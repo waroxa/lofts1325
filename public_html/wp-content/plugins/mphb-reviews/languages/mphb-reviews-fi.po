@@ -1,0 +1,267 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: Hotel Booking Reviews\n"
+"POT-Creation-Date: 2020-02-24 12:15+0200\n"
+"PO-Revision-Date: 2021-03-16 12:16+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-WPHeader: mphb-reviews.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-Flags-xgettext: --add-comments\n"
+"Last-Translator: \n"
+"Language: fi_FI\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+"X-Poedit-SearchPathExcluded-1: includes/admin/groups/license-settings-group."
+"php\n"
+"X-Poedit-SearchPathExcluded-2: includes/libraries/edd-plugin-updater\n"
+
+#: functions.php:103 includes/views/review-view.php:15
+#, php-format
+msgid "%d Review"
+msgid_plural "%d Reviews"
+msgstr[0] "%d Arvostelu"
+msgstr[1] "%d arvostelua"
+
+#: functions.php:106 includes/views/review-view.php:23
+msgid "Write a review"
+msgstr "Kirjoita arvostelu"
+
+#: functions.php:150
+#, php-format
+msgid "Rated %1$s out of %2$s based on %3$s review."
+msgid_plural "Rated %1$s out of %2$s based on %3$s reviews."
+msgstr[0] "Arvioitu %1$s kohteesta %2$s %3$s arvostelun perusteella."
+msgstr[1] "Arvioitu %1$s kohteesta %2$s %3$s arvion perusteella."
+
+#: functions.php:152
+#, php-format
+msgid "Rated %1$s out of %2$s."
+msgstr "Arvioitu %1$s kohteesta %2$s."
+
+#: functions.php:196
+msgid "Rate"
+msgstr "Kurssi"
+
+#: includes/admin-reviews.php:16 includes/rating-type-taxonomy.php:20
+#: includes/rating-type-taxonomy.php:29
+msgid "Rating Types"
+msgstr "Luokitus tyypit"
+
+#: includes/admin-reviews.php:103 includes/admin-reviews.php:143
+msgid "Average Rating"
+msgstr "Keskiarvo"
+
+#: includes/admin/extension-settings.php:23
+msgid "Reviews"
+msgstr "Arvostelut"
+
+#: includes/admin/extension-settings.php:29
+msgid "Review Length"
+msgstr "Tarkista pituus"
+
+#: includes/admin/extension-settings.php:30
+msgid "The number of letters displayed before the Read More link."
+msgstr "Lue lisää -linkkiä näytettävien kirjainten määrä."
+
+#: includes/admin/extension-settings.php:40
+msgid "License"
+msgstr "Lisenssi"
+
+#: includes/dependencies.php:44
+#, php-format
+msgid ""
+"Hotel Booking Reviews plugin requires activated Hotel Booking plugin version "
+"%s or higher."
+msgstr ""
+"Hotellivarausarvostelut-laajennus edellyttää aktivoitua Hotellivaraus-"
+"liitännäisen versiota %s tai uudempaa."
+
+#. translators: What to append if text needs to be trimmed. Do not translate.
+#: includes/frontend-reviews.php:215
+msgid "&hellip;"
+msgstr "&hellip;"
+
+#: includes/frontend-reviews.php:218
+msgid "Read more"
+msgstr "Lue lisää"
+
+#: includes/rating-type-taxonomy.php:21
+msgid "Rating Type"
+msgstr "Luokituksen tyyppi"
+
+#: includes/rating-type-taxonomy.php:22
+msgid "Search Rating Type"
+msgstr "Haun luokitustyyppi"
+
+#: includes/rating-type-taxonomy.php:23
+msgid "All Rating Types"
+msgstr "Kaikki luokitustyypit"
+
+#: includes/rating-type-taxonomy.php:24
+msgid "Edit Rating Type"
+msgstr "Muokkaa luokitustyyppiä"
+
+#: includes/rating-type-taxonomy.php:25
+msgid "Update Rating Type"
+msgstr "Päivitä luokitustyyppi"
+
+#: includes/rating-type-taxonomy.php:26
+msgid "Add New Rating Type"
+msgstr "Lisää uusi luokitustyyppi"
+
+#: includes/rating-type-taxonomy.php:27
+msgid "New Rating Type Name"
+msgstr "Uusi luokitustyypin nimi"
+
+#: includes/rating-type-taxonomy.php:28
+msgid "No rating types found."
+msgstr "Luokitustyyppejä ei löytynyt."
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:88
+#: includes/widgets/accommodation-reviews-widget.php:15
+msgid "Accommodation Reviews"
+msgstr "Majoitus arvostelut"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:92
+msgid "Accommodation Type ID"
+msgstr "Majoitustyypin tunnus"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:93
+msgid "Display reviews of this Accommodation Type."
+msgstr "Näytä tämän majoitustyypin arvostelut."
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:94
+#: includes/shortcodes/accommodation-reviews-shortcode.php:99
+msgid "integer number"
+msgstr "kokonaisluku"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:97
+#: includes/widgets/accommodation-reviews-widget.php:79
+msgid "Number of reviews to show"
+msgstr "Näytetään palveluarvioita kpl"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:98
+msgid "Leave empty to use the value from Discussion Settings."
+msgstr "Jätä tyhjäksi, jos haluat käyttää keskusteluasetusten arvoa."
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:102
+msgid "Number of columns"
+msgstr "Sarakkeiden määrä"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:107
+#: includes/widgets/accommodation-reviews-widget.php:87
+msgid "Show Rating Types"
+msgstr "Näytä luokitustyypit"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:112
+msgid "Show Write Review Button"
+msgstr "Näytä Kirjoita arvostelu -painike"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:117
+msgid "Show Load More Button"
+msgstr "Näytä Lisää lisää -painike"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:122
+msgid "Custom CSS class for shortcode wrapper"
+msgstr "Custom CSS luokka shortcode kääre"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:123
+msgid "whitespace separated css classes"
+msgstr "whitespace erotettu css luokat"
+
+#: includes/shortcodes/accommodation-reviews-shortcode.php:129
+msgid "Show Reviews for Accommodation Type with id 777"
+msgstr "Näytä arviot majoituspaikalle Accommodation Type with id 777"
+
+#: includes/views/review-view.php:64 templates/reviews.php:37
+msgid "Post review"
+msgstr "Jälkiarviointi"
+
+#. Change the title of send button
+#: includes/views/review-view.php:65 templates/reviews.php:38
+#, php-format
+msgid "Review \"%s\""
+msgstr "Tarkista %s"
+
+#: includes/views/review-view.php:67 templates/reviews.php:40
+msgid "Your review"
+msgstr "Kommenttisi"
+
+#: includes/views/review-view.php:95
+msgid "Load more reviews"
+msgstr "Lataa lisää arvosteluja"
+
+#: includes/widgets/accommodation-reviews-widget.php:17
+msgid "Display Accommodation Reviews"
+msgstr "Näyta Majoitus arvostelut"
+
+#: includes/widgets/accommodation-reviews-widget.php:58
+msgid "Title"
+msgstr "Otsikko"
+
+#: includes/widgets/accommodation-reviews-widget.php:66
+msgid "Accommodation Type"
+msgstr "Majoitustyyppi"
+
+#: includes/widgets/accommodation-reviews-widget.php:68
+msgid "Current Accommodation"
+msgstr "Nykyinen majoitus"
+
+#: includes/widgets/accommodation-reviews-widget.php:89
+msgid "Yes"
+msgstr "Kyllä"
+
+#: includes/widgets/accommodation-reviews-widget.php:90
+msgid "No"
+msgstr "Ei"
+
+#: includes/widgets/accommodation-reviews-widget.php:97
+msgid "CSS Class"
+msgstr "CSS-luokka"
+
+#: templates/reviews.php:73
+msgid "Older reviews"
+msgstr "Vanhemmat arvostelut"
+
+#: templates/reviews.php:74
+msgid "Newer reviews"
+msgstr "Uudemmat arvostelut"
+
+#. If comments are closed and there are comments, let's leave a little note, shall we?
+#: templates/reviews.php:85
+msgid "There are no reviews yet."
+msgstr "Tuotearvioita ei vielä ole."
+
+#. Plugin Name of the plugin/theme
+msgid "Hotel Booking Reviews"
+msgstr "Hotellien varausarvostelut"
+
+#. Plugin URI of the plugin/theme
+msgid "https://motopress.com/products/hotel-booking-reviews/"
+msgstr "https://motopress.com/products/hotel-booking-reviews/"
+
+#. Description of the plugin/theme
+msgid ""
+"User-submitted reviews for your Hotel Booking plugin accommodations: display "
+"ratings, easily manage reviews via native WordPress comments."
+msgstr ""
+"Käyttäjän lähettämät arvostelut Hotellivaraus-liitännäismajitsiisi: "
+"näyttöluokitukset, helposti arvostelujen hallinta natiivien WordPress-"
+"kommenttien kautta."
+
+#. Author of the plugin/theme
+msgid "MotoPress"
+msgstr "MotoPress (MotoPress)"
+
+#. Author URI of the plugin/theme
+msgid "https://motopress.com/"
+msgstr "https://motopress.com/"

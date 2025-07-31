@@ -1,0 +1,253 @@
+@import "mixins";
+
+.mphb_sc_booking_form-wrapper.is-style-horizontal-form form,
+.mphb_sc_search-wrapper.is-style-horizontal-form form,
+.mphb_widget_search-form.is-style-horizontal-form {
+	display: flex;
+	flex-wrap: wrap;
+	@include respond-to(sm) {
+		align-items: flex-end;
+		margin: 0 -10px;
+		flex-wrap: nowrap;
+	}
+
+	> * {
+		box-sizing: border-box;
+		flex: 1 0 auto;
+		width: 100%;
+		max-width: 100%;
+		margin-bottom: 1.5em;
+		padding: 0;
+		@include respond-to(sm) {
+			padding: 0 10px;
+			flex: 1 1 auto;
+			width: auto;
+		}
+
+		input,
+		select {
+			width: 100%;
+			margin: 0;
+			display: block;
+		}
+
+	}
+
+	.mphb_sc_search-submit-button-wrapper {
+		margin-top: 0;
+	}
+
+	.mphb-required-fields-tip {
+		display: none;
+	}
+
+	.button {
+		margin: 0;
+	}
+}
+
+.mphb_sc_search-wrapper,
+.mphb_sc_booking_form-wrapper {
+	&.mphbs-wrap {
+		form {
+			@include respond-to(sm) {
+				flex-wrap: wrap;
+			}
+		}
+	}
+
+	&.mphbs-fw-20 {
+		form {
+			> p {
+				@include respond-to(sm) {
+					width: 100%;
+					max-width: 20%;
+				}
+			}
+		}
+	}
+
+	&.mphbs-fw-25 {
+		form {
+			> p {
+				@include respond-to(sm) {
+					width: 100%;
+					max-width: 25%;
+				}
+			}
+		}
+	}
+
+	&.mphbs-fw-33 {
+		form {
+			> p {
+				@include respond-to(sm) {
+					width: 100%;
+					max-width: 33.33%;
+				}
+			}
+		}
+	}
+
+	&.mphbs-fw-50 {
+		form {
+			> p {
+				@include respond-to(sm) {
+					width: 100%;
+					max-width: 50%;
+				}
+			}
+		}
+	}
+
+	&.mphbs-fw-100 {
+		form {
+			> p {
+				@include respond-to(sm) {
+					width: 100%;
+					max-width: 100%;
+				}
+			}
+		}
+	}
+
+	&.mphbs-fluid-button {
+		.mphb-reserve-btn-wrapper,
+		.mphb_sc_search-submit-button-wrapper {
+			max-width: 100%;
+			width: auto;
+
+			.button {
+				width: 100%;
+			}
+		}
+	}
+}
+
+.mphb_sc_booking_form-wrapper {
+	&.is-style-horizontal-form {
+		.mphb-reserve-btn-wrapper {
+			margin-top: 0;
+		}
+
+		&.is-direct-booking {
+			.mphb-booking-form {
+				flex-wrap: wrap;
+
+				> * {
+					&.mphb-reserve-room-section {
+						width: 100%;
+					}
+				}
+			}
+
+			.mphb-reserve-btn-wrapper {
+				position: relative;
+
+				@include respond-to(sm) {
+					.mphb-preloader {
+						position: absolute;
+						left: 50%;
+						top: 105%;
+						transform: translateX(-50%);
+					}
+				}
+
+				.button {
+					white-space: normal;
+				}
+			}
+
+		}
+	}
+}
+
+.mphb_sc_booking_form-wrapper,
+.mphb_sc_search-wrapper {
+	&.mphbs-hide-rf-tip {
+		.mphb-required-fields-tip {
+			display: none;
+		}
+	}
+
+	&.mphbs-hide-labels {
+		br,
+		label {
+			display: none;
+		}
+	}
+
+	&.mphbs-no-paddings {
+		form {
+			margin: 0;
+
+			> * {
+				padding: 0
+			}
+		}
+	}
+}
+
+.mphb_widget_search-form {
+	&.mphbs-wrap {
+		@include respond-to(sm) {
+			flex-wrap: wrap;
+		}
+	}
+
+	&.mphbs-fw-20 {
+		> p {
+			@include respond-to(sm) {
+				width: 100%;
+				max-width: 20%;
+			}
+		}
+	}
+
+	&.mphbs-fw-25 {
+		> p {
+			@include respond-to(sm) {
+				width: 100%;
+				max-width: 25%;
+			}
+		}
+	}
+
+	&.mphbs-fw-33 {
+		> p {
+			@include respond-to(sm) {
+				width: 100%;
+				max-width: 33.33%;
+			}
+		}
+	}
+
+	&.mphbs-fw-50 {
+		> p {
+			@include respond-to(sm) {
+				width: 100%;
+				max-width: 50%;
+			}
+		}
+	}
+
+	&.mphbs-fw-100 {
+		> p {
+			@include respond-to(sm) {
+				width: 100%;
+				max-width: 100%;
+			}
+		}
+	}
+
+	&.mphbs-fluid-button {
+		.mphb_widget_search-submit-button-wrapper {
+			max-width: 100%;
+			width: auto;
+
+			.button {
+				width: 100%;
+			}
+		}
+	}
+}

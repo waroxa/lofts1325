@@ -1,0 +1,405 @@
+AWSTATS DATA FILE 7.7 (build 20161204)
+# If you remove this file, all statistics for date 202411 will be lost/reset.
+# Last config file used to build this data file was /etc/awstats/awstats.carolinem27.sg-host.com.conf.
+
+# Position (offset in bytes) in this file for beginning of each section for
+# direct I/O access. If you made changes somewhere in this file, you should
+# also remove completely the MAP section (AWStats will rewrite it at next
+# update).
+BEGIN_MAP 28
+POS_GENERAL 2006                
+POS_TIME 2696                
+POS_VISITOR 7327                
+POS_DAY 8605                
+POS_DOMAIN 3511                
+POS_LOGIN 3830                
+POS_ROBOT 3985                
+POS_WORMS 4195                
+POS_EMAILSENDER 4326                
+POS_EMAILRECEIVER 4469                
+POS_SESSION 9089                
+POS_SIDER 9296                
+POS_FILETYPES 4604                
+POS_DOWNLOADS 4980                
+POS_OS 5028                
+POS_BROWSER 5194                
+POS_SCREENSIZE 5434                
+POS_UNKNOWNREFERER 5508                
+POS_UNKNOWNREFERERBROWSER 5724                
+POS_ORIGIN 5834                
+POS_SEREFERRALS 5973                
+POS_PAGEREFS 6117                
+POS_SEARCHWORDS 6295                
+POS_KEYWORDS 6447                
+POS_MISC 2359                
+POS_ERRORS 6506                
+POS_CLUSTER 3686                
+POS_SIDER_404 6666                
+END_MAP
+
+# LastLine    = Date of last record processed - Last record line number in last log - Last record offset in last log - Last record signature value
+# FirstTime   = Date of first visit for history file
+# LastTime    = Date of last visit for history file
+# LastUpdate  = Date of last update - Nb of parsed records - Nb of parsed old records - Nb of parsed new records - Nb of parsed corrupted - Nb of parsed dropped
+# TotalVisits = Number of visits
+# TotalUnique = Number of unique visitors
+# MonthHostsKnown   = Number of hosts known
+# MonthHostsUnKnown = Number of hosts unknown
+BEGIN_GENERAL 8
+LastLine 20241201003351 8085 3047306 15067983378905
+FirstTime 20241101000118
+LastTime 20241129210305
+LastUpdate 20241201044606 8085 7756 6 0 322
+TotalVisits 45                  
+TotalUnique 16                  
+MonthHostsKnown 0                   
+MonthHostsUnknown 38                  
+END_GENERAL
+
+# Misc ID - Pages - Hits - Bandwidth
+BEGIN_MISC 10
+TotalMisc 0 0 0
+RealPlayerSupport 0 0 0
+JavaEnabled 0 0 0
+QuickTimeSupport 0 0 0
+WindowsMediaPlayerSupport 0 0 0
+JavascriptDisabled 0 0 0
+DirectorSupport 0 0 0
+PDFSupport 0 0 0
+AddToFavourites 0 43 0
+FlashSupport 0 0 0
+END_MISC
+
+# Hour - Pages - Hits - Bandwidth - Not viewed Pages - Not viewed Hits - Not viewed Bandwidth
+BEGIN_TIME 24
+0 32 62 672905 68 68 218083
+1 59 201 37826623 23 23 198
+2 116 229 30804116 75 75 1694546
+3 225 388 33827696 152 161 597441
+4 305 676 31599101 186 195 1660439
+5 304 1030 1138538418 74 76 493363
+6 177 665 62647578 47 47 441592
+7 1 1 69 7 7 243294
+8 1 6 82975 32 33 2662
+9 1 5 82249 3 3 232238
+10 44 65 1402986 15 15 296
+11 30 117 7085515 19 20 1179061
+12 26 28 324520 53 54 8288
+13 5 95 5249285 5 5 95
+14 259 1418 87913074 75 84 412423
+15 105 231 5577476 76 82 171257
+16 159 167 3319307 124 125 39578
+17 42 77 6241320 15 15 2778
+18 1 1 43944 1 1 2646
+19 16 92 1804883 13 13 33
+20 22 24 1724534 62 62 108799
+21 48 151 6701231 34 38 21623
+22 68 159 6272463 39 40 1269
+23 9 140 408589 8 8 101
+END_TIME
+
+# Domain - Pages - Hits - Bandwidth
+# The 10 first Pages must be first (order not required for others)
+BEGIN_DOMAIN 7
+ca 2038 5964 1468656342
+de 7 28 636282
+gb 5 25 385226
+ie 2 2 106785
+ch 1 5 71706
+us 1 3 64764
+nl 1 1 229752
+END_DOMAIN
+
+# Cluster ID - Pages - Hits - Bandwidth
+BEGIN_CLUSTER 0
+END_CLUSTER
+
+# Login - Pages - Hits - Bandwidth - Last visit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_LOGIN 0
+END_LOGIN
+
+# Robot ID - Hits - Bandwidth - Last visit - Hits on robots.txt
+# The 10 first Hits must be first (order not required for others)
+BEGIN_ROBOT 2
+wordpress 769 444789 20241130203819 0
+no_user_agent 2 475465 20241116095933 0
+END_ROBOT
+
+# Worm ID - Hits - Bandwidth - Last visit
+# The 5 first Hits must be first (order not required for others)
+BEGIN_WORMS 0
+END_WORMS
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first Hits must be first (order not required for others)
+BEGIN_EMAILSENDER 0
+END_EMAILSENDER
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first hits must be first (order not required for others)
+BEGIN_EMAILRECEIVER 0
+END_EMAILRECEIVER
+
+# Files type - Hits - Bandwidth - Bandwidth without compression - Bandwidth after compression
+BEGIN_FILETYPES 16
+gif 14 96051 0 0
+php 1509 48685681 0 0
+png 465 304540997 0 0
+html 170 7411075 0 0
+jpg 114 15601939 0 0
+css 1228 3290133 0 0
+cur 3 652 0 0
+woff2 19 1801800 0 0
+jpeg 5 986163 0 0
+js 1937 28129390 0 0
+svg 210 266546 0 0
+ics 1 3548 0 0
+wpress 1 1059151711 0 0
+woff 4 45760 0 0
+map 2 8240 0 0
+Unknown 346 131171 0 0
+END_FILETYPES
+
+# Downloads - Hits - Bandwidth
+BEGIN_DOWNLOADS 0
+END_DOWNLOADS
+
+# OS ID - Hits
+BEGIN_OS ID - Hits - Pages 8
+macosx 4191 1875
+macosx7 1 1
+win10 1795 167
+win8 1 1
+Unknown 25 5
+winxp 1 0
+linux 9 4
+ios_iphone 5 2
+END_OS
+
+# Browser ID - Hits - Pages
+BEGIN_BROWSER 11
+chrome130.0.0.0 5503 2016
+firefox11.0 1 0
+firefox84.0 1 1
+Unknown 1 1
+msie8.0 1 1
+chrome131.0.0.0 483 26
+chrome125.0.0.0 5 1
+chrome129.0.0.0 3 2
+safari16.6 5 2
+safari5.1.3 1 1
+mozilla 24 4
+END_BROWSER
+
+# Screen size - Hits
+BEGIN_SCREENSIZE 0
+END_SCREENSIZE
+
+# Unknown referer OS - Last visit date
+BEGIN_UNKNOWNREFERER 2
+Mozilla/5.0_(compatible;_InternetMeasurement/1.0;__https://internet-measurement.com/) 20241105150520
+GuzzleHttp/7 20241114044959
+END_UNKNOWNREFERER
+
+# Unknown referer Browser - Last visit date
+BEGIN_UNKNOWNREFERERBROWSER 1
+GuzzleHttp/7 20241114044959
+END_UNKNOWNREFERERBROWSER
+
+# Origin - Pages - Hits 
+BEGIN_ORIGIN 6
+From0 93 135
+From1 0 0
+From2 0 0
+From3 1 1
+From4 1961 5892
+From5 0 0
+END_ORIGIN
+
+# Search engine referers ID - Pages - Hits
+BEGIN_SEREFERRALS 0
+END_SEREFERRALS
+
+# External page referers - Pages - Hits
+# The 10 first Pages must be first (order not required for others)
+BEGIN_PAGEREFS 1
+https://my.siteground.com 1 1
+END_PAGEREFS
+
+# Search keyphrases - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_SEARCHWORDS 0
+END_SEARCHWORDS
+
+# Search keywords - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_KEYWORDS 0
+END_KEYWORDS
+
+# Errors - Hits - Bandwidth
+BEGIN_ERRORS 7
+500 47 438387
+403 8 5975
+301 14 466
+400 2 2
+302 132 5559423
+499 217 0
+404 16 539107
+END_ERRORS
+
+# URL with 404 errors - Hits - Last URL referrer
+BEGIN_SIDER_404 7
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/tippy-bundle.iife.min.js.map 3 -
+/[object%20Object] 6 https://carolinem27.sg-host.com/
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/popper.min.js.map 3 -
+/wp-admin/admin-ajax.php 1 https://carolinem27.sg-host.com/wp-admin/customize.php
+/rooms/occupaton-double/ 1 -
+/favicon.svg 1 -
+/manifest.json 1 -
+END_SIDER_404
+
+# Host - Pages - Hits - Bandwidth - Last visit date - [Start date of last visit] - [Last page of last visit]
+# [Start date of last visit] and [Last page of last visit] are saved only if session is not finished
+# The 10 first Hits must be first (order not required for others)
+BEGIN_VISITOR 38
+142.127.20.171 1855 3956 289043254 20241115142441
+198.58.235.193 132 1227 1122742351 20241103065209
+142.116.82.167 22 240 7098968 20241115224113
+69.70.152.58 19 455 48662075 20241129210305
+137.175.169.250 9 85 1109694 20241101190226
+94.100.133.123 7 28 636282 20241122144331
+52.208.151.205 2 2 106785 20241128062732
+34.90.11.232 1 1 229752 20241114044959
+87.236.176.173 1 1 53277 20241105150517
+185.159.157.24 1 2 55705 20241103053434
+87.236.176.217 0 1 730 
+87.236.176.32 0 1 730 
+87.236.176.120 0 1 7964 
+87.236.176.2 0 1 12921 
+87.236.176.149 0 1 7964 
+87.236.176.31 0 1 730 
+87.236.176.35 0 1 12921 
+87.236.176.170 0 1 730 
+167.99.53.94 1 2 54071 20241104002732
+87.236.176.196 0 1 12921 
+87.236.176.91 0 1 12921 
+87.236.176.206 0 1 7964 
+51.89.255.22 1 1 53411 20241122144329
+87.236.176.235 1 1 53280 20241103164047
+87.236.176.45 1 1 53327 20241103093731
+87.236.176.203 0 1 7307 
+64.233.172.129 0 1 10693 
+138.197.145.141 1 1 0 20241102025546
+87.236.176.90 0 1 730 
+87.236.176.112 0 1 730 
+185.159.157.23 0 3 16001 
+87.236.176.56 0 1 730 
+87.236.176.176 0 1 7307 
+87.236.176.216 0 1 7964 
+87.236.176.238 1 1 53323 20241105082434
+87.236.176.105 0 1 7307 
+87.236.176.22 0 1 7307 
+87.236.176.46 0 1 730 
+END_VISITOR
+
+# Date - Pages - Hits - Bandwidth - Visits
+BEGIN_DAY 17
+20241101 53 214 7623604 3
+20241102 1 1 0 1
+20241103 743 2491 1273622765 7
+20241104 174 303 34606410 5
+20241105 169 491 29869888 3
+20241106 22 240 7114795 2
+20241108 8 25 159383 2
+20241112 77 407 14151447 4
+20241113 350 709 32597675 2
+20241114 421 650 20803319 7
+20241115 9 11 185605 2
+20241121 0 1 10693 0
+20241122 15 188 33605117 3
+20241126 4 94 5247192 1
+20241127 3 94 5247192 1
+20241128 1 1 53505 1
+20241129 5 108 5252267 1
+END_DAY
+
+# Session range - Number of visits
+BEGIN_SESSION 7
+1h+ 11
+15mn-30mn 3
+2mn-5mn 1
+30mn-1h 3
+5mn-15mn 3
+0s-30s 23
+30s-2mn 1
+END_SESSION
+
+# URL - Pages - Bandwidth - Entry - Exit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_SIDER 64
+/wp-admin/admin-ajax.php 645 8647345 4 7
+/wp-admin/admin.php 513 14425746 4 12
+/wp-admin/plugins.php 140 13526138 4 3
+/ 130 5825030 29 14
+/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 117 18606 0 0
+/wp-json/contact-form-7/v1/contact-forms/3742/refill 116 696 0 5
+/wp-admin/edit.php 78 2646511 1 2
+/wp-admin/load-scripts.php 32 1063513 0 0
+/wp-admin/post.php 28 4061630 1 0
+/wp-json/siteground-central/v1/dashboard 26 34418 0 1
+/wp-json/wp/v2/mphb_template 1 1702 0 0
+/wp-content/plugins/wp-letsencrypt-ssl/admin/css/le-admin.min.css.map 2 8240 0 0
+/wp-admin/all-reservations.ics 1 3548 0 0
+/wp-admin/tools.php 16 536870 0 0
+/wp-admin/users.php 3 93315 0 0
+/price-pages/prices-03/ 1 43374 0 0
+/about-pages/about-01/ 2 84995 0 0
+/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.woff 2 37648 0 0
+/wp-json/wp/v2/mphb_room_type 1 2736 0 0
+/rooms/occupation-double/ 1 37585 0 0
+/wp-login.php 8 12157 2 1
+/wp-json/elementor/v1/globals 17 4420 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-brands-400.woff2 2 163224 0 0
+/contact-pages/contact-01/ 1 40146 0 0
+/wp-json/elementor/v1/kit-elements-defaults 17 102 0 0
+/checkout/ 1 87372 0 0
+/wp-admin/options-general.php 3 90235 0 0
+/wp-admin/load-styles.php 24 2318464 0 0
+/wp-json/wp/v2/settings 2 2660 0 0
+/wp-admin/edit-tags.php 1 30936 0 0
+/wp-admin/user-new.php 1 29839 0 0
+/wp-admin/update.php 3 82114 0 0
+/wp-admin/post-new.php 5 394814 0 0
+/wp-content/plugins/all-in-one-wp-migration/lib/view/assets/font/servmask.woff 2 8112 0 0
+/wp-content/plugins/elementor/assets/lib/eicons/fonts/eicons.woff2 13 1263392 0 0
+/wp-json/wp/v2/widget-types 4 5420 0 0
+/accommodation/suite-gazou/ 3 113364 0 0
+/wp-json/wp/v2/media 1 3991 0 0
+/wp-content/plugins/revslider/public/assets/css/openhand.cur 3 652 0 0
+/elementor-10/ 1 36580 0 0
+/wp-json/wp/v2/wp_pattern_category 2 12 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-solid-900.woff2 1 78196 0 0
+/wp-json/wp/v2/pages/13492 2 2185 0 0
+/wp-json/wp/v2/users/me 6 14256 0 0
+/service-pages/forfaits-aventure/ 1 44347 0 0
+/wp-json/wp/v2/mphb_template/13243 1 1288 0 0
+/wp-json/elementor/v1/global-widget/templates 17 102 0 0
+/wp-json/wp/v2/types 6 5910 0 0
+/wp-json/ 4 1132 0 0
+/wp-json/wp/v2/taxonomies 2 3870 0 0
+/wp-content/ai1wm-backups/carolinem27-sg-host-com-20241103-054111-lvcxby1xibhu.wpress 1 1059151711 0 0
+/wp-json/wp/v2/blocks 2 12 0 0
+/wp-json/wp/v2/users 2 132 0 0
+/accommodation/suite-kira/ 1 37788 0 0
+/wp-json/wp/v2/block-patterns/categories 2 1174 0 0
+/rooms/occupation-simple/ 3 125063 0 0
+/wp-admin/plugin-install.php 5 175466 0 0
+/nd-booking-pages/booking-search/ 16 719173 0 0
+/wp-json/wp/v2/users/1 1 38 0 0
+/wp-json/wp/v2/block-patterns/patterns 1 27441 0 0
+/remboursements/ 1 40410 0 0
+/wp-admin/customize.php 4 550588 0 0
+/nd-booking-pages/nd-booking-search/ 4 174716 0 0
+/wp-content/plugins/revslider/public/assets/fonts/material/MaterialIcons-Regular.woff2 3 296988 0 0
+END_SIDER

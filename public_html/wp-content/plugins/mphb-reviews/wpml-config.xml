@@ -1,0 +1,5 @@
+<wpml-config>
+    <taxonomies>
+        <taxonomy translate="1">mphbr_ratings</taxonomy>
+    </taxonomies>
+</wpml-config>

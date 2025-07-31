@@ -1,0 +1,19 @@
+<b>7.7.1  SINGLE DOMAIN SSL SG 1 - https://loft1325.com - ROOT</b>
+Domain covered:
+["loft1325.com","www.loft1325.com"]
+
+[05-12-2024 11:57:28] :
+No account found, attempting to create account.
+
+[05-12-2024 11:57:29] :
+LEClient finished constructing
+
+[05-12-2024 11:57:29] :
+No order found for 'loft1325.com'. Creating new order.
+
+[05-12-2024 11:57:29] :
+Created order for 'loft1325.com'.
+
+Offering manual verification procedure. 
+
+Syncing debug log

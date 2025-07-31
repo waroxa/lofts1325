@@ -1,0 +1,822 @@
+AWSTATS DATA FILE 7.7 (build 20161204)
+# If you remove this file, all statistics for date 202505 will be lost/reset.
+# Last config file used to build this data file was /etc/awstats/awstats.loft1325.com.conf.
+
+# Position (offset in bytes) in this file for beginning of each section for
+# direct I/O access. If you made changes somewhere in this file, you should
+# also remove completely the MAP section (AWStats will rewrite it at next
+# update).
+BEGIN_MAP 28
+POS_GENERAL 1995                
+POS_TIME 2677                
+POS_VISITOR 10339               
+POS_DAY 16209               
+POS_DOMAIN 3639                
+POS_LOGIN 4133                
+POS_ROBOT 4288                
+POS_WORMS 5197                
+POS_EMAILSENDER 5328                
+POS_EMAILRECEIVER 5471                
+POS_SESSION 17035               
+POS_SIDER 17244               
+POS_FILETYPES 5606                
+POS_DOWNLOADS 6020                
+POS_OS 6454                
+POS_BROWSER 6691                
+POS_SCREENSIZE 7730                
+POS_UNKNOWNREFERER 7804                
+POS_UNKNOWNREFERERBROWSER 8103                
+POS_ORIGIN 8296                
+POS_SEREFERRALS 8437                
+POS_PAGEREFS 8609                
+POS_SEARCHWORDS 8757                
+POS_KEYWORDS 8909                
+POS_MISC 2340                
+POS_ERRORS 8968                
+POS_CLUSTER 3989                
+POS_SIDER_404 9174                
+END_MAP
+
+# LastLine    = Date of last record processed - Last record line number in last log - Last record offset in last log - Last record signature value
+# FirstTime   = Date of first visit for history file
+# LastTime    = Date of last visit for history file
+# LastUpdate  = Date of last update - Nb of parsed records - Nb of parsed old records - Nb of parsed new records - Nb of parsed corrupted - Nb of parsed dropped
+# TotalVisits = Number of visits
+# TotalUnique = Number of unique visitors
+# MonthHostsKnown   = Number of hosts known
+# MonthHostsUnKnown = Number of hosts unknown
+BEGIN_GENERAL 8
+LastLine 20250530043002 23145 7618454 0
+FirstTime 20250501024020
+LastTime 20250529233158
+LastUpdate 20250530044342 23145 22452 569 0 124
+TotalVisits 160                 
+TotalUnique 130                 
+MonthHostsKnown 0                   
+MonthHostsUnknown 148                 
+END_GENERAL
+
+# Misc ID - Pages - Hits - Bandwidth
+BEGIN_MISC 10
+RealPlayerSupport 0 0 0
+QuickTimeSupport 0 0 0
+FlashSupport 0 0 0
+PDFSupport 0 0 0
+WindowsMediaPlayerSupport 0 0 0
+JavaEnabled 0 0 0
+DirectorSupport 0 0 0
+JavascriptDisabled 0 0 0
+AddToFavourites 0 22 0
+TotalMisc 0 0 0
+END_MISC
+
+# Hour - Pages - Hits - Bandwidth - Not viewed Pages - Not viewed Hits - Not viewed Bandwidth
+BEGIN_TIME 24
+0 993 1401 68943151 367 400 13542001
+1 473 1270 115620167 225 349 6383386
+2 100 438 63769348 257 325 2874774
+3 24 109 736754 166 230 10205413
+4 7 8 268062 169 219 2250811
+5 11 12 434069 162 272 6459743
+6 23 253 21425007 184 337 14987945
+7 8 74 806693 149 411 19756976
+8 18 68 577230 224 526 8911689
+9 27 209 11822614 169 334 13595796
+10 61 464 42683035 168 248 3205367
+11 67 389 11538018 182 557 11067477
+12 86 663 42596967 212 324 7285504
+13 108 580 48025933 159 226 15796772
+14 125 686 77814693 193 356 14366467
+15 53 613 89219647 199 325 17875414
+16 39 308 13165085 244 641 23107934
+17 142 376 18290510 209 416 4473629
+18 27 173 20652680 255 366 10200619
+19 7 12 363392 168 289 10245676
+20 89 99 2739490 230 409 7264344
+21 189 582 79118005 227 364 20065203
+22 131 868 55449567 215 349 10814411
+23 540 2227 191610198 415 608 4434916
+END_TIME
+
+# Domain - Pages - Hits - Bandwidth
+# The 10 first Pages must be first (order not required for others)
+BEGIN_DOMAIN 18
+ca 2935 10106 816937681
+lv 189 189 5605590
+us 108 1376 121031905
+gb 33 41 1311911
+nl 28 30 2427861
+fr 11 57 812608
+se 9 13 491197
+ru 9 13 329370
+es 9 31 2645397
+de 4 6 218154
+ro 2 2 67527
+ua 1 1 251070
+ch 2 2 30237
+bg 1 2 64851
+tr 1 5 78284
+in 3 5 164016
+at 2 2 54183
+cn 1 1 114406
+END_DOMAIN
+
+# Cluster ID - Pages - Hits - Bandwidth
+BEGIN_CLUSTER 0
+END_CLUSTER
+
+# Login - Pages - Hits - Bandwidth - Last visit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_LOGIN 0
+END_LOGIN
+
+# Robot ID - Hits - Bandwidth - Last visit - Hits on robots.txt
+# The 10 first Hits must be first (order not required for others)
+BEGIN_ROBOT 20
+bingbot/ 1675 140792324 20250530023840 27
+curl 1403 82355 20250530043002 0
+wordpress 1373 465693 20250530042349 0
+AhrefsBot/ 1008 12356971 20250530005828 50
+Googlebot/ 916 40493014 20250529225738 22
+SemrushBot/ 535 15647497 20250530042349 155
+Applebot/ 382 2962750 20250527072937 4
+dataprovider\.com 270 24126288 20250506215207 2
+facebookexternalhit/ 85 76640 20250529150433 84
+crawl 61 2659421 20250524001800 6
+bot[\s_+:,\.\;\/\\-] 2 54323 20250513170231 1
+unknown 8 1315 20250523055736 8
+TelegramBot 1 1758 20250521231415 0
+python 2 108362 20250517130758 0
+BLEXBot/ 2 346 20250502193925 2
+CFNetwork 7 2985839 20250501133554 0
+domainchecker 1 0 20250527140511 0
+checker 2 108320 20250514215609 0
+Googlebot\-Image/ 23 1632710 20250529015841 0
+scanner 1 64910 20250524070253 0
+END_ROBOT
+
+# Worm ID - Hits - Bandwidth - Last visit
+# The 5 first Hits must be first (order not required for others)
+BEGIN_WORMS 0
+END_WORMS
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first Hits must be first (order not required for others)
+BEGIN_EMAILSENDER 0
+END_EMAILSENDER
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first hits must be first (order not required for others)
+BEGIN_EMAILRECEIVER 0
+END_EMAILRECEIVER
+
+# Files type - Hits - Bandwidth - Bandwidth without compression - Bandwidth after compression
+BEGIN_FILETYPES 18
+jpg 282 25045703 0 0
+jpeg 256 28943931 0 0
+woff2 277 6079000 0 0
+heic 1 281814 0 0
+php 1939 24455112 0 0
+gif 12 138493 0 0
+woff 2 47052 0 0
+pdf 2 1349340 0 0
+Unknown 500 87879 0 0
+svg 772 1360992 0 0
+js 3152 34924906 0 0
+cur 17 5542 0 0
+png 1318 772258522 0 0
+webp 3 459364 0 0
+html 596 24616416 0 0
+xml 12 3553 0 0
+css 2740 7544562 0 0
+map 1 0 0 0
+END_FILETYPES
+
+# Downloads - Hits - Bandwidth
+BEGIN_DOWNLOADS 6
+/wp-content/uploads/2025/02/GUIDE-UTILISATION-DEPANAGE-2025.pdf 5 0 3373350
+/wp-content/uploads/2025/02/FICHE-TELE-3-2025.pdf 5 0 12277325
+/wp-content/uploads/2025/02/RULES-EN-FR-2025.pdf 4 0 6149708
+/wp-content/uploads/2025/02/FICHE-TELE-1-2025.pdf 4 0 9463692
+/wp-content/uploads/2025/02/FICHE-TELE-2-2025.pdf 4 0 9609224
+/wp-content/uploads/2024/08/255662885089048.mp4 0 14 25034067
+END_DOWNLOADS
+
+# OS ID - Hits
+BEGIN_OS ID - Hits - Pages 13
+macosx 1597 545
+winnt 3 3
+win10 7382 2338
+win7 1 1
+linux 1678 287
+ios_iphone 1204 159
+ios_ipad 1 1
+macosx9 1 1
+unix 1 1
+winxp 1 0
+linuxandroid 5 5
+win8.1 1 1
+Unknown 21 6
+END_OS
+
+# Browser ID - Hits - Pages
+BEGIN_BROWSER 49
+chrome136.0.0.0 4631 1308
+chrome133.0.0.0 65 65
+chrome80.0.3987.162 2 2
+chrome110.0.0.0 2 2
+chrome125.0.0.0 2 1
+safari17.5 1 0
+chrome58.0.3029.110 3 2
+chrome108.0.0.0 2 2
+firefox68.0 1 1
+chrome91.0.4472.114 3 3
+firefox121.0 1 0
+chrome68.0.3440.106 1198 58
+opera118.0.0.0 1702 795
+firefox115.0 1 0
+safari15.4 3 2
+chrome136.0.7103.49 1 1
+safari18.4 996 158
+safari17.1.2 1 1
+safari 111 16
+chrome115.0.0.0 1 1
+firefox114.0 1 1
+chrome76.0.3809.100 2 2
+opera119.0.0.0 271 14
+chrome120.0.0.0 21 3
+chrome104.0.0.0 5 5
+firefox136.0 12 7
+firefox11.0 1 0
+chrome100.0.4896.127 2 2
+chrome123.0.0.0 1 1
+mozilla 12 3
+netscape5.0 2 2
+chrome135.0.0.0 2111 614
+safari18.5 337 39
+chrome56.0.2924.87 20 2
+firefox106.0 1 1
+firefox126.0 5 1
+chrome128.0.0.0 117 6
+opera89.0.4447.51 2 2
+chrome83.0.4103.97 2 2
+chrome105.0.0.0 10 6
+chrome114.0.0.0 5 5
+safari18.1.1 1 1
+chrome66.0.3359.181 10 10
+chrome134.0.0.0 190 190
+Unknown 10 4
+chrome131.0.6778.205 1 1
+chrome121.0.0.0 15 4
+firefox115 1 1
+chrome107.0.0.0 1 1
+END_BROWSER
+
+# Screen size - Hits
+BEGIN_SCREENSIZE 0
+END_SCREENSIZE
+
+# Unknown referer OS - Last visit date
+BEGIN_UNKNOWNREFERER 3
+Google-Firebase 20250509235535
+Mozilla/5.0_(compatible;_InternetMeasurement/1.0;__https://internet-measurement.com/) 20250529152222
+NetworkingExtension/8621.1.15.10.7_Network/4277.102.4_iOS/18.4.1 20250526023917
+END_UNKNOWNREFERER
+
+# Unknown referer Browser - Last visit date
+BEGIN_UNKNOWNREFERERBROWSER 2
+Google-Firebase 20250509235535
+NetworkingExtension/8621.1.15.10.7_Network/4277.102.4_iOS/18.4.1 20250526023917
+END_UNKNOWNREFERERBROWSER
+
+# Origin - Pages - Hits 
+BEGIN_ORIGIN 6
+From0 405 480
+From1 0 0
+From2 3 3
+From3 0 0
+From4 2940 11413
+From5 0 0
+END_ORIGIN
+
+# Search engine referers ID - Pages - Hits
+BEGIN_SEREFERRALS 2
+bing 2 2
+www_google_com 1 1
+END_SEREFERRALS
+
+# External page referers - Pages - Hits
+# The 10 first Pages must be first (order not required for others)
+BEGIN_PAGEREFS 0
+END_PAGEREFS
+
+# Search keyphrases - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_SEARCHWORDS 0
+END_SEARCHWORDS
+
+# Search keywords - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_KEYWORDS 0
+END_KEYWORDS
+
+# Errors - Hits - Bandwidth
+BEGIN_ERRORS 11
+499 420 0
+500 10 712612
+206 4 177661
+302 52 219
+303 2 0
+504 1 89596
+404 46 2289351
+301 292 5768
+405 1 5
+503 273 11269898
+403 1 6
+END_ERRORS
+
+# URL with 404 errors - Hits - Last URL referrer
+BEGIN_SIDER_404 23
+/sellers.json 1 -
+/.well-known/security.txt 2 -
+/accommodation-facility/television/ 1 -
+/sitemap_index.xml 2 -
+/wp-sitemap-taxonomies-mphb_room_type_facility-1.xml 1 -
+/humans.txt 2 -
+/en/booking-page/ 1 -
+/fr 1 -
+/favicon.svg 1 http://loft1325.com/favicon.svg
+/ads.txt 6 -
+/en/accommodation-facility/lit-king/ 1 -
+/accommodation/petite-chambre-1201-3-avenue-ouest/ 1 -
+/accommodation-facility/ascenseur/ 1 -
+/security.txt 2 -
+/mphb_room_type_facility-sitemap.xml 1 -
+/accommodation-facility/satellite-tv/ 1 -
+/rooms/occupaton-double/ 1 -
+/en/accommodation-facility/stationnement/ 1 -
+/apple-touch-icon-precomposed.png 2 -
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/popper.min.js.map 7 -
+/apple-touch-icon.png 2 -
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/tippy-bundle.iife.min.js.map 7 -
+/accommodation/chambre-double-1201-3-avenue-ouest/ 1 -
+END_SIDER_404
+
+# Host - Pages - Hits - Bandwidth - Last visit date - [Start date of last visit] - [Last page of last visit]
+# [Start date of last visit] and [Last page of last visit] are saved only if session is not finished
+# The 10 first Hits must be first (order not required for others)
+BEGIN_VISITOR 148
+69.158.29.72 1013 2818 220009968 20250529233158
+142.127.53.216 794 1626 62091572 20250522011355
+142.118.82.138 303 977 18862218 20250503024842
+174.117.75.163 188 744 95119242 20250514145625
+24.37.83.249 151 633 29735591 20250528172853
+142.117.156.79 121 312 3581745 20250502231402
+24.200.37.235 55 248 52604335 20250526064802
+83.99.151.68 47 47 1491672 20250502211549
+24.212.106.43 42 245 51374503 20250504213554
+83.99.151.66 33 33 666716 20250502212657
+188.163.68.213 1 1 251070 20250522181540
+54.214.210.94 2 2 108362 20250502012652
+167.172.240.145 1 2 54910 20250511194252
+77.74.177.118 1 1 54183 20250521210625
+172.83.7.26 0 1 730 
+199.244.88.229 1 1 54160 20250507160610
+35.90.56.19 2 2 108368 20250508125607
+15.206.235.52 1 1 54179 20250511044422
+18.213.111.31 1 1 54180 20250512035835
+129.146.24.173 1 1 251054 20250504142555
+142.126.17.77 16 149 11418760 20250521013207
+34.222.193.11 6 120 10565143 20250502012700
+206.167.65.208 7 120 9839068 20250527152036
+5.133.192.167 1 2 54911 20250509124202
+142.118.141.4 0 8 940402 
+142.217.70.228 21 180 19663635 20250528132410
+70.36.116.154 1 1 54181 20250502000857
+142.93.144.107 1 2 54923 20250523181608
+193.239.160.12 1 1 30147 20250507181407
+89.110.109.74 18 18 682792 20250523224118
+83.99.151.70 17 17 522202 20250502212439
+173.177.145.178 12 153 19903252 20250528181919
+212.34.153.180 9 9 341542 20250511231700
+165.225.212.197 8 123 9870929 20250526122219
+44.192.97.248 2 2 74730 20250518042023
+34.222.159.195 2 2 108358 20250517065920
+192.36.121.172 1 1 54184 20250508183817
+66.249.91.33 1 1 54183 20250509235535
+3.85.49.94 1 1 190194 20250502012024
+195.200.26.27 9 9 341537 20250514083521
+44.204.211.107 1 1 37366 20250517082343
+38.170.77.15 1 1 37378 20250521031530
+137.74.81.189 0 22 2303855 
+143.110.189.111 1 2 54925 20250525185049
+51.77.89.184 1 18 132060 20250518210517
+109.199.118.129 1 1 54158 20250506175419
+199.244.88.224 1 1 54172 20250523132209
+170.39.218.60 6 35 480611 20250524140927
+185.247.137.20 0 1 7307 
+165.22.123.15 1 2 54911 20250517194647
+192.36.109.102 1 1 54182 20250519015701
+93.158.91.249 1 1 54182 20250513113917
+181.177.85.181 1 1 37402 20250522042004
+139.28.218.6 8 123 9869852 20250525094143
+83.99.151.71 27 27 860680 20250502212623
+83.99.151.64 14 14 423045 20250502210909
+104.248.34.108 1 2 54909 20250517015106
+35.92.68.149 1 1 54195 20250525124853
+91.84.110.151 9 9 341565 20250517054641
+198.50.163.55 2 29 3333902 20250518210525
+185.21.13.25 1 1 54183 20250513204018
+91.84.109.110 9 9 341565 20250516214325
+66.249.83.45 1 5 847288 20250501133725
+35.89.126.140 2 2 108362 20250505001005
+144.217.105.195 30 180 20173068 20250526143109
+31.148.131.29 0 1 674670 
+38.152.129.30 1 1 30148 20250521031531
+138.59.207.88 1 1 30148 20250522042006
+134.209.183.230 1 2 54911 20250509200107
+196.245.247.242 2 2 67527 20250508010207
+149.56.150.70 1 1 251055 20250506215133
+13.217.137.46 1 1 251055 20250501202054
+54.156.52.163 0 1 10693 
+66.70.220.140 3 48 4019094 20250518210536
+45.135.232.10 2 2 4352 20250513144427
+66.249.83.33 0 9 3581609 
+51.255.149.113 1 1 37379 20250509165351
+93.158.91.12 1 2 54909 20250517000813
+185.247.137.205 0 1 730 
+5.133.192.140 1 2 54922 20250527103231
+96.23.53.45 31 216 75795522 20250519155625
+87.236.176.20 0 1 7307 
+216.208.243.215 8 105 8778760 20250527015753
+195.211.77.142 2 2 54182 20250516134356
+180.163.29.234 1 1 114406 20250521005859
+5.133.192.138 1 2 55407 20250501123844
+144.217.135.129 1 1 251055 20250505164527
+157.245.100.253 1 2 54912 20250513192355
+35.84.142.100 6 120 10565146 20250508125610
+138.197.134.247 1 2 54911 20250503033520
+143.198.64.192 1 2 54913 20250519191517
+87.236.176.221 0 2 1460 
+51.158.233.147 1 1 54195 20250525112324
+44.205.252.28 2 2 74730 20250515211900
+93.159.230.28 1 1 54181 20250507210811
+143.198.57.52 1 2 54909 20250503183903
+87.236.176.154 0 1 12921 
+34.208.130.29 2 2 108366 20250520104248
+188.143.244.135 1 5 70912 20250514222229
+212.11.64.160 1 1 90 20250518072901
+94.247.172.129 1 1 54319 20250529230353
+24.212.20.34 2 2 37364 20250522005657
+66.249.83.32 0 5 116721 
+172.226.162.16 18 157 19262133 20250523001925
+217.160.202.182 1 1 54160 20250514111025
+87.236.176.144 1 1 54319 20250529152220
+34.221.198.113 6 120 10565143 20250505001018
+100.20.65.0 5 119 10557325 20250517065924
+192.71.3.222 1 1 54181 20250502175916
+185.247.137.251 0 1 7964 
+178.20.42.24 1 1 37378 20250521080946
+74.125.210.32 0 1 10693 
+87.236.176.39 0 1 12921 
+159.89.116.140 1 2 54912 20250515181756
+109.69.108.85 2 3 34311 20250519140826
+142.120.168.217 20 186 20905548 20250507104208
+135.148.195.7 1 1 54181 20250502082310
+51.158.160.124 1 1 54183 20250521051217
+156.146.60.85 2 2 54183 20250520224553
+184.95.225.153 22 174 12733717 20250501135814
+35.90.253.86 8 110 8052197 20250501110738
+157.230.227.168 1 2 54913 20250505202251
+35.84.38.163 6 120 10565141 20250517065931
+159.89.108.12 1 2 54911 20250507203941
+35.81.171.172 6 120 10565143 20250505001009
+35.91.218.44 1 1 251071 20250522032921
+52.32.20.241 5 119 10557329 20250520104252
+185.247.137.233 0 1 7964 
+142.117.218.122 8 76 9259879 20250509211543
+34.222.194.46 6 120 10565145 20250520104258
+80.71.38.167 14 271 3501086 20250527151823
+135.148.195.15 0 1 730 
+31.148.131.107 0 1 674670 
+46.228.199.158 1 1 54174 20250522183818
+83.99.151.67 30 30 981792 20250502212634
+184.144.244.88 33 209 23585680 20250506141547
+34.212.75.133 6 120 10565143 20250502012654
+35.90.17.252 2 2 108366 20250510072010
+89.110.103.94 9 9 341545 20250506224029
+44.234.63.197 6 120 10565146 20250508125617
+80.85.245.5 1 1 54182 20250505092727
+86.104.252.36 1 1 54180 20250511195547
+83.99.151.69 21 21 659483 20250502211327
+185.247.137.199 1 1 54319 20250529134355
+64.227.14.255 1 2 54913 20250521191730
+74.125.151.39 3 3 162546 20250506234936
+94.102.55.18 1 1 54184 20250507232536
+34.222.11.67 1 1 54319 20250529131825
+END_VISITOR
+
+# Date - Pages - Hits - Bandwidth - Visits
+BEGIN_DAY 29
+20250501 255 1158 42268665 7
+20250502 331 753 31566830 19
+20250503 80 127 2250043 3
+20250504 43 242 55819865 2
+20250505 175 740 86313655 7
+20250506 47 223 24394984 5
+20250507 25 192 21153131 6
+20250508 17 245 21360371 5
+20250509 12 82 9461263 5
+20250510 2 2 108366 1
+20250511 13 22 1482577 5
+20250512 1 1 54180 1
+20250513 6 7 221811 6
+20250514 41 265 33378476 4
+20250515 3 4 129642 2
+20250516 12 12 449929 3
+20250517 26 257 21774484 8
+20250518 9 120 9863731 5
+20250519 35 222 75938928 4
+20250520 15 244 21285847 4
+20250521 282 1202 43888859 10
+20250522 550 594 36146883 7
+20250523 44 255 20715737 13
+20250524 273 1367 182807781 4
+20250525 658 792 19942191 5
+20250526 113 843 98070771 5
+20250527 30 503 22180057 4
+20250528 193 1071 78832125 5
+20250529 57 337 15809133 5
+END_DAY
+
+# Session range - Number of visits
+BEGIN_SESSION 7
+30mn-1h 8
+30s-2mn 13
+15mn-30mn 8
+0s-30s 116
+5mn-15mn 2
+2mn-5mn 3
+1h+ 10
+END_SESSION
+
+# URL - Pages - Bandwidth - Entry - Exit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_SIDER 256
+/wp-admin/admin-ajax.php 1414 8237251 3 8
+/ 242 12286979 120 75
+/wp-admin/admin.php 224 7591170 8 9
+/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 197 32352 0 1
+/wp-json/contact-form-7/v1/contact-forms/3742/refill 192 2157 0 18
+/wp-content/plugins/translatepress-multilingual/includes/trp-ajax.php 169 2593 0 1
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxigyp8kv8jhgfvrlptuchta.woff2 42 291876 0 3
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxieyp8kv8jhgfvrjjfecg.woff2 41 299592 0 1
+/wp-content/uploads/elementor/google-fonts/fonts/roboto-kfo7cnqeu92fr1me7ksn66agldtyluama3yuba.woff2 41 1564992 1 8
+/wp-content/uploads/elementor/google-fonts/fonts/opensans-memvyags126mizpba-uvwbx2vvnxbbobj2ovts-muw.woff2 41 1881204 1 0
+/en/woocommerce-pages/woo-my-account/ 1 29178 0 0
+/wp-json/elementor/v1/kit-elements-defaults 14 84 0 0
+/en/new-website-2/ 1 32896 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrlcz7z1xlfq.woff2 35 250112 0 0
+/wp-json/contact-form-7/v1/contact-forms/489/feedback/schema 2 370 0 0
+/en/nd-booking-pages/nd-booking-page/ 1 29264 0 0
+/en/woocommerce-pages/woo-shop-01/ 1 30245 0 0
+/remboursements/ 1 30019 0 0
+/employee-panel/ 1 44320 0 0
+/wp-sitemap-users-1.xml 1 164 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-solid-900.woff2 2 156392 0 0
+/en/gallery-pages/ 1 28450 0 0
+/nd-booking-pages/ 1 27812 0 0
+/about-pages/about-03/ 1 32226 0 0
+/home-pages/03-home/ 1 36484 0 0
+/en/price-pages/prices-03/ 1 32457 0 0
+/inner-pages/ 1 27803 0 0
+/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.woff 1 18824 0 0
+/wp-json/elementor/v1/global-widget/templates 14 84 0 0
+/en/about-pages/about-04/ 1 33468 0 0
+/wp-admin/tools.php 8 245971 0 0
+/services/ameublement/ 1 28810 0 0
+/gallery-pages/gallery-01/ 3 103651 0 0
+/services/king-bed/ 1 28809 1 0
+/en/our-reviews/ 1 32905 0 0
+/wp-admin/edit.php 9 354905 0 0
+/en/guide-tv-utilisation-et-depannage-2025/ 1 29341 0 0
+/wp-sitemap-posts-nd_booking_cpt_4-1.xml 1 206 0 0
+/wp-json/wp/v2/wp_pattern_category 1 6 0 0
+/home-pages/01-home/ 1 39763 0 0
+/wp-sitemap-posts-post-1.xml 1 248 0 0
+/branches/lofts-1325/ 1 29430 1 0
+/header-pages/ 1 27804 0 0
+/about-pages/a-propos/ 10 503909 1 1
+/wp-json/siteground-central/v1/dashboard 12 19574 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/roboto-kfo5cnqeu92fr1mu53zec9_vu3r1gihoszmkbnka.woff2 4 176768 0 0
+/nd-booking-pages/nd-booking-page/ 9 272778 0 0
+/en/service-pages/forfaits-touki-suite/ 2 74800 0 0
+/header-pages/header/ 2 75100 0 0
+/wp-json/wp/v2/pages/11055 1 12707 1 1
+/service-pages/forfaits-splash-moi/ 9 334954 0 0
+/wp-sitemap-taxonomies-product_cat-1.xml 1 162 0 0
+/lofts-details/ 1 27930 0 1
+/rooms/penthouse/ 8 327435 0 1
+/product/autumn-promotion/ 1 32583 0 0
+/wp-admin/load-styles.php 13 1334384 0 0
+/wp-json/wp/v2/blocks 1 6 0 0
+/footer-pages/footer/ 1 27886 0 0
+/woocommerce-pages/ 1 27819 0 0
+/en/product/st-valentine-week/ 1 33046 0 0
+/wp-json/wp/v2/pages/8999 1 672 0 0
+/wp-content/plugins/elementor/assets/lib/eicons/fonts/eicons.woff2 13 696080 0 1
+/en/shop/ 1 29730 0 0
+/woocommerce-pages/woo-my-account/ 1 28521 0 0
+/inner-pages/coming-soon/ 1 33518 0 0
+/en/price-pages/prices-02/ 1 30187 0 1
+/nd-booking-pages/nd-booking-search/ 19 776399 0 0
+/en/service-pages/forfaits-aventure/ 1 33772 0 0
+/en/service-pages/forfait-le-romantique/ 1 33804 0 0
+/nd-booking-pages/nd-booking-order/ 1 28228 0 0
+/author/waroxagmail-com/ 1 28716 0 0
+/en/price-pages/ 1 28420 0 0
+/en/rooms/occupation-simple/ 7 252150 0 0
+/en/contact-pages/contact/ 8 316497 0 0
+/wp-admin/ 4 96745 0 0
+//wp-json/wc/store/products/collection-data 1 90 1 1
+/wp-json/elementor/v1/site-editor/templates 4 2132 0 0
+/en/about-pages/about-02/ 1 34054 0 0
+/en/nd-restaurant-pages/open-table/ 1 30839 0 0
+/wp-json/elementor/v1/globals 13 3380 0 0
+/wp-sitemap-posts-nd_booking_cpt_2-1.xml 1 343 0 0
+/en/gallery-pages/gallery-01/ 1 32759 0 0
+/wp-json/wp/v2/settings 1 1570 0 0
+/service-pages/forfaits-aventure/ 5 162231 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrldd4z1xlfq.woff2 7 54768 0 0
+/en/nd-booking-pages/nd-booking-account/ 1 29469 0 0
+/en/inner-pages/coming-soon/ 1 34111 0 0
+/en/contact-pages/ 1 28453 0 0
+/wp-sitemap-posts-product-1.xml 1 280 0 0
+/en/home-pages/ 1 28421 0 0
+/en/rooms/occupation-double/ 1 36849 0 0
+/woocommerce-pages/woo-checkout/ 1 48869 1 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxigyp8kv8jhgfvrjjluchta.woff2 5 43340 0 0
+/en/product-category/room-service/ 1 29736 0 0
+/home-pages/02-home/ 1 40064 0 0
+/en/product-tag/all-inclusive/ 1 29747 0 0
+/wp-json/contact-form-7/v1/contact-forms/489/refill 2 12 0 0
+/en/nd-booking-pages/nd-booking-checkout/ 1 29194 0 0
+/en/services/salle-dentrainement/ 1 29423 0 0
+/en/archive-pages/archive-right/ 1 31797 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrlgt9z1xlfq.woff2 9 69732 0 0
+/product/st-valentine-week/ 1 32587 0 0
+/woocommerce-pages/woo-shop/ 1 27833 0 0
+/en/services/ascenseur/ 1 29352 0 0
+/en/header-pages/header/ 1 28524 0 1
+/en/new-services-2/ 1 32941 0 0
+/feed/ 1 189070 1 1
+/product/honeymoon/ 1 32562 0 0
+/en/about-pages/about-03/ 1 32870 0 0
+/certificat-enregistrement-ctiq/ 8 287223 0 0
+/elementor-10/ 1 28422 0 0
+/our-reviews/ 1 32297 0 0
+/type/quote/ 1 28389 0 0
+/en/product/spring-sale/ 1 32997 0 0
+/en/footer-pages/ 1 28422 0 0
+/wp-json/elementor/v1/site-navigation/recent-posts 14 4921 0 0
+/new-website-2/ 1 32274 0 0
+/services/stationnement/ 1 28792 0 0
+/woocommerce-pages/woo-shop-01/ 1 29610 0 0
+/wp-admin/users.php 11 408466 5 4
+/en/contact-pages/contact-02/ 1 29727 0 0
+/wp-sitemap-taxonomies-product_tag-1.xml 1 165 0 0
+/wp-json/oembed/1.0/embed 2 1978 2 2
+/en/branches/halte-routiere/ 1 28991 0 0
+/wp-admin/user-new.php 2 71701 0 0
+/en/archive-pages/news-page/ 1 31288 0 0
+/about-pages/about-04/ 1 32821 0 0
+/wp-content/plugins/revslider/public/assets/fonts/material/MaterialIcons-Regular.woff2 1 98996 0 0
+/price-pages/prices-01/ 1 32011 0 0
+/home-pages/ 1 27808 0 0
+/woocommerce-pages/woo-shop-02/ 1 29496 0 0
+/en/nd-restaurant-pages/ 1 28476 0 0
+/en/header-pages/ 1 28422 0 0
+/branches/halte-routiere/ 1 28345 0 0
+/nd-booking-pages/booking-search/ 1 28745 0 0
+/wp-sitemap-posts-nd_booking_cpt_1-1.xml 1 227 0 0
+/nd-restaurant-pages/ 1 27830 0 0
+/en/nd-booking-pages/nd-booking-order/ 1 28852 0 0
+/footer-pages/ 1 27806 0 0
+/product/christmas-offer/ 1 32567 0 0
+/service-pages/services-02/ 1 30746 0 0
+/wp-json/wp/v2/users/me 1 1996 0 0
+/comments/feed/ 7 4816 0 0
+/en/certificat-enregistrement-ctiq/ 8 293780 0 0
+/en/reglements/ 7 271403 0 7
+/en/branches/lofts-1325/ 1 30067 0 0
+/en/inner-pages/faq/ 2 64887 0 0
+/gallery-pages/ 1 27806 0 0
+/service-pages/ 1 27814 0 0
+/contact-pages/contact/ 17 600282 4 4
+/wp-json/wp/v2/taxonomies 1 1640 0 0
+/archive-pages/news-page/ 1 30637 0 0
+/en/woocommerce-pages/woo-cart/ 1 48960 0 0
+/services/television/ 1 28804 0 0
+/liste-des-chaines-de-television-disponibles-pour-les-residents-des-lofts-2025/ 1 28777 0 0
+/en/type/quote/ 1 29038 0 1
+/nd-restaurant-pages/open-table/ 1 30174 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrlbt5z1xlfq.woff2 7 53424 0 0
+/product/spring-sale/ 1 32550 0 0
+/en/archive-pages/archive-left/ 1 31915 0 0
+/en/footer-pages/footer/ 1 28533 0 0
+/en/ 6 240127 1 0
+/en/wp-json/contact-form-7/v1/contact-forms/3742/refill 12 72 0 0
+/en/rooms/penthouse/ 1 37683 0 0
+/new-services-2/ 1 32390 0 0
+/wp-sitemap-posts-page-1.xml 1 1200 0 0
+/en/remboursements/ 1 30655 0 0
+/about-pages/about-02/ 1 33386 0 0
+/wp-login.php 16 26418 3 3
+/wp-content/uploads/2024/12/DALL%C2%B7E-2024-12-18-11.54.31-A-romantic-setting-with-a-bottle-of-champagne-and-two-glasses-on-a-table-surrounded-by-lit-candles-and-red-rose-petals.-The-table-is-in-soft-ambient-.webp 2 442344 0 0
+/en/home-pages/09-home/ 1 36688 0 0
+/en/inner-pages/ 1 28416 0 0
+/en/services/buanderie/ 1 29348 0 0
+/archive-pages/archive/ 1 28515 0 0
+/price-pages/ 1 27802 0 0
+/en/services/service-dentretien-menager/ 1 29425 0 0
+/wp-admin/post.php 27 3792839 2 0
+/en/elementor-10/ 1 29051 0 0
+/en/services/wifi/ 1 29347 0 0
+/en/service-pages/ 1 28450 0 0
+/price-pages/prices-03/ 1 31803 0 0
+/en/nd-booking-pages/ 1 28461 0 0
+/services/buanderie/ 1 28806 0 0
+/en/services/king-bed/ 1 29352 0 0
+/en/product/christmas-offer/ 1 32994 0 0
+/en/employee-panel/ 1 44883 0 0
+/woocommerce-pages/woo-cart/ 1 48826 0 0
+/en/services/stationnement/ 1 29348 0 0
+/en/product/autumn-promotion/ 1 32989 0 0
+/en/liste-des-chaines-de-television-disponibles-pour-les-residents-des-lofts-2025/ 1 29414 0 0
+/en/home-pages/01-home/ 1 40385 0 0
+/wp-json/wp/v2/templates 1 6 0 0
+/contact-pages/ 1 27807 0 0
+/service-pages/forfait-le-romantique/ 7 254155 0 0
+/home-pages/09-home/ 1 36058 0 0
+/about-pages/ 1 27800 1 0
+/wp-json/contact-form-7/v1/contact-forms/489/feedback 1 150 0 1
+/en/services/lit-queen/ 1 29356 0 0
+/wp-admin/themes.php 1 39986 0 0
+/en/home-pages/02-home/ 1 40648 0 0
+/archive-pages/archive-left/ 1 31281 0 0
+/nd-booking-pages/nd-booking-checkout/ 4 121928 0 0
+/wp-content/plugins/revslider/public/assets/css/closedhand.cur 4 1304 0 2
+/wp-admin/plugins.php 7 646880 0 0
+/en/nd-booking-pages/nd-booking-search/ 1 36575 0 0
+/en/service-pages/services-02/ 1 31387 0 0
+/adminpanel/ 1 44321 0 0
+/en/woocommerce-pages/woo-shop/ 1 28483 0 0
+/wp-content/plugins/revslider/public/assets/css/openhand.cur 13 4238 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/opensans-memtyags126mizpba-ufuicvxscekx2cmqvxlwqwuu6f.woff2 5 251480 0 0
+/wp-admin/upload.php 1 47721 0 0
+/en/author/waroxagmail-com/ 1 29346 0 0
+/contact-pages/contact-02/ 1 29114 0 0
+/wp-content/plugins/wp-letsencrypt-ssl/admin/css/le-admin.min.css.map 1 0 0 0
+/service-pages/forfaits-touki-suite/ 17 685678 0 0
+/en/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 12 1920 0 0
+/wp-sitemap-taxonomies-post_format-1.xml 1 153 0 0
+/services/salle-dentrainement/ 1 28843 0 0
+/services/lit-queen/ 1 28810 0 0
+/services/wifi/ 1 28803 0 0
+/services/service-dentretien-menager/ 1 28843 0 0
+/inner-pages/faq/ 1 31731 0 1
+/nd-booking-pages/nd-booking-account/ 1 28806 0 1
+/home-pages/06-home/ 1 39133 0 0
+/wp-admin/plugin-install.php 2 82190 0 0
+/rooms/occupation-simple/ 14 550915 0 0
+/en/service-pages/forfaits-splash-moi/ 1 33791 0 0
+/product-tag/all-inclusive/ 1 29105 0 0
+/wp-sitemap-taxonomies-category-1.xml 1 168 0 0
+/services/ascenseur/ 1 28810 0 0
+/en/woocommerce-pages/ 1 28462 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrlej6z1xlfq.woff2 9 72000 0 0
+/rooms/occupation-double/ 9 363103 0 0
+/en/latest-event-2/ 1 33025 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrlfj_z1xlfq.woff2 7 55524 0 0
+/wp-admin/load-scripts.php 35 1572637 0 0
+/en/services/ameublement/ 1 29354 0 0
+/wp-content/plugins/loco-translate/pub/font/loco.woff 1 28228 0 0
+/shop/ 1 29077 0 0
+/wp-content/uploads/elementor/google-fonts/fonts/poppins-pxibyp8kv8jhgfvrldz8z1xlfq.woff2 8 62720 0 1
+/en/home-pages/03-home/ 1 37121 0 0
+/wp-sitemap.xml 1 237 1 0
+/product-category/room-service/ 1 29079 0 0
+/en/product/august-offer/ 1 32984 0 0
+/price-pages/prices-02/ 1 29538 0 0
+/reglements/ 7 265666 0 0
+/en/product/honeymoon/ 1 32991 1 0
+/wp-content/uploads/2024/12/DALL%C2%B7E-2024-12-18-11.54.31-A-romantic-setting-with-a-bottle-of-champagne-and-two-glasses-on-a-table-surrounded-by-lit-candles-and-red-rose-petals.-The-table-is-in-soft-ambient--300x300.webp 1 17020 0 0
+/services/satellite-tv/ 1 28814 0 0
+/archive-pages/archive-right/ 1 31174 0 0
+/en/archive-pages/archive/ 1 29158 0 0
+/en/woocommerce-pages/woo-checkout/ 1 49026 0 0
+/wp-content/uploads/2024/12/IMG_2338.heic 1 281814 0 0
+/en/lofts-details/ 1 28575 0 0
+/en/about-pages/ 1 28416 0 0
+/en/nd-booking-pages/booking-search/ 1 29386 0 0
+END_SIDER

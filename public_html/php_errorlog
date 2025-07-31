@@ -1,0 +1,6 @@
+[25-Sep-2024 21:17:17 UTC] Cron reschedule event error for hook: wp_background_process_cron, Error code: invalid_schedule, Error message: Event schedule does not exist., Data: {"schedule":"wp_background_process_cron_interval","args":[],"interval":60}
+[27-Oct-2024 01:50:38 UTC] Cron reschedule event error for hook: ssa_cron_process_async_actions, Error code: invalid_schedule, Error message: Event schedule does not exist., Data: {"schedule":"ssa_async_interval","args":[],"interval":60}
+[04-Nov-2024 03:58:07 UTC] ButterflyMX: Unit sync completed successfully.
+[04-Nov-2024 03:58:41 UTC] ButterflyMX: Unit sync completed successfully.
+[04-Nov-2024 04:00:34 UTC] ButterflyMX: Unit sync completed successfully.
+[04-Nov-2024 04:05:06 UTC] ButterflyMX: No unit data returned from API.

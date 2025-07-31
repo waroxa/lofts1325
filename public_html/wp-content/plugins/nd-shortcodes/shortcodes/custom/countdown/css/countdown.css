@@ -1,0 +1,16 @@
+.nd_options_countdown_l3_elem { position:relative; }
+  .nd_options_countdown_l3_elem:after {
+    position: absolute;
+    content: "/";
+    top: 30px;
+    right: -12px;
+    font-size: 60px;
+    color: #000;
+    opacity: 0.05;
+    font-weight: 100;
+    z-index: 9;
+    line-height: 60px;
+  } 
+  .nd_options_countdown_l3 .nd_options_countdown_l3_elem:last-child:after {
+    display:none;
+  }

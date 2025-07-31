@@ -1,0 +1,27 @@
+function encolar_scripts_listar_tenants() {
+    wp_enqueue_script('listar-tenants-js', get_template_directory_uri() . '/js/listar-tenants.js', array('jquery'), '1.0', true);
+    wp_localize_script('listar-tenants-js', 'ajaxurl', array('ajax_url' => admin_url('admin-ajax.php')));
+}
+add_action('wp_enqueue_scripts', 'encolar_scripts_listar_tenants');
+
+function boton_listar_tenants() {
+    return '<button id="listarTenantsBtn">Listar Tenants</button><div id="resultadoTenants"></div>';
+}
+add_shortcode('boton_listar_tenants', 'boton_listar_tenants');
+
+function listar_tenants_building() {
+    // Aquí llamas al método del plugin para obtener los tenants
+    $plugin_instance = new IntegracionButterflyMX();
+    $building_id = isset($_GET['building_id']) ? intval($_GET['building_id']) : 60892; // Default to 60892
+    $response = $plugin_instance->get_tenants_by_building($building_id);
+
+    if (is_wp_error($response)) {
+        error_log('Error al listar tenants: ' . $response->get_error_message());
+        wp_send_json_error('Error al listar tenants: ' . $response->get_error_message());
+    } else {
+        error_log('Tenants obtenidos correctamente.');
+        wp_send_json_success($plugin_instance->format_tenants($response));
+    }
+}
+add_action('wp_ajax_listar_tenants_building', 'listar_tenants_building');
+add_action('wp_ajax_nopriv_listar_tenants_building', 'listar_tenants_building');

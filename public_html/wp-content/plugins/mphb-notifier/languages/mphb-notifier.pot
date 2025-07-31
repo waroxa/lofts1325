@@ -1,0 +1,444 @@
+# Copyright (C) 2023 MotoPress
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Hotel Booking Notifier - Event-driven emails 1.3.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mphb-notifier\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-03-10T11:20:01+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.6.0\n"
+"X-Domain: mphb-notifier\n"
+
+#. Plugin Name of the plugin
+msgid "Hotel Booking Notifier - Event-driven emails"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://motopress.com/products/hotel-booking-notifier/"
+msgstr ""
+
+#. Description of the plugin
+msgid "Automate common notifications by sending check-in and check-out date-driven emails, such as key pick-up instructions, feedback request, etc."
+msgstr ""
+
+#. Author of the plugin
+msgid "MotoPress"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://motopress.com/"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:33
+msgid "Update Notification"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:51
+msgid "Active"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:52
+#: classes/admin/groups/license-settings-group.php:63
+msgid "Disabled"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:70
+msgid "Created on:"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:80
+msgid "Delete Permanently"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:82
+msgid "Move to Trash"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:90
+#: classes/admin/cpt-pages/edit-notification-page.php:91
+msgid "Update"
+msgstr ""
+
+#: classes/admin/cpt-pages/edit-notification-page.php:91
+msgid "Create"
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:19
+#: classes/post-types/notification-cpt.php:119
+msgid "Recipients"
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:20
+msgid "Condition"
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:40
+#: classes/post-types/notification-cpt.php:121
+msgid "Admin"
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:44
+#: classes/post-types/notification-cpt.php:122
+msgid "Customer"
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:88
+msgid "Last execution — just now. Sending emails..."
+msgstr ""
+
+#. translators: %s is a time
+#: classes/admin/cpt-pages/manage-notifications-page.php:98
+msgid "Last execution was at %s. No new emails were sent for any of the notifications."
+msgstr ""
+
+#. translators: %d is count of notifications
+#: classes/admin/cpt-pages/manage-notifications-page.php:101
+msgid "%d notification"
+msgid_plural "%d notifications"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d is count of emails
+#: classes/admin/cpt-pages/manage-notifications-page.php:103
+msgid "%d email"
+msgid_plural "%d emails"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: Example: "Last execution was at 3:27 pm. Was sent X emails for Y notifications."
+#: classes/admin/cpt-pages/manage-notifications-page.php:106
+msgid "Last execution was at %1$s. %2$s for %3$s were sent."
+msgstr ""
+
+#. translators: %s is time
+#: classes/admin/cpt-pages/manage-notifications-page.php:119
+msgid "Next execution is scheduled for — %s."
+msgstr ""
+
+#: classes/admin/cpt-pages/manage-notifications-page.php:121
+msgid "Failed to schedule next execution in your WordPress installation."
+msgstr ""
+
+#. translators: %s is a code
+#: classes/admin/cpt-pages/manage-notifications-page.php:131
+msgid "You can set up a real cron task in your server admin panel: %s"
+msgstr ""
+
+#: classes/admin/fields/trigger-date-field.php:47
+msgctxt "X days before some date"
+msgid "days"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:22
+msgid "The License Key is required in order to get automatic plugin updates and support. You can manage your License Key in your personal account. <a>Learn more</a>."
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:30
+msgid "License Key"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:41
+msgid "Status"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:47
+msgid "Inactive"
+msgstr ""
+
+#. translators: %s - date in format d.m.Y
+#: classes/admin/groups/license-settings-group.php:56
+msgid "Valid until %s"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:58
+msgid "Valid (Lifetime)"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:67
+msgid "Expired"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:71
+msgid "Invalid"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:75
+msgid "Your License Key does not match the installed plugin. <a>How to fix this.</a>"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:82
+msgid "Product ID is not valid"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:91
+msgid "Action"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:95
+msgid "Activate License"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:98
+msgid "Deactivate License"
+msgstr ""
+
+#: classes/admin/groups/license-settings-group.php:101
+msgid "Renew License"
+msgstr ""
+
+#: classes/admin/groups/main-settings-group.php:25
+msgid "Imported/external bookings"
+msgstr ""
+
+#: classes/admin/groups/main-settings-group.php:26
+msgid "Do not send notifications for imported bookings to Administrator."
+msgstr ""
+
+#: classes/admin/groups/main-settings-group.php:34
+msgid "Do not send notifications for imported bookings to Customer."
+msgstr ""
+
+#: classes/admin/groups/main-settings-group.php:42
+msgid "Do not send notifications for imported bookings to Custom email addresses."
+msgstr ""
+
+#. translators: "Notice 1", "Notice 2" etc.
+#: classes/admin/meta-boxes/notices-meta-box.php:21
+#: classes/admin/meta-boxes/notices-meta-box.php:28
+msgid "Notice %d"
+msgstr ""
+
+#: classes/admin/meta-boxes/test-meta-box.php:28
+msgid "Save and send this notification to the administrator email address. To test custom notices, make sure you’ve added Accommodation Notice 1/Notice 2 in the Accommodation type menu."
+msgstr ""
+
+#: classes/admin/meta-boxes/test-meta-box.php:32
+msgid "Send Email"
+msgstr ""
+
+#: classes/admin/settings-page.php:36
+msgid "Notifier"
+msgstr ""
+
+#: classes/admin/settings-page.php:46
+msgid "Notifier Settings"
+msgstr ""
+
+#: classes/admin/settings-page.php:56
+msgid "License"
+msgstr ""
+
+#. translators: "Notification Notice 1", "Notification Notice 2" etc.
+#: classes/emails/custom-tags.php:26
+#: classes/emails/custom-tags.php:31
+msgid "Accommodation Notice %d"
+msgstr ""
+
+#. translators: %s is notification label
+#: classes/emails/notification-email.php:61
+#: classes/emails/notification-email.php:183
+msgid "Notification \"%s\" will not be sent: there is no email address to send the notification to."
+msgstr ""
+
+#. translators: %s is notification label
+#: classes/emails/notification-email.php:168
+msgid "Notification \"%s\" was sent."
+msgstr ""
+
+#. translators: %s is notification label
+#: classes/emails/notification-email.php:171
+msgid "Notification \"%s\" sending failed."
+msgstr ""
+
+#: classes/plugin.php:89
+msgid "Interval for sending notifications"
+msgstr ""
+
+#: classes/plugin.php:108
+msgid "Notification Notices"
+msgstr ""
+
+#. translators: "Test" as a verb
+#: classes/plugin.php:110
+msgid "Test Notification Now"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:39
+#: classes/post-types/notification-cpt.php:49
+msgid "Notifications"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:40
+msgid "Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:41
+msgctxt "Add new notification"
+msgid "Add New"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:42
+msgid "Add New Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:43
+msgid "Edit Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:44
+msgid "New Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:45
+msgid "View Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:46
+msgid "Search Notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:47
+msgid "No notifications found"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:48
+msgid "No notifications found in Trash"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:50
+msgid "Insert into notification description"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:51
+msgid "Uploaded to this notification"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:72
+msgid "Settings"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:73
+#: includes/functions.php:31
+msgid "Email"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:75
+msgid "All"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:85
+msgid "Type"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:94
+msgid "Trigger"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:101
+msgid "Skip this notification for reservations made later than the set time frame."
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:109
+msgid "Accommodations"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:123
+#: classes/post-types/notification-cpt.php:133
+msgid "Custom Email Addresses"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:134
+msgid "You can use multiple comma-separated email addresses."
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:148
+msgid "Subject"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:158
+msgid "Header"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:168
+msgid "Message"
+msgstr ""
+
+#: classes/post-types/notification-cpt.php:170
+msgid "To replace the Accommodation Notice 1/Notice 2 tags you use in the email with custom property information, go to Accommodation types to fill in the respective fields."
+msgstr ""
+
+#. translators: %s is notification label
+#: classes/services/send-notifications.php:117
+msgid "Notification \"%s\" not sent, booking date does not meet requirements."
+msgstr ""
+
+#. translators: title of website
+#: classes/settings.php:15
+msgid "Notification from %site_title%"
+msgstr ""
+
+#. translators: booking ID
+#: classes/settings.php:23
+msgid "Notification for your booking #%booking_id%"
+msgstr ""
+
+#: includes/functions.php:116
+msgctxt "Before some day"
+msgid "before"
+msgstr ""
+
+#: includes/functions.php:117
+msgctxt "After some day"
+msgid "after"
+msgstr ""
+
+#: includes/functions.php:129
+msgid "check-in"
+msgstr ""
+
+#: includes/functions.php:130
+msgid "check-out"
+msgstr ""
+
+#: includes/functions.php:142
+msgid "day"
+msgid_plural "days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/emails/notification-default.php:6
+msgid "Dear %1$s %2$s,"
+msgstr ""
+
+#: templates/emails/notification-default.php:8
+msgid "For your information:"
+msgstr ""
+
+#: templates/emails/notification-default.php:10
+msgid "Accommodation Notice 1 - %s"
+msgstr ""
+
+#: templates/emails/notification-default.php:12
+msgid "Accommodation Notice 2 - %s"
+msgstr ""
+
+#: templates/emails/notification-default.php:13
+msgid "Details of booking"
+msgstr ""
+
+#: templates/emails/notification-default.php:14
+msgid "Check-in: %1$s, from %2$s"
+msgstr ""
+
+#: templates/emails/notification-default.php:16
+msgid "Check-out: %1$s, until %2$s"
+msgstr ""
+
+#: templates/emails/notification-default.php:18
+msgid "Thank you!"
+msgstr ""

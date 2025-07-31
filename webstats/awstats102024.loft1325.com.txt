@@ -1,0 +1,566 @@
+AWSTATS DATA FILE 7.7 (build 20161204)
+# If you remove this file, all statistics for date 202410 will be lost/reset.
+# Last config file used to build this data file was /etc/awstats/awstats.carolinem27.sg-host.com.conf.
+
+# Position (offset in bytes) in this file for beginning of each section for
+# direct I/O access. If you made changes somewhere in this file, you should
+# also remove completely the MAP section (AWStats will rewrite it at next
+# update).
+BEGIN_MAP 28
+POS_GENERAL 2006                
+POS_TIME 2701                
+POS_VISITOR 8564                
+POS_DAY 11229               
+POS_DOMAIN 3592                
+POS_LOGIN 3933                
+POS_ROBOT 4088                
+POS_WORMS 4570                
+POS_EMAILSENDER 4701                
+POS_EMAILRECEIVER 4844                
+POS_SESSION 11908               
+POS_SIDER 12105               
+POS_FILETYPES 4979                
+POS_DOWNLOADS 5326                
+POS_OS 5435                
+POS_BROWSER 5623                
+POS_SCREENSIZE 6223                
+POS_UNKNOWNREFERER 6297                
+POS_UNKNOWNREFERERBROWSER 6490                
+POS_ORIGIN 6600                
+POS_SEREFERRALS 6742                
+POS_PAGEREFS 6905                
+POS_SEARCHWORDS 7115                
+POS_KEYWORDS 7267                
+POS_MISC 2364                
+POS_ERRORS 7326                
+POS_CLUSTER 3789                
+POS_SIDER_404 7527                
+END_MAP
+
+# LastLine    = Date of last record processed - Last record line number in last log - Last record offset in last log - Last record signature value
+# FirstTime   = Date of first visit for history file
+# LastTime    = Date of last visit for history file
+# LastUpdate  = Date of last update - Nb of parsed records - Nb of parsed old records - Nb of parsed new records - Nb of parsed corrupted - Nb of parsed dropped
+# TotalVisits = Number of visits
+# TotalUnique = Number of unique visitors
+# MonthHostsKnown   = Number of hosts known
+# MonthHostsUnKnown = Number of hosts unknown
+BEGIN_GENERAL 8
+LastLine 20241101000118 18243 6996837 16005853194972
+FirstTime 20241001010359
+LastTime 20241031235917
+LastUpdate 20241101044833 18243 16920 484 0 838
+TotalVisits 106                 
+TotalUnique 61                  
+MonthHostsKnown 0                   
+MonthHostsUnknown 65                  
+END_GENERAL
+
+# Misc ID - Pages - Hits - Bandwidth
+BEGIN_MISC 10
+DirectorSupport 0 0 0
+AddToFavourites 0 14 0
+JavascriptDisabled 0 0 0
+WindowsMediaPlayerSupport 0 0 0
+FlashSupport 0 0 0
+TotalMisc 0 0 0
+JavaEnabled 0 0 0
+RealPlayerSupport 0 0 0
+QuickTimeSupport 0 0 0
+PDFSupport 0 0 0
+END_MISC
+
+# Hour - Pages - Hits - Bandwidth - Not viewed Pages - Not viewed Hits - Not viewed Bandwidth
+BEGIN_TIME 24
+0 666 1783 136708359 244 244 2775803
+1 404 956 30590545 180 192 14462228
+2 138 473 3476785 47 48 49657
+3 7 221 10333361 9 9 491353
+4 0 0 0 31 31 635
+5 1 2 55549 2 40 453566
+6 8 8 436029 16 17 20700
+7 6 6 328805 10 10 4968
+8 38 482 10315224 39 40 3137
+9 128 538 43549475 32 32 14981
+10 155 155 3520921 85 85 22718
+11 176 280 37887754 57 57 10504
+12 534 1006 140031887 197 200 105812
+13 314 633 119608551 117 117 522763
+14 324 1265 38772280 161 170 1375430
+15 189 509 5003334 120 120 83222
+16 84 168 4865601 83 83 23227
+17 78 238 11298069 58 58 30028
+18 240 937 75591073 139 140 212363
+19 487 1236 170012824 207 231 174748
+20 436 899 41673277 146 146 478548
+21 419 1582 71023622 150 159 13774170
+22 578 1002 69507489 238 243 339815
+23 420 554 27498337 221 222 73370
+END_TIME
+
+# Domain - Pages - Hits - Bandwidth
+# The 10 first Pages must be first (order not required for others)
+BEGIN_DOMAIN 8
+ca 5728 13890 975418071
+us 81 878 41902023
+ie 5 5 269377
+gb 4 4 219245
+de 4 5 179619
+ru 3 3 107055
+bg 3 145 5877988
+nl 2 3 298730
+END_DOMAIN
+
+# Cluster ID - Pages - Hits - Bandwidth
+BEGIN_CLUSTER 0
+END_CLUSTER
+
+# Login - Pages - Hits - Bandwidth - Last visit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_LOGIN 0
+END_LOGIN
+
+# Robot ID - Hits - Bandwidth - Last visit - Hits on robots.txt
+# The 10 first Hits must be first (order not required for others)
+BEGIN_ROBOT 9
+wordpress 1724 455226 20241031235917 0
+python 41 453542 20241017212240 0
+CFNetwork 7 32732 20241029141555 0
+scanner 6 166629 20241004225211 0
+facebookexternalhit/ 6 98372 20241029141555 0
+^mozilla\/5\.0$ 4 42772 20241029142332 0
+Slackbot\-LinkExpanding 4 109285 20241017212512 0
+no_user_agent 3 729575 20241017015959 0
+robot 2 14614 20241017212513 0
+END_ROBOT
+
+# Worm ID - Hits - Bandwidth - Last visit
+# The 5 first Hits must be first (order not required for others)
+BEGIN_WORMS 0
+END_WORMS
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first Hits must be first (order not required for others)
+BEGIN_EMAILSENDER 0
+END_EMAILSENDER
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first hits must be first (order not required for others)
+BEGIN_EMAILRECEIVER 0
+END_EMAILRECEIVER
+
+# Files type - Hits - Bandwidth - Bandwidth without compression - Bandwidth after compression
+BEGIN_FILETYPES 14
+woff2 42 2851204 0 0
+gif 30 818235 0 0
+jpg 419 41609218 0 0
+png 1421 792053599 0 0
+Unknown 1297 916395 0 0
+map 2 8240 0 0
+css 2481 8226074 0 0
+js 3912 62169071 0 0
+svg 800 982946 0 0
+woff 26 292860 0 0
+php 3964 61167342 0 0
+html 489 20123378 0 0
+jpeg 40 5234873 0 0
+cur 10 1630 0 0
+END_FILETYPES
+
+# Downloads - Hits - Bandwidth
+BEGIN_DOWNLOADS 1
+/wp-content/uploads/2024/08/255662885089048.mp4 0 7 27817043
+END_DOWNLOADS
+
+# OS ID - Hits
+BEGIN_OS ID - Hits - Pages 9
+linux 29 27
+winlong 2 2
+winxp 4 0
+Unknown 2 2
+linuxandroid 2 2
+macosx 13060 5633
+ios_iphone 506 60
+win7 4 4
+win10 1331 100
+END_OS
+
+# Browser ID - Hits - Pages
+BEGIN_BROWSER 29
+chrome116.0.0.0 36 20
+chrome113.0.0.0 121 7
+chrome110.0.0.0 4 2
+msie11.0 1 1
+safari15.4 105 5
+firefox64.0 1 1
+msie9.0 2 2
+chrome102.0.4972.0 1 1
+chrome127.0.6533.119 3 1
+chrome129.0.0.0 9103 4177
+chrome117.0.5938.132 721 13
+chrome130.0.0.0 4392 1503
+chrome99.0.4844.82 1 1
+chrome126.0.0.0 6 3
+netscape5.0 1 1
+safari17.6 267 39
+mozilla 1 1
+firefox120.0 24 24
+edge18 2 2
+chrome91.0.4472.106 1 1
+firefox11.0 4 0
+chrome102.0.5005.40 1 1
+firefox45.0 1 1
+chrome108.0.0.0 2 2
+Unknown 1 1
+safari 97 11
+safari16.6 37 5
+opera12.14 2 2
+chrome118.0.5993.80 2 2
+END_BROWSER
+
+# Screen size - Hits
+BEGIN_SCREENSIZE 0
+END_SCREENSIZE
+
+# Unknown referer OS - Last visit date
+BEGIN_UNKNOWNREFERER 2
+Mozilla/5.0_AppleWebKit/537.36_(KHTML,_like_Gecko);_compatible 20241027005633
+GuzzleHttp/7 20241007223806
+END_UNKNOWNREFERER
+
+# Unknown referer Browser - Last visit date
+BEGIN_UNKNOWNREFERERBROWSER 1
+GuzzleHttp/7 20241007223806
+END_UNKNOWNREFERERBROWSER
+
+# Origin - Pages - Hits 
+BEGIN_ORIGIN 6
+From0 170 245
+From1 0 0
+From2 1 1
+From3 1 24
+From4 5658 14670
+From5 0 0
+END_ORIGIN
+
+# Search engine referers ID - Pages - Hits
+BEGIN_SEREFERRALS 1
+www_google_com 1 1
+END_SEREFERRALS
+
+# External page referers - Pages - Hits
+# The 10 first Pages must be first (order not required for others)
+BEGIN_PAGEREFS 2
+https://affiliates.siteground.com 1 1
+https://notegpt.io 0 23
+END_PAGEREFS
+
+# Search keyphrases - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_SEARCHWORDS 0
+END_SEARCHWORDS
+
+# Search keywords - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_KEYWORDS 0
+END_KEYWORDS
+
+# Errors - Hits - Bandwidth
+BEGIN_ERRORS 10
+206 16 25526866
+403 10 5149
+207 1 1408
+500 285 701658
+302 216 6497237
+400 3 2
+404 24 662186
+301 255 6103
+499 68 0
+409 5 365
+END_ERRORS
+
+# URL with 404 errors - Hits - Last URL referrer
+BEGIN_SIDER_404 13
+/rooms/occupaton-double/ 1 -
+/employeepanel/ 1 -
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/popper.min.js.map 2 -
+/wp-content/plugins/elementor/assets/lib/swiper/v8/swiper-bundle.min.js.map 1 -
+/cpanel 3 -
+/wp-content/plugins/motopress-appointment/assets/js/wpapi/wpapi.min.js.map 1 -
+/wp-content/plugins/jet-appointments-booking/assets/js/admin/lib/v-gantt-chart.umd.min.js.map 2 -
+/wp-content/plugins/jet-appointments-booking/assets/js/admin/lib/calendar.umd.min.js.map 2 -
+/apple-touch-icon.png 3 -
+/apple-touch-icon-precomposed.png 3 -
+/wp-admin/admin-ajax.php 1 https://carolinem27.sg-host.com/wp-admin/customize.php
+/employeepanel 2 -
+/wp-content/plugins/wp-letsencrypt-ssl/admin/js/tippy-bundle.iife.min.js.map 2 -
+END_SIDER_404
+
+# Host - Pages - Hits - Bandwidth - Last visit date - [Start date of last visit] - [Last page of last visit]
+# [Start date of last visit] and [Last page of last visit] are saved only if session is not finished
+# The 10 first Hits must be first (order not required for others)
+BEGIN_VISITOR 65
+142.118.20.13 5249 11642 816060203 20241030220027
+142.116.82.167 255 549 40481249 20241028144234
+142.127.20.171 125 396 38712168 20241031235917
+184.95.225.153 46 319 49578766 20241029141711
+137.175.169.250 39 267 8542273 20241029145826
+154.28.229.171 20 36 1064169 20241004220839
+52.26.9.21 6 220 10333292 20241001032721
+73.192.193.109 6 233 11731208 20241018005711
+173.68.97.29 6 123 5741767 20241011193835
+178.62.1.166 4 4 219245 20241014160746
+34.90.11.232 1 1 243181 20241007223806
+74.125.212.32 0 1 10693 
+47.251.46.186 1 1 54808 20241008170246
+205.169.39.47 2 114 3186642 20241025210616
+134.122.23.102 1 2 55543 20241007002833
+195.211.77.140 1 1 0 20241004210942
+87.118.135.129 3 144 5867295 20241008123057
+88.99.26.177 2 2 109624 20241004220950
+205.169.39.11 2 118 3363752 20241004211734
+205.169.39.25 3 119 5747757 20241004211539
+104.166.80.49 1 1 52235 20241026021711
+104.166.80.45 1 1 52235 20241026083716
+104.166.80.245 2 2 108505 20241003071232
+205.169.39.5 1 37 123471 20241016235245
+104.166.80.143 2 2 106995 20241026021805
+104.166.80.254 1 1 54760 20241002010443
+64.233.172.129 0 1 10693 
+104.166.80.92 1 1 54819 20241010014634
+138.197.37.160 1 2 55549 20241010054258
+134.209.85.70 1 2 55549 20241009013541
+64.41.200.103 1 1 232505 20241027013558
+104.166.80.28 1 1 53724 20241001063124
+64.233.172.130 0 1 10693 
+205.169.39.21 1 57 948829 20241017000216
+54.200.111.84 2 2 109520 20241003065526
+193.143.1.43 1 1 52240 20241023152656
+104.166.80.83 1 1 54819 20241010075933
+104.166.80.198 1 1 54781 20241003012501
+205.169.39.7 2 111 4936491 20241025210952
+35.87.182.238 2 2 109478 20241002103151
+52.40.132.63 4 4 218998 20241003065620
+104.166.80.85 1 1 54813 20241006073001
+104.166.80.166 1 1 54781 20241003012340
+104.166.80.47 1 1 54819 20241010075743
+104.166.80.128 1 1 54760 20241002070516
+193.32.248.154 1 2 37740 20241004210625
+205.169.39.13 2 94 2350732 20241004211041
+104.166.80.102 1 1 53724 20241001063058
+104.166.80.53 1 1 54813 20241006012749
+99.81.216.206 2 2 108108 20241031193231
+104.166.80.147 1 1 54781 20241003064348
+104.166.80.113 1 1 53724 20241001010359
+104.166.80.215 1 1 54819 20241010021648
+104.166.80.40 1 1 54813 20241006012719
+47.230.51.134 3 115 5690588 20241017212245
+74.125.210.162 0 1 10693 
+195.211.77.142 1 1 54815 20241004211001
+205.169.39.17 1 74 1385738 20241025210534
+138.199.43.68 1 2 37740 20241004210632
+51.8.155.63 1 1 32255 20241027005633
+54.217.83.13 2 2 108133 20241029140425
+104.166.80.4 1 1 52235 20241026080648
+52.208.151.205 1 1 53136 20241027155059
+54.245.164.215 3 108 5134251 20241030013437
+104.166.80.21 2 2 109573 20241006075955
+END_VISITOR
+
+# Date - Pages - Hits - Bandwidth - Visits
+BEGIN_DAY 24
+20241001 380 883 48574072 7
+20241002 72 118 886116 9
+20241003 1564 2910 331662656 9
+20241004 829 1691 86057415 12
+20241005 3 4 175132 2
+20241006 5 5 274062 5
+20241007 2 3 298724 2
+20241008 275 1107 28748759 5
+20241009 14 15 56504 2
+20241010 260 882 52003766 8
+20241011 72 321 11829746 5
+20241014 1 1 54809 1
+20241016 36 254 64412511 2
+20241017 707 1740 88862155 5
+20241018 54 165 5862259 3
+20241019 4 4 335 2
+20241023 1 1 52240 1
+20241025 8 416 15477939 4
+20241026 4 18 5353288 4
+20241027 497 1687 55292221 5
+20241028 261 643 63430499 4
+20241029 600 1239 138222326 4
+20241030 55 429 15734435 2
+20241031 126 397 38767182 3
+END_DAY
+
+# Session range - Number of visits
+BEGIN_SESSION 6
+30s-2mn 1
+0s-30s 69
+5mn-15mn 1
+15mn-30mn 6
+1h+ 23
+30mn-1h 6
+END_SESSION
+
+# URL - Pages - Bandwidth - Entry - Exit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_SIDER 155
+/wp-admin/admin-ajax.php 2969 10964455 19 30
+/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 310 49131 0 9
+/wp-json/contact-form-7/v1/contact-forms/3742/refill 304 1824 0 8
+/wp-admin/edit.php 252 7164156 0 1
+/wp-admin/admin.php 229 8278464 1 1
+/wp-admin/post.php 205 16362055 0 0
+/ 203 9028357 79 52
+/wp-json/motopress/appointment/v1/settings 119 55097 0 0
+/wp-admin/post-new.php 68 4237598 0 0
+/wp-admin/load-styles.php 63 6323837 0 0
+/wp-json/wp/v2/pages/13213 2 10204 0 0
+/wp-json/wp/v2/mpa_employee 2 3666 0 0
+/wp-login.php 12 20735 0 0
+/product/spring-sale/ 1 39146 0 0
+/accommodation/occupation-simple/ 13 495466 0 0
+/wp-admin/user-new.php 5 149384 0 0
+/wp-json/wp/v2/widget-types 10 13710 0 0
+/wp-json/wp/v2/taxonomies 20 38534 0 0
+/rooms/occupation-simple/ 14 595961 1 0
+/my-account/edit-account/ 6 200233 0 0
+/wp-json/wp/v2/mphb_template 2 3418 0 0
+/wp-json/wp/v2/pages/9010 1 607 0 0
+/wp-json/wp/v2/mphb_room_type 5 12101 0 0
+/product/autumn-promotion/ 13 491460 0 0
+/wp-json/wc-admin/plugins/active 1 217 0 0
+/wp-json/elementor/v1/site-editor/templates 5 545 0 0
+/wp-content/plugins/elementor/assets/lib/eicons/fonts/eicons.woff2 18 1069024 0 0
+/wp-json/wp/v2/widget-types/mphb_search_availability_widget/render 5 96115 0 0
+/wp-json/wp/v2/widget-types/mphb_search_availability_widget/encode 5 5939 0 0
+/wp-admin/widgets.php 1 115996 0 0
+/wp-json/wc/store/v1/cart 1 861 0 0
+/service-pages/forfaits-aventure/ 4 135954 0 0
+/wp-json/wp/v2/taxonomies/category 8 6656 0 0
+/wp-content/plugins/woocommerce/assets/fonts/WooCommerce.woff2 3 12976 0 0
+/wp-admin/users.php 7 216395 0 0
+/wp-json/oembed/1.0/embed 2 1997 0 0
+/my-account/ 2 70521 0 0
+/wp-json/mpa/v1/reservations 41 246 0 0
+/wp-json/wp/v2/templates 3 1157 0 0
+/wp-admin/edit-tags.php 26 678044 0 0
+/wp-content/plugins/simply-schedule-appointments/assets/fonts/roboto-regular-webfont.woff2 1 19344 0 0
+/wp-admin/update.php 7 153528 0 0
+/wp-json/ssa/v1/notices 1 68 0 0
+/wp-admin/load-scripts.php 60 2050991 0 0
+/nd-booking-pages/booking-search/ 61 2645047 1 2
+/wp-json/wc-admin/onboarding/tasks 7 8085 0 0
+/wp-json/wp/v2/blocks 18 108 0 0
+/wp-json/wc-admin/plugins/installed 1 221 0 0
+/feed/ 1 377973 0 0
+/wp-json/jetpack/v4/connection 1 119 0 0
+/wp-admin/profile.php 4 155921 0 0
+/wp-json/wp/v2/block-renderer/core/calendar 2 844 0 0
+/accommodation/suite-gazou/ 1 37621 0 0
+/wp-json/elementor/v1/globals 20 5200 0 0
+/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.woff 10 150592 0 0
+/wp-admin/plugin-install.php 11 306663 0 0
+/wp-content/plugins/simply-schedule-appointments/assets/fonts/MaterialIcons-Regular.woff2 1 128352 0 0
+/wp-admin/tools.php 1 28174 0 0
+/admin-panel/ 8 370906 0 0
+/my-account/edit-address/ 1 55447 0 0
+/wp-json/ssa/v1/async 2 16 0 0
+/my-account/downloads/ 1 35187 0 0
+/wp-json/wp/v2/mpa_service/13253 5 5850 0 0
+/wp-json/wp/v2/mpa_employee/13254 2 1937 0 0
+/wp-json/wc-analytics/reports/performance-indicators 3 837 0 0
+/wp-content/plugins/simply-schedule-appointments/assets/fonts/roboto-bold-webfont.woff2 1 19668 0 0
+/wp-admin/term.php 3 97590 0 0
+/wp-content/plugins/simply-schedule-appointments/assets/fonts/roboto-medium-webfont.woff2 1 19492 0 0
+/wp-content/plugins/wp-letsencrypt-ssl/admin/css/le-admin.min.css.map 2 8240 0 0
+/wp-json/wc-analytics/admin/notes 7 5058 0 0
+/service-pages/forfaits-splash-moi/ 1 32376 0 0
+/wp-json/contact-form-7/v1/contact-forms/10420/feedback/schema 1 223 0 0
+/nd-booking-pages/nd-booking-page/ 2 73129 0 0
+/wp-json/ 37 59160 0 0
+/wp-json/ssa/v1/settings/global 1 331 0 0
+/wp-json/wp/v2/block-patterns/categories 18 10566 0 0
+/wp-json/wc-analytics/reports/orders/stats 2 322 0 0
+/wp-json/wp/v2/types 29 30077 0 0
+/wp-json/wp/v2/block-renderer/core/latest-comments 2 683 0 0
+/wp-json/motopress/appointment/v1/services/available 14 84 0 0
+/nd-booking-pages/nd-booking-search/ 11 484299 0 0
+/wp-json/wp/v2/users 19 1204 0 0
+/wp-json/wp/v2/mpa_location/13256 3 2618 0 0
+/nd-booking-pages/ 1 33861 0 0
+/accommodation/occupation-double/ 23 912415 0 0
+/wp-json/wp/v2/mpa_employee/13274 2 1904 0 0
+/wp-json/wp/v2/block-renderer/core/rss 2 492 0 0
+/Remboursements/ 1 37553 0 0
+/wp-json/wp/v2/mpa_location 1 2123 0 0
+/my-account/orders/ 1 35193 0 0
+/accommodation/test/ 1 36262 0 0
+/wp-json/wp/v2/wp_pattern_category 18 108 0 0
+/wp-json/wc-analytics/reports/revenue/stats 2 356 0 0
+/wp-json/wp/v2/block-renderer/core/archives 1 130 0 0
+/contact-pages/contact-01/ 1 29493 0 0
+/wp-json/wp/v2/taxonomies/post_tag 8 6304 0 0
+/wp-admin/nav-menus.php 2 99337 0 0
+/wp-content/plugins/revslider/public/assets/css/openhand.cur 9 1304 0 0
+/sample-page/ 1 34197 0 0
+/wp-json/wc-analytics/leaderboards 1 186 0 0
+/wp-json/siteground-central/v1/dashboard 39 57463 0 2
+/wp-json/wp/v2/settings 21 26892 0 0
+/wp-json/elementor/v1/kit-elements-defaults 20 120 0 0
+/wp-json/wp/v2/categories/1 8 2056 0 0
+/rooms/occupation-double/ 19 748754 0 0
+/wp-json/jetpack/v4/connection/data 7 1435 0 0
+/wp-json/jet-engine/v2/appointments-list/ 4 208 0 0
+/wp-content/plugins/motopress-hotel-booking/assets/css/fonts/flexslider-icon.woff 2 1268 0 0
+/wp-json/wp/v2/mpa_service/13253/autosaves 1 255 0 0
+/gallery-pages/gallery-01/ 1 30810 0 0
+/wp-json/mpa/v1/employees 20 1183 0 0
+/price-pages/prices-03/ 1 31092 0 1
+/wp-json/wp/v2/categories 2 718 0 0
+/wp-json/contact-form-7/v1/contact-forms/10420/refill 1 6 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-brands-400.woff2 1 81612 0 0
+/service-pages/forfait-le-romantique/ 2 64780 0 0
+/wp-json/wp/v2/users/1 10 380 0 0
+/about-pages/about-01/ 4 144600 0 0
+/wp-json/wp/v2/users/ 3 6750 0 0
+/wp-content/plugins/revslider/public/assets/fonts/material/MaterialIcons-Regular.woff2 12 1187952 0 0
+/wp-json/mpa/v1/locations 20 948 0 0
+/wp-json/ssa/v1/fetch-guides 2 659 0 0
+/wp-json/wp/v2/media 2 7982 0 0
+/wp-json/wp/v2/pages/15 1 1609 0 0
+/wp-json/ssa/v1/appointment_types 1 699 0 0
+/wp-json/wp/v2/posts 2 18144 0 0
+/wp-json/ssa/v1/notices-errors 1 53 0 0
+/wp-json/wp/v2/mpa_service 3 6672 0 0
+/wp-content/plugins/ameliabooking/public/fonts/vendor/element-ui/lib/theme-chalk/element-icons.woff 14 141000 0 0
+/cart/ 6 477135 0 0
+/employee-panel/ 14 698208 4 0
+/wp-admin/customize.php 10 1366855 0 0
+/archive-pages/ 1 34849 0 0
+/wp-json/wp/v2/pages/13414 6 15901 0 0
+/wp-admin/plugins.php 27 2299203 0 0
+/wp-json/wp/v2/pages/13406 7 15428 0 0
+/checkout/ 14 1157098 0 0
+/wp-json/elementor/v1/global-widget/templates 20 120 0 0
+/wp-json/wp/v2/block-patterns/patterns 12 329324 0 0
+/service-pages/forfaits-touki-suite/ 5 176098 1 0
+/wp-json/wp/v2/pages/11055 1 13274 0 0
+/wp-json/wc/v3/products 1 1820 0 0
+/wp-json/wp/v2/mphb_template/13243 3 3293 0 0
+/wp-json/wc-admin/options 21 1190 0 0
+/wp-json/elementor/v1/template-library/templates 2 16231 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-solid-900.woff2 4 312784 0 0
+/wp-json/mpa/v1/services 20 1614 0 0
+/wp-json/wc/store/v1/products 1 1773 0 0
+/wp-json/ssa/v1/license 1 119 0 0
+/wp-json/wp/v2/mphb_template/13243/autosaves 2 955 0 0
+/wp-admin/user-edit.php 2 97961 0 0
+/wp-admin/ 2 46434 0 0
+/inner-pages/faq/ 3 121696 0 0
+/wp-content/plugins/revslider/public/assets/css/closedhand.cur 1 326 0 0
+/en/ 1 37649 0 0
+END_SIDER

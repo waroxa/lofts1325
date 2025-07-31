@@ -1,0 +1,661 @@
+AWSTATS DATA FILE 7.7 (build 20161204)
+# If you remove this file, all statistics for date 202412 will be lost/reset.
+# Last config file used to build this data file was /etc/awstats/awstats.loft1325.com.conf.
+
+# Position (offset in bytes) in this file for beginning of each section for
+# direct I/O access. If you made changes somewhere in this file, you should
+# also remove completely the MAP section (AWStats will rewrite it at next
+# update).
+BEGIN_MAP 28
+POS_GENERAL 1995                
+POS_TIME 2677                
+POS_VISITOR 9967                
+POS_DAY 15524               
+POS_DOMAIN 3547                
+POS_LOGIN 4004                
+POS_ROBOT 4159                
+POS_WORMS 4917                
+POS_EMAILSENDER 5048                
+POS_EMAILRECEIVER 5191                
+POS_SESSION 16335               
+POS_SIDER 16532               
+POS_FILETYPES 5326                
+POS_DOWNLOADS 5754                
+POS_OS 6374                
+POS_BROWSER 6611                
+POS_SCREENSIZE 7808                
+POS_UNKNOWNREFERER 7882                
+POS_UNKNOWNREFERERBROWSER 8388                
+POS_ORIGIN 8470                
+POS_SEREFERRALS 8610                
+POS_PAGEREFS 8772                
+POS_SEARCHWORDS 8920                
+POS_KEYWORDS 9072                
+POS_MISC 2340                
+POS_ERRORS 9131                
+POS_CLUSTER 3860                
+POS_SIDER_404 9307                
+END_MAP
+
+# LastLine    = Date of last record processed - Last record line number in last log - Last record offset in last log - Last record signature value
+# FirstTime   = Date of first visit for history file
+# LastTime    = Date of last visit for history file
+# LastUpdate  = Date of last update - Nb of parsed records - Nb of parsed old records - Nb of parsed new records - Nb of parsed corrupted - Nb of parsed dropped
+# TotalVisits = Number of visits
+# TotalUnique = Number of unique visitors
+# MonthHostsKnown   = Number of hosts known
+# MonthHostsUnKnown = Number of hosts unknown
+BEGIN_GENERAL 8
+LastLine 20250101000003 14214 4781106 11247057515790
+FirstTime 0
+LastTime 20241231045247
+LastUpdate 20250101044401 14214 13056 69 0 1088
+TotalVisits 174                 
+TotalUnique 137                 
+MonthHostsKnown 0                   
+MonthHostsUnknown 143                 
+END_GENERAL
+
+# Misc ID - Pages - Hits - Bandwidth
+BEGIN_MISC 10
+JavascriptDisabled 0 0 0
+FlashSupport 0 0 0
+TotalMisc 0 0 0
+PDFSupport 0 0 0
+RealPlayerSupport 0 0 0
+DirectorSupport 0 0 0
+WindowsMediaPlayerSupport 0 0 0
+QuickTimeSupport 0 0 0
+JavaEnabled 0 0 0
+AddToFavourites 0 39 0
+END_MISC
+
+# Hour - Pages - Hits - Bandwidth - Not viewed Pages - Not viewed Hits - Not viewed Bandwidth
+BEGIN_TIME 24
+0 6 10 364174 81 85 117553
+1 84 331 18107505 62 150 731867
+2 483 1234 123001559 108 112 5253
+3 235 524 38893620 126 335 1542022
+4 51 52 592589 89 101 10912
+5 2 2 51444 29 33 3738
+6 10 14 346589 28 30 1942
+7 5 5 6208 29 29 665933
+8 4 6 110305 69 77 224761
+9 6 7 93292 59 69 404716
+10 4 4 6854 55 153 3524194
+11 83 809 15410197 60 63 233119
+12 288 1521 61493052 119 122 466527
+13 418 678 107419259 174 182 1140027
+14 294 668 51549114 101 120 3224012
+15 229 431 42834289 84 85 1737
+16 602 1183 115079978 225 363 1557457
+17 374 884 37932475 188 202 2015951
+18 162 451 31470006 124 128 111663
+19 81 778 35590878 117 320 1139550
+20 47 246 12429054 101 113 39079
+21 70 99 8218213 66 90 80625
+22 44 78 31640320 37 38 9090
+23 17 39 26360377 33 33 1597
+END_TIME
+
+# Domain - Pages - Hits - Bandwidth
+# The 10 first Pages must be first (order not required for others)
+BEGIN_DOMAIN 17
+ca 3384 9285 647400093
+us 82 514 25347912
+ru 47 47 1164963
+de 22 130 4471654
+gb 18 23 410186
+se 11 15 318634
+es 6 6 8907
+cn 6 7 155846
+nl 5 6 58139
+ie 4 4 152558
+hk 1 1 680
+lv 4 4 38598
+in 4 7 108380
+fr 1 1 889
+sg 2 2 236
+pl 1 1 2400
+vn 1 1 889
+END_DOMAIN
+
+# Cluster ID - Pages - Hits - Bandwidth
+BEGIN_CLUSTER 0
+END_CLUSTER
+
+# Login - Pages - Hits - Bandwidth - Last visit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_LOGIN 0
+END_LOGIN
+
+# Robot ID - Hits - Bandwidth - Last visit - Hits on robots.txt
+# The 10 first Hits must be first (order not required for others)
+BEGIN_ROBOT 16
+wordpress 930 825285 20241231204111 0
+curl 525 17686 20241231233003 0
+Googlebot/ 376 2259351 20241220035023 7
+bingbot/ 112 31869 20241231192923 19
+Applebot/ 81 656709 20241231014504 1
+AhrefsBot/ 23 125170 20241231013251 11
+dataprovider\.com 20 307959 20241208034052 2
+no_user_agent 19 1621093 20241228074806 0
+Googlebot\-Image/ 11 52774 20241220040606 0
+unknown 10 2888 20241231045246 10
+archive\.org_bot 1 53445 20241204123911 0
+SemrushBot/ 6 6663 20241211110829 2
+python 1 2412 20241207014132 0
+bot[\s_+:,\.\;\/\\-] 5 103035 20241228141757 2
+CFNetwork 4 16731 20241218173407 0
+facebookexternalhit/ 2 35754 20241225021702 1
+END_ROBOT
+
+# Worm ID - Hits - Bandwidth - Last visit
+# The 5 first Hits must be first (order not required for others)
+BEGIN_WORMS 0
+END_WORMS
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first Hits must be first (order not required for others)
+BEGIN_EMAILSENDER 0
+END_EMAILSENDER
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first hits must be first (order not required for others)
+BEGIN_EMAILRECEIVER 0
+END_EMAILRECEIVER
+
+# Files type - Hits - Bandwidth - Bandwidth without compression - Bandwidth after compression
+BEGIN_FILETYPES 19
+gif 14 96886 0 0
+xml 3 2076 0 0
+mov 1 814515 0 0
+Unknown 873 200784 0 0
+css 1870 5056960 0 0
+jpeg 57 2375400 0 0
+heic 2 563628 0 0
+jpg 517 28205490 0 0
+webp 11 459364 0 0
+png 1382 385611987 0 0
+svg 387 882129 0 0
+txt 2 1778 0 0
+woff2 32 2269568 0 0
+html 559 19618883 0 0
+woff 7 75876 0 0
+php 2101 127619301 0 0
+ttf 3 83108 0 0
+cur 8 2608 0 0
+js 2225 26340236 0 0
+END_FILETYPES
+
+# Downloads - Hits - Bandwidth
+BEGIN_DOWNLOADS 11
+/ads.txt 3 0 4190
+/sitemap.xml.gz 2 0 1360
+/humans.txt 1 0 2412
+/wp-content/uploads/2024/12/IMG_0004.mov 1 0 814515
+/sitemap.txt 1 0 680
+/security.txt 1 0 2412
+/wp-content/uploads/2024/08/255662885089048.mp4 0 25 75569959
+/wp-content/plugins/revslider/admin/views/features/assets/supportvideo-1.mp4 0 2 393700
+/wp-content/plugins/revslider/admin/views/features/assets/library_video.mp4 0 4 814387
+/wp-content/plugins/revslider/admin/views/features/assets/templatesvideo.mp4 0 4 1781624
+/wp-content/plugins/revslider/admin/views/features/assets/addonsvideo.mp4 0 4 800717
+END_DOWNLOADS
+
+# OS ID - Hits
+BEGIN_OS ID - Hits - Pages 13
+win7 43 6
+linuxandroid 6 6
+winvista 1 1
+win8.1 2 2
+winlong 1 1
+winnt 2 2
+macosx 8108 3283
+ios_iphone 23 6
+winxp 1 1
+Unknown 48 31
+linux 447 36
+macosx11 2 2
+win10 1409 222
+END_OS
+
+# Browser ID - Hits - Pages
+BEGIN_BROWSER 57
+firefox129.0 4 4
+opera80.4.4244.7786 1 1
+safari5.0.3 1 1
+chrome122.0.0.0 6 5
+chrome108.0.0.0 4 4
+msie9.0 2 1
+chrome129.0.0.0 8 5
+chrome76.0.2209.88 1 1
+chrome58.0.3029.110 1 1
+safari5.0.2 1 1
+chrome120.0.0.0 51 51
+firefox116.0 1 1
+safari17.0 22 5
+chrome94.0.4606.81 33 0
+chrome105.0.0.0 10 6
+firefox50.0 1 1
+mozilla 44 27
+chrome104.0.0.0 1 1
+chrome66.0.3359.181 14 14
+safari 1 1
+chrome91.0.4472.114 5 5
+chrome114.0.0.0 3 2
+chrome124.0.6367.119 1 1
+chrome131.0.0.0 8822 3369
+opera89.0.4447.51 2 2
+chrome80.0.3987.162 1 1
+firefox56.0 1 1
+firefox114.0 4 4
+firefox72.7 1 1
+chrome117.0.5938.132 90 2
+safari17.3.1 1 1
+chrome116.0.0.0 4 4
+chrome108.0.5374.212 1 1
+chrome117.0.0.0 3 3
+chrome124.0.6367.61 1 1
+chrome83.0.4103.97 5 5
+chrome60.0.3112.113 1 1
+safari15.6.6 115 3
+chrome70.0.3730.88 1 1
+firefox123.0 1 1
+chrome83.0.4103.61 37 1
+firefox126.0 2 2
+safari17.6 1 1
+chrome124.0.0.0 7 7
+msie8.0 1 1
+safari17.2 1 1
+chrome76.0.3809.100 2 2
+chrome110.0.0.0 2 1
+chrome125.0.0.0 117 12
+chrome68.0.3440.106 387 13
+chrome128.0.0.0 1 1
+chrome79.0.3945.88 4 4
+chrome74.0.3729.169 2 2
+safari9.0.2 2 2
+chrome112.0.0.0 2 1
+firefox133.0 253 6
+chrome130.0.0.0 2 2
+END_BROWSER
+
+# Screen size - Hits
+BEGIN_SCREENSIZE 0
+END_SCREENSIZE
+
+# Unknown referer OS - Last visit date
+BEGIN_UNKNOWNREFERER 4
+Mozilla/5.0_(compatible) 20241230185158
+Mozilla/5.0_(compatible;_Let's_Encrypt_validation_server;__https://www.letsencrypt.org) 20241204123857
+Mozilla/5.0_(compatible;_InternetMeasurement/1.0;__https://internet-measurement.com/) 20241208203413
+Mozilla/5.0_AppleWebKit/537.36_(KHTML,_like_Gecko;_compatible;_GeedoProductSearch;__http://www.geedo.com/product-search.html)_Chrome/79.0.3945.88_Safari/537.36 20241207031105
+END_UNKNOWNREFERER
+
+# Unknown referer Browser - Last visit date
+BEGIN_UNKNOWNREFERERBROWSER 0
+END_UNKNOWNREFERERBROWSER
+
+# Origin - Pages - Hits 
+BEGIN_ORIGIN 6
+From0 299 377
+From1 0 0
+From2 1 1
+From3 0 0
+From4 3299 9715
+From5 0 0
+END_ORIGIN
+
+# Search engine referers ID - Pages - Hits
+BEGIN_SEREFERRALS 1
+www_google_fr 1 1
+END_SEREFERRALS
+
+# External page referers - Pages - Hits
+# The 10 first Pages must be first (order not required for others)
+BEGIN_PAGEREFS 0
+END_PAGEREFS
+
+# Search keyphrases - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_SEARCHWORDS 0
+END_SEARCHWORDS
+
+# Search keywords - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_KEYWORDS 0
+END_KEYWORDS
+
+# Errors - Hits - Bandwidth
+BEGIN_ERRORS 8
+302 57 0
+403 2 859
+503 71 3411222
+301 353 6075
+206 135 6849104
+499 193 0
+500 16 43340
+404 41 778904
+END_ERRORS
+
+# URL with 404 errors - Hits - Last URL referrer
+BEGIN_SIDER_404 13
+/apple-touch-icon.png 1 -
+/rooms/occupaton-double/ 3 https://loft1325.com/rooms/occupation-simple/
+/.well-known/security.txt 1 -
+/ads.txt 1 -
+/apple-touch-icon-precomposed.png 1 -
+/wp-cron.php 1 -
+/autodiscover/autodiscover.xml 2 -
+/cpanel 3 -
+/sitemaps.xml 4 -
+/sitemap_index.xml 2 -
+/sitemap.txt 4 -
+/lander 1 -
+/Autodiscover/Autodiscover.xml 17 -
+END_SIDER_404
+
+# Host - Pages - Hits - Bandwidth - Last visit date - [Start date of last visit] - [Last page of last visit]
+# [Start date of last visit] and [Last page of last visit] are saved only if session is not finished
+# The 10 first Hits must be first (order not required for others)
+BEGIN_VISITOR 143
+142.127.20.171 3254 7855 522981361 20241225174545
+184.95.225.153 60 246 72865271 20241218230509
+69.70.152.58 42 731 31901213 20241212172002
+168.119.80.126 12 117 4167416 20241205021553
+46.101.9.216 7 7 329641 20241205065829
+142.116.82.167 7 114 4049594 20241211005634
+212.34.154.231 6 6 8907 20241213203708
+88.218.62.29 5 5 179298 20241220220457
+94.103.87.196 5 5 179311 20241226011510
+141.148.153.213 5 22 792040 20241209145542
+159.203.104.154 1 1 889 20241209184743
+34.220.42.158 1 1 53426 20241203202909
+3.83.81.84 0 33 1081115 
+34.217.14.114 2 2 101110 20241226161947
+124.70.203.191 2 2 51447 20241227194246
+146.190.138.175 1 1 36526 20241204133605
+64.227.183.224 1 2 51288 20241226200655
+35.85.51.170 2 2 1778 20241210020621
+83.99.151.71 3 3 2076 20241207031105
+147.182.157.66 1 2 4915 20241206192152
+15.204.182.106 2 2 1778 20241206025709
+185.147.125.18 1 1 2400 20241213102557
+35.94.56.14 1 114 6892306 20241223161253
+192.36.109.99 1 1 53445 20241204205600
+54.188.91.14 2 9 285419 20241211161124
+35.92.59.153 2 9 285419 20241214163736
+104.168.153.43 2 2 2495 20241218032957
+62.210.97.74 1 1 889 20241208221153
+124.236.100.56 2 2 889 20241217015303
+35.86.237.43 2 9 285419 20241208133730
+144.172.245.44 1 1 43768 20241224173947
+34.220.50.137 2 2 1778 20241205172714
+195.211.77.142 3 3 104001 20241221193724
+42.83.147.53 2 2 101098 20241218223053
+159.203.16.46 1 2 51288 20241222211013
+178.254.38.45 1 1 877 20241215201305
+18.236.181.1 1 1 889 20241208122448
+104.168.138.164 2 2 64858 20241223045504
+23.178.112.109 1 1 118 20241204123842
+198.54.133.103 1 2 37256 20241204173415
+161.35.35.162 1 2 4915 20241208193613
+51.20.7.135 2 2 236 20241204123856
+159.65.22.109 1 2 4915 20241214193438
+134.209.153.150 1 2 4915 20241216194755
+193.187.172.24 1 1 2400 20241210201503
+15.204.88.117 2 2 1754 20241206074727
+139.59.92.253 1 1 889 20241205195611
+99.81.216.206 2 2 51447 20241226190558
+205.169.39.18 2 90 2289122 20241204125422
+188.143.244.135 1 1 50555 20241229052430
+24.203.209.191 4 8 914514 20241205190010
+104.223.52.117 1 1 692 20241211042317
+94.103.93.19 3 3 4454 20241206073530
+52.35.100.155 1 1 889 20241210214709
+18.142.91.107 2 2 236 20241204123857
+188.143.244.134 1 1 889 20241206043911
+5.133.192.133 1 2 51288 20241226232147
+128.199.36.205 1 2 51285 20241230185155
+212.118.43.65 3 3 4454 20241210092224
+54.149.250.245 2 2 101112 20241229155404
+80.85.245.250 4 4 136067 20241205111054
+159.203.4.110 1 3 5804 20241214134325
+154.28.229.250 3 3 73052 20241204135335
+35.87.127.156 1 114 6892303 20241229155407
+167.71.95.233 1 1 889 20241207195827
+23.178.112.107 1 1 118 20241204123856
+154.28.229.237 1 1 36526 20241204135319
+205.169.39.222 1 37 346563 20241204124611
+91.84.87.137 2 2 0 20241214024928
+54.184.189.248 2 9 285419 20241205172718
+80.85.246.74 3 3 4453 20241215120613
+54.217.83.13 2 2 101111 20241224024841
+206.189.124.85 1 2 51285 20241228200154
+135.148.195.15 1 1 889 20241207064349
+3.147.81.51 1 1 118 20241204123852
+44.243.238.126 1 1 0 20241208122449
+171.244.43.14 1 1 889 20241205123343
+154.28.229.21 2 2 411414 20241204123934
+162.212.173.20 1 1 692 20241215014541
+199.244.88.218 1 1 53422 20241205080948
+111.180.202.140 0 1 2412 
+87.236.176.85 0 1 4026 
+92.246.137.4 1 1 2400 20241209020625
+91.107.121.165 4 4 9600 20241212114412
+93.158.91.12 1 2 4915 20241214082512
+46.228.199.158 1 1 50537 20241222163852
+87.236.176.157 1 1 889 20241208062526
+44.199.197.140 1 1 889 20241210055338
+34.222.18.249 2 2 1778 20241217174858
+87.236.176.162 1 1 889 20241208203412
+62.141.44.236 1 1 50538 20241229094052
+83.99.151.69 1 1 36522 20241204092023
+54.245.56.71 2 9 285419 20241217174902
+18.188.140.165 1 1 118 20241204123856
+135.148.195.16 0 1 4026 
+199.244.88.221 1 1 50527 20241219153031
+80.85.246.140 3 3 4453 20241217225400
+165.22.95.181 1 2 51285 20241228133828
+149.56.150.52 1 1 2412 20241208034027
+3.85.48.71 1 1 2412 20241205130200
+195.90.221.76 1 1 53424 20241204181714
+5.75.175.53 1 1 50553 20241223183015
+54.245.157.183 1 1 0 20241205143115
+34.208.46.189 1 114 6892306 20241226161951
+207.244.119.135 1 1 1803 20241215014545
+93.158.91.30 1 2 4915 20241208012148
+159.89.87.182 1 2 54175 20241204200109
+54.213.201.99 1 2 6438 20241207002036
+195.211.77.140 1 1 0 20241204124114
+87.236.176.62 0 1 4026 
+54.148.197.63 1 1 0 20241205143116
+34.220.167.240 2 2 101116 20241223161251
+198.145.82.119 1 1 889 20241214115322
+195.2.81.171 3 3 4454 20241216104759
+185.13.99.111 1 1 889 20241210200040
+192.36.109.98 1 1 50558 20241225035415
+15.204.194.30 1 1 50558 20241227085810
+142.112.120.143 2 9 680 20241216134119
+5.133.192.108 1 2 51284 20241220161729
+80.85.245.128 5 5 179291 20241218222659
+178.20.47.92 5 5 179286 20241219231433
+119.8.118.14 1 1 680 20241206084211
+24.212.37.194 3 115 6468732 20241225193933
+154.28.229.83 1 1 0 20241205011800
+52.36.223.37 2 2 1778 20241211161122
+178.156.145.204 1 2 4706 20241214060942
+93.158.91.242 1 1 50555 20241231045247
+35.161.94.98 2 2 236 20241204123856
+34.209.210.65 2 2 1778 20241214163732
+162.212.173.35 1 1 1803 20241211042323
+139.59.9.228 1 2 51288 20241224201926
+176.9.158.217 1 1 36526 20241205021428
+80.85.245.37 4 4 136051 20241204163409
+93.158.90.73 1 1 50549 20241219040457
+137.184.40.110 1 2 1778 20241210093248
+70.53.222.106 3 108 5469941 20241202173933
+161.35.207.160 1 2 4915 20241212185530
+164.92.113.107 1 2 51279 20241218185714
+135.148.195.7 0 1 730 
+217.160.202.182 1 1 877 20241210025758
+35.88.253.103 1 1 889 20241214123520
+142.93.177.189 1 2 51279 20241220200942
+147.182.153.175 1 2 4915 20241210194557
+END_VISITOR
+
+# Date - Pages - Hits - Bandwidth - Visits
+BEGIN_DAY 30
+20241202 3 108 5469941 1
+20241203 37 718 31648320 3
+20241204 48 381 11168679 26
+20241205 288 1641 53477974 16
+20241206 14 44 6894199 10
+20241207 8 12 255433 5
+20241208 10 21 309269 9
+20241209 613 1448 185338146 9
+20241210 13 15 19758 10
+20241211 13 22 622015 6
+20241212 7 15 290939 3
+20241213 4 4 6854 2
+20241214 12 25 311727 9
+20241215 40 405 11900535 5
+20241216 6 14 10049 3
+20241217 113 272 45681506 6
+20241218 1815 3215 356816435 7
+20241219 101 123 3416985 4
+20241220 26 88 1639616 4
+20241221 314 616 6380776 3
+20241222 59 115 7434574 4
+20241223 9 122 7162942 6
+20241224 19 259 1498764 4
+20241225 5 117 6519290 3
+20241226 11 126 7325861 6
+20241227 2 3 101846 2
+20241228 2 4 102570 2
+20241229 5 118 7094508 4
+20241230 1 2 51285 1
+20241231 1 1 50555 1
+END_DAY
+
+# Session range - Number of visits
+BEGIN_SESSION 6
+30mn-1h 3
+1h+ 6
+0s-30s 151
+30s-2mn 6
+5mn-15mn 5
+15mn-30mn 3
+END_SESSION
+
+# URL - Pages - Bandwidth - Entry - Exit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_SIDER 106
+/wp-admin/admin-ajax.php 1500 21092104 0 5
+/ 335 10756044 155 112
+/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 306 48640 0 3
+/wp-json/contact-form-7/v1/contact-forms/3742/refill 299 1794 0 8
+/wp-admin/tools.php 240 86103293 0 1
+/wp-admin/admin.php 149 6599731 5 4
+/wp-admin/post.php 45 8155803 0 0
+/wp-json/elementor/v1/global-widget/templates 36 216 0 0
+/wp-json/elementor/v1/kit-elements-defaults 36 216 0 0
+/wp-json/elementor/v1/site-navigation/recent-posts 36 10698 0 0
+/nd-booking-pages/nd-booking-search/ 10 442800 1 0
+/gallery-pages/gallery-01/ 13 541820 0 0
+/wp-admin/nav-menus.php 3 154844 0 0
+/wp-json/wp/v2/pages/9015 1 634 0 0
+/wp-content/plugins/revslider/public/assets/fonts/revicons/revicons.woff 4 30144 0 0
+/wp-json/elementor/v1/globals 35 9100 0 0
+/about-us/ 4 159247 0 0
+/wp-content/plugins/under-construction-page/themes/fonts/fontawesome-webfont.woff2 15 848760 0 10
+/sitemap.xml 1 692 1 0
+/wp-json/wp/v2/pages/9013 1 632 0 0
+/wp-json/elementor/v1/template-library/templates 9 51546 0 0
+/feed/ 2 374888 0 2
+/wp-admin/ 2 86677 0 0
+/wp-admin/plugin-install.php 9 293996 0 0
+/wp-json/wp/v2/users 6 474 0 0
+/wp-json/contact-form-7/v1/contact-forms/10420/refill 1 6 0 0
+/wp-json/contact-form-7/v1/contact-forms/3742 6 6320 0 0
+/remboursements/ 1 38320 0 0
+/wp-admin/edit-comments.php 1 34081 0 0
+/wp-content/uploads/2024/12/IMG_2338.heic 2 563628 0 0
+/wp-json/wp/v2/pages/483 1 4278 0 0
+/comments/feed/ 6 5796 0 0
+/price-pages/prices-03/ 2 80681 0 0
+/wp-includes/fonts/dashicons.ttf 1 56392 0 0
+/wp-content/plugins/revslider/public/assets/css/openhand.cur 4 1304 0 0
+/wp-json/wp/v2/blocks 6 36 0 0
+/wp-login.php 31 56406 3 12
+/en/wp-json/contact-form-7/v1/contact-forms/3742/feedback/schema 2 320 0 0
+/nd-booking-pages/ 1 35356 0 0
+/wp-content/plugins/revslider/public/assets/fonts/revicons/revicons.ttf 1 11968 0 0
+/.well-known/acme-challenge/otcwGDlFHOUGPPDnREQwaBRXcblfTb2n5H9vvXoiwes 5 590 2 5
+/wp-content/plugins/woocommerce/assets/fonts/WooCommerce.woff 1 8084 0 0
+/wp-json/contact-form-7/v1/contact-forms/10420/feedback/schema 1 223 0 0
+/wp-json/elementor/v1/site-editor/templates 1 531 0 0
+/rooms/occupation-double/ 3 112269 0 0
+/wp-content/plugins/elementor/assets/lib/eicons/fonts/eicons.woff2 8 492360 0 1
+/service-pages/forfaits-splash-moi/ 6 252111 0 0
+/wp-json/wp/v2/pages/2 1 1297 0 0
+/service-pages/forfait-le-romantique/ 17 778392 0 0
+/wp-content/uploads/2024/12/DALL%C2%B7E-2024-12-18-11.54.31-A-romantic-setting-with-a-bottle-of-champagne-and-two-glasses-on-a-table-surrounded-by-lit-candles-and-red-rose-petals.-The-table-is-in-soft-ambient-.webp 8 442344 0 0
+/wp-admin/plugins.php 14 1400723 0 0
+/wp-json/wp/v2/users/1 6 228 0 0
+/new-services-2/ 2 79458 0 0
+/wp-json/wp/v2/wp_pattern_category 6 36 0 0
+/wp-json/wp/v2/taxonomies 6 11568 0 0
+/service-pages/forfaits-aventure/ 7 284928 0 1
+/wp-content/plugins/revslider/public/assets/css/closedhand.cur 4 1304 0 1
+/wp-json/contact-form-7/v1/contact-forms/335/feedback/schema 1 181 0 0
+/about-pages/about-01/ 23 1009949 0 0
+/wp-json/wp/v2/pages/9047 1 634 0 0
+/wp-json/contact-form-7/v1/contact-forms/489 6 6356 0 0
+/about-pages/a-propos/ 6 220125 0 0
+/sitemap_index.xml 1 692 0 1
+/wp-json/wp/v2/pages/412 1 5863 0 0
+/wp-admin/edit.php 20 697902 0 1
+/sample-page/ 1 37518 0 0
+/lofts-page/ 34 1198368 1 0
+/en/contact-pages/contact-01/ 2 81870 0 2
+/inner-pages/faq/ 13 597120 0 0
+/wp-admin/load-scripts.php 24 738474 0 0
+/new-website/ 1 40158 0 0
+/wp-json/contact-form-7/v1/contact-forms/335/refill 1 6 0 0
+/latest-event-2/ 2 79706 0 0
+/nd-booking-pages/nd-booking-page/ 3 108132 0 0
+/wp-content/plugins/woocommerce/assets/fonts/Inter-VariableFont_slnt,wght.woff2 1 326628 0 0
+/wp-content/uploads/2024/12/DALL%C2%B7E-2024-12-18-11.54.31-A-romantic-setting-with-a-bottle-of-champagne-and-two-glasses-on-a-table-surrounded-by-lit-candles-and-red-rose-petals.-The-table-is-in-soft-ambient--300x300.webp 3 17020 0 0
+/wp-content/plugins/woocommerce/assets/fonts/WooCommerce.ttf 1 14748 0 1
+/header-pages/header/ 1 48871 0 0
+/wp-json/siteground-central/v1/dashboard 15 18879 0 0
+/wp-content/plugins/revslider/public/assets/fonts/material/MaterialIcons-Regular.woff2 2 197992 0 0
+/wp-json/wp/v2/pages/ 1 2095 0 0
+/en/contact-pages/contact/ 4 156532 0 0
+/wp-json/wp/v2/block-patterns/categories 6 3522 0 0
+/en/wp-json/contact-form-7/v1/contact-forms/3742/refill 2 12 0 0
+/en/ 5 144582 0 0
+/wp-admin/options-general.php 14 660565 0 0
+/wp-admin/load-styles.php 17 1600127 0 0
+/contact-pages/contact/ 10 371214 0 1
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-brands-400.woff2 1 81612 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-regular-400.woff2 1 13276 0 0
+/wp-json/contact-form-7/v1/contact-forms/489/feedback/schema 8 1480 0 0
+/wp-admin/async-upload.php 34 31252 0 0
+/wp-content/plugins/woocommerce/assets/fonts/WooCommerce.woff2 1 6488 0 0
+/rooms/occupation-simple/ 14 563890 1 0
+/contact-pages/contact-01/ 8 326174 0 0
+/wp-sitemap.xml 1 692 0 0
+/wp-json/wp/v2/types 6 5868 0 0
+/wp-content/plugins/woocommerce/assets/fonts/cardo_normal_400.woff2 1 146060 0 0
+/.well-known/acme-challenge/5SYKSDg9v_g8bE3nVKT-1RcS_ZT6Uw5pyQ7C9GzOwgE 5 590 5 2
+/wp-json/ 6 1632 0 0
+/wp-json/contact-form-7/v1/contact-forms/489/refill 8 48 0 0
+/wp-json/wp/v2/settings 6 7962 0 0
+/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-solid-900.woff2 2 156392 0 0
+/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.woff 2 37648 0 1
+/new-website-2/ 2 79395 0 0
+/service-pages/forfaits-touki-suite/ 12 522765 0 0
+END_SIDER

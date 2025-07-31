@@ -1,0 +1,41 @@
+#nd_options_beforeafter_component img { float:left; width:100%;  }
+
+  #nd_options_beforeafter_component { 
+    float: left;
+    width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    position: relative;
+  }
+
+  #nd_options_beforeafter_component .ui-slider-range {
+    background-color: #000;
+    z-index: 9;
+    position: absolute;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  #nd_options_beforeafter_component .ui-slider-handle {
+    width: 4px;
+    position: absolute;
+    height: 100%;
+    outline: 0px;
+    cursor: ew-resize;  
+  }
+
+  #nd_options_beforeafter_component .ui-slider-handle::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 50%;
+    margin-top: -20px;
+    margin-left: -18px;
+    z-index: 9;
+    border-radius: 100%;
+    background-size: 30px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
