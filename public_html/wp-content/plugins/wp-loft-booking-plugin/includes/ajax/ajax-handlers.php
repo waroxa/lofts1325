@@ -35,6 +35,15 @@ function wp_loft_booking_sync_units() {
     $units_table      = $wpdb->prefix . 'loft_units';
     $keychains_table  = $wpdb->prefix . 'loft_keychains';
     $loft_types_table = $wpdb->prefix . 'loft_types';
+    $tenant_table     = $wpdb->prefix . 'loft_tenants';
+
+    // Helper to normalize unit labels like "LOFT123"
+    $normalize = function($label) {
+        if (preg_match('/LOFTS?\s*-*\s*([0-9]+)/i', $label, $matches)) {
+            return 'LOFT' . $matches[1];
+        }
+        return strtoupper(preg_replace('/[^A-Z0-9]/', '', $label));
+    };
 
     $token = get_option('butterflymx_access_token_v4');
     $environment = get_option('butterflymx_environment', 'sandbox');
@@ -61,6 +70,24 @@ function wp_loft_booking_sync_units() {
             'valid_until' => $row->valid_until
         ];
     }, $active_keys);
+
+    // Fetch active tenant leases
+    $tenant_rows = $wpdb->get_results("SELECT unit_label, lease_start, lease_end FROM $tenant_table", ARRAY_A);
+    $active_tenants = [];
+    $now_ts = current_time('timestamp');
+    foreach ($tenant_rows as $row) {
+        $label = $normalize($row['unit_label']);
+        if (
+            !empty($row['lease_start']) &&
+            !empty($row['lease_end']) &&
+            strtotime($row['lease_start']) <= $now_ts &&
+            strtotime($row['lease_end']) >= $now_ts
+        ) {
+            if (empty($active_tenants[$label]) || strtotime($row['lease_end']) < strtotime($active_tenants[$label])) {
+                $active_tenants[$label] = $row['lease_end'];
+            }
+        }
+    }
 
     // Fetch all virtual keys and log solos
     $solo_virtual_units = [];
@@ -103,6 +130,9 @@ function wp_loft_booking_sync_units() {
 
             $unit_id_api = intval($unit['id']);
             $unit_name_upper = $unit_name;
+            $unit_label = $normalize($unit_name_upper);
+            preg_match('/LOFT\s*(\d+)/i', $unit_name_upper, $match);
+            $unit_number = $match[1] ?? null;
             $status = 'available'; // Default to available
             $available_until = null;
 
@@ -123,11 +153,13 @@ function wp_loft_booking_sync_units() {
             ) {
                 $status = 'unavailable';
             }
-            // Otherwise, check active keychains
+            // Otherwise, check active tenants or keychains
             else {
-                preg_match('/LOFT\s*(\d+)/i', $unit_name_upper, $match);
-                $unit_number = $match[1] ?? null;
-                if ($unit_number) {
+                if (!empty($active_tenants[$unit_label])) {
+                    $status = 'occupied';
+                    $available_until = date('Y-m-d H:i:s', strtotime($active_tenants[$unit_label]));
+                    error_log("🏠 MARKED OCCUPIED: $unit_name | UNTIL: $available_until | TENANT");
+                } elseif ($unit_number) {
                     foreach ($active_key_data as $key) {
                         if (preg_match('/^LOFT\s*' . preg_quote($unit_number, '/') . '(\s|\(|$)/i', $key['name'])) {
                             $status = 'occupied';
