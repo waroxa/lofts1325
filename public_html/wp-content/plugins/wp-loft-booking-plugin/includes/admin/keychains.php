@@ -351,6 +351,12 @@ function wp_loft_booking_sync_keychains() {
 
         error_log("✅ Synced keychain '{$kc_data['name']}' with " . count($virtual_keys) . " virtual keys.");
     }
+    // 🔄 After syncing keychains, update unit availability status.
+    $active_units = $wpdb->get_col(
+        "SELECT DISTINCT u.unit_name FROM $units_table u INNER JOIN $keychains_table kc ON kc.unit_id = u.id"
+    );
+
+    wp_loft_booking_update_unit_statuses($active_units);
 
     return true;
 }
@@ -529,6 +535,33 @@ function wp_loft_booking_sync_keychains_from_api(): array {
     }
 
     return $active_keychains;
+}
+
+/**
+ * Update loft unit availability based on a list of active units.
+ *
+ * @param array $active_units Array of unit names that should be marked as Available.
+ */
+function wp_loft_booking_update_unit_statuses(array $active_units) {
+    global $wpdb;
+
+    $units_table = $wpdb->prefix . 'loft_units';
+
+    // Set all units as Occupied by default.
+    $wpdb->query("UPDATE $units_table SET status = 'Occupied'");
+
+    if (empty($active_units)) {
+        return;
+    }
+
+    // Prepare placeholders for the active unit names.
+    $placeholders = implode(',', array_fill(0, count($active_units), '%s'));
+    $sql = $wpdb->prepare(
+        "UPDATE $units_table SET status = 'Available' WHERE unit_name IN ($placeholders)",
+        $active_units
+    );
+
+    $wpdb->query($sql);
 }
 
 
