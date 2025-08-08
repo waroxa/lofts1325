@@ -32,8 +32,9 @@ function wp_loft_booking_sync_units() {
 
     error_log("🚨 ENTERED wp_loft_booking_sync_units()");
 
-    $units_table = $wpdb->prefix . 'loft_units';
-    $keychains_table = $wpdb->prefix . 'loft_keychains';
+    $units_table      = $wpdb->prefix . 'loft_units';
+    $keychains_table  = $wpdb->prefix . 'loft_keychains';
+    $loft_types_table = $wpdb->prefix . 'loft_types';
 
     $token = get_option('butterflymx_access_token_v4');
     $environment = get_option('butterflymx_environment', 'sandbox');
@@ -167,6 +168,11 @@ function wp_loft_booking_sync_units() {
             }
         }
     }
+
+    // Update loft_types quantities
+    $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $summary['SIMPLE'], 'simple'));
+    $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $summary['DOUBLE'], 'double'));
+    $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $summary['PENTHOUSE'], 'penthouse'));
 
     // Update post_meta with only available counts
     update_post_meta(10773, 'nd_booking_meta_box_qnt', $summary['SIMPLE']);    // SIMPLE
