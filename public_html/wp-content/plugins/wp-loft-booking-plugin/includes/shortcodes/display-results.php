@@ -46,7 +46,12 @@ function custom_booking_search_results() {
     $query = "SELECT u.id, u.unit_name, u.max_adults, u.max_children, u.status, u.price_per_night FROM {$wpdb->prefix}loft_units AS u WHERE u.status = 'Available' AND u.branch_id = %d AND u.max_adults >= %d AND u.max_children >= %d";
     $results = $wpdb->get_results($wpdb->prepare($query, $branch_id, $adults, $children));
 
+    $simple_count    = intval(get_post_meta(10773, 'nd_booking_meta_box_qnt', true));
+    $double_count    = intval(get_post_meta(13803, 'nd_booking_meta_box_qnt', true));
+    $penthouse_count = intval(get_post_meta(13804, 'nd_booking_meta_box_qnt', true));
+
     $output = '<div class="custom-nd-booking-results">';
+    $output .= '<p class="available-summary">Available Lofts - Simple: ' . esc_html($simple_count) . ', Double: ' . esc_html($double_count) . ', Penthouse: ' . esc_html($penthouse_count) . '</p>';
     if (!empty($results)) {
         foreach ($results as $result) {
             $output .= '<div class="custom-nd-booking-item"><div class="custom-nd-booking-thumbnail"><img src="https://via.placeholder.com/150" alt="Loft Image"></div><div class="custom-nd-booking-info">';
@@ -57,7 +62,7 @@ function custom_booking_search_results() {
         $output .= '<p class="custom-nd-booking-no-results">No lofts available for the selected criteria.</p>';
     }
     $output .= '</div>';
-    $output .= '<style>.custom-nd-booking-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; } .custom-nd-booking-item { border: 1px solid #eaeaea; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.3s ease; } .custom-nd-booking-item:hover { transform: translateY(-5px); } .custom-nd-booking-thumbnail img { width: 100%; height: auto; display: block; } .custom-nd-booking-info { padding: 15px; text-align: center; } .custom-nd-booking-info h3 { font-size: 1.2rem; margin-bottom: 10px; } .custom-nd-booking-info p { margin: 5px 0; font-size: 1rem; color: #555; } .custom-nd-booking-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #76B1C4; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.3s ease; } .custom-nd-booking-btn:hover { background-color: #5990A3; } .custom-nd-booking-no-results { text-align: center; color: #d9534f; }</style>';
+    $output .= '<style>.custom-nd-booking-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; } .custom-nd-booking-item { border: 1px solid #eaeaea; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.3s ease; } .custom-nd-booking-item:hover { transform: translateY(-5px); } .custom-nd-booking-thumbnail img { width: 100%; height: auto; display: block; } .custom-nd-booking-info { padding: 15px; text-align: center; } .custom-nd-booking-info h3 { font-size: 1.2rem; margin-bottom: 10px; } .custom-nd-booking-info p { margin: 5px 0; font-size: 1rem; color: #555; } .custom-nd-booking-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #76B1C4; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.3s ease; } .custom-nd-booking-btn:hover { background-color: #5990A3; } .custom-nd-booking-no-results { text-align: center; color: #d9534f; } .available-summary { grid-column: 1 / -1; font-weight: bold; margin-bottom: 15px; }</style>';
     return $output;
 }
 add_shortcode('custom_nd_booking_results', 'custom_booking_search_results');

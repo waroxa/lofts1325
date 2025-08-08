@@ -1,6 +1,8 @@
 <?php
 
-if (function_exists('wp_loft_booking_sync_units')) {
+if (function_exists('wp_loft_booking_full_sync')) {
+    wp_loft_booking_full_sync();
+} elseif (function_exists('wp_loft_booking_sync_units')) {
     wp_loft_booking_sync_units();
 }
 
