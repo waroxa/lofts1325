@@ -36,6 +36,43 @@ require_once plugin_dir_path(__FILE__) . 'includes/calendar/google-oauth-handler
 require_once plugin_dir_path(__FILE__) . 'includes/calendar/cleaning-calendar.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/keychains.php';
 
+/**
+ * Run a callback while suppressing wp_die output.
+ */
+function wp_loft_booking_run_safely( callable $callback ) {
+    add_filter( 'wp_die_handler', 'wp_loft_booking_noop_die_handler' );
+    add_filter( 'wp_die_ajax_handler', 'wp_loft_booking_noop_die_handler' );
+    try {
+        $callback();
+    } finally {
+        remove_filter( 'wp_die_handler', 'wp_loft_booking_noop_die_handler' );
+        remove_filter( 'wp_die_ajax_handler', 'wp_loft_booking_noop_die_handler' );
+    }
+}
+
+function wp_loft_booking_noop_die_handler() {
+    return 'wp_loft_booking_noop_die';
+}
+
+function wp_loft_booking_noop_die( $message = '', $title = '', $args = array() ) {}
+
+/**
+ * Sync tenants, keychains and units in sequence without exiting.
+ */
+function wp_loft_booking_full_sync() {
+    if ( function_exists( 'wp_loft_booking_fetch_and_save_tenants' ) ) {
+        wp_loft_booking_run_safely( 'wp_loft_booking_fetch_and_save_tenants' );
+    }
+
+    if ( function_exists( 'wp_loft_booking_sync_keychains' ) ) {
+        wp_loft_booking_sync_keychains();
+    }
+
+    if ( function_exists( 'wp_loft_booking_sync_units' ) ) {
+        wp_loft_booking_run_safely( 'wp_loft_booking_sync_units' );
+    }
+}
+
 
 
 
