@@ -43,12 +43,43 @@ function custom_booking_search_results() {
     $branch_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}loft_branches WHERE building_id = %d", $building_id));
     if (!$branch_id) return '<p class="custom-nd-booking-no-results">Invalid branch selection. Please try again.</p>';
 
-    $query = "SELECT u.id, u.unit_name, u.max_adults, u.max_children, u.status, u.price_per_night FROM {$wpdb->prefix}loft_units AS u WHERE u.status = 'Available' AND u.branch_id = %d AND u.max_adults >= %d AND u.max_children >= %d";
+    // Fetch units that match the search criteria
+    $query   = "SELECT u.id, u.unit_name, u.max_adults, u.max_children, u.status, u.price_per_night FROM {$wpdb->prefix}loft_units AS u WHERE u.status = 'Available' AND u.branch_id = %d AND u.max_adults >= %d AND u.max_children >= %d";
     $results = $wpdb->get_results($wpdb->prepare($query, $branch_id, $adults, $children));
 
-    $simple_count    = intval(get_post_meta(10773, 'nd_booking_meta_box_qnt', true));
-    $double_count    = intval(get_post_meta(13803, 'nd_booking_meta_box_qnt', true));
-    $penthouse_count = intval(get_post_meta(13804, 'nd_booking_meta_box_qnt', true));
+    // Count available lofts grouped by type directly from the loft_units table
+    $counts = get_transient('wp_loft_available_counts');
+    if ($counts === false) {
+        $count_query = "SELECT \
+                CASE \
+                    WHEN LOWER(unit_name) LIKE '%(simple)%' THEN 'simple' \
+                    WHEN LOWER(unit_name) LIKE '%(double)%' THEN 'double' \
+                    WHEN LOWER(unit_name) LIKE '%(penthouse)%' THEN 'penthouse' \
+                END AS type, \
+                COUNT(*) AS cnt \
+            FROM {$wpdb->prefix}loft_units \
+            WHERE LOWER(status) = 'available' \
+            GROUP BY type";
+        $count_results = $wpdb->get_results($count_query, OBJECT_K);
+        $counts = [
+            'simple'    => intval($count_results['simple']->cnt ?? 0),
+            'double'    => intval($count_results['double']->cnt ?? 0),
+            'penthouse' => intval($count_results['penthouse']->cnt ?? 0),
+        ];
+
+        // Cache the counts for a short period to avoid repeated heavy queries
+        set_transient('wp_loft_available_counts', $counts, 5 * MINUTE_IN_SECONDS);
+
+        // Keep loft_types table in sync so admin views reflect current availability
+        $loft_types_table = $wpdb->prefix . 'loft_types';
+        $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $counts['simple'], 'simple'));
+        $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $counts['double'], 'double'));
+        $wpdb->query($wpdb->prepare("UPDATE $loft_types_table SET quantity = %d WHERE LOWER(name) = %s", $counts['penthouse'], 'penthouse'));
+    }
+
+    $simple_count    = $counts['simple'];
+    $double_count    = $counts['double'];
+    $penthouse_count = $counts['penthouse'];
 
     $output = '<div class="custom-nd-booking-results">';
     $output .= '<p class="available-summary">Available Lofts - Simple: ' . esc_html($simple_count) . ', Double: ' . esc_html($double_count) . ', Penthouse: ' . esc_html($penthouse_count) . '</p>';
