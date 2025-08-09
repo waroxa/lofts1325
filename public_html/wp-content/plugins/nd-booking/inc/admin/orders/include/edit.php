@@ -113,6 +113,9 @@ if ( empty($nd_booking_orders) ) {
     //define action type
     $nd_booking_new_action_type = str_replace("_"," ",$nd_booking_order->action_type);
 
+    $guest_id_front = esc_url( get_post_meta( $nd_booking_order->id, 'guest_id_front', true ) );
+    $guest_id_back  = esc_url( get_post_meta( $nd_booking_order->id, 'guest_id_back', true ) );
+
 
     $nd_booking_result .= '
 
@@ -259,10 +262,16 @@ if ( empty($nd_booking_orders) ) {
             </div>
             
           
-          </div>
+          </div>';
 
-          
-          <div style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba(0,0,0,.04);" class="nd_booking_section nd_booking_background_color_ffffff nd_booking_margin_top_20">
+          if ( current_user_can('manage_options') ) {
+            $nd_booking_result .= '<div class="nd_booking_section nd_booking_margin_top_20"><h3>'.__('Guest ID','nd-booking').'</h3>';
+            if ( $guest_id_front != '' ) { $nd_booking_result .= '<p><a href="'.$guest_id_front.'" target="_blank"><img src="'.$guest_id_front.'" width="150" /></a></p>'; }
+            if ( $guest_id_back != '' ) { $nd_booking_result .= '<p><a href="'.$guest_id_back.'" target="_blank"><img src="'.$guest_id_back.'" width="150" /></a></p>'; }
+            $nd_booking_result .= '</div>';
+          }
+
+          $nd_booking_result .= '<div style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba(0,0,0,.04);" class="nd_booking_section nd_booking_background_color_ffffff nd_booking_margin_top_20">
             
             <div class="nd_booking_custom_tables nd_booking_section nd_booking_box_sizing_border_box nd_booking_padding_30">
 

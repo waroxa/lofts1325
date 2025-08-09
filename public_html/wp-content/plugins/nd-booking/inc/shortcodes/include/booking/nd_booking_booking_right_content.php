@@ -10,7 +10,7 @@ $nd_booking_shortcode_right_content = '
   <h1>'.__('Add Your Informations','nd-booking').' :</h1>
   <div class="nd_booking_section nd_booking_height_30"></div>
 
-  <form method="post" action="'.nd_booking_checkout_page().'">
+  <form method="post" enctype="multipart/form-data" action="'.nd_booking_checkout_page().'">
       
       <input type="hidden" id="nd_booking_form_booking_arrive" name="nd_booking_form_booking_arrive" value="1">
       <input type="hidden" id="nd_booking_booking_form_final_price" name="nd_booking_booking_form_final_price" value="'.$nd_booking_trip_price.'">
@@ -66,6 +66,19 @@ $nd_booking_shortcode_right_content = '
           <input class="nd_booking_section" id="nd_booking_booking_form_zip" name="nd_booking_booking_form_zip" type="text" >
       </div>
       <div class="nd_booking_section nd_booking_height_20"></div>
+
+      <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+          <p>'.__('Guest ID Front','nd-booking').'</p>
+          <div class="nicdark_section nicdark_height_5"></div>
+          <input class="nd_booking_section" type="file" name="guest_id_front" accept="image/*" />
+      </div>
+      <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+          <p>'.__('Guest ID Back','nd-booking').'</p>
+          <div class="nicdark_section nicdark_height_5"></div>
+          <input class="nd_booking_section" type="file" name="guest_id_back" accept="image/*" />
+      </div>
+      <div class="nd_booking_section nd_booking_height_20"></div>
+
       <div id="nd_booking_booking_form_requests_container"  class="nd_booking_width_100_percentage nd_booking_box_sizing_border_box nd_booking_float_left">
           <p>'.__('Requests','nd-booking').'</p>
           <div class="nicdark_section nicdark_height_5"></div>
