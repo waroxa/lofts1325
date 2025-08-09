@@ -584,7 +584,9 @@ function nd_booking_add_booking_in_db(
   $nd_booking_paypal_payment_status,
   $nd_booking_paypal_currency,
   $nd_booking_paypal_tx,
-  $nd_booking_action_type
+  $nd_booking_action_type,
+  $guest_id_front = '',
+  $guest_id_back = ''
 
 ) {
 
@@ -639,14 +641,38 @@ function nd_booking_add_booking_in_db(
 
 			);
 
-			if ($nd_booking_add_booking){
+                        if ($nd_booking_add_booking){
 
-				//order added in db
-			
-				//hook
-	        	do_action('nd_booking_reservation_added_in_db',$nd_booking_id_post,$nd_booking_title_post,$nd_booking_date,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_guests,$nd_booking_final_trip_price,$nd_booking_extra_services,$nd_booking_id_user,$nd_booking_user_first_name,$nd_booking_user_last_name,$nd_booking_paypal_email,$nd_booking_user_phone,$nd_booking_user_address,$nd_booking_user_city,$nd_booking_user_country,$nd_booking_user_message,$nd_booking_user_arrival,$nd_booking_user_coupon,$nd_booking_paypal_payment_status,$nd_booking_paypal_currency,$nd_booking_paypal_tx,$nd_booking_action_type);	
+                                $booking_id = $wpdb->insert_id;
 
-			}else{
+                                if ( $guest_id_front || $guest_id_back ) {
+                                        $upload_dir = wp_upload_dir();
+                                        $base_dir  = trailingslashit( $upload_dir['basedir'] ) . 'ids/' . $booking_id;
+                                        wp_mkdir_p( $base_dir );
+
+                                        if ( $guest_id_front && file_exists( $guest_id_front ) ) {
+                                                $dest_front = $base_dir . '/' . sanitize_file_name( basename( $guest_id_front ) );
+                                                @rename( $guest_id_front, $dest_front );
+                                                $front_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_front );
+                                                add_post_meta( $booking_id, 'guest_id_front', $front_url );
+                                        }
+
+                                        if ( $guest_id_back && file_exists( $guest_id_back ) ) {
+                                                $dest_back = $base_dir . '/' . sanitize_file_name( basename( $guest_id_back ) );
+                                                @rename( $guest_id_back, $dest_back );
+                                                $back_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_back );
+                                                add_post_meta( $booking_id, 'guest_id_back', $back_url );
+                                        }
+                                }
+
+                                //order added in db
+
+                                //hook
+                        do_action('nd_booking_reservation_added_in_db',$nd_booking_id_post,$nd_booking_title_post,$nd_booking_date,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_guests,$nd_booking_final_trip_price,$nd_booking_extra_services,$nd_booking_id_user,$nd_booking_user_first_name,$nd_booking_user_last_name,$nd_booking_paypal_email,$nd_booking_user_phone,$nd_booking_user_address,$nd_booking_user_city,$nd_booking_user_country,$nd_booking_user_message,$nd_booking_user_arrival,$nd_booking_user_coupon,$nd_booking_paypal_payment_status,$nd_booking_paypal_currency,$nd_booking_paypal_tx,$nd_booking_action_type);
+
+                                return $booking_id;
+
+                        }else{
 
 			$wpdb->show_errors();
 			$wpdb->print_error();

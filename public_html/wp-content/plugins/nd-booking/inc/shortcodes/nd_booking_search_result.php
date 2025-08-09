@@ -145,7 +145,9 @@ function nd_booking_woo_thankyou_content( $order_id ) {
             $nd_booking_booking_form_payment_status,
             $nd_booking_booking_form_currency,
             $nd_booking_paypal_tx,
-            $nd_booking_booking_form_action_type
+            $nd_booking_booking_form_action_type,
+            '',
+            ''
         );
         
     }

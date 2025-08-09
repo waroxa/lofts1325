@@ -34,6 +34,37 @@ function nd_booking_shortcode_checkout() {
         $nd_booking_booking_form_post_title = sanitize_text_field($_POST['nd_booking_booking_form_post_title']);
         $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_checkbox_services_id']);
 
+        $nd_booking_guest_id_front = '';
+        $nd_booking_guest_id_back = '';
+
+        if ( ! empty( $_FILES['guest_id_front']['name'] ) || ! empty( $_FILES['guest_id_back']['name'] ) ) {
+            if ( ! function_exists( 'wp_handle_upload' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            $upload_overrides = [
+                'test_form' => false,
+                'mimes'     => [
+                    'jpg|jpeg|jpe' => 'image/jpeg',
+                    'png'          => 'image/png',
+                ],
+            ];
+
+            $max_size = 2 * 1024 * 1024; // 2MB
+
+            if ( ! empty( $_FILES['guest_id_front']['name'] ) && $_FILES['guest_id_front']['size'] <= $max_size ) {
+                $front = wp_handle_upload( $_FILES['guest_id_front'], $upload_overrides );
+                if ( empty( $front['error'] ) ) {
+                    $nd_booking_guest_id_front = $front['file'];
+                }
+            }
+            if ( ! empty( $_FILES['guest_id_back']['name'] ) && $_FILES['guest_id_back']['size'] <= $max_size ) {
+                $back = wp_handle_upload( $_FILES['guest_id_back'], $upload_overrides );
+                if ( empty( $back['error'] ) ) {
+                    $nd_booking_guest_id_back = $back['file'];
+                }
+            }
+        }
+
         //ids
         $nd_booking_booking_form_post_id = sanitize_text_field($_POST['nd_booking_booking_form_post_id']);
         $nd_booking_ids_array = explode('-', $nd_booking_booking_form_post_id ); 
@@ -73,9 +104,9 @@ function nd_booking_shortcode_checkout() {
     //START PAYMENT ON CHECKOUT PAGE
     }elseif ( $nd_booking_form_checkout_arrive == 1 OR isset($_GET['tx']) OR $nd_booking_form_checkout_arrive == 2 ) {
 
+        $nd_booking_guest_id_front = '';
+        $nd_booking_guest_id_back = '';
 
-        
-        
         //START BUILT VARIABLES DEPENDING ON PAYMENT METHODS
         if ( $nd_booking_form_checkout_arrive == 1 ) {
 
@@ -112,6 +143,8 @@ function nd_booking_shortcode_checkout() {
             $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_form_services']);
             $nd_booking_booking_form_action_type = sanitize_text_field($_POST['nd_booking_booking_form_action_type']);
             $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
+            $nd_booking_guest_id_front = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
+            $nd_booking_guest_id_back = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
 
             //ids
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
@@ -151,6 +184,8 @@ function nd_booking_shortcode_checkout() {
             $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_form_services']);
             $nd_booking_booking_form_action_type = sanitize_text_field($_POST['nd_booking_booking_form_action_type']);
             $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
+            $nd_booking_guest_id_front = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
+            $nd_booking_guest_id_back = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
 
             //ids
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
@@ -471,7 +506,7 @@ function nd_booking_shortcode_checkout() {
         //END check if user is logged
 
 
-        nd_booking_add_booking_in_db(
+        $nd_booking_booking_id = nd_booking_add_booking_in_db(
   
           $nd_booking_id_room,
           get_the_title($nd_booking_id_room),
@@ -495,7 +530,9 @@ function nd_booking_shortcode_checkout() {
           $nd_booking_booking_form_payment_status,
           $nd_booking_booking_form_currency,
           $nd_booking_paypal_tx,
-          $nd_booking_booking_form_action_type
+          $nd_booking_booking_form_action_type,
+          $nd_booking_guest_id_front,
+          $nd_booking_guest_id_back
 
         );
 
