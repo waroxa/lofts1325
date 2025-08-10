@@ -55,6 +55,17 @@ function nd_booking_shortcode_checkout() {
         $nd_booking_booking_form_post_title = sanitize_text_field($_POST['nd_booking_booking_form_post_title']);
         $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_checkbox_services_id']);
 
+        if ( isset( $_POST['guest_id_number'] ) ) {
+            $nd_booking_guest_id_number = sanitize_text_field( $_POST['guest_id_number'] );
+        } else {
+            $nd_booking_guest_id_number = '';
+        }
+        if ( isset( $_POST['guest_id_type'] ) ) {
+            $nd_booking_guest_id_type = sanitize_text_field( $_POST['guest_id_type'] );
+        } else {
+            $nd_booking_guest_id_type = '';
+        }
+
         $nd_booking_guest_id_front = '';
         $nd_booking_guest_id_back = '';
 
@@ -178,11 +189,13 @@ function nd_booking_shortcode_checkout() {
             $nd_booking_booking_form_term = sanitize_text_field($_POST['nd_booking_checkout_form_term']);
             $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_form_services']);
             $nd_booking_booking_form_action_type = sanitize_text_field($_POST['nd_booking_booking_form_action_type']);
-            $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
-            $front_token = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
-            $back_token  = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
-            $nd_booking_guest_id_front = nd_booking_get_upload_path_from_token( $front_token );
-            $nd_booking_guest_id_back  = nd_booking_get_upload_path_from_token( $back_token );
+              $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
+              $nd_booking_guest_id_number = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_number']);
+              $nd_booking_guest_id_type   = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_type']);
+              $front_token = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
+              $back_token  = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
+              $nd_booking_guest_id_front = nd_booking_get_upload_path_from_token( $front_token );
+              $nd_booking_guest_id_back  = nd_booking_get_upload_path_from_token( $back_token );
 
             //ids
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
@@ -221,11 +234,13 @@ function nd_booking_shortcode_checkout() {
             $nd_booking_booking_form_term = sanitize_text_field($_POST['nd_booking_checkout_form_term']);
             $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_form_services']);
             $nd_booking_booking_form_action_type = sanitize_text_field($_POST['nd_booking_booking_form_action_type']);
-            $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
-            $front_token = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
-            $back_token  = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
-            $nd_booking_guest_id_front = nd_booking_get_upload_path_from_token( $front_token );
-            $nd_booking_guest_id_back  = nd_booking_get_upload_path_from_token( $back_token );
+              $nd_booking_booking_form_payment_status = sanitize_text_field($_POST['nd_booking_booking_form_payment_status']);
+              $nd_booking_guest_id_number = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_number']);
+              $nd_booking_guest_id_type   = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_type']);
+              $front_token = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_front']);
+              $back_token  = sanitize_text_field($_POST['nd_booking_checkout_form_guest_id_back']);
+              $nd_booking_guest_id_front = nd_booking_get_upload_path_from_token( $front_token );
+              $nd_booking_guest_id_back  = nd_booking_get_upload_path_from_token( $back_token );
 
             //ids
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
@@ -575,6 +590,11 @@ function nd_booking_shortcode_checkout() {
           $nd_booking_guest_id_back
 
         );
+
+        update_post_meta( $nd_booking_booking_id, 'guest_id_front', esc_url_raw( $nd_booking_guest_id_front ) );
+        update_post_meta( $nd_booking_booking_id, 'guest_id_back', esc_url_raw( $nd_booking_guest_id_back ) );
+        update_post_meta( $nd_booking_booking_id, 'guest_id_number', sanitize_text_field( $nd_booking_guest_id_number ) );
+        update_post_meta( $nd_booking_booking_id, 'guest_id_type', sanitize_text_field( $nd_booking_guest_id_type ) );
 
         if (function_exists('add_booking_to_google_calendar')) {
             $args = [
