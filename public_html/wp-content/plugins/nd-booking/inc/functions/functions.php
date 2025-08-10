@@ -714,8 +714,8 @@ Une réservation vient d’être confirmée :
 
 $headers = ['Content-Type: text/plain; charset=UTF-8'];
 
-wp_mail($nd_booking_booking_form_email, $subject, $message, $headers); // Client
-wp_mail('waroxa@gmail.com', $subject, $message, $headers); // Owner
+// wp_mail($nd_booking_booking_form_email, $subject, $message, $headers); // Client
+// wp_mail('waroxa@gmail.com', $subject, $message, $headers); // Owner
 
 // 🧼 Notify cleaning team
 $cleaning_subject = "🧼 Nettoyage requis – Loft {$nd_booking_room_title}";
@@ -727,7 +727,7 @@ Merci de prévoir le ménage pour le Loft {$nd_booking_room_title} le :
 Merci de confirmer une fois terminé.
 — Lofts 1325";
 
-wp_mail('waroxa@gmail.com', $cleaning_subject, $cleaning_message, $headers);
+// wp_mail('waroxa@gmail.com', $cleaning_subject, $cleaning_message, $headers);
 
 // 📆 Add to Google Calendar
 add_booking_to_google_calendar([
