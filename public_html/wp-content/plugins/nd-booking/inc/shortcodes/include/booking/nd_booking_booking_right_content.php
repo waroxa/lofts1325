@@ -65,21 +65,37 @@ $nd_booking_shortcode_right_content = '
           <div class="nicdark_section nicdark_height_5"></div>
           <input class="nd_booking_section" id="nd_booking_booking_form_zip" name="nd_booking_booking_form_zip" type="text" >
       </div>
-      <div class="nd_booking_section nd_booking_height_20"></div>
+        <div class="nd_booking_section nd_booking_height_20"></div>
+        <h3>'.__('Upload ID','nd-booking').'</h3>
+        <div class="nd_booking_section nd_booking_height_20"></div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('ID Number','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" id="guest_id_number" name="guest_id_number" type="text" >
+        </div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('ID Type','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <select class="nd_booking_section" id="guest_id_type" name="guest_id_type">
+                <option>'.__('Driver\'s License','nd-booking').'</option>
+                <option>'.__('Passport','nd-booking').'</option>
+            </select>
+        </div>
+        <div class="nd_booking_section nd_booking_height_20"></div>
 
-      <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
-          <p>'.__('Guest ID Front','nd-booking').'</p>
-          <div class="nicdark_section nicdark_height_5"></div>
-          <input class="nd_booking_section" type="file" name="guest_id_front" accept="image/*" />
-      </div>
-      <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
-          <p>'.__('Guest ID Back','nd-booking').'</p>
-          <div class="nicdark_section nicdark_height_5"></div>
-          <input class="nd_booking_section" type="file" name="guest_id_back" accept="image/*" />
-      </div>
-      <div class="nd_booking_section nd_booking_height_20"></div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('Guest ID Front','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" type="file" name="guest_id_front" accept="image/*" />
+        </div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('Guest ID Back','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" type="file" name="guest_id_back" accept="image/*" />
+        </div>
+        <div class="nd_booking_section nd_booking_height_20"></div>
 
-      <div id="nd_booking_booking_form_requests_container"  class="nd_booking_width_100_percentage nd_booking_box_sizing_border_box nd_booking_float_left">
+        <div id="nd_booking_booking_form_requests_container"  class="nd_booking_width_100_percentage nd_booking_box_sizing_border_box nd_booking_float_left">
           <p>'.__('Requests','nd-booking').'</p>
           <div class="nicdark_section nicdark_height_5"></div>
           <textarea class="nd_booking_section" id="nd_booking_booking_form_requests" rows="6" name="nd_booking_booking_form_requests"></textarea>
