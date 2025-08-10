@@ -584,9 +584,7 @@ function nd_booking_add_booking_in_db(
   $nd_booking_paypal_payment_status,
   $nd_booking_paypal_currency,
   $nd_booking_paypal_tx,
-  $nd_booking_action_type,
-  $guest_id_front = '',
-  $guest_id_back = ''
+  $nd_booking_action_type
 
 ) {
 
@@ -641,49 +639,14 @@ function nd_booking_add_booking_in_db(
 
 			);
 
-                        if ($nd_booking_add_booking){
+			if ($nd_booking_add_booking){
 
-                                $booking_id = $wpdb->insert_id;
+				//order added in db
+			
+				//hook
+	        	do_action('nd_booking_reservation_added_in_db',$nd_booking_id_post,$nd_booking_title_post,$nd_booking_date,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_guests,$nd_booking_final_trip_price,$nd_booking_extra_services,$nd_booking_id_user,$nd_booking_user_first_name,$nd_booking_user_last_name,$nd_booking_paypal_email,$nd_booking_user_phone,$nd_booking_user_address,$nd_booking_user_city,$nd_booking_user_country,$nd_booking_user_message,$nd_booking_user_arrival,$nd_booking_user_coupon,$nd_booking_paypal_payment_status,$nd_booking_paypal_currency,$nd_booking_paypal_tx,$nd_booking_action_type);	
 
-                                if ( $guest_id_front || $guest_id_back ) {
-                                        $upload_dir = wp_upload_dir();
-                                        $base_dir  = trailingslashit( $upload_dir['basedir'] ) . 'ids/' . $booking_id;
-                                        wp_mkdir_p( $base_dir );
-                                        $base_path = wp_normalize_path( $upload_dir['basedir'] );
-
-                                        if ( $guest_id_front ) {
-                                                $src = wp_normalize_path( $guest_id_front );
-                                                if ( strpos( $src, $base_path ) === 0 && file_exists( $src ) && wp_is_writable( $src ) ) {
-                                                        $dest_front = $base_dir . '/' . sanitize_file_name( basename( $src ) );
-                                                        @rename( $src, $dest_front );
-                                                        $front_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_front );
-                                                        add_post_meta( $booking_id, 'guest_id_front', $front_url );
-                                                } else {
-                                                        error_log( 'nd_booking: invalid guest_id_front path ' . $guest_id_front );
-                                                }
-                                        }
-
-                                        if ( $guest_id_back ) {
-                                                $src = wp_normalize_path( $guest_id_back );
-                                                if ( strpos( $src, $base_path ) === 0 && file_exists( $src ) && wp_is_writable( $src ) ) {
-                                                        $dest_back = $base_dir . '/' . sanitize_file_name( basename( $src ) );
-                                                        @rename( $src, $dest_back );
-                                                        $back_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_back );
-                                                        add_post_meta( $booking_id, 'guest_id_back', $back_url );
-                                                } else {
-                                                        error_log( 'nd_booking: invalid guest_id_back path ' . $guest_id_back );
-                                                }
-                                        }
-                                }
-
-                                //order added in db
-
-                                //hook
-                        do_action('nd_booking_reservation_added_in_db',$nd_booking_id_post,$nd_booking_title_post,$nd_booking_date,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_guests,$nd_booking_final_trip_price,$nd_booking_extra_services,$nd_booking_id_user,$nd_booking_user_first_name,$nd_booking_user_last_name,$nd_booking_paypal_email,$nd_booking_user_phone,$nd_booking_user_address,$nd_booking_user_city,$nd_booking_user_country,$nd_booking_user_message,$nd_booking_user_arrival,$nd_booking_user_coupon,$nd_booking_paypal_payment_status,$nd_booking_paypal_currency,$nd_booking_paypal_tx,$nd_booking_action_type);
-
-                                return $booking_id;
-
-                        }else{
+			}else{
 
 			$wpdb->show_errors();
 			$wpdb->print_error();
@@ -700,55 +663,6 @@ function nd_booking_add_booking_in_db(
 
 	}
 
-// 🔔 Email client + owner
-$subject = "Nouvelle réservation - Loft {$nd_booking_room_title}";
-$message = "Bonjour,
-
-Une réservation vient d’être confirmée :
-
-🛏️ Loft : {$nd_booking_room_title}
-📅 Dates : Du {$nd_booking_booking_form_date_from} au {$nd_booking_booking_form_date_to}
-👤 Invité : {$nd_booking_booking_form_name} {$nd_booking_booking_form_surname}
-📧 Courriel : {$nd_booking_booking_form_email}
-📞 Téléphone : {$nd_booking_booking_form_phone}";
-
-$headers = ['Content-Type: text/plain; charset=UTF-8'];
-
-// wp_mail($nd_booking_booking_form_email, $subject, $message, $headers); // Client
-// wp_mail('waroxa@gmail.com', $subject, $message, $headers); // Owner
-
-// 🧼 Notify cleaning team
-$cleaning_subject = "🧼 Nettoyage requis – Loft {$nd_booking_room_title}";
-$cleaning_message = "Bonjour,
-
-Merci de prévoir le ménage pour le Loft {$nd_booking_room_title} le :
-📅 {$nd_booking_booking_form_date_to}, dès 12h00.
-
-Merci de confirmer une fois terminé.
-— Lofts 1325";
-
-// wp_mail('waroxa@gmail.com', $cleaning_subject, $cleaning_message, $headers);
-
-// 📆 Add to Google Calendar
-add_booking_to_google_calendar([
-    'room_title' => $nd_booking_room_title,
-    'date_from' => $nd_booking_booking_form_date_from,
-    'date_to' => $nd_booking_booking_form_date_to,
-    'name' => $nd_booking_booking_form_name,
-    'surname' => $nd_booking_booking_form_surname,
-    'email' => $nd_booking_booking_form_email,
-    'phone' => $nd_booking_booking_form_phone,
-    'guests' => $nd_booking_booking_form_guests
-]);
-
-create_keychain_in_butterflymx([
-    'room_title' => $nd_booking_title_post,
-    'date_from' => $nd_booking_date_from,
-    'date_to' => $nd_booking_date_to,
-    'name' => $nd_booking_user_first_name,
-    'surname' => $nd_booking_user_last_name
-]);
-
 
 }
 //END add order if the plugin is not in dev mode
@@ -756,31 +670,6 @@ create_keychain_in_butterflymx([
 
 /* **************************************** END DATABASE **************************************** */
 
-
-function add_booking_to_google_calendar($args) {
-    $client = new Google_Client();
-    $client->setAuthConfig('path/to/credentials.json'); // Update this with your actual credentials file
-    $client->addScope(Google_Service_Calendar::CALENDAR);
-    $service = new Google_Service_Calendar($client);
-
-    // Booking Event for client and owner
-    $event = new Google_Service_Calendar_Event([
-        'summary' => '🔑 Réservation Loft ' . $args['room_title'],
-        'description' => "Invité: {$args['name']} {$args['surname']} ({$args['email']})\nTel: {$args['phone']}\nInvités: {$args['guests']}",
-        'start' => ['date' => $args['date_from'], 'timeZone' => 'America/Toronto'],
-        'end' => ['date' => $args['date_to'], 'timeZone' => 'America/Toronto'],
-    ]);
-    $service->events->insert('a752f27cffee8c22988adb29fdc933c93184e3a5814c79dcee4f62115d69fbfd@group.calendar.google.com', $event);
-
-    // Cleaning Event
-    $cleaning_event = new Google_Service_Calendar_Event([
-        'summary' => '🧼 Nettoyage - Loft ' . $args['room_title'],
-        'description' => 'Préparation du loft après le départ des invités.',
-        'start' => ['date' => $args['date_to'], 'timeZone' => 'America/Toronto'],
-        'end' => ['date' => $args['date_to'], 'timeZone' => 'America/Toronto'],
-    ]);
-    $service->events->insert('e964e301b54d0e795b44a76ebfb9d2cfbd2f6517a822429c5af62bc2cb94de20@group.calendar.google.com', $cleaning_event);
-}
 
 
 
@@ -935,44 +824,4 @@ function nd_booking_get_slug($type){
 /* **************************************** END SETTINGS **************************************** */
 
 
-function create_keychain_in_butterflymx($args) {
-    $token = get_option('butterflymx_access_token_v3');
-
-    if (!$token) {
-        error_log("❌ Missing ButterflyMX token.");
-        return false;
-    }
-
-    $payload = [
-        'data' => [
-            'type' => 'keychains',
-            'attributes' => [
-                'name' => "LOFT {$args['room_title']} ({$args['name']} {$args['surname']})",
-                'starts_at' => $args['date_from'] . 'T12:00:00-04:00',
-                'ends_at' => $args['date_to'] . 'T16:00:00-04:00'
-            ]
-        ]
-    ];
-
-    $response = wp_remote_post("https://api.butterflymx.com/v3/keychains", [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type' => 'application/vnd.api+json',
-            'Accept' => 'application/vnd.api+json',
-        ],
-        'body' => json_encode($payload),
-        'method' => 'POST',
-        'data_format' => 'body'
-    ]);
-
-    if (is_wp_error($response)) {
-        error_log('❌ Error creating keychain: ' . $response->get_error_message());
-        return false;
-    }
-
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    error_log('✅ Created keychain: ' . json_encode($body));
-
-    return true;
-}
 
