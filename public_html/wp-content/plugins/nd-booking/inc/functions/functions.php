@@ -649,19 +649,30 @@ function nd_booking_add_booking_in_db(
                                         $upload_dir = wp_upload_dir();
                                         $base_dir  = trailingslashit( $upload_dir['basedir'] ) . 'ids/' . $booking_id;
                                         wp_mkdir_p( $base_dir );
+                                        $base_path = wp_normalize_path( $upload_dir['basedir'] );
 
-                                        if ( $guest_id_front && file_exists( $guest_id_front ) ) {
-                                                $dest_front = $base_dir . '/' . sanitize_file_name( basename( $guest_id_front ) );
-                                                @rename( $guest_id_front, $dest_front );
-                                                $front_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_front );
-                                                add_post_meta( $booking_id, 'guest_id_front', $front_url );
+                                        if ( $guest_id_front ) {
+                                                $src = wp_normalize_path( $guest_id_front );
+                                                if ( strpos( $src, $base_path ) === 0 && file_exists( $src ) && wp_is_writable( $src ) ) {
+                                                        $dest_front = $base_dir . '/' . sanitize_file_name( basename( $src ) );
+                                                        @rename( $src, $dest_front );
+                                                        $front_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_front );
+                                                        add_post_meta( $booking_id, 'guest_id_front', $front_url );
+                                                } else {
+                                                        error_log( 'nd_booking: invalid guest_id_front path ' . $guest_id_front );
+                                                }
                                         }
 
-                                        if ( $guest_id_back && file_exists( $guest_id_back ) ) {
-                                                $dest_back = $base_dir . '/' . sanitize_file_name( basename( $guest_id_back ) );
-                                                @rename( $guest_id_back, $dest_back );
-                                                $back_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_back );
-                                                add_post_meta( $booking_id, 'guest_id_back', $back_url );
+                                        if ( $guest_id_back ) {
+                                                $src = wp_normalize_path( $guest_id_back );
+                                                if ( strpos( $src, $base_path ) === 0 && file_exists( $src ) && wp_is_writable( $src ) ) {
+                                                        $dest_back = $base_dir . '/' . sanitize_file_name( basename( $src ) );
+                                                        @rename( $src, $dest_back );
+                                                        $back_url = trailingslashit( $upload_dir['baseurl'] ) . 'ids/' . $booking_id . '/' . basename( $dest_back );
+                                                        add_post_meta( $booking_id, 'guest_id_back', $back_url );
+                                                } else {
+                                                        error_log( 'nd_booking: invalid guest_id_back path ' . $guest_id_back );
+                                                }
                                         }
                                 }
 

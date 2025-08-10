@@ -105,8 +105,8 @@ $nd_booking_shortcode_right_content .= '
                 <input type="hidden" id="nd_booking_checkout_form_requets" name="nd_booking_checkout_form_requets" value="'.$nd_booking_booking_form_requests.'">
                 <input type="hidden" id="nd_booking_checkout_form_arrival" name="nd_booking_checkout_form_arrival" value="'.$nd_booking_booking_form_arrival.'">
                 <input type="hidden" id="nd_booking_checkout_form_coupon" name="nd_booking_checkout_form_coupon" value="'.$nd_booking_booking_form_coupon.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front_token.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back_token.'">
                 <input type="hidden" id="nd_booking_checkout_form_term" name="nd_booking_checkout_form_term" value="'.$nd_booking_booking_form_term.'">
                 <input type="hidden" id="nd_booking_booking_form_services" name="nd_booking_booking_form_services" value="'.$nd_booking_booking_form_services.'">
 
@@ -149,8 +149,8 @@ $nd_booking_shortcode_right_content .= '
                 <input type="hidden" id="nd_booking_checkout_form_requets" name="nd_booking_checkout_form_requets" value="'.$nd_booking_booking_form_requests.'">
                 <input type="hidden" id="nd_booking_checkout_form_arrival" name="nd_booking_checkout_form_arrival" value="'.$nd_booking_booking_form_arrival.'">
                 <input type="hidden" id="nd_booking_checkout_form_coupon" name="nd_booking_checkout_form_coupon" value="'.$nd_booking_booking_form_coupon.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front_token.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back_token.'">
                 <input type="hidden" id="nd_booking_checkout_form_term" name="nd_booking_checkout_form_term" value="'.$nd_booking_booking_form_term.'">
                 <input type="hidden" id="nd_booking_booking_form_services" name="nd_booking_booking_form_services" value="'.$nd_booking_booking_form_services.'">
 
@@ -193,8 +193,8 @@ $nd_booking_shortcode_right_content .= '
                 <input type="hidden" id="nd_booking_checkout_form_requets" name="nd_booking_checkout_form_requets" value="'.$nd_booking_booking_form_requests.'">
                 <input type="hidden" id="nd_booking_checkout_form_arrival" name="nd_booking_checkout_form_arrival" value="'.$nd_booking_booking_form_arrival.'">
                 <input type="hidden" id="nd_booking_checkout_form_coupon" name="nd_booking_checkout_form_coupon" value="'.$nd_booking_booking_form_coupon.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front_token.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back_token.'">
                 <input type="hidden" id="nd_booking_checkout_form_term" name="nd_booking_checkout_form_term" value="'.$nd_booking_booking_form_term.'">
                 <input type="hidden" id="nd_booking_booking_form_services" name="nd_booking_booking_form_services" value="'.$nd_booking_booking_form_services.'">
 
@@ -244,8 +244,8 @@ $nd_booking_shortcode_right_content .= '
                 <input type="hidden" id="nd_booking_checkout_form_requets" name="nd_booking_checkout_form_requets" value="'.$nd_booking_booking_form_requests.'">
                 <input type="hidden" id="nd_booking_checkout_form_arrival" name="nd_booking_checkout_form_arrival" value="'.$nd_booking_booking_form_arrival.'">
                 <input type="hidden" id="nd_booking_checkout_form_coupon" name="nd_booking_checkout_form_coupon" value="'.$nd_booking_booking_form_coupon.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front.'">
-                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_front" name="nd_booking_checkout_form_guest_id_front" value="'.$nd_booking_guest_id_front_token.'">
+                <input type="hidden" id="nd_booking_checkout_form_guest_id_back" name="nd_booking_checkout_form_guest_id_back" value="'.$nd_booking_guest_id_back_token.'">
                 <input type="hidden" id="nd_booking_checkout_form_term" name="nd_booking_checkout_form_term" value="'.$nd_booking_booking_form_term.'">
                 <input type="hidden" id="nd_booking_booking_form_services" name="nd_booking_booking_form_services" value="'.$nd_booking_booking_form_services.'">
                 <input type="hidden" id="nd_booking_booking_form_action_type" name="nd_booking_booking_form_action_type" value="stripe">
