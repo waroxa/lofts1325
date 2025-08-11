@@ -104,33 +104,8 @@ $nd_booking_shortcode_right_content = '
       <div class=" nd_booking_width_100_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone  nd_booking_box_sizing_border_box nd_booking_float_left">
           <p>'.__('Arrival','nd-booking').'</p>
           <div class="nicdark_section nicdark_height_5"></div>
-          <select class="nd_booking_section" class="nd_booking_width_100_percentage" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival">
-              <option>'.__('I do not know','nd-booking').'</option>
-              <option>12:00 - 1:00 '.__('am','nd-booking').'</option>
-              <option>1:00 - 2:00 '.__('am','nd-booking').'</option>
-              <option>2:00 - 3:00 '.__('am','nd-booking').'</option>
-              <option>3:00 - 4:00 '.__('am','nd-booking').'</option>
-              <option>4:00 - 5:00 '.__('am','nd-booking').'</option>
-              <option>5:00 - 6:00 '.__('am','nd-booking').'</option>
-              <option>6:00 - 7:00 '.__('am','nd-booking').'</option>
-              <option>7:00 - 8:00 '.__('am','nd-booking').'</option>
-              <option>8:00 - 9:00 '.__('am','nd-booking').'</option>
-              <option>9:00 - 10:00 '.__('am','nd-booking').'</option>
-              <option>10:00 - 11:00 '.__('am','nd-booking').'</option>
-              <option>11:00 - 12:00 '.__('am','nd-booking').'</option>
-              <option>12:00 - 1:00 '.__('pm','nd-booking').'</option>
-              <option>1:00 - 2:00 '.__('pm','nd-booking').'</option>
-              <option>2:00 - 3:00 '.__('pm','nd-booking').'</option>
-              <option>3:00 - 4:00 '.__('pm','nd-booking').'</option>
-              <option>4:00 - 5:00 '.__('pm','nd-booking').'</option>
-              <option>5:00 - 6:00 '.__('pm','nd-booking').'</option>
-              <option>6:00 - 7:00 '.__('pm','nd-booking').'</option>
-              <option>7:00 - 8:00 '.__('pm','nd-booking').'</option>
-              <option>8:00 - 9:00 '.__('pm','nd-booking').'</option>
-              <option>9:00 - 10:00 '.__('pm','nd-booking').'</option>
-              <option>10:00 - 11:00 '.__('pm','nd-booking').'</option>
-              <option>11:00 - 12:00 '.__('pm','nd-booking').'</option>
-          </select>
+          <p><small><em>'.__('Check-in starts at 4 PM; checkout is at 12 PM.','nd-booking').'</em></small></p>
+          <input type="hidden" class="nd_booking_section" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival" value="4:00 - 5:00 '. __('pm','nd-booking').'" >
       </div>
       <div class="nd_booking_section nd_booking_height_20 '.nd_booking_get_coupon_enable_class().' "></div>
       <div id="nd_booking_booking_form_coupon_container" class="nd_booking_width_100_percentage '.nd_booking_get_coupon_enable_class().' nd_booking_box_sizing_border_box nd_booking_float_left">
