@@ -213,6 +213,8 @@ function wp_loft_booking_create_tables() {
 
     $sql = "CREATE TABLE $keychains_table (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        keychain_id INT UNSIGNED DEFAULT NULL,
+        booking_id MEDIUMINT DEFAULT NULL,
         tenant_id INT UNSIGNED DEFAULT NULL,
         unit_id MEDIUMINT DEFAULT NULL,
         name VARCHAR(255),
@@ -225,6 +227,9 @@ function wp_loft_booking_create_tables() {
             ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT fk_loft_keychains_unit_id
             FOREIGN KEY (unit_id) REFERENCES {$wpdb->prefix}loft_units(id)
+            ON DELETE SET NULL ON UPDATE CASCADE,
+        CONSTRAINT fk_loft_keychains_booking_id
+            FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id)
             ON DELETE SET NULL ON UPDATE CASCADE
     ) $charset_collate;";
 

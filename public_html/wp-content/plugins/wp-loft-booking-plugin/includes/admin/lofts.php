@@ -282,17 +282,29 @@ function wp_loft_booking_display_units() {
 
 function find_first_available_loft_unit($room_type) {
     global $wpdb;
-    $type = strtoupper($room_type);
-    $units = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}loft_units WHERE status = 'Available' ORDER BY id ASC");
+    $type        = strtoupper($room_type);
+    $units_table = $wpdb->prefix . 'loft_units';
 
-    foreach ($units as $unit) {
-        if (stripos($unit->unit_name, "($type)") !== false) {
-            error_log("✅ MATCHED UNIT: {$unit->unit_name} (DB ID: {$unit->id}, API ID: {$unit->unit_id_api})");
-            return $unit; // includes unit_id_api
-        }
+    $unit = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM {$units_table} WHERE status = 'Available' AND unit_name LIKE %s ORDER BY id ASC LIMIT 1",
+            '%' . $wpdb->esc_like("($type)") . '%'
+        )
+    );
+
+    if ($unit) {
+        $wpdb->update(
+            $units_table,
+            ['status' => 'Reserved'],
+            ['id' => $unit->id],
+            ['%s'],
+            ['%d']
+        );
+
+        error_log("✅ MATCHED UNIT: {$unit->unit_name} (DB ID: {$unit->id}, API ID: {$unit->unit_id_api})");
     }
 
-    return null;
+    return $unit;
 }
 
 

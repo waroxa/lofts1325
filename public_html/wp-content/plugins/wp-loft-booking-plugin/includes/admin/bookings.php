@@ -38,104 +38,63 @@ function create_butterflymx_visitor_pass($unit_id, $email, $from, $to) {
 update_option('loft_booking_cleaning_calendar_id', 'e964e301b54d0e795b44a76ebfb9d2cfbd2f6517a822429c5af62bc2cb94de20@group.calendar.google.com');
 update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e3a5814c79dcee4f62115d69fbfd@group.calendar.google.com');
 
-function handle_successful_booking($booking_id) {
-    global $wpdb;
+add_action('wc_stripe_webhook_payment_intent_succeeded', 'wp_loft_booking_stripe_payment_succeeded', 10, 2);
 
-    $booking = $wpdb->get_row(
-        $wpdb->prepare("SELECT * FROM {$wpdb->prefix}nd_booking_booking WHERE id = %d", $booking_id)
-    );
-
-    if (!$booking) {
-        error_log("❌ Booking not found.");
+function wp_loft_booking_stripe_payment_succeeded($order, $event) {
+    $intent = $event->data->object ?? null;
+    if (!$intent || empty($intent->metadata)) {
         return;
     }
 
-    $room_type  = strtoupper($booking->title_post);
-    $first_name = $booking->user_first_name;
-    $last_name  = $booking->user_last_name;
-    $email      = $booking->paypal_email;
-    $checkin    = $booking->date_from;
-    $checkout   = $booking->date_to;
+    $meta       = $intent->metadata;
+    $email      = $meta->guest_email ?? '';
+    $room_type  = $meta->loft_type ?? '';
+    $checkin    = $meta->checkin ?? '';
+    $checkout   = $meta->checkout ?? '';
+    $first_name = $meta->first_name ?? 'Guest';
+    $last_name  = $meta->last_name ?? 'Booking';
+    $booking_id = isset($meta->booking_id) ? intval($meta->booking_id) : 0;
 
-    // Normalize room type
-    if (stripos($room_type, 'SIMPLE') !== false)    $room_type = 'SIMPLE';
-    if (stripos($room_type, 'DOUBLE') !== false)    $room_type = 'DOUBLE';
-    if (stripos($room_type, 'PENTHOUSE') !== false) $room_type = 'PENTHOUSE';
+    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id);
+}
 
-    // Log to browser
-    add_action('wp_footer', function () use ($booking_id, $room_type, $first_name, $last_name, $email, $checkin, $checkout) {
-        echo "<script>
-            console.log('%c🔥 Booking Hook Triggered', 'color: green; font-weight: bold;');
-            console.log('ID: $booking_id');
-            console.log('Room Type: $room_type');
-            console.log('Guest: $first_name $last_name');
-            console.log('Email: $email');
-            console.log('Check-in: $checkin');
-            console.log('Checkout: $checkout');
-        </script>";
-    });
+function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name = 'Guest', $last_name = 'Booking', $booking_id = 0) {
+    $room_type = strtoupper($room_type);
 
     $loft = find_first_available_loft_unit($room_type);
     if (!$loft) {
-        add_action('wp_footer', function () {
-            echo "<script>console.warn('❌ No matching loft available');</script>";
-        });
+        error_log('❌ No matching loft available.');
         return;
     }
 
-    // 🧠 New check for unit_id_api
     if (!$loft->unit_id_api) {
         error_log("❌ Missing unit_id_api for {$loft->unit_name}");
-        add_action('wp_footer', function () use ($loft) {
-            echo "<script>console.error('❌ Missing unit_id_api for {$loft->unit_name}');</script>";
-        });
         return;
     }
 
-    // ✅ Create tenant
-    create_tenant_and_virtual_key(
-    $loft->unit_id_api,
-    $email,
-    $first_name,
-    $last_name,
-    $checkin // Pass real check-in date
-);
-    // if (!$tenant_id) {
-    //     error_log("❌ Failed to create tenant.");
-    //     add_action('wp_footer', function () {
-    //         echo "<script>console.error('❌ Failed to create tenant');</script>";
-    //     });
-    //     return;
-    // }
+    $access_group_id = wp_loft_booking_get_access_group_id($loft->unit_name);
+    if (!$access_group_id) {
+        error_log('❌ Access group not found for ' . $loft->unit_name);
+        return;
+    }
 
-    // ✅ Create visitor pass
-    // $created = create_butterflymx_visitor_pass($loft->unit_id_api, $email, $checkin, $checkout);
-    // if (!$created) {
-    //     error_log("❌ Failed to create visitor pass.");
-    //     add_action('wp_footer', function () {
-    //         echo "<script>console.error('❌ Failed to create visitor pass');</script>";
-    //     });
-    //     return;
-    // }
+    $tenant = [
+        'first_name' => $first_name,
+        'last_name'  => $last_name,
+        'email'      => $email,
+    ];
 
-    // ✅ Add calendar booking
+    $start = $checkin . 'T15:00:00Z';
+    $end   = $checkout . 'T11:00:00Z';
+
+    $result = wp_loft_booking_create_keychain_with_vk($tenant, $loft->unit_id_api, $access_group_id, $start, $end);
+    if ($result) {
+        wp_loft_booking_save_keychain_data($booking_id, $loft->id, $result['keychain_id'], $result['virtual_key_id'], $start, $end);
+    }
+
     add_booking_to_google_calendar("Booking for $first_name $last_name", $checkin, $checkout);
-
-    // ✅ Add cleaning task
     $cleaning_time = date('Y-m-d H:i:s', strtotime($checkout . ' +1 hour'));
     schedule_cleaning_task("Cleaning: {$loft->unit_name}", $cleaning_time);
 
-    error_log("✅ Booking automation completed.");
-
-    // Final success message
-    add_action('wp_footer', function () use ($loft) {
-        echo "<script>console.log('%c✅ Booking & automation complete for loft: {$loft->unit_name}', 'color: blue; font-weight: bold;');</script>";
-    });
+    error_log('✅ Booking automation completed.');
 }
-
-
-
-
-
-
-
