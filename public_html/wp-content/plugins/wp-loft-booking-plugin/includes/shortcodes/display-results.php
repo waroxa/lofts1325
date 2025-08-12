@@ -43,8 +43,10 @@ function custom_booking_search_results() {
     $branch_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}loft_branches WHERE building_id = %d", $building_id));
     if (!$branch_id) return '<p class="custom-nd-booking-no-results">Invalid branch selection. Please try again.</p>';
 
-    // Fetch units that match the search criteria
-    $query   = "SELECT u.id, u.unit_name, u.max_adults, u.max_children, u.status, u.price_per_night FROM {$wpdb->prefix}loft_units AS u WHERE u.status = 'Available' AND u.branch_id = %d AND u.max_adults >= %d AND u.max_children >= %d";
+    // Fetch units that match the search criteria. Use COALESCE to treat
+    // NULL capacities as a large number so units with unspecified limits
+    // are still returned in results.
+    $query   = "SELECT u.id, u.unit_name, u.max_adults, u.max_children, u.status, u.price_per_night FROM {$wpdb->prefix}loft_units AS u WHERE u.status = 'Available' AND u.branch_id = %d AND COALESCE(u.max_adults, 999) >= %d AND COALESCE(u.max_children, 999) >= %d";
     $results = $wpdb->get_results($wpdb->prepare($query, $branch_id, $adults, $children));
 
     // Count available lofts grouped by type directly from the loft_units table
