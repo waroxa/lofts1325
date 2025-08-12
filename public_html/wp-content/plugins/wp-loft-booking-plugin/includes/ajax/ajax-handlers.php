@@ -12,14 +12,17 @@ function wp_loft_booking_get_units() {
     global $wpdb;
     $branch_id = intval($_POST['branch_id']);
 
-    // Fetch units with no active bookings for the selected branch
-    $units = $wpdb->get_results($wpdb->prepare("
-        SELECT u.id, u.unit_name 
-        FROM {$wpdb->prefix}loft_units u
-        LEFT JOIN {$wpdb->prefix}loft_virtual_keys vk ON u.id = vk.unit_id
-        WHERE u.branch_id = %d
-        AND (vk.expiration_date IS NULL OR vk.expiration_date < NOW())
-    ", $branch_id));
+    // Fetch units with no active keychains for the selected branch
+    $units = $wpdb->get_results($wpdb->prepare(
+        "SELECT u.id, u.unit_name
+         FROM {$wpdb->prefix}loft_units u
+         LEFT JOIN {$wpdb->prefix}loft_keychains kc
+           ON kc.unit_id = u.id AND kc.valid_until >= NOW()
+         WHERE u.branch_id = %d
+           AND kc.unit_id IS NULL
+           AND u.status = 'available'",
+        $branch_id
+    ));
 
     wp_send_json($units);
 }
