@@ -210,6 +210,7 @@ function wp_loft_booking_display_units() {
 
     $units = $wpdb->get_results("SELECT * FROM $units_table WHERE unit_name LIKE '%LOFT%'");
     foreach ($units as $unit) {
+        $status      = strtolower($unit->status);
         $label       = normalize_label($unit->unit_name);
         $has_key     = isset($keys_map[$label]);
         $has_tenant  = isset($tenants_map[$label]);
@@ -229,20 +230,33 @@ function wp_loft_booking_display_units() {
             $avail = 'N/A';
         }
 
-        $color = $occupied ? 'red' : 'green';
-        $text  = $occupied ? 'Occupied' : 'Available';
+        // 📝 Update DB status for this unit, preserving 'unavailable'
+        if ($status !== 'unavailable') {
+            $status = $occupied ? 'occupied' : 'available';
+            $wpdb->update(
+                $units_table,
+                [
+                    'status'             => $status,
+                    'availability_until' => ($avail !== 'N/A') ? $avail : null,
+                ],
+                ['id' => $unit->id],
+                ['%s', '%s'],
+                ['%d']
+            );
+        } else {
+            $wpdb->update(
+                $units_table,
+                [
+                    'availability_until' => ($avail !== 'N/A') ? $avail : null,
+                ],
+                ['id' => $unit->id],
+                ['%s'],
+                ['%d']
+            );
+        }
 
-        // 📝 Update DB status for this unit
-        $wpdb->update(
-            $units_table,
-            [
-                'status'             => $occupied ? 'occupied' : 'available',
-                'availability_until' => ($avail !== 'N/A') ? $avail : null,
-            ],
-            ['id' => $unit->id],
-            ['%s', '%s'],
-            ['%d']
-        );
+        $text  = ucfirst($status);
+        $color = ($status === 'available') ? 'green' : 'red';
 
         echo "<tr>
                 <td>{$unit->unit_name}</td>
