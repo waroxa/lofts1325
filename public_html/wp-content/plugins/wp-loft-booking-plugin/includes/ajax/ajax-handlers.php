@@ -248,7 +248,7 @@ function test_room_counts_from_loft_units() {
             $double++;
         }
 
-        if (stripos($title, '(PENTHOUSE)') !== false && $status === 'available') {
+        if (stripos($title, 'PENTHOUSE') !== false && $status === 'available') {
             $penthouse++;
         }
     }
@@ -284,7 +284,7 @@ function update_room_quantities_after_loft_sync() {
             $simple_count++;
         } elseif (preg_match('/\( *DOUBLE *\)/i', $title)) {
             $double_count++;
-        } elseif (preg_match('/\( *PENTHOUSE *\)/i', $title)) {
+        } elseif (preg_match('/PENTHOUSE/i', $title)) {
             $penthouse_count++;
         }
     }

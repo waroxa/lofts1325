@@ -56,7 +56,7 @@ function custom_booking_search_results() {
                 CASE \
                     WHEN LOWER(unit_name) LIKE '%(simple)%' THEN 'simple' \
                     WHEN LOWER(unit_name) LIKE '%(double)%' THEN 'double' \
-                    WHEN LOWER(unit_name) LIKE '%(penthouse)%' THEN 'penthouse' \
+                    WHEN LOWER(unit_name) LIKE '%penthouse%' THEN 'penthouse' \
                 END AS type, \
                 COUNT(*) AS cnt \
             FROM {$wpdb->prefix}loft_units \
