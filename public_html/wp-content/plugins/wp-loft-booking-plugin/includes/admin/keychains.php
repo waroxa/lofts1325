@@ -564,5 +564,38 @@ function wp_loft_booking_update_unit_statuses(array $active_units) {
     $wpdb->query($sql);
 }
 
+function wp_loft_booking_save_keychain_data($booking_id, $unit_id, $keychain_id, $virtual_key_id, $start, $end) {
+    global $wpdb;
+
+    $kc_table   = $wpdb->prefix . 'loft_keychains';
+    $vk_table   = $wpdb->prefix . 'loft_virtual_keys';
+    $link_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
+
+    $wpdb->insert($kc_table, [
+        'keychain_id' => $keychain_id,
+        'booking_id'  => $booking_id,
+        'unit_id'     => $unit_id,
+        'name'        => 'Booking ' . $booking_id,
+        'valid_from'  => $start,
+        'valid_until' => $end,
+    ]);
+    $saved_kc_id = $wpdb->insert_id;
+
+    $wpdb->insert($vk_table, [
+        'name'           => 'Virtual Key ' . $virtual_key_id,
+        'booking_id'     => $booking_id,
+        'virtual_key_id' => $virtual_key_id,
+        'key_status'     => 'active',
+    ]);
+    $saved_vk_id = $wpdb->insert_id;
+
+    if ($saved_kc_id && $saved_vk_id) {
+        $wpdb->insert($link_table, [
+            'keychain_id' => $saved_kc_id,
+            'key_id'      => $saved_vk_id,
+        ]);
+    }
+}
+
 
 

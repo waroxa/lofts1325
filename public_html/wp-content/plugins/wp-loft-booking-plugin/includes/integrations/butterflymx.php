@@ -332,6 +332,117 @@ function wp_loft_booking_refresh_code_token($version) {
     return true;
 }
 
+function wp_loft_booking_get_access_group_id($loft_name) {
+    $token       = get_option('butterflymx_access_token_v4');
+    $environment = get_option('butterflymx_environment', 'sandbox');
+    $base_url    = $environment === 'production'
+        ? 'https://api.butterflymx.com/v4'
+        : 'https://api.na.sandbox.butterflymx.com/v4';
+
+    if (!$token) {
+        error_log('❌ Missing ButterflyMX token.');
+        return false;
+    }
+
+    $url      = $base_url . '/access_groups?q[name_cont]=' . rawurlencode($loft_name);
+    $response = wp_remote_get($url, [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $token,
+            'Content-Type'  => 'application/json',
+        ],
+        'timeout' => 20,
+    ]);
+
+    if (is_wp_error($response)) {
+        error_log('❌ Access group lookup failed: ' . $response->get_error_message());
+        return false;
+    }
+
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (!empty($data['data'][0]['id'])) {
+        return intval($data['data'][0]['id']);
+    }
+
+    return false;
+}
+
+function wp_loft_booking_create_keychain_with_vk($tenant, $unit_id_api, $access_group_id, $start, $end) {
+    $token       = get_option('butterflymx_access_token_v4');
+    $environment = get_option('butterflymx_environment', 'sandbox');
+    $base_url    = $environment === 'production'
+        ? 'https://api.butterflymx.com/v4'
+        : 'https://api.na.sandbox.butterflymx.com/v4';
+
+    if (!$token) {
+        error_log('❌ Missing ButterflyMX token.');
+        return false;
+    }
+
+    $kc_payload = [
+        'name'       => trim(($tenant['first_name'] ?? '') . ' ' . ($tenant['last_name'] ?? '')), 
+        'starts_at'  => $start,
+        'ends_at'    => $end,
+        'access_group_ids' => [$access_group_id],
+        'devices'    => [ [ 'type' => 'panels', 'id' => intval($unit_id_api) ] ],
+    ];
+
+    $kc_response = wp_remote_post($base_url . '/keychains/custom', [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $token,
+            'Content-Type'  => 'application/json',
+        ],
+        'body'    => wp_json_encode($kc_payload),
+        'timeout' => 20,
+    ]);
+
+    if (is_wp_error($kc_response)) {
+        error_log('❌ Keychain creation failed: ' . $kc_response->get_error_message());
+        return false;
+    }
+
+    $kc_data = json_decode(wp_remote_retrieve_body($kc_response), true);
+    $keychain_id = $kc_data['data']['id'] ?? null;
+
+    if (!$keychain_id) {
+        error_log('❌ Keychain ID missing in response.');
+        return false;
+    }
+
+    $vk_payload = [
+        'recipient' => $tenant['email'] ?? '',
+        'starts_at' => $start,
+        'ends_at'   => $end,
+    ];
+
+    $vk_response = wp_remote_post($base_url . '/keychains/' . intval($keychain_id) . '/virtual_keys', [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $token,
+            'Content-Type'  => 'application/json',
+        ],
+        'body'    => wp_json_encode($vk_payload),
+        'timeout' => 20,
+    ]);
+
+    if (is_wp_error($vk_response)) {
+        error_log('❌ Virtual key creation failed: ' . $vk_response->get_error_message());
+        return false;
+    }
+
+    $vk_data = json_decode(wp_remote_retrieve_body($vk_response), true);
+    $virtual_key_id = $vk_data['data']['id'] ?? null;
+
+    if (!$virtual_key_id) {
+        error_log('❌ Virtual key ID missing in response.');
+        return false;
+    }
+
+    return [
+        'keychain_id'    => intval($keychain_id),
+        'virtual_key_id' => intval($virtual_key_id),
+    ];
+}
+
 // add_action('nd_booking_after_booking_completed', 'handle_successful_booking', 10, 1);
 
 
