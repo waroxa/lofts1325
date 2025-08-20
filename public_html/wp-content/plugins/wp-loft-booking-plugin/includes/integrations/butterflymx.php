@@ -1,6 +1,18 @@
 <?php
 defined('ABSPATH') || exit;
 
+/**
+ * Resolve the ButterflyMX v4 base URL for the given environment.
+ *
+ * @param string $environment 'production' (default) or 'sandbox'.
+ * @return string Base API endpoint including /v4.
+ */
+function wp_loft_booking_get_butterflymx_base_url( $environment = 'production' ) {
+    return ( 'production' === $environment )
+        ? 'https://api.butterflymx.com/v4'
+        : 'https://api.na.sandbox.butterflymx.com/v4';
+}
+
 function wp_loft_booking_get_authorization_url($version) {
     $client_id = get_option('butterflymx_client_id');
     $environment = get_option('butterflymx_environment', 'sandbox');
@@ -367,79 +379,214 @@ function wp_loft_booking_get_access_group_id($loft_name) {
     return false;
 }
 
+/**
+ * Determine shared access points for a unit by copying from a template unit's
+ * access groups or falling back to all building-level access points.
+ *
+ * @param int         $building_id      Building id.
+ * @param int|null    $template_unit_id Optional unit to copy from.
+ * @param string      $environment      'production' or 'sandbox'.
+ * @return int[]|WP_Error              Array of access_point_ids or WP_Error.
+ */
+function wp_loft_booking_get_shared_access_points(
+    $building_id,
+    $template_unit_id = null,
+    $environment = 'production'
+) {
+    $token    = get_butterflymx_access_token( 'v4' );
+    $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
+
+    if ( empty( $token ) ) {
+        return new WP_Error( 'no_token', 'ButterflyMX access token missing.' );
+    }
+
+    $ap_ids = array();
+
+    if ( $template_unit_id ) {
+        $resp = wp_remote_get(
+            $base_url . '/access_groups?per_page=100',
+            array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $token,
+                    'Content-Type'  => 'application/json',
+                ),
+                'timeout' => 20,
+            )
+        );
+
+        if ( ! is_wp_error( $resp ) ) {
+            $groups = json_decode( wp_remote_retrieve_body( $resp ), true );
+            foreach ( $groups['data'] ?? array() as $group ) {
+                if ( ! empty( $group['units_ids'] ) && in_array( (int) $template_unit_id, $group['units_ids'], true ) ) {
+                    $g_resp = wp_remote_get(
+                        $base_url . '/access_groups/' . (int) $group['id'],
+                        array(
+                            'headers' => array(
+                                'Authorization' => 'Bearer ' . $token,
+                                'Content-Type'  => 'application/json',
+                            ),
+                            'timeout' => 20,
+                        )
+                    );
+
+                    if ( ! is_wp_error( $g_resp ) ) {
+                        $g_data = json_decode( wp_remote_retrieve_body( $g_resp ), true );
+                        foreach ( $g_data['data']['access_point_ids'] ?? array() as $id ) {
+                            $ap_ids[] = (int) $id;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ( empty( $ap_ids ) ) {
+        $resp = wp_remote_get(
+            $base_url . '/access_points?q[building_id_eq]=' . (int) $building_id,
+            array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $token,
+                    'Content-Type'  => 'application/json',
+                ),
+                'timeout' => 20,
+            )
+        );
+
+        if ( is_wp_error( $resp ) ) {
+            return new WP_Error( 'api_error', 'Unable to fetch building access points.' );
+        }
+
+        $aps = json_decode( wp_remote_retrieve_body( $resp ), true );
+        foreach ( $aps['data'] ?? array() as $ap ) {
+            $ap_ids[] = (int) $ap['id'];
+        }
+    }
+
+    $ap_ids = array_values( array_unique( $ap_ids ) );
+    if ( empty( $ap_ids ) ) {
+        return new WP_Error( 'no_access_points', 'No access points discovered for building.' );
+    }
+
+    return $ap_ids;
+}
+
+/**
+ * Creates a ButterflyMX visitor pass (keychain + virtual key) by default in
+ * production, copying shared access points from peer lofts.
+ *
+ * @param int         $building_id      Building id.
+ * @param int         $target_unit_id   Unit id for the new loft.
+ * @param string      $starts_at_utc    UTC ISO8601 start time (with Z).
+ * @param string      $ends_at_utc      UTC ISO8601 end time (with Z).
+ * @param string|null $recipient_email  Email to send the virtual key to.
+ * @param int|null    $template_unit_id Optional unit id to copy APs from.
+ * @param string      $environment      'production' or 'sandbox'.
+ *
+ * @return array|WP_Error On success: ['keychain_id'=>int,'virtual_key_ids'=>int[],'access_point_ids'=>int[]].
+ */
+function wp_loft_booking_create_visitor_pass_for_unit(
+    $building_id,
+    $target_unit_id,
+    $starts_at_utc,
+    $ends_at_utc,
+    $recipient_email = null,
+    $template_unit_id = null,
+    $environment = 'production'
+) {
+    $token    = get_butterflymx_access_token( 'v4' );
+    $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
+
+    if ( empty( $token ) ) {
+        return new WP_Error( 'no_token', 'ButterflyMX access token missing.' );
+    }
+
+    $ap_ids = wp_loft_booking_get_shared_access_points( $building_id, $template_unit_id, $environment );
+    if ( is_wp_error( $ap_ids ) ) {
+        return $ap_ids;
+    }
+
+    $payload = array(
+        'keychain' => array(
+            'name'             => 'Visitor - ' . (int) $target_unit_id,
+            'unit_id'          => (int) $target_unit_id,
+            'starts_at'        => $starts_at_utc,
+            'ends_at'          => $ends_at_utc,
+            'access_point_ids' => $ap_ids,
+            'notes'            => 'Booking via WP',
+        ),
+    );
+
+    if ( $recipient_email ) {
+        $payload['keychain']['recipients'] = array( sanitize_email( $recipient_email ) );
+    }
+
+    $resp = wp_remote_post(
+        $base_url . '/keychains/custom',
+        array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ),
+            'body'    => wp_json_encode( $payload, JSON_UNESCAPED_SLASHES ),
+            'timeout' => 20,
+        )
+    );
+
+    if ( is_wp_error( $resp ) ) {
+        return new WP_Error( 'http_request_failed', $resp->get_error_message() );
+    }
+
+    $status = wp_remote_retrieve_response_code( $resp );
+    $data   = json_decode( wp_remote_retrieve_body( $resp ), true );
+
+    if ( $status >= 300 ) {
+        $message = isset( $data['message'] ) ? trim( $data['message'] ) : 'ButterflyMX API error.';
+        return new WP_Error( 'http_error', $message, array( 'status' => $status ) );
+    }
+
+    $keychain_id = (int) ( $data['data']['id'] ?? 0 );
+    $vk_ids      = array();
+    foreach ( $data['data']['virtual_keys'] ?? array() as $vk ) {
+        if ( isset( $vk['id'] ) ) {
+            $vk_ids[] = (int) $vk['id'];
+        }
+    }
+
+    return array(
+        'keychain_id'      => $keychain_id,
+        'virtual_key_ids'  => $vk_ids,
+        'access_point_ids' => $ap_ids,
+    );
+}
+
+/**
+ * Legacy helper to create a keychain and virtual key. Deprecated in favour of
+ * wp_loft_booking_create_visitor_pass_for_unit().
+ *
+ * @deprecated Use wp_loft_booking_create_visitor_pass_for_unit().
+ */
 function wp_loft_booking_create_keychain_with_vk($tenant, $unit_id_api, $access_group_id, $start, $end) {
-    $token       = get_option('butterflymx_access_token_v4');
+    $building_id = get_option('butterflymx_building_id');
     $environment = get_option('butterflymx_environment', 'sandbox');
-    $base_url    = $environment === 'production'
-        ? 'https://api.butterflymx.com/v4'
-        : 'https://api.na.sandbox.butterflymx.com/v4';
 
-    if (!$token) {
-        error_log('❌ Missing ButterflyMX token.');
-        return false;
-    }
+    $result = wp_loft_booking_create_visitor_pass_for_unit(
+        intval( $building_id ),
+        intval( $unit_id_api ),
+        $start,
+        $end,
+        $tenant['email'] ?? null,
+        null,
+        $environment
+    );
 
-    $kc_payload = [
-        'name'       => trim(($tenant['first_name'] ?? '') . ' ' . ($tenant['last_name'] ?? '')), 
-        'starts_at'  => $start,
-        'ends_at'    => $end,
-        'access_group_ids' => [$access_group_id],
-        'devices'    => [ [ 'type' => 'panels', 'id' => intval($unit_id_api) ] ],
-    ];
-
-    $kc_response = wp_remote_post($base_url . '/keychains/custom', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type'  => 'application/json',
-        ],
-        'body'    => wp_json_encode($kc_payload),
-        'timeout' => 20,
-    ]);
-
-    if (is_wp_error($kc_response)) {
-        error_log('❌ Keychain creation failed: ' . $kc_response->get_error_message());
-        return false;
-    }
-
-    $kc_data = json_decode(wp_remote_retrieve_body($kc_response), true);
-    $keychain_id = $kc_data['data']['id'] ?? null;
-
-    if (!$keychain_id) {
-        error_log('❌ Keychain ID missing in response.');
-        return false;
-    }
-
-    $vk_payload = [
-        'recipient' => $tenant['email'] ?? '',
-        'starts_at' => $start,
-        'ends_at'   => $end,
-    ];
-
-    $vk_response = wp_remote_post($base_url . '/keychains/' . intval($keychain_id) . '/virtual_keys', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type'  => 'application/json',
-        ],
-        'body'    => wp_json_encode($vk_payload),
-        'timeout' => 20,
-    ]);
-
-    if (is_wp_error($vk_response)) {
-        error_log('❌ Virtual key creation failed: ' . $vk_response->get_error_message());
-        return false;
-    }
-
-    $vk_data = json_decode(wp_remote_retrieve_body($vk_response), true);
-    $virtual_key_id = $vk_data['data']['id'] ?? null;
-
-    if (!$virtual_key_id) {
-        error_log('❌ Virtual key ID missing in response.');
+    if ( is_wp_error( $result ) ) {
+        error_log( '❌ Visitor pass creation failed: ' . $result->get_error_message() );
         return false;
     }
 
     return [
-        'keychain_id'    => intval($keychain_id),
-        'virtual_key_id' => intval($virtual_key_id),
+        'keychain_id'    => $result['keychain_id'],
+        'virtual_key_id' => $result['virtual_key_ids'][0] ?? null,
     ];
 }
 
