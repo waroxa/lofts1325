@@ -96,5 +96,21 @@ function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout
     $cleaning_time = date('Y-m-d H:i:s', strtotime($checkout . ' +1 hour'));
     schedule_cleaning_task("Cleaning: {$loft->unit_name}", $cleaning_time);
 
+    if (function_exists('trigger_amelia_booking_webhook')) {
+        $amelia_data = [
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
+            'email'      => $email,
+            'checkin'    => $checkin,
+            'checkout'   => $checkout,
+            'unit'       => [
+                'id'     => $loft->id,
+                'name'   => $loft->unit_name,
+                'api_id' => $loft->unit_id_api,
+            ],
+        ];
+        trigger_amelia_booking_webhook($amelia_data);
+    }
+
     error_log('✅ Booking automation completed.');
 }
