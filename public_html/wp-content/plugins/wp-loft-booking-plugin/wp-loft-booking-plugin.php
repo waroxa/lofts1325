@@ -24,7 +24,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/admin/payment-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/tenants.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/butterflymx.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/booking-handler.php';
-require_once plugin_dir_path(__FILE__) . 'includes/integrations/amelia_hooks.php';
+require_once plugin_dir_path(__FILE__) . 'includes/integrations/amelia-hooks.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/booking-form.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/search-form.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/display-results.php';
