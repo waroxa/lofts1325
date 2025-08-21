@@ -6,6 +6,7 @@
     <meta name="author" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         	
+    <meta name="google-site-verification" content="OQ6CtFgHyOZp5l52DnI5YnOkdM_4t2bA0wuvjH78RTE">
 <?php wp_head(); ?>	  
 </head>  
 
