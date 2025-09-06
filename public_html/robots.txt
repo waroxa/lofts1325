@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.loft1325.com/sitemap.xml
