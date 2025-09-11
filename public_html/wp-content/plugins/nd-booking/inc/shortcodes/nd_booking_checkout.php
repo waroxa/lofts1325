@@ -310,7 +310,11 @@ function nd_booking_shortcode_checkout() {
                     $nd_booking_response_body = wp_remote_retrieve_body( $nd_booking_response );
                     $nd_booking_stripe_data = json_decode( $nd_booking_response_body );
 
-                    if ( $nd_booking_stripe_data->paid == 1 ) { $nd_booking_booking_form_payment_status = 'Completed'; }
+                    if ( $nd_booking_stripe_data->paid == 1 ) {
+                        $nd_booking_booking_form_payment_status = 'Completed';
+                        // store the payment id for later use
+                        $nd_booking_booking_form_payment_id     = $nd_booking_stripe_data->id;
+                    }
 
                     //transaction TX id
                     $nd_booking_paypal_tx = $nd_booking_stripe_data->id;
@@ -595,6 +599,23 @@ function nd_booking_shortcode_checkout() {
         update_post_meta( $nd_booking_booking_id, 'guest_id_back', esc_url_raw( $nd_booking_guest_id_back ) );
         update_post_meta( $nd_booking_booking_id, 'guest_id_number', sanitize_text_field( $nd_booking_guest_id_number ) );
         update_post_meta( $nd_booking_booking_id, 'guest_id_type', sanitize_text_field( $nd_booking_guest_id_type ) );
+
+        if (
+            $nd_booking_booking_form_action_type === 'stripe' &&
+            $nd_booking_booking_form_payment_status === 'Completed'
+        ) {
+            $payload = [
+                'guest_email'   => $nd_booking_booking_form_email,
+                'room_type'     => $nd_booking_checkout_form_post_title,
+                'check_in_date' => $nd_booking_booking_form_date_from,
+                'check_out_date'=> $nd_booking_booking_form_date_to,
+                'booking_id'    => $nd_booking_booking_id,
+                'first_name'    => $nd_booking_booking_form_name,
+                'last_name'     => $nd_booking_booking_form_surname,
+            ];
+
+            do_action( 'nd_booking_stripe_payment_complete', $payload );
+        }
 
         if (function_exists('add_booking_to_google_calendar')) {
             $summary = sprintf(
