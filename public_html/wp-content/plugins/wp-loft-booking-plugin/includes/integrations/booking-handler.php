@@ -28,6 +28,8 @@ function wp_loft_booking_handle_booking(
     $paypal_tx,
     $action_type
 ) {
+    global $wpdb;
+
     $booking = [
         'room_id'   => $id_post,
         'name'      => $user_first_name,
@@ -37,6 +39,31 @@ function wp_loft_booking_handle_booking(
         'date_from' => $date_from,
         'date_to'   => $date_to,
     ];
+
+    $units_table    = $wpdb->prefix . 'loft_units';
+    $bookings_table = $wpdb->prefix . 'loft_bookings';
+
+    $has_valid_unit = !empty($booking['room_id']) && $wpdb->get_var(
+        $wpdb->prepare("SELECT id FROM {$units_table} WHERE id = %d", $booking['room_id'])
+    );
+
+    if (!$has_valid_unit) {
+        $available_unit = $wpdb->get_var(
+            "SELECT id FROM {$units_table} WHERE status = 'available' ORDER BY unit_name ASC LIMIT 1"
+        );
+
+        if ($available_unit) {
+            $booking['room_id'] = intval($available_unit);
+
+            $wpdb->update(
+                $bookings_table,
+                ['unit_id' => $booking['room_id']],
+                ['id' => $id_post],
+                ['%d'],
+                ['%d']
+            );
+        }
+    }
 
     // 🔐 Generar llave virtual con ButterflyMX
     wp_loft_booking_generate_virtual_key(
