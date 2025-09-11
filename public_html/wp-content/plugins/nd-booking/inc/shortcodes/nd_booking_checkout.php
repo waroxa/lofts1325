@@ -268,12 +268,12 @@ function nd_booking_shortcode_checkout() {
 
 
                 //prepare the request
-                $nd_booking_response = wp_remote_post( 
+                $nd_booking_response = wp_remote_post(
 
-                    $nd_booking_url, 
+                    $nd_booking_url,
 
                     array(
-                    
+
                         'method' => 'POST',
                         'timeout' => 45,
                         'redirection' => 5,
@@ -282,7 +282,7 @@ function nd_booking_shortcode_checkout() {
                         'headers' => array(
                             'Authorization' => 'Bearer '.$nd_booking_stripe_secret_key
                         ),
-                        'body' => array( 
+                        'body' => array(
                             'amount' => $nd_booking_amount,
                             'currency' => $nd_booking_currency,
                             'description' => $nd_booking_description,
@@ -297,41 +297,51 @@ function nd_booking_shortcode_checkout() {
                             'metadata[requests]' => $nd_booking_booking_form_requests
                         ),
                         'cookies' => array()
-                    
+
                     )
                 );
 
 
+                if ( is_wp_error( $nd_booking_response ) ) {
+                    error_log( 'nd_booking: Stripe request error: ' . $nd_booking_response->get_error_message() );
+                    return '<p>'. esc_html__( 'There was a problem processing your payment. Please try again later.', 'nd-booking' ) .'</p>';
+                }
+
                 // START check the response
                 $nd_booking_http_response_code = wp_remote_retrieve_response_code( $nd_booking_response );
 
-                if ( $nd_booking_http_response_code == 200 ) {
-
-                    $nd_booking_response_body = wp_remote_retrieve_body( $nd_booking_response );
-                    $nd_booking_stripe_data = json_decode( $nd_booking_response_body );
-
-                    if ( $nd_booking_stripe_data->paid == 1 ) {
-                        $nd_booking_booking_form_payment_status = 'Completed';
-                        // store the payment id for later use
-                        $nd_booking_booking_form_payment_id     = $nd_booking_stripe_data->id;
-                    }
-
-                    //transaction TX id
-                    $nd_booking_paypal_tx = $nd_booking_stripe_data->id;
-
-                    //get current date
-                    $nd_booking_date = date('H:m:s F j Y');
-
-                    //get currency
-                    $nd_booking_booking_form_currency = nd_booking_get_currency();
-
-                    $nd_booking_paypal_error = 0;
-
-                }else
-                {
-                    //$error_message = $nd_booking_response->get_error_message();
-                    $nd_booking_paypal_error = 1;
+                if ( 200 !== $nd_booking_http_response_code ) {
+                    error_log( 'nd_booking: Stripe request failed with code '. $nd_booking_http_response_code .' and body: '. wp_remote_retrieve_body( $nd_booking_response ) );
+                    return '<p>'. esc_html__( 'Unable to process payment at this time. Please contact support.', 'nd-booking' ) .'</p>';
                 }
+
+                $nd_booking_response_body = wp_remote_retrieve_body( $nd_booking_response );
+                $nd_booking_stripe_data   = json_decode( $nd_booking_response_body );
+
+                if ( ! is_object( $nd_booking_stripe_data ) ) {
+                    error_log( 'nd_booking: Invalid Stripe response: '. $nd_booking_response_body );
+                    return '<p>'. esc_html__( 'Unexpected response from payment gateway. Please contact support.', 'nd-booking' ) .'</p>';
+                }
+
+                if ( empty( $nd_booking_stripe_data->paid ) ) {
+                    error_log( 'nd_booking: Stripe charge not paid. Response: '. $nd_booking_response_body );
+                    return '<p>'. esc_html__( 'Payment was not completed. Please try again.', 'nd-booking' ) .'</p>';
+                }
+
+                $nd_booking_booking_form_payment_status = 'Completed';
+                // store the payment id for later use
+                $nd_booking_booking_form_payment_id     = $nd_booking_stripe_data->id;
+
+                //transaction TX id
+                $nd_booking_paypal_tx = $nd_booking_stripe_data->id;
+
+                //get current date
+                $nd_booking_date = date('H:m:s F j Y');
+
+                //get currency
+                $nd_booking_booking_form_currency = nd_booking_get_currency();
+
+                $nd_booking_paypal_error = 0;
                 //END check the response
 
             }
