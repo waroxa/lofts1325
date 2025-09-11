@@ -1,12 +1,51 @@
 <?php
 defined('ABSPATH') || exit;
 
-add_action('nd_booking_after_booking_created', 'wp_loft_booking_handle_booking', 10, 1);
+add_action('nd_booking_reservation_added_in_db', 'wp_loft_booking_handle_booking', 10, 23);
 
-function wp_loft_booking_handle_booking($booking) {
+function wp_loft_booking_handle_booking(
+    $id_post,
+    $title_post,
+    $date,
+    $date_from,
+    $date_to,
+    $guests,
+    $final_trip_price,
+    $extra_services,
+    $id_user,
+    $user_first_name,
+    $user_last_name,
+    $paypal_email,
+    $user_phone,
+    $user_address,
+    $user_city,
+    $user_country,
+    $user_message,
+    $user_arrival,
+    $user_coupon,
+    $paypal_payment_status,
+    $paypal_currency,
+    $paypal_tx,
+    $action_type
+) {
+    $booking = [
+        'room_id'   => $id_post,
+        'name'      => $user_first_name,
+        'surname'   => $user_last_name,
+        'email'     => $paypal_email,
+        'country'   => $user_country,
+        'date_from' => $date_from,
+        'date_to'   => $date_to,
+    ];
 
     // 🔐 Generar llave virtual con ButterflyMX
-    wp_loft_booking_generate_virtual_key($booking['room_id'], $booking['name'], $booking['email'], $booking['date_from'], $booking['date_to']);
+    wp_loft_booking_generate_virtual_key(
+        $booking['room_id'],
+        $booking['name'],
+        $booking['email'],
+        $booking['date_from'],
+        $booking['date_to']
+    );
 
     // 🗓️ Crear evento en Google Calendar
     wp_loft_booking_create_google_event($booking);
