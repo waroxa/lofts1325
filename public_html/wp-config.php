@@ -40,11 +40,12 @@ define( 'DB_CHARSET', 'utf8' );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
 
-define('WP_DEBUG', true);
-define('WP_DEBUG_LOG', true);
-define('WP_DEBUG_DISPLAY', false);
-@ini_set('log_errors', 1);
-@ini_set('display_errors', 0);
+// Debug configuration. Disabled by default in production.
+define( 'WP_DEBUG', false );
+define( 'WP_DEBUG_LOG', false );
+define( 'WP_DEBUG_DISPLAY', false );
+@ini_set( 'log_errors', 1 );
+@ini_set( 'display_errors', 0 );
 
 
 
@@ -99,9 +100,7 @@ $table_prefix = 'lum_';
  *
  * @link https://wordpress.org/support/article/debugging-in-wordpress/
  */
-if ( ! defined( 'WP_DEBUG' ) ) {
-	define( 'WP_DEBUG', false );
-}
+// WP_DEBUG, WP_DEBUG_LOG, and WP_DEBUG_DISPLAY are defined above.
 
 /* That's all, stop editing! Happy publishing. */
 
@@ -114,3 +113,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 @include_once('/var/lib/sec/wp-settings-pre.php'); // Added by SiteGround WordPress management system
 require_once ABSPATH . 'wp-settings.php';
 @include_once('/var/lib/sec/wp-settings.php'); // Added by SiteGround WordPress management system
+
+if ( function_exists( 'add_filter' ) && ! function_exists( 'booking_wp_die_log_handler' ) ) {
+    function booking_wp_die_log_handler( $message, $title = '', $args = array() ) {
+        $text = is_string( $message ) ? $message : print_r( $message, true );
+        error_log( 'wp_die: ' . $text );
+        _default_wp_die_handler( $message, $title, $args );
+    }
+    add_filter( 'wp_die_handler', function () {
+        return 'booking_wp_die_log_handler';
+    } );
+}
