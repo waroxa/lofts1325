@@ -39,6 +39,7 @@ update_option('loft_booking_cleaning_calendar_id', 'e964e301b54d0e795b44a76ebfb9
 update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e3a5814c79dcee4f62115d69fbfd@group.calendar.google.com');
 
 add_action('wc_stripe_webhook_payment_intent_succeeded', 'wp_loft_booking_stripe_payment_succeeded', 10, 2);
+add_action('nd_booking_stripe_payment_complete', 'wp_loft_booking_nd_stripe_payment_complete', 10, 1);
 
 function wp_loft_booking_stripe_payment_succeeded($order, $event) {
     $intent = $event->data->object ?? null;
@@ -54,6 +55,18 @@ function wp_loft_booking_stripe_payment_succeeded($order, $event) {
     $first_name = $meta->first_name ?? 'Guest';
     $last_name  = $meta->last_name ?? 'Booking';
     $booking_id = isset($meta->booking_id) ? intval($meta->booking_id) : 0;
+
+    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id);
+}
+
+function wp_loft_booking_nd_stripe_payment_complete($payload) {
+    $email      = $payload['guest_email']   ?? '';
+    $room_type  = $payload['room_type']     ?? '';
+    $checkin    = $payload['check_in_date'] ?? '';
+    $checkout   = $payload['check_out_date'] ?? '';
+    $booking_id = isset($payload['booking_id']) ? intval($payload['booking_id']) : 0;
+    $first_name = $payload['first_name']    ?? 'Guest';
+    $last_name  = $payload['last_name']     ?? 'Booking';
 
     wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id);
 }
