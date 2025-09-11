@@ -597,16 +597,17 @@ function nd_booking_shortcode_checkout() {
         update_post_meta( $nd_booking_booking_id, 'guest_id_type', sanitize_text_field( $nd_booking_guest_id_type ) );
 
         if (function_exists('add_booking_to_google_calendar')) {
-            $args = [
-                'name'        => $nd_booking_booking_form_name,
-                'surname'     => $nd_booking_booking_form_surname,
-                'email'       => $nd_booking_booking_form_email,
-                'start'       => $nd_booking_booking_form_date_from,
-                'end'         => $nd_booking_booking_form_date_to,
-                'room_id'     => $nd_booking_id_room,
-                // add other fields as needed
-            ];
-            add_booking_to_google_calendar($args);
+            $summary = sprintf(
+                'Booking for %s %s',
+                $nd_booking_booking_form_name,
+                $nd_booking_booking_form_surname
+            );
+
+            add_booking_to_google_calendar(
+                $summary,
+                $nd_booking_booking_form_date_from,
+                $nd_booking_booking_form_date_to
+            );
         }
         if (function_exists('create_keychain_in_butterflymx')) {
             $args = [

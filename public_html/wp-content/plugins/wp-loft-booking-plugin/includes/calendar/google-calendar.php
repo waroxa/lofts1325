@@ -47,8 +47,38 @@ function loft_booking_get_google_auth_url() {
 
 
 function add_booking_to_google_calendar($summary, $start, $end) {
-    $calendar_id = get_option('loft_booking_calendar_id');
-    return create_google_event($summary, 'Automated guest booking.', date('c', strtotime($start)), date('c', strtotime($end)), $calendar_id);
+    $calendar_id  = get_option('loft_booking_calendar_id');
+    $access_token = get_option('google_calendar_access_token');
+
+    $event = [
+        'summary'     => $summary,
+        'description' => 'Automated guest booking.',
+        'start'       => [
+            'dateTime' => date('c', strtotime($start)),
+            'timeZone' => 'America/Toronto',
+        ],
+        'end'         => [
+            'dateTime' => date('c', strtotime($end)),
+            'timeZone' => 'America/Toronto',
+        ],
+    ];
+
+    $response = wp_remote_post("https://www.googleapis.com/calendar/v3/calendars/{$calendar_id}/events", [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $access_token,
+            'Content-Type'  => 'application/json',
+        ],
+        'body' => json_encode($event),
+    ]);
+
+    error_log("\xF0\x9F\x93\xA4 Google Calendar API response: " . print_r($response, true));
+
+    if (is_wp_error($response)) {
+        error_log("\xE2\x9D\x8C Google Calendar error: " . $response->get_error_message());
+        return false;
+    }
+
+    return json_decode(wp_remote_retrieve_body($response), true);
 }
 
 add_action('admin_footer', function() {
