@@ -35,6 +35,7 @@ function wp_loft_booking_handle_booking(
         'name'      => $user_first_name,
         'surname'   => $user_last_name,
         'email'     => $paypal_email,
+        'phone'     => $user_phone,
         'country'   => $user_country,
         'date_from' => $date_from,
         'date_to'   => $date_to,
@@ -70,6 +71,7 @@ function wp_loft_booking_handle_booking(
         $booking['room_id'],
         $booking['name'],
         $booking['email'],
+        $booking['phone'],
         $booking['date_from'],
         $booking['date_to']
     );
@@ -78,7 +80,7 @@ function wp_loft_booking_handle_booking(
     wp_loft_booking_create_google_event($booking);
 }
 
-function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $date_from, $date_to) {
+function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $date_from, $date_to) {
     $access_token = get_option('butterflymx_access_token_v4');
     $environment = get_option('butterflymx_environment', 'sandbox');
 
@@ -92,23 +94,24 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $date_fro
             'Content-Type'  => 'application/json',
         ],
         'body' => json_encode([
-            'unit_id'   => intval($unit_id),
-            'recipient' => $email,
-            'start_time' => $date_from . 'T15:00:00Z',
-            'end_time'   => $date_to . 'T11:00:00Z',
+            'unit_id'         => intval($unit_id),
+            'recipient'       => $email,
+            'phone_number'    => $phone,
+            'delivery_methods' => ['email', 'sms'],
+            'start_time'      => $date_from . 'T15:00:00Z',
+            'end_time'        => $date_to . 'T11:00:00Z',
         ]),
     ]);
-
     if (is_wp_error($response)) {
-        error_log('ButterflyMX error: ' . $response->get_error_message());
+        error_log('❌ ButterflyMX key creation failed: ' . $response->get_error_message());
         return;
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
     if (!empty($body['data'])) {
-        error_log("🔐 Llave creada para $email desde $date_from hasta $date_to");
+        error_log('✅ ButterflyMX key created successfully');
     } else {
-        error_log("❌ Error creando llave ButterflyMX: " . print_r($body, true));
+        error_log('❌ ButterflyMX key creation failed: ' . wp_remote_retrieve_body($response));
     }
 }
 
