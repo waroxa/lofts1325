@@ -116,7 +116,12 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 }
 
 function wp_loft_booking_create_google_event($booking) {
-    $client = wp_loft_get_google_client(); // Asumes que ya tienes esto en google-oauth-handler.php
+    $client = wp_loft_get_google_client();
+    if (!$client) {
+        error_log('⚠️ Google Client unavailable. Skipping calendar event creation.');
+        return;
+    }
+
     $service = new Google_Service_Calendar($client);
 
     $event = new Google_Service_Calendar_Event([
