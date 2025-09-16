@@ -8,6 +8,15 @@ $nd_booking_checkout_currency = nd_booking_get_currency();
 $nd_booking_checkout_subtotal_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['base'] );
 $nd_booking_checkout_total_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['total'] );
 $nd_booking_checkout_tax_total_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['total_tax'] );
+$nd_booking_checkout_nights = absint( nd_booking_get_number_night( $nd_booking_booking_form_date_from, $nd_booking_booking_form_date_to ) );
+$nd_booking_checkout_nightly_rate = 0;
+
+if ( $nd_booking_checkout_nights > 0 ) {
+    $nd_booking_checkout_nightly_rate = floatval( $nd_booking_checkout_tax_breakdown['base'] ) / $nd_booking_checkout_nights;
+}
+
+$nd_booking_checkout_nightly_rate_formatted = nd_booking_format_decimal( $nd_booking_checkout_nightly_rate );
+$nd_booking_checkout_nights_label = _n( 'night', 'nights', $nd_booking_checkout_nights, 'nd-booking' );
 
 $nd_booking_checkout_known_tax_labels = array(
     'lodging' => __( 'Lodging Tax', 'nd-booking' ),
@@ -17,6 +26,7 @@ $nd_booking_checkout_known_tax_labels = array(
 
 $nd_booking_checkout_tax_lines = '<div class="nd_booking_section nd_booking_height_10"></div>';
 $nd_booking_checkout_tax_lines .= '<div class="nd_booking_section nd_booking_tax_breakdown">';
+$nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13" data-tax-key="nightly_rate" data-nights="'.esc_attr( $nd_booking_checkout_nights ).'"><span class="nd_booking_tax_label">'.__( 'Nightly Rate', 'nd-booking' ).'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_checkout_nightly_rate_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span> &times; <span class="nd_booking_tax_nights">'.$nd_booking_checkout_nights.'</span> <span class="nd_booking_tax_nights_label">'.$nd_booking_checkout_nights_label.'</span></p>';
 $nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13" data-tax-key="subtotal"><span class="nd_booking_tax_label">'.__( 'Subtotal', 'nd-booking' ).'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_checkout_subtotal_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span></p>';
 
 foreach ( $nd_booking_checkout_known_tax_labels as $nd_booking_tax_key => $nd_booking_tax_label ) {
