@@ -1,6 +1,45 @@
 <?php
 
 
+$nd_booking_checkout_tax_breakdown = isset( $nd_booking_tax_breakdown ) && is_array( $nd_booking_tax_breakdown )
+    ? $nd_booking_tax_breakdown
+    : nd_booking_calculate_tax_breakdown_from_total( $nd_booking_booking_form_final_price );
+$nd_booking_checkout_currency = nd_booking_get_currency();
+$nd_booking_checkout_subtotal_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['base'] );
+$nd_booking_checkout_total_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['total'] );
+$nd_booking_checkout_tax_total_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['total_tax'] );
+
+$nd_booking_checkout_known_tax_labels = array(
+    'lodging' => __( 'Lodging Tax', 'nd-booking' ),
+    'gst'     => __( 'GST', 'nd-booking' ),
+    'qst'     => __( 'QST', 'nd-booking' ),
+);
+
+$nd_booking_checkout_tax_lines = '<div class="nd_booking_section nd_booking_height_10"></div>';
+$nd_booking_checkout_tax_lines .= '<div class="nd_booking_section nd_booking_tax_breakdown">';
+$nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13" data-tax-key="subtotal"><span class="nd_booking_tax_label">'.__( 'Subtotal', 'nd-booking' ).'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_checkout_subtotal_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span></p>';
+
+foreach ( $nd_booking_checkout_known_tax_labels as $nd_booking_tax_key => $nd_booking_tax_label ) {
+    $nd_booking_line_style = '';
+    if ( isset( $nd_booking_checkout_tax_breakdown['taxes'][ $nd_booking_tax_key ] ) ) {
+        $nd_booking_tax_rate = nd_booking_format_percentage( $nd_booking_checkout_tax_breakdown['taxes'][ $nd_booking_tax_key ]['rate'] );
+        $nd_booking_tax_amount_formatted = nd_booking_format_decimal( $nd_booking_checkout_tax_breakdown['taxes'][ $nd_booking_tax_key ]['amount'] );
+        $nd_booking_display_label = sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $nd_booking_checkout_tax_breakdown['taxes'][ $nd_booking_tax_key ]['label'], $nd_booking_tax_rate );
+    } else {
+        $nd_booking_tax_amount_formatted = nd_booking_format_decimal( 0 );
+        $nd_booking_tax_rate = nd_booking_format_percentage( 0 );
+        $nd_booking_display_label = sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $nd_booking_tax_label, $nd_booking_tax_rate );
+        $nd_booking_line_style = ' style="display:none;"';
+    }
+
+    $nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13" data-tax-key="'.$nd_booking_tax_key.'"'.$nd_booking_line_style.'><span class="nd_booking_tax_label">'.$nd_booking_display_label.'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_tax_amount_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span></p>';
+}
+
+$nd_booking_checkout_tax_lines .= '<div class="nd_booking_section nd_booking_height_5"></div>';
+$nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13 nd_booking_font_weight_bold" data-tax-key="total_tax"><span class="nd_booking_tax_label">'.__( 'Total Tax', 'nd-booking' ).'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_checkout_tax_total_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span></p>';
+$nd_booking_checkout_tax_lines .= '<p class="nd_booking_font_size_13 nd_booking_font_weight_bolder" data-tax-key="grand_total"><span class="nd_booking_tax_label">'.__( 'Grand Total', 'nd-booking' ).'</span>: <span class="nd_booking_tax_amount">'.$nd_booking_checkout_total_formatted.'</span> <span class="nd_booking_tax_currency">'.$nd_booking_checkout_currency.'</span></p>';
+$nd_booking_checkout_tax_lines .= '</div>';
+
 $nd_booking_shortcode_right_content = '';
 $nd_booking_shortcode_right_content .= '
 
@@ -112,26 +151,14 @@ $nd_booking_shortcode_right_content .= '
     ';
 
 
-    if ( get_option('nd_booking_city_tax') != '' OR get_option('nd_booking_vat') != '' ) {
+    $nd_booking_shortcode_right_content .= '
+    <div class="nd_booking_section nd_booking_height_30"></div>
 
-        $nd_booking_shortcode_right_content .= '
-        <div class="nd_booking_section nd_booking_height_30"></div>
-
-        <div class="nd_booking_width_100_percentage nd_booking_float_left nd_booking_box_sizing_border_ààbox ">
-            <p><span class="nd_options_color_greydark nd_booking_font_weight_bolder">'.__('Tax','nd-booking').' :</span></p>';
-
-            if ( get_option('nd_booking_city_tax') != '' ) {
-                $nd_booking_shortcode_right_content .= '<p>'.__('Included','nd-booking').'</span> '.$nd_booking_total_city_tax.' '.nd_booking_get_currency().' '.__('City Tax','nd-booking').'</p>';    
-            }
-            if ( get_option('nd_booking_vat') != '' ) {
-                $nd_booking_shortcode_right_content .= '<p>'.__('Included','nd-booking').' '.get_option('nd_booking_vat').' % '.__('VAT','nd-booking').'</p>';    
-            }
-        
-        $nd_booking_shortcode_right_content .= '
-        </div>
-        ';
-
-    } 
+    <div class="nd_booking_width_100_percentage nd_booking_float_left nd_booking_box_sizing_border_box ">
+        <p><span class="nd_options_color_greydark nd_booking_font_weight_bolder">'.__('Price Summary','nd-booking').' :</span></p>
+        '.$nd_booking_checkout_tax_lines.'
+    </div>
+    ';
 
 
 
