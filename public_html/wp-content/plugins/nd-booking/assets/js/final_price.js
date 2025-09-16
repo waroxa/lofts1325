@@ -71,6 +71,31 @@ function nd_booking_update_tax_breakdown( data, currency ) {
   subtotalLine.show();
 
   var handledKeys = {};
+  var baseRawValue = parseFloat( data.base_raw );
+  if ( isNaN( baseRawValue ) ) {
+    baseRawValue = 0;
+  }
+
+  var nightlyLine = container.find( '[data-tax-key="nightly_rate"]' );
+  if ( nightlyLine.length ) {
+    var nights = parseInt( nightlyLine.attr( 'data-nights' ), 10 );
+    if ( isNaN( nights ) || nights <= 0 ) {
+      nights = 0;
+    }
+
+    var nightlyAmount = 0;
+    if ( nights > 0 ) {
+      nightlyAmount = baseRawValue / nights;
+    }
+
+    var nightlyFormatted = nightlyAmount.toFixed( 2 );
+    nightlyLine.attr( 'data-nights', nights );
+    nightlyLine.find( '.nd_booking_tax_amount' ).text( nightlyFormatted );
+    nightlyLine.find( '.nd_booking_tax_currency' ).text( currency );
+    nightlyLine.find( '.nd_booking_tax_nights' ).text( nights );
+    nightlyLine.show();
+    handledKeys.nightly_rate = true;
+  }
   if ( Array.isArray( data.taxes ) ) {
     for ( var i = 0; i < data.taxes.length; i++ ) {
       var tax = data.taxes[i];
