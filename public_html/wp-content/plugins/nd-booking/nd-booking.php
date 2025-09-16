@@ -21,13 +21,13 @@ add_action('plugins_loaded', 'nd_booking_load_textdomain');
 
 ///////////////////////////////////////////////////DB///////////////////////////////////////////////////////////////
 register_activation_hook( __FILE__, 'nd_booking_create_booking_db' );
-function nd_booking_create_booking_db()
-{
+
+function nd_booking_get_booking_table_schema() {
     global $wpdb;
 
     $nd_booking_table_name = $wpdb->prefix . 'nd_booking_booking';
 
-    $nd_booking_sql = "CREATE TABLE $nd_booking_table_name (
+    return "CREATE TABLE $nd_booking_table_name (
       id int(11) NOT NULL AUTO_INCREMENT,
       id_post int(11) NOT NULL,
       title_post varchar(255) NOT NULL,
@@ -35,7 +35,7 @@ function nd_booking_create_booking_db()
       date_from varchar(255) NOT NULL,
       date_to varchar(255) NOT NULL,
       guests int(11) NOT NULL,
-      final_trip_price int(11) NOT NULL,
+      final_trip_price decimal(12,2) NOT NULL,
       extra_services varchar(255) NOT NULL,
       id_user int(11) NOT NULL,
       user_first_name varchar(255) NOT NULL,
@@ -54,10 +54,38 @@ function nd_booking_create_booking_db()
       action_type varchar(255) NOT NULL,
       UNIQUE KEY id (id)
     );";
+}
+
+function nd_booking_create_booking_db() {
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( nd_booking_get_booking_table_schema() );
+}
+
+function nd_booking_maybe_upgrade_booking_db() {
+    global $wpdb;
+
+    $nd_booking_table_name = $wpdb->prefix . 'nd_booking_booking';
+
+    $table_exists = $wpdb->get_var(
+        $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $nd_booking_table_name ) )
+    );
+
+    if ( $table_exists !== $nd_booking_table_name ) {
+        return;
+    }
+
+    $final_trip_price_column = $wpdb->get_row(
+        $wpdb->prepare( "SHOW COLUMNS FROM $nd_booking_table_name LIKE %s", 'final_trip_price' )
+    );
+
+    if ( empty( $final_trip_price_column ) || false !== stripos( $final_trip_price_column->Type, 'decimal' ) ) {
+        return;
+    }
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $nd_booking_sql );
+    dbDelta( nd_booking_get_booking_table_schema() );
 }
+add_action( 'plugins_loaded', 'nd_booking_maybe_upgrade_booking_db' );
 
 
 

@@ -591,17 +591,19 @@ function nd_booking_add_booking_in_db(
 
 
 	//START add order if the plugin is not in dev mode
-	if ( get_option('nd_booking_plugin_dev_mode') == 1 ){
+        if ( get_option('nd_booking_plugin_dev_mode') == 1 ){
 
-		//dev mode active not insert in db
+                //dev mode active not insert in db
 
-	}else{
-		
+        }else{
 
-		if ( nd_booking_check_if_order_is_present($nd_booking_id_post,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_paypal_email,$nd_booking_action_type) == 0 ) {
+                $nd_booking_final_trip_price = nd_booking_format_decimal( $nd_booking_final_trip_price );
 
-			global $wpdb;
-			$nd_booking_table_name = $wpdb->prefix . 'nd_booking_booking';
+
+                if ( nd_booking_check_if_order_is_present($nd_booking_id_post,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_paypal_email,$nd_booking_action_type) == 0 ) {
+
+                        global $wpdb;
+                        $nd_booking_table_name = $wpdb->prefix . 'nd_booking_booking';
 
 
 			//START INSERT DB
@@ -631,13 +633,38 @@ function nd_booking_add_booking_in_db(
 				'user_arrival' => $nd_booking_user_arrival,
 				'user_coupon' => $nd_booking_user_coupon,
 				'paypal_payment_status' => $nd_booking_paypal_payment_status,
-				'paypal_currency' => $nd_booking_paypal_currency,
-				'paypal_tx' => $nd_booking_paypal_tx,
-				'action_type' => $nd_booking_action_type
+                                'paypal_currency' => $nd_booking_paypal_currency,
+                                'paypal_tx' => $nd_booking_paypal_tx,
+                                'action_type' => $nd_booking_action_type
 
-			)
+                        ),
+                        array(
+                                '%d',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%d',
+                                '%s',
+                                '%s',
+                                '%d',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%s'
+                        )
 
-			);
+                        );
 
 			if ($nd_booking_add_booking){
 
