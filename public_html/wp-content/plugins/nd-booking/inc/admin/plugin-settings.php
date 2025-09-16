@@ -537,8 +537,6 @@ function nd_booking_add_paypal_settings(){
 
 
 function nd_booking_paypal_settings() {
-  register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_city_tax' );
-  register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_vat' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_lodging_tax_rate' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_gst_rate' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_qst_rate' );
@@ -638,40 +636,6 @@ function nd_booking_paypal_page() {
         <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
 
         
-
-        <!--START-->
-        <div class="nd_booking_section">
-          <div class="nd_booking_width_40_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
-            <h2 class="nd_booking_section nd_booking_margin_0"><?php _e('City Tax','nd-booking'); ?></h2>
-            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_10"><?php _e('Insert city tax value','nd-booking'); ?></p>
-          </div>
-          <div class="nd_booking_width_60_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
-            
-            <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_city_tax" value="<?php echo esc_attr( get_option('nd_booking_city_tax') ); ?>" />
-            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Insert your city tax value, only number ( not mandatory ), City tax is calculated per person per night.','nd-booking'); ?></p>
-
-          </div>
-        </div>
-        <!--END-->
-        <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
-
-
-        <!--START-->
-        <div class="nd_booking_section">
-          <div class="nd_booking_width_40_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
-            <h2 class="nd_booking_section nd_booking_margin_0"><?php _e('VAT','nd-booking'); ?></h2>
-            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_10"><?php _e('Insert your country VAT','nd-booking'); ?></p>
-          </div>
-          <div class="nd_booking_width_60_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
-            
-            <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_vat" value="<?php echo esc_attr( get_option('nd_booking_vat') ); ?>" />
-            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Insert your country VAT value, only number ( not mandatory ).','nd-booking'); ?></p>
-
-          </div>
-        </div>
-        <!--END-->
-        <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
-
 
         <!--START-->
         <div class="nd_booking_section">

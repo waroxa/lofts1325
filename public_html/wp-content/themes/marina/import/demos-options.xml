@@ -415,14 +415,6 @@
 		<value>Default Template</value>
 		</option>
 		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
-		</option>
-		<option>
 		<name>nd_booking_paypal_developer</name>
 		<value>1</value>
 		</option>
@@ -999,14 +991,6 @@
 		<option>
 		<name>nd_booking_email_template</name>
 		<value>Default Template</value>
-		</option>
-		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
 		</option>
 		<option>
 		<name>nd_booking_paypal_developer</name>
@@ -1587,14 +1571,6 @@
 		<value>Default Template</value>
 		</option>
 		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
-		</option>
-		<option>
 		<name>nd_booking_paypal_developer</name>
 		<value>1</value>
 		</option>
@@ -2171,14 +2147,6 @@
 		<option>
 		<name>nd_booking_email_template</name>
 		<value>Default Template</value>
-		</option>
-		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
 		</option>
 		<option>
 		<name>nd_booking_paypal_developer</name>
@@ -2759,14 +2727,6 @@
 		<value>Default Template</value>
 		</option>
 		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
-		</option>
-		<option>
 		<name>nd_booking_paypal_developer</name>
 		<value>1</value>
 		</option>
@@ -3343,14 +3303,6 @@
 		<option>
 		<name>nd_booking_email_template</name>
 		<value>Default Template</value>
-		</option>
-		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
 		</option>
 		<option>
 		<name>nd_booking_paypal_developer</name>
@@ -3931,14 +3883,6 @@
 		<value>Default Template</value>
 		</option>
 		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
-		</option>
-		<option>
 		<name>nd_booking_paypal_developer</name>
 		<value>1</value>
 		</option>
@@ -4517,14 +4461,6 @@
 		<value>Default Template</value>
 		</option>
 		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
-		</option>
-		<option>
 		<name>nd_booking_paypal_developer</name>
 		<value>1</value>
 		</option>
@@ -5101,14 +5037,6 @@
 		<option>
 		<name>nd_booking_email_template</name>
 		<value>Default Template</value>
-		</option>
-		<option>
-		<name>nd_booking_city_tax</name>
-		<value>3</value>
-		</option>
-		<option>
-		<name>nd_booking_vat</name>
-		<value>22</value>
 		</option>
 		<option>
 		<name>nd_booking_paypal_developer</name>
