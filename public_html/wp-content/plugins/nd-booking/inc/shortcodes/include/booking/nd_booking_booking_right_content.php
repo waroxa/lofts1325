@@ -1,6 +1,10 @@
 <?php
 
 
+$nd_booking_initial_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_trip_price );
+$nd_booking_initial_final_price = $nd_booking_initial_breakdown['total'];
+$nd_booking_initial_base_price = $nd_booking_initial_breakdown['base'];
+
 $nd_booking_shortcode_right_content = '
 
 <div class="nd_booking_section nd_booking_height_2 nd_booking_bg_grey"></div>
@@ -13,8 +17,9 @@ $nd_booking_shortcode_right_content = '
   <form method="post" enctype="multipart/form-data" action="'.nd_booking_checkout_page().'">
       
       <input type="hidden" id="nd_booking_form_booking_arrive" name="nd_booking_form_booking_arrive" value="1">
-      <input type="hidden" id="nd_booking_booking_form_final_price" name="nd_booking_booking_form_final_price" value="'.$nd_booking_trip_price.'">
-      <input type="hidden" id="nd_booking_booking_form_trip_price" name="nd_booking_booking_form_trip_price" value="'.$nd_booking_trip_price.'">
+      <input type="hidden" id="nd_booking_booking_form_final_price" name="nd_booking_booking_form_final_price" value="'.nd_booking_format_decimal( $nd_booking_initial_final_price ).'">
+      <input type="hidden" id="nd_booking_booking_form_base_price" name="nd_booking_booking_form_base_price" value="'.nd_booking_format_decimal( $nd_booking_initial_base_price ).'">
+      <input type="hidden" id="nd_booking_booking_form_trip_price" name="nd_booking_booking_form_trip_price" value="'.nd_booking_format_decimal( $nd_booking_trip_price ).'">
       <input type="hidden" id="nd_booking_booking_form_date_from" name="nd_booking_booking_form_date_from" value="'.$nd_booking_date_from.'">
       <input type="hidden" id="nd_booking_booking_form_date_to" name="nd_booking_booking_form_date_to" value="'.$nd_booking_date_tooo.'">
       <input type="hidden" id="nd_booking_booking_form_guests" name="nd_booking_booking_form_guests" value="'.$nd_booking_form_booking_guests.'">

@@ -64,6 +64,7 @@ function nd_booking_shortcode_checkout() {
 
         //get value
         $nd_booking_booking_form_final_price = sanitize_text_field($_POST['nd_booking_booking_form_final_price']);
+        if( isset( $_POST['nd_booking_booking_form_base_price'] ) ) {  $nd_booking_booking_form_base_price = sanitize_text_field($_POST['nd_booking_booking_form_base_price']); }else{ $nd_booking_booking_form_base_price = '';}
         $nd_booking_booking_form_date_from = sanitize_text_field($_POST['nd_booking_booking_form_date_from']);
         $nd_booking_booking_form_date_to = sanitize_text_field($_POST['nd_booking_booking_form_date_to']);
         $nd_booking_booking_form_guests = sanitize_text_field($_POST['nd_booking_booking_form_guests']);
@@ -82,6 +83,9 @@ function nd_booking_shortcode_checkout() {
         $nd_booking_booking_form_post_id = sanitize_text_field($_POST['nd_booking_booking_form_post_id']);
         $nd_booking_booking_form_post_title = sanitize_text_field($_POST['nd_booking_booking_form_post_title']);
         $nd_booking_booking_form_services = sanitize_text_field($_POST['nd_booking_booking_checkbox_services_id']);
+
+        $nd_booking_booking_form_final_price = floatval( $nd_booking_booking_form_final_price );
+        $nd_booking_booking_form_base_price = floatval( $nd_booking_booking_form_base_price );
 
         if ( isset( $_POST['guest_id_number'] ) ) {
             $nd_booking_guest_id_number = sanitize_text_field( $_POST['guest_id_number'] );
@@ -146,12 +150,41 @@ function nd_booking_shortcode_checkout() {
         $nd_booking_booking_form_post_id = $nd_booking_ids_array[0];
         $nd_booking_id_room = $nd_booking_ids_array[1];
 
+        $nd_booking_tax_base_amount = $nd_booking_booking_form_base_price;
+        if ( $nd_booking_tax_base_amount <= 0 && isset( $_SESSION['nd_booking_tax_base'] ) ) {
+            $nd_booking_tax_base_amount = floatval( $_SESSION['nd_booking_tax_base'] );
+        }
+        if ( $nd_booking_tax_base_amount <= 0 && $nd_booking_total_tax_amount > 0 ) {
+            $nd_booking_tax_base_amount = round( $nd_booking_booking_form_final_price - $nd_booking_total_tax_amount, 2 );
+        }
+
+        if ( $nd_booking_tax_base_amount > 0 ) {
+            $nd_booking_tax_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_tax_base_amount );
+        } else {
+            $nd_booking_tax_breakdown = nd_booking_calculate_tax_breakdown_from_total( $nd_booking_booking_form_final_price );
+        }
+
+        $nd_booking_tax_base_amount = $nd_booking_tax_breakdown['base'];
+        $nd_booking_tax_lodging = isset( $nd_booking_tax_breakdown['taxes']['lodging'] ) ? $nd_booking_tax_breakdown['taxes']['lodging']['amount'] : 0.0;
+        $nd_booking_tax_gst = isset( $nd_booking_tax_breakdown['taxes']['gst'] ) ? $nd_booking_tax_breakdown['taxes']['gst']['amount'] : 0.0;
+        $nd_booking_tax_qst = isset( $nd_booking_tax_breakdown['taxes']['qst'] ) ? $nd_booking_tax_breakdown['taxes']['qst']['amount'] : 0.0;
+        $nd_booking_total_tax_amount = $nd_booking_tax_breakdown['total_tax'];
+        $nd_booking_booking_form_final_price = $nd_booking_tax_breakdown['total'];
+
+        if ( isset( $_SESSION ) && is_array( $_SESSION ) ) {
+            $_SESSION['nd_booking_tax_base'] = $nd_booking_tax_base_amount;
+            $_SESSION['nd_booking_tax_lodging'] = $nd_booking_tax_lodging;
+            $_SESSION['nd_booking_tax_gst'] = $nd_booking_tax_gst;
+            $_SESSION['nd_booking_tax_qst'] = $nd_booking_tax_qst;
+            $_SESSION['nd_booking_tax_total'] = $nd_booking_total_tax_amount;
+            $_SESSION['nd_booking_final_price'] = $nd_booking_booking_form_final_price;
+        }
+
         $nd_booking_total_city_tax = $nd_booking_total_tax_amount;
-        $nd_booking_booking_form_final_price += $nd_booking_total_tax_amount;
-    
-        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_left_content.php'); 
-        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_right_content.php'); 
-        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_payment_options.php'); 
+
+        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_left_content.php');
+        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_right_content.php');
+        include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_payment_options.php');
         
         $nd_booking_shortcode_result .= '
 
@@ -198,6 +231,7 @@ function nd_booking_shortcode_checkout() {
             $nd_booking_booking_form_date_to = sanitize_text_field($_POST['nd_booking_checkout_form_date_top']);
             $nd_booking_booking_form_guests = sanitize_text_field($_POST['nd_booking_checkout_form_guests']);
             $nd_booking_booking_form_final_price = sanitize_text_field($_POST['nd_booking_checkout_form_final_price']);
+            if( isset( $_POST['nd_booking_checkout_form_base_price'] ) ) { $nd_booking_checkout_form_base_price = sanitize_text_field($_POST['nd_booking_checkout_form_base_price']); }else{ $nd_booking_checkout_form_base_price = ''; }
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
             $nd_booking_checkout_form_post_title = sanitize_text_field($_POST['nd_booking_checkout_form_post_title']);
             $nd_booking_booking_form_name = sanitize_text_field($_POST['nd_booking_checkout_form_name']);
@@ -224,9 +258,42 @@ function nd_booking_shortcode_checkout() {
 
             //ids
             $nd_booking_checkout_form_post_id = sanitize_text_field($_POST['nd_booking_checkout_form_post_id']);
-            $nd_booking_ids_array = explode('-', $nd_booking_checkout_form_post_id ); 
+            $nd_booking_ids_array = explode('-', $nd_booking_checkout_form_post_id );
             $nd_booking_checkout_form_post_id = $nd_booking_ids_array[0];
             $nd_booking_id_room = $nd_booking_ids_array[1];
+
+            $nd_booking_booking_form_final_price = floatval( $nd_booking_booking_form_final_price );
+            $nd_booking_checkout_form_base_price = floatval( $nd_booking_checkout_form_base_price );
+
+            $nd_booking_tax_base_amount = $nd_booking_checkout_form_base_price;
+            if ( $nd_booking_tax_base_amount <= 0 && isset( $_SESSION['nd_booking_tax_base'] ) ) {
+                $nd_booking_tax_base_amount = floatval( $_SESSION['nd_booking_tax_base'] );
+            }
+            if ( $nd_booking_tax_base_amount <= 0 && $nd_booking_total_tax_amount > 0 ) {
+                $nd_booking_tax_base_amount = round( $nd_booking_booking_form_final_price - $nd_booking_total_tax_amount, 2 );
+            }
+
+            if ( $nd_booking_tax_base_amount > 0 ) {
+                $nd_booking_tax_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_tax_base_amount );
+            } else {
+                $nd_booking_tax_breakdown = nd_booking_calculate_tax_breakdown_from_total( $nd_booking_booking_form_final_price );
+            }
+
+            $nd_booking_tax_base_amount = $nd_booking_tax_breakdown['base'];
+            $nd_booking_tax_lodging = isset( $nd_booking_tax_breakdown['taxes']['lodging'] ) ? $nd_booking_tax_breakdown['taxes']['lodging']['amount'] : 0.0;
+            $nd_booking_tax_gst = isset( $nd_booking_tax_breakdown['taxes']['gst'] ) ? $nd_booking_tax_breakdown['taxes']['gst']['amount'] : 0.0;
+            $nd_booking_tax_qst = isset( $nd_booking_tax_breakdown['taxes']['qst'] ) ? $nd_booking_tax_breakdown['taxes']['qst']['amount'] : 0.0;
+            $nd_booking_total_tax_amount = $nd_booking_tax_breakdown['total_tax'];
+            $nd_booking_booking_form_final_price = $nd_booking_tax_breakdown['total'];
+
+            if ( isset( $_SESSION ) && is_array( $_SESSION ) ) {
+                $_SESSION['nd_booking_tax_base'] = $nd_booking_tax_base_amount;
+                $_SESSION['nd_booking_tax_lodging'] = $nd_booking_tax_lodging;
+                $_SESSION['nd_booking_tax_gst'] = $nd_booking_tax_gst;
+                $_SESSION['nd_booking_tax_qst'] = $nd_booking_tax_qst;
+                $_SESSION['nd_booking_tax_total'] = $nd_booking_total_tax_amount;
+                $_SESSION['nd_booking_final_price'] = $nd_booking_booking_form_final_price;
+            }
 
 
 

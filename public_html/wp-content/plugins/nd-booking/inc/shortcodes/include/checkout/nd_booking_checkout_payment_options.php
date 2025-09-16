@@ -63,7 +63,8 @@ $nd_booking_shortcode_right_content .= '
                 <input type="hidden" id="nd_booking_checkout_form_date_from" name="nd_booking_checkout_form_date_from" value="'.$nd_booking_booking_form_date_from.'">
                 <input type="hidden" id="nd_booking_checkout_form_date_top" name="nd_booking_checkout_form_date_top" value="'.$nd_booking_booking_form_date_to.'">
                 <input type="hidden" id="nd_booking_checkout_form_guests" name="nd_booking_checkout_form_guests" value="'.$nd_booking_booking_form_guests.'">
-                <input type="hidden" id="nd_booking_checkout_form_final_price" name="nd_booking_checkout_form_final_price" value="'.$nd_booking_booking_form_final_price.'">
+                <input type="hidden" id="nd_booking_checkout_form_final_price" name="nd_booking_checkout_form_final_price" value="'.nd_booking_format_decimal( $nd_booking_booking_form_final_price ).'">
+                <input type="hidden" id="nd_booking_checkout_form_base_price" name="nd_booking_checkout_form_base_price" value="'.nd_booking_format_decimal( $nd_booking_tax_breakdown['base'] ).'">
                 <input type="hidden" id="nd_booking_checkout_form_post_id" name="nd_booking_checkout_form_post_id" value="'.$nd_booking_booking_form_post_id.'-'.$nd_booking_id_room.'">
                 <input type="hidden" id="nd_booking_checkout_form_post_title" name="nd_booking_checkout_form_post_title" value="'.$nd_booking_booking_form_post_title.'">
                 <input type="hidden" id="nd_booking_checkout_form_name" name="nd_booking_checkout_form_name" value="'.$nd_booking_booking_form_name.'">

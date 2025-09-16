@@ -768,9 +768,146 @@ function nd_booking_order_page() {
 
 function nd_booking_get_currency(){
 
-	$nd_booking_currency = get_option('nd_booking_currency');
+        $nd_booking_currency = get_option('nd_booking_currency');
 
-	return $nd_booking_currency;
+        return $nd_booking_currency;
+
+}
+
+function nd_booking_format_decimal( $amount, $decimals = 2 ) {
+
+        $amount = floatval( $amount );
+
+        return number_format( $amount, $decimals, '.', '' );
+
+}
+
+function nd_booking_format_percentage( $rate ) {
+
+        $rate = floatval( $rate );
+
+        if ( 0.0 === $rate ) {
+                return '0';
+        }
+
+        $formatted = number_format( $rate, 3, '.', '' );
+        $formatted = rtrim( rtrim( $formatted, '0' ), '.' );
+
+        return $formatted;
+
+}
+
+function nd_booking_calculate_tax_breakdown( $base_amount ) {
+
+        $base_amount = max( 0, floatval( $base_amount ) );
+
+        $rates = array(
+                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', 0 ) ),
+                'gst'     => floatval( get_option( 'nd_booking_gst_rate', 0 ) ),
+                'qst'     => floatval( get_option( 'nd_booking_qst_rate', 0 ) ),
+        );
+
+        $labels = array(
+                'lodging' => __( 'Lodging Tax', 'nd-booking' ),
+                'gst'     => __( 'GST', 'nd-booking' ),
+                'qst'     => __( 'QST', 'nd-booking' ),
+        );
+
+        $taxes = array();
+
+        $lodging_amount = 0.0;
+        if ( $rates['lodging'] > 0 ) {
+                $lodging_amount = round( $base_amount * $rates['lodging'] / 100, 2 );
+                $taxes['lodging'] = array(
+                        'label'         => $labels['lodging'],
+                        'rate'          => $rates['lodging'],
+                        'amount'        => $lodging_amount,
+                        'display_label' => sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $labels['lodging'], nd_booking_format_percentage( $rates['lodging'] ) ),
+                );
+        }
+
+        $gst_amount = 0.0;
+        if ( $rates['gst'] > 0 ) {
+                $gst_amount = round( $base_amount * $rates['gst'] / 100, 2 );
+                $taxes['gst'] = array(
+                        'label'         => $labels['gst'],
+                        'rate'          => $rates['gst'],
+                        'amount'        => $gst_amount,
+                        'display_label' => sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $labels['gst'], nd_booking_format_percentage( $rates['gst'] ) ),
+                );
+        }
+
+        $qst_amount = 0.0;
+        if ( $rates['qst'] > 0 ) {
+                $qst_amount = round( ( $base_amount + $gst_amount ) * $rates['qst'] / 100, 2 );
+                $taxes['qst'] = array(
+                        'label'         => $labels['qst'],
+                        'rate'          => $rates['qst'],
+                        'amount'        => $qst_amount,
+                        'display_label' => sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $labels['qst'], nd_booking_format_percentage( $rates['qst'] ) ),
+                );
+        }
+
+        $total_tax = round( $lodging_amount + $gst_amount + $qst_amount, 2 );
+        $base_amount = round( $base_amount, 2 );
+        $total = round( $base_amount + $total_tax, 2 );
+
+        return array(
+                'base'      => $base_amount,
+                'taxes'     => $taxes,
+                'total_tax' => $total_tax,
+                'total'     => $total,
+        );
+
+}
+
+function nd_booking_calculate_tax_breakdown_from_total( $total_amount ) {
+
+        $total_amount = max( 0, floatval( $total_amount ) );
+
+        $rates = array(
+                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', 0 ) ),
+                'gst'     => floatval( get_option( 'nd_booking_gst_rate', 0 ) ),
+                'qst'     => floatval( get_option( 'nd_booking_qst_rate', 0 ) ),
+        );
+
+        $l = $rates['lodging'] / 100;
+        $g = $rates['gst'] / 100;
+        $q = $rates['qst'] / 100;
+
+        $denominator = 1 + $l + $g + $q + ( $g * $q );
+
+        if ( $denominator <= 0 ) {
+                $breakdown = nd_booking_calculate_tax_breakdown( $total_amount );
+                $breakdown['total'] = round( $total_amount, 2 );
+                $breakdown['total_tax'] = round( $breakdown['total'] - $breakdown['base'], 2 );
+
+                return $breakdown;
+        }
+
+        $base_amount = $total_amount / $denominator;
+        $breakdown = nd_booking_calculate_tax_breakdown( $base_amount );
+
+        $expected_total = round( $total_amount, 2 );
+        $difference = $expected_total - $breakdown['total'];
+
+        if ( abs( $difference ) >= 0.01 && ! empty( $breakdown['taxes'] ) ) {
+                $last_key = array_key_last( $breakdown['taxes'] );
+                $breakdown['taxes'][ $last_key ]['amount'] = round( $breakdown['taxes'][ $last_key ]['amount'] + $difference, 2 );
+        }
+
+        if ( ! empty( $breakdown['taxes'] ) ) {
+                $total_tax = 0.0;
+                foreach ( $breakdown['taxes'] as $tax ) {
+                        $total_tax += floatval( $tax['amount'] );
+                }
+                $breakdown['total_tax'] = round( $total_tax, 2 );
+        }
+
+        $breakdown['total'] = $expected_total;
+        $breakdown['base'] = round( $expected_total - $breakdown['total_tax'], 2 );
+
+        return $breakdown;
 
 }
 
