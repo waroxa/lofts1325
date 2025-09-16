@@ -1,6 +1,28 @@
 <?php
 
 
+//START price
+$nd_booking_trip_price_for_person = 0;
+$nd_booking_index = 1;
+$nd_booking_date_cicle = $nd_booking_date_from;
+while ($nd_booking_index <= nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to)) {
+
+    $nd_booking_trip_price_for_person = $nd_booking_trip_price_for_person + nd_booking_get_final_price($nd_booking_form_booking_id,$nd_booking_date_cicle);
+
+    $nd_booking_date_cicle = date('Y/m/d', strtotime($nd_booking_date_cicle.' + 1 days'));
+
+    $nd_booking_index++;
+}
+
+$nd_booking_price_guests_enable = get_option('nd_booking_price_guests');
+if ( $nd_booking_price_guests_enable == 1 ) {
+  $nd_booking_trip_price = $nd_booking_trip_price_for_person*$nd_booking_form_booking_guests;
+}else{
+  $nd_booking_trip_price = $nd_booking_trip_price_for_person;
+}
+//END price
+
+
 $nd_booking_tax_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_trip_price );
 $nd_booking_currency = nd_booking_get_currency();
 $nd_booking_initial_total_formatted = nd_booking_format_decimal( $nd_booking_tax_breakdown['total'] );
@@ -38,27 +60,6 @@ $nd_booking_tax_lines .= '<p class="nd_options_color_white nd_booking_font_size_
 $nd_booking_tax_lines .= '</div>';
 
 $nd_booking_shortcode_left_content = '';
-
-//START price
-$nd_booking_trip_price_for_person = 0;
-$nd_booking_index = 1;
-$nd_booking_date_cicle = $nd_booking_date_from;
-while ($nd_booking_index <= nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to)) {
-
-    $nd_booking_trip_price_for_person = $nd_booking_trip_price_for_person + nd_booking_get_final_price($nd_booking_form_booking_id,$nd_booking_date_cicle);
-
-    $nd_booking_date_cicle = date('Y/m/d', strtotime($nd_booking_date_cicle.' + 1 days'));
-
-    $nd_booking_index++;
-} 
-
-$nd_booking_price_guests_enable = get_option('nd_booking_price_guests');
-if ( $nd_booking_price_guests_enable == 1 ) {
-  $nd_booking_trip_price = $nd_booking_trip_price_for_person*$nd_booking_form_booking_guests;
-}else{
-  $nd_booking_trip_price = $nd_booking_trip_price_for_person;
-}
-//END price
 
 
 //image
