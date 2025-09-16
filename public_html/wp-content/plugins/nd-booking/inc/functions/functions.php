@@ -797,14 +797,44 @@ function nd_booking_format_percentage( $rate ) {
 
 }
 
+function nd_booking_get_tax_rate_defaults() {
+
+        static $defaults = null;
+
+        if ( null === $defaults ) {
+                $defaults = array(
+                        'lodging' => 3.5,
+                        'gst'     => 5,
+                        'qst'     => 9.975,
+                );
+        }
+
+        return $defaults;
+
+}
+
+function nd_booking_get_tax_rate_default( $type ) {
+
+        $defaults = nd_booking_get_tax_rate_defaults();
+
+        if ( isset( $defaults[ $type ] ) ) {
+                return $defaults[ $type ];
+        }
+
+        return 0;
+
+}
+
 function nd_booking_calculate_tax_breakdown( $base_amount ) {
 
         $base_amount = max( 0, floatval( $base_amount ) );
 
+        $defaults = nd_booking_get_tax_rate_defaults();
+
         $rates = array(
-                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', 0 ) ),
-                'gst'     => floatval( get_option( 'nd_booking_gst_rate', 0 ) ),
-                'qst'     => floatval( get_option( 'nd_booking_qst_rate', 0 ) ),
+                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', $defaults['lodging'] ) ),
+                'gst'     => floatval( get_option( 'nd_booking_gst_rate', $defaults['gst'] ) ),
+                'qst'     => floatval( get_option( 'nd_booking_qst_rate', $defaults['qst'] ) ),
         );
 
         $labels = array(
@@ -865,10 +895,12 @@ function nd_booking_calculate_tax_breakdown_from_total( $total_amount ) {
 
         $total_amount = max( 0, floatval( $total_amount ) );
 
+        $defaults = nd_booking_get_tax_rate_defaults();
+
         $rates = array(
-                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', 0 ) ),
-                'gst'     => floatval( get_option( 'nd_booking_gst_rate', 0 ) ),
-                'qst'     => floatval( get_option( 'nd_booking_qst_rate', 0 ) ),
+                'lodging' => floatval( get_option( 'nd_booking_lodging_tax_rate', $defaults['lodging'] ) ),
+                'gst'     => floatval( get_option( 'nd_booking_gst_rate', $defaults['gst'] ) ),
+                'qst'     => floatval( get_option( 'nd_booking_qst_rate', $defaults['qst'] ) ),
         );
 
         $l = $rates['lodging'] / 100;
