@@ -539,6 +539,9 @@ function nd_booking_add_paypal_settings(){
 function nd_booking_paypal_settings() {
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_city_tax' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_vat' );
+  register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_lodging_tax_rate' );
+  register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_gst_rate' );
+  register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_qst_rate' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_paypal_developer' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_paypal_email' );
   register_setting( 'nd_booking_paypal_settings_group', 'nd_booking_paypal_token' );
@@ -663,6 +666,57 @@ function nd_booking_paypal_page() {
             
             <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_vat" value="<?php echo esc_attr( get_option('nd_booking_vat') ); ?>" />
             <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Insert your country VAT value, only number ( not mandatory ).','nd-booking'); ?></p>
+
+          </div>
+        </div>
+        <!--END-->
+        <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
+
+
+        <!--START-->
+        <div class="nd_booking_section">
+          <div class="nd_booking_width_40_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <h2 class="nd_booking_section nd_booking_margin_0"><?php _e('Lodging Tax Rate','nd-booking'); ?></h2>
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_10"><?php _e('Set the lodging tax percentage applied to each stay.','nd-booking'); ?></p>
+          </div>
+          <div class="nd_booking_width_60_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+
+            <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_lodging_tax_rate" value="<?php echo esc_attr( get_option('nd_booking_lodging_tax_rate', '3.5') ); ?>" />
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Enter the lodging tax rate percentage for accommodations. Default 3.5%.','nd-booking'); ?></p>
+
+          </div>
+        </div>
+        <!--END-->
+        <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
+
+
+        <!--START-->
+        <div class="nd_booking_section">
+          <div class="nd_booking_width_40_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <h2 class="nd_booking_section nd_booking_margin_0"><?php _e('GST Rate','nd-booking'); ?></h2>
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_10"><?php _e('Set the Goods and Services Tax (GST) percentage for bookings.','nd-booking'); ?></p>
+          </div>
+          <div class="nd_booking_width_60_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+
+            <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_gst_rate" value="<?php echo esc_attr( get_option('nd_booking_gst_rate', '5') ); ?>" />
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Enter the GST rate applied to reservations. Default 5%.','nd-booking'); ?></p>
+
+          </div>
+        </div>
+        <!--END-->
+        <div class="nd_booking_section nd_booking_height_1 nd_booking_background_color_E7E7E7 nd_booking_margin_top_10 nd_booking_margin_bottom_10"></div>
+
+
+        <!--START-->
+        <div class="nd_booking_section">
+          <div class="nd_booking_width_40_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <h2 class="nd_booking_section nd_booking_margin_0"><?php _e('QST Rate','nd-booking'); ?></h2>
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_10"><?php _e('Set the Quebec Sales Tax (QST) percentage for bookings.','nd-booking'); ?></p>
+          </div>
+          <div class="nd_booking_width_60_percentage nd_booking_padding_20 nd_booking_box_sizing_border_box nd_booking_float_left">
+
+            <input class="regular-text nd_booking_width_100_percentage" type="text" name="nd_booking_qst_rate" value="<?php echo esc_attr( get_option('nd_booking_qst_rate', '9.975') ); ?>" />
+            <p class="nd_booking_color_666666 nd_booking_section nd_booking_margin_0 nd_booking_margin_top_20"><?php _e('Enter the QST percentage for applicable stays. Default 9.975%.','nd-booking'); ?></p>
 
           </div>
         </div>
