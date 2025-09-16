@@ -180,8 +180,6 @@ function nd_booking_shortcode_checkout() {
             $_SESSION['nd_booking_final_price'] = $nd_booking_booking_form_final_price;
         }
 
-        $nd_booking_total_city_tax = $nd_booking_total_tax_amount;
-
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_left_content.php');
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_right_content.php');
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_payment_options.php');

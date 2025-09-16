@@ -18,8 +18,6 @@ function loft_booking_payment_settings_page() {
 function loft_booking_payment_settings() {
     // Save Settings if Form is Submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment_settings'])) {
-        update_option('loft_city_tax', sanitize_text_field($_POST['city_tax']));
-        update_option('loft_vat', sanitize_text_field($_POST['vat']));
         update_option('stripe_publishable_key', sanitize_text_field($_POST['stripe_publishable_key']));
         update_option('stripe_secret_key', sanitize_text_field($_POST['stripe_secret_key']));
         update_option('stripe_checkout_message', sanitize_textarea_field($_POST['stripe_checkout_message']));
@@ -28,8 +26,6 @@ function loft_booking_payment_settings() {
     }
 
     // Fetch Existing Settings
-    $city_tax = get_option('loft_city_tax', '0');
-    $vat = get_option('loft_vat', '14.975');
     $stripe_publishable_key = get_option('stripe_publishable_key', '');
     $stripe_secret_key = get_option('stripe_secret_key', '');
     $stripe_checkout_message = get_option('stripe_checkout_message', 'Simple and safe. Make payments with any type of credit card.');
@@ -41,14 +37,6 @@ function loft_booking_payment_settings() {
         <h1>Payment Settings</h1>
         <form method="post">
             <table class="form-table">
-                <tr>
-                    <th scope="row"><label for="city_tax">City Tax (%)</label></th>
-                    <td><input type="number" id="city_tax" name="city_tax" value="<?php echo esc_attr($city_tax); ?>" step="0.01" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="vat">VAT (%)</label></th>
-                    <td><input type="number" id="vat" name="vat" value="<?php echo esc_attr($vat); ?>" step="0.01" /></td>
-                </tr>
                 <tr>
                     <th scope="row"><label for="stripe_publishable_key">Stripe Publishable Key</label></th>
                     <td><input type="text" id="stripe_publishable_key" name="stripe_publishable_key" value="<?php echo esc_attr($stripe_publishable_key); ?>" /></td>
