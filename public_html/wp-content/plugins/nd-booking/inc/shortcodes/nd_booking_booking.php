@@ -254,19 +254,54 @@ function nd_booking_final_price_php() {
     $nd_booking_booking_checkbox_services = sanitize_text_field($_GET['nd_booking_booking_checkbox_services']);
     $nd_booking_booking_form_final_price = sanitize_text_field($_GET['nd_booking_booking_form_final_price']);
 
+    $nd_booking_booking_form_final_price = floatval($nd_booking_booking_form_final_price);
+
     //declare
     $nd_booking_final_price_result = $nd_booking_booking_form_final_price;
 
     $nd_booking_additional_services_value_array = explode(',', $nd_booking_booking_checkbox_services );
     for ($nd_booking_i = 0; $nd_booking_i < count($nd_booking_additional_services_value_array)-1; $nd_booking_i++) {
-        
-        $nd_booking_final_price_result = $nd_booking_final_price_result + $nd_booking_additional_services_value_array[$nd_booking_i];   
+
+        $nd_booking_final_price_result = $nd_booking_final_price_result + floatval($nd_booking_additional_services_value_array[$nd_booking_i]);
 
     }
 
-    $nd_booking_booking_result = $nd_booking_final_price_result;
+    $nd_booking_booking_result = floatval($nd_booking_final_price_result);
 
-    echo esc_html($nd_booking_booking_result);
+    $nd_booking_lodging_rate = floatval( get_option( 'nd_booking_lodging_tax_rate', 0 ) );
+    $nd_booking_gst_rate = floatval( get_option( 'nd_booking_gst_rate', 0 ) );
+    $nd_booking_qst_rate = floatval( get_option( 'nd_booking_qst_rate', 0 ) );
+
+    $nd_booking_lodging_tax = $nd_booking_booking_result * $nd_booking_lodging_rate / 100;
+    $nd_booking_gst_tax = $nd_booking_booking_result * $nd_booking_gst_rate / 100;
+    $nd_booking_qst_tax = ( $nd_booking_booking_result + $nd_booking_gst_tax ) * $nd_booking_qst_rate / 100;
+
+    $nd_booking_lodging_tax = round( $nd_booking_lodging_tax, 2 );
+    $nd_booking_gst_tax = round( $nd_booking_gst_tax, 2 );
+    $nd_booking_qst_tax = round( $nd_booking_qst_tax, 2 );
+    $nd_booking_total_tax = round( $nd_booking_lodging_tax + $nd_booking_gst_tax + $nd_booking_qst_tax, 2 );
+    $nd_booking_final_with_tax = round( $nd_booking_booking_result + $nd_booking_total_tax, 2 );
+
+    if ( function_exists( 'session_status' ) ) {
+        if ( PHP_SESSION_NONE === session_status() ) {
+            session_start();
+        }
+    } elseif ( ! session_id() ) {
+        session_start();
+    }
+
+    if ( ! isset( $_SESSION ) || ! is_array( $_SESSION ) ) {
+        $_SESSION = array();
+    }
+
+    $_SESSION['nd_booking_tax_base'] = $nd_booking_booking_result;
+    $_SESSION['nd_booking_tax_lodging'] = $nd_booking_lodging_tax;
+    $_SESSION['nd_booking_tax_gst'] = $nd_booking_gst_tax;
+    $_SESSION['nd_booking_tax_qst'] = $nd_booking_qst_tax;
+    $_SESSION['nd_booking_tax_total'] = $nd_booking_total_tax;
+    $_SESSION['nd_booking_final_price'] = $nd_booking_final_with_tax;
+
+    echo esc_html( number_format( $nd_booking_final_with_tax, 2, '.', '' ) );
 
     die();
 
