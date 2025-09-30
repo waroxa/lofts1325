@@ -14,6 +14,77 @@ add_action( 'wp_enqueue_scripts', 'ms_theme_editor_parent_css', 10 );
 // END ENQUEUE PARENT ACTION
 
 
+/**
+ * Output global Loft 1325 keyword meta tags.
+ */
+function loft1325_output_global_meta_keywords() {
+    // Skip if All in One SEO already renders meta keywords for this request.
+    if ( function_exists( 'aioseo' ) ) {
+        $aioseo_instance = aioseo();
+
+        if ( is_object( $aioseo_instance ) && isset( $aioseo_instance->meta ) ) {
+            $meta = $aioseo_instance->meta;
+
+            if ( is_object( $meta ) && isset( $meta->metaData ) && is_object( $meta->metaData ) ) {
+                $meta_data = $meta->metaData;
+
+                if (
+                    ( property_exists( $meta_data, 'keywords' ) && ! empty( $meta_data->keywords ) ) ||
+                    ( method_exists( $meta_data, 'keywords' ) && ! empty( $meta_data->keywords() ) )
+                ) {
+                    return;
+                }
+            }
+        }
+    }
+
+    $english_keywords = array(
+        'Loft 1325',
+        'Lofts 1325',
+        'Le 1325',
+        'Loft1325',
+        'Lofts1325',
+        'Loft 1325 Val-d’Or',
+        'Lofts 1325 Val-d’Or',
+        'Loft 1325 Québec',
+        'Lofts 1325 Québec',
+        'Loft 1325 Abitibi',
+        'Loft 1325 Val-d\'Or Quebec Canada',
+        'Loft 1325 hotel Val-d’Or',
+        'Loft 1325 apartments Val-d’Or',
+        'Loft 1325 rentals Val-d’Or',
+        'Loft 1325 Airbnb Val-d’Or',
+        'Loft 1325 corporate rentals Val-d’Or',
+        'Loft 1325 tourist home Val-d’Or',
+        'Loft 1325 short-term rentals Val-d’Or',
+        'Loft 1325 furnished apartments Val-d’Or',
+        'Loft 1325 long-term stay Val-d’Or',
+        'Loft 1325 furnished rentals Val-d’Or',
+        'Loft 1325 vacation rentals Val-d’Or',
+    );
+
+    $french_keywords = array(
+        'Loft 1325 hôtel Val-d’Or',
+        'Loft 1325 appartements meublés Val-d’Or',
+        'Loft 1325 location court terme Val-d’Or',
+        'Loft 1325 hébergement touristique Val-d’Or',
+        'Loft 1325 location longue durée Val-d’Or',
+    );
+
+    $all_keywords = array_unique( array_map( 'trim', array_merge( $english_keywords, $french_keywords ) ) );
+
+    if ( empty( $all_keywords ) ) {
+        return;
+    }
+
+    printf(
+        "<meta name=\"keywords\" content=\"%s\" />\n",
+        esc_attr( implode( ', ', $all_keywords ) )
+    );
+}
+add_action( 'wp_head', 'loft1325_output_global_meta_keywords', 1 );
+
+
 //function BUTTERFLYMX
 function encolar_scripts_listar_tenants() {
     wp_enqueue_script('listar-tenants-js', get_stylesheet_directory_uri() . '/js/listar-tenants.js', array('jquery'), '1.0', true);
