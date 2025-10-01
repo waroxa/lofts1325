@@ -40,6 +40,11 @@ define( 'DB_CHARSET', 'utf8' );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
 
+/**
+ * Header used by SiteGround Security to obtain the real client IP address.
+ */
+define( 'SGS_HEADER', 'X-Forwarded-For' );
+
 // Debug configuration. Disabled by default in production.
 define( 'WP_DEBUG', false );
 define( 'WP_DEBUG_LOG', false );
