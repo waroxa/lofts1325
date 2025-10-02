@@ -228,27 +228,55 @@ function wp_loft_booking_sync_units_only() {
 
 
 function wp_loft_booking_sync_units() {
-    $messages       = [];
-    $tenant_result  = null;
+    $messages        = [];
+    $tenant_result   = null;
     $keychain_synced = null;
+    $keychain_payload = null;
+    $rerun_keychains  = false;
 
-    if (function_exists('wp_loft_booking_fetch_and_save_tenants')) {
-        $tenant_result = wp_loft_booking_fetch_and_save_tenants();
+    $can_stream_keychains = function_exists('wp_loft_booking_fetch_keychains_from_api')
+        && function_exists('wp_loft_booking_sync_keychains_only');
 
-        if (is_wp_error($tenant_result)) {
+    if ($can_stream_keychains) {
+        $keychain_payload = wp_loft_booking_fetch_keychains_from_api();
+
+        if (is_wp_error($keychain_payload)) {
             if (wp_doing_ajax()) {
-                wp_send_json_error($tenant_result->get_error_message());
+                wp_send_json_error($keychain_payload->get_error_message());
             }
 
-            return $tenant_result;
+            return $keychain_payload;
         }
 
-        if (is_array($tenant_result) && !empty($tenant_result['message'])) {
-            $messages[] = $tenant_result['message'];
-        }
-    }
+        if (empty($keychain_payload)) {
+            $error = new WP_Error('wp_loft_booking_empty_keychains', 'No keychains were returned from ButterflyMX.');
 
-    if (function_exists('wp_loft_booking_sync_keychains')) {
+            if (wp_doing_ajax()) {
+                wp_send_json_error($error->get_error_message());
+            }
+
+            return $error;
+        }
+
+        $keychain_result = wp_loft_booking_sync_keychains_only($keychain_payload);
+
+        if ($keychain_result === false) {
+            $error = new WP_Error('wp_loft_booking_keychain_failed', 'Failed to sync keychains.');
+
+            if (wp_doing_ajax()) {
+                wp_send_json_error($error->get_error_message());
+            }
+
+            return $error;
+        }
+
+        $keychain_synced = (bool) $keychain_result;
+        $rerun_keychains  = $keychain_synced;
+
+        if ($keychain_synced) {
+            $messages[] = '🔑 Keychains synced successfully.';
+        }
+    } elseif (function_exists('wp_loft_booking_sync_keychains')) {
         $keychain_result = wp_loft_booking_sync_keychains();
 
         if (is_wp_error($keychain_result)) {
@@ -276,6 +304,22 @@ function wp_loft_booking_sync_units() {
         }
     }
 
+    if (function_exists('wp_loft_booking_fetch_and_save_tenants')) {
+        $tenant_result = wp_loft_booking_fetch_and_save_tenants();
+
+        if (is_wp_error($tenant_result)) {
+            if (wp_doing_ajax()) {
+                wp_send_json_error($tenant_result->get_error_message());
+            }
+
+            return $tenant_result;
+        }
+
+        if (is_array($tenant_result) && !empty($tenant_result['message'])) {
+            $messages[] = $tenant_result['message'];
+        }
+    }
+
     $unit_result = wp_loft_booking_sync_units_only();
 
     if (is_wp_error($unit_result)) {
@@ -284,6 +328,17 @@ function wp_loft_booking_sync_units() {
         }
 
         return $unit_result;
+    }
+
+    if ($rerun_keychains && !empty($keychain_payload) && function_exists('wp_loft_booking_sync_keychains_only')) {
+        // 🔁 Re-apply the keychain payload so the freshly inserted unit IDs
+        // are linked correctly after wp_loft_booking_sync_units_only() truncates
+        // and rebuilds the loft_units table.
+        $second_pass = wp_loft_booking_sync_keychains_only($keychain_payload);
+
+        if ($second_pass === false) {
+            error_log('❌ Second pass keychain sync failed after unit refresh.');
+        }
     }
 
     if (is_array($unit_result) && !empty($unit_result['message'])) {
