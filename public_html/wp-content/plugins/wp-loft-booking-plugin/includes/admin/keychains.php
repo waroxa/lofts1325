@@ -186,6 +186,18 @@ function keychains_page_function() {
 
 
 
+if (!function_exists('wp_loft_booking_normalize_loft_label')) {
+    function wp_loft_booking_normalize_loft_label($label) {
+        if (preg_match('/LOFTS?\s*-*\s*([0-9]+)/i', $label, $matches)) {
+            return 'LOFT' . $matches[1];
+        }
+
+        $normalized = strtoupper(preg_replace('/[^A-Z0-9]/', '', (string) $label));
+
+        return $normalized !== '' ? $normalized : null;
+    }
+}
+
 function wp_loft_booking_sync_keychains_only($keychains) {
     global $wpdb;
 
@@ -280,6 +292,59 @@ function wp_loft_booking_sync_keychains_only($keychains) {
     }
 
     return true;
+}
+
+function wp_loft_booking_relink_keychains_to_units() {
+    global $wpdb;
+
+    $keychains_table = $wpdb->prefix . 'loft_keychains';
+    $units_table     = $wpdb->prefix . 'loft_units';
+
+    $keychains = $wpdb->get_results("SELECT id, name, unit_id FROM {$keychains_table}");
+
+    if (empty($keychains)) {
+        return 0;
+    }
+
+    $updated = 0;
+
+    foreach ($keychains as $keychain) {
+        $normalized = wp_loft_booking_normalize_loft_label($keychain->name);
+
+        if (empty($normalized)) {
+            continue;
+        }
+
+        $unit_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM {$units_table} WHERE REPLACE(UPPER(unit_name), ' ', '') LIKE %s LIMIT 1",
+            '%' . $normalized . '%'
+        ));
+
+        if (!$unit_id || intval($unit_id) === intval($keychain->unit_id)) {
+            continue;
+        }
+
+        $wpdb->update(
+            $keychains_table,
+            ['unit_id' => intval($unit_id)],
+            ['id' => intval($keychain->id)],
+            ['%d'],
+            ['%d']
+        );
+
+        if ($wpdb->last_error) {
+            error_log('❌ Failed to relink keychain ID ' . intval($keychain->id) . ': ' . $wpdb->last_error);
+            continue;
+        }
+
+        $updated++;
+    }
+
+    if ($updated > 0) {
+        error_log("🔗 Relinked {$updated} keychains to refreshed units.");
+    }
+
+    return $updated;
 }
 
 
