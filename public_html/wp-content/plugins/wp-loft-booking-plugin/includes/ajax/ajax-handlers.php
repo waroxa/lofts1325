@@ -234,10 +234,10 @@ function wp_loft_booking_sync_units() {
     $keychain_payload = null;
     $rerun_keychains  = false;
 
-    $can_stream_keychains = function_exists('wp_loft_booking_fetch_keychains_from_api')
-        && function_exists('wp_loft_booking_sync_keychains_only');
-
-    if ($can_stream_keychains) {
+    if (
+        function_exists('wp_loft_booking_fetch_keychains_from_api') &&
+        function_exists('wp_loft_booking_sync_keychains_only')
+    ) {
         $keychain_payload = wp_loft_booking_fetch_keychains_from_api();
 
         if (is_wp_error($keychain_payload)) {
@@ -331,9 +331,6 @@ function wp_loft_booking_sync_units() {
     }
 
     if ($rerun_keychains && !empty($keychain_payload) && function_exists('wp_loft_booking_sync_keychains_only')) {
-        // 🔁 Re-apply the keychain payload so the freshly inserted unit IDs
-        // are linked correctly after wp_loft_booking_sync_units_only() truncates
-        // and rebuilds the loft_units table.
         $second_pass = wp_loft_booking_sync_keychains_only($keychain_payload);
 
         if ($second_pass === false) {
