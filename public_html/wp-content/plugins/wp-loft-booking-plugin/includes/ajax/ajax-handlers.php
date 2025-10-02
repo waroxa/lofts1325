@@ -249,28 +249,21 @@ function wp_loft_booking_sync_units() {
         }
     }
 
-    if (function_exists('wp_loft_booking_sync_keychains')) {
-        $keychain_result = wp_loft_booking_sync_keychains();
+    if (function_exists('keychains_page_function')) {
+        $keychain_synced = false;
+        $original_post   = $_POST;
 
-        if (is_wp_error($keychain_result)) {
-            if (wp_doing_ajax()) {
-                wp_send_json_error($keychain_result->get_error_message());
-            }
+        try {
+            $_POST['sync_keychains'] = 1;
 
-            return $keychain_result;
+            ob_start();
+            keychains_page_function();
+            ob_end_clean();
+
+            $keychain_synced = true;
+        } finally {
+            $_POST = $original_post;
         }
-
-        if ($keychain_result === false) {
-            $error = new WP_Error('wp_loft_booking_keychain_failed', 'Failed to sync keychains.');
-
-            if (wp_doing_ajax()) {
-                wp_send_json_error($error->get_error_message());
-            }
-
-            return $error;
-        }
-
-        $keychain_synced = (bool) $keychain_result;
 
         if ($keychain_synced) {
             $messages[] = '🔑 Keychains synced successfully.';
