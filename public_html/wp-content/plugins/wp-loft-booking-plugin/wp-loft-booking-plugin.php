@@ -57,6 +57,49 @@ function wp_loft_booking_noop_die_handler() {
 function wp_loft_booking_noop_die( $message = '', $title = '', $args = array() ) {}
 
 /**
+ * Trigger the existing keychains admin page flow programmatically.
+ *
+ * @return bool|WP_Error True when the sync ran, false when unavailable, or WP_Error on failure.
+ */
+function wp_loft_booking_trigger_keychains_page_sync() {
+    if ( ! function_exists( 'keychains_page_function' ) ) {
+        return false;
+    }
+
+    $original_post     = isset( $_POST ) ? $_POST : null;
+    $original_ob_level = ob_get_level();
+
+    try {
+        $_POST = is_array( $original_post ) ? $original_post : array();
+        $_POST['sync_keychains'] = 1;
+
+        ob_start();
+        wp_loft_booking_run_safely( 'keychains_page_function' );
+        ob_end_clean();
+
+        return true;
+    } catch ( Exception $exception ) {
+        error_log( '[WP Loft Booking] keychains_page_function failed: ' . $exception->getMessage() );
+
+        return new WP_Error( 'keychain_sync_failed', $exception->getMessage() );
+    } catch ( Error $error ) {
+        error_log( '[WP Loft Booking] keychains_page_function caused a fatal error: ' . $error->getMessage() );
+
+        return new WP_Error( 'keychain_sync_failed', $error->getMessage() );
+    } finally {
+        if ( null === $original_post ) {
+            unset( $_POST );
+        } else {
+            $_POST = $original_post;
+        }
+
+        while ( ob_get_level() > $original_ob_level ) {
+            ob_end_clean();
+        }
+    }
+}
+
+/**
  * Sync tenants, keychains and units in sequence without exiting.
  */
 function wp_loft_booking_full_sync() {

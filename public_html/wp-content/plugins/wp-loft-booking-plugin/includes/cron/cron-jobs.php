@@ -82,8 +82,14 @@ add_action('wp_loft_booking_cron_sync', function () {
             wp_loft_booking_run_safely('wp_loft_booking_fetch_and_save_tenants');
         }
 
-        if (function_exists('wp_loft_booking_sync_keychains')) {
-            wp_loft_booking_sync_keychains();
+        $keychain_result = function_exists('wp_loft_booking_trigger_keychains_page_sync')
+            ? wp_loft_booking_trigger_keychains_page_sync()
+            : false;
+
+        if ($keychain_result instanceof WP_Error) {
+            error_log('[WP Loft Booking] Cron keychain sync failed: ' . $keychain_result->get_error_message());
+        } elseif ($keychain_result) {
+            error_log('🔑 Cron: keychains synced successfully via keychains_page_function.');
         }
 
         if (function_exists('wp_loft_booking_sync_units')) {
