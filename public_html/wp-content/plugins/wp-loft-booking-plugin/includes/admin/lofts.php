@@ -139,6 +139,7 @@ function wp_loft_booking_lofts_page() {
 }
 
 add_action('wp_ajax_wp_loft_booking_sync_units', 'wp_loft_booking_sync_units');
+add_action('wp_ajax_wplb_sync_units', 'wp_loft_booking_sync_units');
 
 /**
  * Display all LOFT units, marking as Occupied if there is
