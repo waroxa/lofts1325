@@ -60,17 +60,31 @@ function wp_loft_booking_noop_die( $message = '', $title = '', $args = array() )
  * Sync tenants, keychains and units in sequence without exiting.
  */
 function wp_loft_booking_full_sync() {
+    if ( function_exists( 'wp_loft_booking_sync_units' ) ) {
+        $result = wp_loft_booking_sync_units();
+
+        if ( is_wp_error( $result ) ) {
+            error_log( '[WP Loft Booking] Full sync failed: ' . $result->get_error_message() );
+        }
+
+        return $result;
+    }
+
+    $results = [];
+
     if ( function_exists( 'wp_loft_booking_fetch_and_save_tenants' ) ) {
-        wp_loft_booking_run_safely( 'wp_loft_booking_fetch_and_save_tenants' );
+        $results['tenants'] = wp_loft_booking_fetch_and_save_tenants();
     }
 
     if ( function_exists( 'wp_loft_booking_sync_keychains' ) ) {
-        wp_loft_booking_sync_keychains();
+        $results['keychains'] = wp_loft_booking_sync_keychains();
     }
 
-    if ( function_exists( 'wp_loft_booking_sync_units' ) ) {
-        wp_loft_booking_run_safely( 'wp_loft_booking_sync_units' );
+    if ( function_exists( 'wp_loft_booking_sync_units_only' ) ) {
+        $results['units'] = wp_loft_booking_sync_units_only();
     }
+
+    return $results;
 }
 
 

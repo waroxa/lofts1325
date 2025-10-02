@@ -78,9 +78,11 @@ function wp_loft_booking_fetch_and_save_tenants() {
 
     if ( ! $token ) {
         error_log( '❌ Missing ButterflyMX token.' );
-        wp_send_json_error( 'Missing API token.' );
-        return;
+        return new WP_Error( 'wp_loft_booking_missing_token', 'Missing API token.' );
     }
+
+    $synced_tenants = 0;
+    $synced_keys    = 0;
 
     // 1) Fetch tenants
     $response = wp_remote_get( "{$base_url}/tenants", [
@@ -93,23 +95,20 @@ function wp_loft_booking_fetch_and_save_tenants() {
 
     if ( is_wp_error( $response ) ) {
         error_log( '❌ HTTP Error (tenants): ' . $response->get_error_message() );
-        wp_send_json_error( 'Error fetching tenants.' );
-        return;
+        return new WP_Error( 'wp_loft_booking_tenant_http_error', 'Error fetching tenants.' );
     }
 
     $code = wp_remote_retrieve_response_code( $response );
     $body = wp_remote_retrieve_body( $response );
     if ( $code === 401 ) {
         error_log( '🔒 Unauthorized. Check API token.' );
-        wp_send_json_error( 'Unauthorized.' );
-        return;
+        return new WP_Error( 'wp_loft_booking_tenant_unauthorized', 'Unauthorized.' );
     }
 
     $data = json_decode( $body, true );
     if ( ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
         error_log( '❌ Invalid tenant response.' );
-        wp_send_json_error( 'Invalid API response.' );
-        return;
+        return new WP_Error( 'wp_loft_booking_tenant_invalid_response', 'Invalid API response.' );
     }
 
     foreach ( $data['data'] as $tenant ) {
@@ -158,6 +157,10 @@ function wp_loft_booking_fetch_and_save_tenants() {
             [ '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', is_null($lease_end) ? 'NULL' : '%s' ]
         );
 
+        if ( ! $wpdb->last_error ) {
+            $synced_tenants++;
+        }
+
         if ( $wpdb->last_error ) {
             error_log( '❌ DB Error (tenant): ' . $wpdb->last_error );
             continue;
@@ -198,12 +201,20 @@ function wp_loft_booking_fetch_and_save_tenants() {
                 if ( $wpdb->last_error ) {
                     error_log( '❌ DB Error (keychain): ' . $wpdb->last_error );
                 }
+                else {
+                    $synced_keys++;
+                }
             }
         }
     }
     wp_loft_booking_fetch_and_save_visitor_passes();
 
-    wp_send_json_success( '🎉 Tenants and keys synced successfully.' );
+    return [
+        'success'       => true,
+        'message'       => '🎉 Tenants and keys synced successfully.',
+        'tenants_synced'=> $synced_tenants,
+        'keys_synced'   => $synced_keys,
+    ];
 }
 
 
