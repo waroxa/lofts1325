@@ -288,52 +288,64 @@ function wp_loft_booking_sync_keychains() {
     global $wpdb;
 
     $keychains_table = $wpdb->prefix . 'loft_keychains';
-    $vk_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
-    $tenants_table = $wpdb->prefix . 'loft_tenants';
-    $units_table = $wpdb->prefix . 'loft_units';
+    $vk_table        = $wpdb->prefix . 'loft_keychain_virtual_keys';
+    $tenants_table   = $wpdb->prefix . 'loft_tenants';
+    $units_table     = $wpdb->prefix . 'loft_units';
 
-    // 🔥 Limpia datos antiguos para evitar duplicados o acumulación
+    $keychains = wp_loft_booking_fetch_keychains_from_api();
+
+    if (is_wp_error($keychains)) {
+        return $keychains;
+    }
+
+    if (empty($keychains)) {
+        return new WP_Error('wp_loft_booking_empty_keychains', 'No keychains were returned from ButterflyMX.');
+    }
+
+    // Only clear the existing data once we have fresh results.
     $wpdb->query("DELETE FROM $vk_table");
     $wpdb->query("DELETE FROM $keychains_table");
 
-    // ✅ Obtén los datos de ButterflyMX
-    $keychains = wp_loft_booking_fetch_keychains_from_api(); // Asegúrate que esta exista y funcione
-    error_log('🔍 Keychains received from API: ' . count($keychains));
-
     foreach ($keychains as $keychain) {
-        $external_tenant_id = $keychain['relationships']['tenant']['data']['id'] ?? null;
-        $virtual_keys = $keychain['relationships']['virtual_keys']['data'] ?? [];
-        $unit_label = $keychain['attributes']['name'] ?? null;
+        $attributes    = $keychain['attributes'] ?? [];
+        $relationships = $keychain['relationships'] ?? [];
+
+        $external_tenant_id = $relationships['tenant']['data']['id'] ?? null;
+        $virtual_keys       = $relationships['virtual_keys']['data'] ?? [];
+        $unit_label         = $attributes['name'] ?? null;
 
         if (!$external_tenant_id || empty($virtual_keys)) {
-            error_log("❌ Skipped keychain with missing tenant ID or virtual keys: " . json_encode($keychain));
+            error_log("❌ Skipped keychain with missing tenant ID or virtual keys: " . wp_json_encode($keychain));
             continue;
         }
 
         $tenant_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $tenants_table WHERE tenant_id = %d", $external_tenant_id
+            "SELECT id FROM $tenants_table WHERE tenant_id = %d",
+            $external_tenant_id
         ));
 
-        $unit_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $units_table WHERE unit_name = %s", $unit_label
-        ));
+        $unit_id = null;
+        if ($unit_label) {
+            $unit_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM $units_table WHERE unit_name = %s",
+                $unit_label
+            ));
+        }
 
         if (!$tenant_id) {
-            error_log("❌ Tenant not found for ID $external_tenant_id");
+            error_log("❌ Tenant not found for external ID $external_tenant_id");
             continue;
         }
 
         $kc_data = [
             'tenant_id'   => $tenant_id,
             'unit_id'     => $unit_id,
-            'name'        => sanitize_text_field($unit_label),
-            'valid_from'  => date('Y-m-d H:i:s', strtotime($keychain['attributes']['starts_at'])),
-            'valid_until' => date('Y-m-d H:i:s', strtotime($keychain['attributes']['ends_at'])),
+            'name'        => sanitize_text_field($unit_label ?? ''),
+            'valid_from'  => date('Y-m-d H:i:s', strtotime($attributes['starts_at'] ?? 'now')),
+            'valid_until' => date('Y-m-d H:i:s', strtotime($attributes['ends_at'] ?? 'now')),
         ];
 
-        $inserted = $wpdb->insert($keychains_table, $kc_data, [
-            '%d', '%d', '%s', '%s', '%s'
-        ]);
+        $inserted = $wpdb->insert($keychains_table, $kc_data, ['%d', '%d', '%s', '%s', '%s']);
 
         if (!$inserted) {
             error_log("❌ Error inserting keychain: " . $wpdb->last_error);
@@ -343,15 +355,23 @@ function wp_loft_booking_sync_keychains() {
         $kc_id = $wpdb->insert_id;
 
         foreach ($virtual_keys as $vk) {
-            $wpdb->insert($vk_table, [
-                'keychain_id' => $kc_id,
-                'key_id'      => intval($vk['id'])
-            ], ['%d', '%d']);
+            if (!isset($vk['id'])) {
+                continue;
+            }
+
+            $wpdb->insert(
+                $vk_table,
+                [
+                    'keychain_id' => $kc_id,
+                    'key_id'      => intval($vk['id'])
+                ],
+                ['%d', '%d']
+            );
         }
 
         error_log("✅ Synced keychain '{$kc_data['name']}' with " . count($virtual_keys) . " virtual keys.");
     }
-    // 🔄 After syncing keychains, update unit availability status.
+
     $active_units = $wpdb->get_col(
         "SELECT DISTINCT u.unit_name FROM $units_table u INNER JOIN $keychains_table kc ON kc.unit_id = u.id"
     );
@@ -362,43 +382,62 @@ function wp_loft_booking_sync_keychains() {
 }
 
 function wp_loft_booking_fetch_keychains_from_api() {
-    $token = get_option('butterflymx_access_token_v4');
-    if (!$token) {
-        error_log("❌ No V3 token found.");
-        return [];
+    $token_v4 = get_option('butterflymx_access_token_v4');
+    $token_v3 = get_option('butterflymx_access_token_v3');
+    $environment = get_option('butterflymx_environment', 'sandbox');
+
+    $base_url = ($environment === 'production')
+        ? 'https://api.butterflymx.com'
+        : 'https://api.na.sandbox.butterflymx.com';
+
+    $version = null;
+    $token   = null;
+
+    if ($token_v4) {
+        $version = 'v4';
+        $token   = $token_v4;
+    } elseif ($token_v3) {
+        $version = 'v3';
+        $token   = $token_v3;
     }
 
-    $page = 1;
-    $all_keychains = [];
-    error_log("🔑 Usando token V3 desde opciones: $token");
+    if (!$version || !$token) {
+        error_log('❌ Missing ButterflyMX token for keychain sync.');
+        return new WP_Error('wp_loft_booking_missing_token', 'Missing ButterflyMX API token.');
+    }
 
-    while (true) {
-        $url = "https://api.butterflymx.com/v4/keychains";
+    $url          = sprintf('%s/%s/keychains', $base_url, $version);
+    $all_keychains = [];
+
+    while ($url) {
         $response = wp_remote_get($url, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
-                'Content-Type'  => 'application/vnd.api+json'
-            ]
+                'Content-Type'  => 'application/vnd.api+json',
+                'Accept'        => 'application/vnd.api+json',
+            ],
+            'timeout' => 30,
         ]);
 
         if (is_wp_error($response)) {
-            error_log("❌ API request failed: " . $response->get_error_message());
-            break;
+            error_log('❌ Keychain API request failed: ' . $response->get_error_message());
+            return $response;
         }
 
         $body = json_decode(wp_remote_retrieve_body($response), true);
 
-        if (empty($body['data'])) {
+        if (empty($body['data']) || !is_array($body['data'])) {
             break;
         }
 
         $all_keychains = array_merge($all_keychains, $body['data']);
-        $page++;
 
-        if (!isset($body['links']['next'])) break;
+        $next = $body['links']['next'] ?? null;
+        $url  = $next ?: null;
     }
 
-    error_log("✅ API V3 returned " . count($all_keychains) . " keychains.");
+    error_log('✅ Keychain API returned ' . count($all_keychains) . ' records using ' . strtoupper($version) . '.');
+
     return $all_keychains;
 }
 
