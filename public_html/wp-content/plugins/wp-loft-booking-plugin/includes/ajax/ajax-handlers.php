@@ -30,10 +30,10 @@ add_action('wp_ajax_wp_loft_booking_get_units', 'wp_loft_booking_get_units');
 add_action('wp_ajax_nopriv_wp_loft_booking_get_units', 'wp_loft_booking_get_units');
 
 
-function wp_loft_booking_sync_units() {
+function wp_loft_booking_sync_units_only() {
     global $wpdb;
 
-    error_log("🚨 ENTERED wp_loft_booking_sync_units()");
+    error_log("🚨 ENTERED wp_loft_booking_sync_units_only()");
 
     $units_table      = $wpdb->prefix . 'loft_units';
     $keychains_table  = $wpdb->prefix . 'loft_keychains';
@@ -216,11 +216,98 @@ function wp_loft_booking_sync_units() {
 
     error_log("✅ FINAL SYNC (ONLY AVAILABLE): SIMPLE={$summary['SIMPLE']}, DOUBLE={$summary['DOUBLE']}, PENTHOUSE={$summary['PENTHOUSE']}");
 
-    wp_send_json_success("✅ Sync completed with $new_units_count units.");
+    return [
+        'success'        => true,
+        'message'        => "✅ Sync completed with $new_units_count units.",
+        'new_units'      => $new_units_count,
+        'availability'   => $summary,
+    ];
 }
 
 
 
+
+function wp_loft_booking_sync_units() {
+    $messages       = [];
+    $tenant_result  = null;
+    $keychain_synced = null;
+
+    if (function_exists('wp_loft_booking_fetch_and_save_tenants')) {
+        $tenant_result = wp_loft_booking_fetch_and_save_tenants();
+
+        if (is_wp_error($tenant_result)) {
+            if (wp_doing_ajax()) {
+                wp_send_json_error($tenant_result->get_error_message());
+            }
+
+            return $tenant_result;
+        }
+
+        if (is_array($tenant_result) && !empty($tenant_result['message'])) {
+            $messages[] = $tenant_result['message'];
+        }
+    }
+
+    if (function_exists('wp_loft_booking_sync_keychains')) {
+        $keychain_result = wp_loft_booking_sync_keychains();
+
+        if (is_wp_error($keychain_result)) {
+            if (wp_doing_ajax()) {
+                wp_send_json_error($keychain_result->get_error_message());
+            }
+
+            return $keychain_result;
+        }
+
+        if ($keychain_result === false) {
+            $error = new WP_Error('wp_loft_booking_keychain_failed', 'Failed to sync keychains.');
+
+            if (wp_doing_ajax()) {
+                wp_send_json_error($error->get_error_message());
+            }
+
+            return $error;
+        }
+
+        $keychain_synced = (bool) $keychain_result;
+
+        if ($keychain_synced) {
+            $messages[] = '🔑 Keychains synced successfully.';
+        }
+    }
+
+    $unit_result = wp_loft_booking_sync_units_only();
+
+    if (is_wp_error($unit_result)) {
+        if (wp_doing_ajax()) {
+            wp_send_json_error($unit_result->get_error_message());
+        }
+
+        return $unit_result;
+    }
+
+    if (is_array($unit_result) && !empty($unit_result['message'])) {
+        $messages[] = $unit_result['message'];
+    }
+
+    $message = trim(implode(' ', array_filter($messages)));
+
+    if ($message === '') {
+        $message = '✅ Full sync completed.';
+    }
+
+    if (wp_doing_ajax()) {
+        wp_send_json_success($message);
+    }
+
+    return [
+        'success'          => true,
+        'message'          => $message,
+        'tenants'          => $tenant_result,
+        'keychains_synced' => $keychain_synced,
+        'units'            => $unit_result,
+    ];
+}
 
 add_action('wp_ajax_wp_loft_booking_sync_units', 'wp_loft_booking_sync_units');
 
@@ -303,8 +390,17 @@ function update_room_quantities_after_loft_sync() {
 
 
 function wp_loft_booking_sync_tenants_ajax() {
-    wp_loft_booking_fetch_and_save_tenants();
-    wp_send_json_success("Tenants synced successfully.");
+    $result = wp_loft_booking_fetch_and_save_tenants();
+
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+    }
+
+    $message = is_array($result) && isset($result['message'])
+        ? $result['message']
+        : 'Tenants synced successfully.';
+
+    wp_send_json_success($message);
 }
 
 add_action('wp_ajax_wp_loft_booking_sync_tenants', 'wp_loft_booking_sync_tenants_ajax');

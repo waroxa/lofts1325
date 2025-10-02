@@ -59,24 +59,37 @@ add_filter('cron_schedules', function ($schedules) {
 });
 
 // 2️⃣ Schedule cron event on plugin activation
-register_activation_hook(__FILE__, function () {
+register_activation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php', function () {
     if (!wp_next_scheduled('wp_loft_booking_cron_sync')) {
         wp_schedule_event(time(), 'every_15_minutes', 'wp_loft_booking_cron_sync');
     }
 });
 
 // 3️⃣ Clear cron on plugin deactivation
-register_deactivation_hook(__FILE__, function () {
+register_deactivation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php', function () {
     wp_clear_scheduled_hook('wp_loft_booking_cron_sync');
 });
 
 // 4️⃣ Main cron hook
 add_action('wp_loft_booking_cron_sync', function () {
-    error_log("⏰ Running cron: syncing tenants and keys");
+    error_log("⏰ Running cron: syncing tenants, keychains, and units");
 
-    // Call your existing sync functions
-    wp_loft_booking_sync_tenants_ajax();
-    wp_loft_booking_sync_keychains();
+    if (function_exists('wp_loft_booking_full_sync')) {
+        wp_loft_booking_full_sync();
+    } else {
+        // Fallback to individual calls if the helper is unavailable.
+        if (function_exists('wp_loft_booking_fetch_and_save_tenants')) {
+            wp_loft_booking_run_safely('wp_loft_booking_fetch_and_save_tenants');
+        }
+
+        if (function_exists('wp_loft_booking_sync_keychains')) {
+            wp_loft_booking_sync_keychains();
+        }
+
+        if (function_exists('wp_loft_booking_sync_units')) {
+            wp_loft_booking_run_safely('wp_loft_booking_sync_units');
+        }
+    }
 
     error_log("✅ Cron sync completed");
 });
