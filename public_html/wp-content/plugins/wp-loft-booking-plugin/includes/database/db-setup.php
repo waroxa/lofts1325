@@ -130,6 +130,7 @@ function wp_loft_booking_create_tables() {
             pin_code varchar(10),
             qr_code_url varchar(255),
             key_status varchar(255) DEFAULT 'inactive',
+            key_type varchar(100) DEFAULT '',
             PRIMARY KEY (id),
             CONSTRAINT fk_booking FOREIGN KEY (booking_id) REFERENCES $bookings_table(id) ON DELETE SET NULL
         ) $charset_collate;";
@@ -220,6 +221,8 @@ function wp_loft_booking_create_tables() {
         name VARCHAR(255),
         valid_from DATETIME NOT NULL,
         valid_until DATETIME NOT NULL,
+        people_count SMALLINT UNSIGNED DEFAULT 0,
+        people_json LONGTEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         CONSTRAINT fk_loft_keychains_tenant_id
