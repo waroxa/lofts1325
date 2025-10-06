@@ -1,79 +1,38 @@
 <?php
 defined('ABSPATH') || exit;
 
-// function keychains_page_function() {
-//     global $wpdb;
-//     $keychains_table = $wpdb->prefix . 'loft_keychains';
-//     $tenants_table = $wpdb->prefix . 'loft_tenants';
-//     $units_table = $wpdb->prefix . 'loft_units';
-//     $vk_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
-
-//     echo '<div class="wrap"><h1>🔑 Keychains</h1>';
-
-//     echo '<form method="post">';
-//     echo '<input type="submit" name="sync_keychains" class="button button-primary" value="🔄 Sync Keychains from ButterflyMX" />';
-//     echo '</form>';
-
-//     if (isset($_POST['sync_keychains'])) {
-//         $total = wp_loft_booking_sync_keychains_chunked();
-//         echo "<div class='updated'><p>✅ $total keychains synced in chunks.</p></div>";
-//     }
-
-//     $results = $wpdb->get_results("
-//         SELECT kc.*, t.first_name, t.last_name, u.unit_name
-//         FROM $keychains_table kc
-//         LEFT JOIN $tenants_table t ON kc.tenant_id = t.id
-//         LEFT JOIN $units_table u ON kc.unit_id = u.id
-//         ORDER BY kc.valid_until DESC
-//     ");
-
-//     if (empty($results)) {
-//         echo '<p>No keychains found.</p>';
-//         return;
-//     }
-
-//     echo '<table class="wp-list-table widefat fixed striped">';
-//     echo '<thead><tr>
-//         <th>ID</th><th>Keychain Name</th><th>Tenant</th><th>Unit</th><th>Virtual Keys</th><th>Valid From</th><th>Valid Until</th>
-//     </tr></thead><tbody>';
-
-//     foreach ($results as $kc) {
-//         $tenant_name = $kc->first_name ? esc_html($kc->first_name . ' ' . $kc->last_name) : '<span style="color:red;">❌ Not linked</span>';
-//         $unit_name = $kc->unit_name ? esc_html($kc->unit_name) : '<span style="color:red;">❌ None</span>';
-
-//         $vk_ids = $wpdb->get_col($wpdb->prepare(
-//             "SELECT key_id FROM $vk_table WHERE keychain_id = %d", $kc->id
-//         ));
-
-//         $vk_content = empty($vk_ids)
-//             ? '<span style="color:gray;">❌ None</span>'
-//             : '<details><summary>👁 Ver ' . count($vk_ids) . '</summary><ul>' .
-//                 implode('', array_map(fn($id) => '<li>🔑 ' . esc_html($id) . '</li>', $vk_ids)) .
-//               '</ul></details>';
-
-//         echo '<tr>';
-//         echo '<td>' . esc_html($kc->id) . '</td>';
-//         echo '<td>' . esc_html($kc->name) . '</td>';
-//         echo '<td>' . $tenant_name . '</td>';
-//         echo '<td>' . $unit_name . '</td>';
-//         echo '<td>' . $vk_content . '</td>';
-//         echo '<td>' . esc_html($kc->valid_from) . '</td>';
-//         echo '<td>' . esc_html($kc->valid_until) . '</td>';
-//         echo '</tr>';
-//     }
-
-//     echo '</tbody></table>';
-//     echo '</div>';
-// }
-
 function keychains_page_function() {
     global $wpdb;
-    $now = current_time('mysql');
-    $kc_table = $wpdb->prefix . 'loft_keychains';
-    $vk_table = $wpdb->prefix . 'loft_virtual_keys';
-    $kc_vk_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
-    $units_table = $wpdb->prefix . 'loft_units';
+
+    $now           = current_time('mysql');
+    $kc_table      = $wpdb->prefix . 'loft_keychains';
+    $vk_table      = $wpdb->prefix . 'loft_virtual_keys';
+    $kc_vk_table   = $wpdb->prefix . 'loft_keychain_virtual_keys';
+    $units_table   = $wpdb->prefix . 'loft_units';
     $tenants_table = $wpdb->prefix . 'loft_tenants';
+
+    // Ensure the tables contain the columns we rely on for enriched output.
+    if (!function_exists('maybe_add_column')) {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    }
+
+    maybe_add_column(
+        $kc_table,
+        'people_count',
+        "ALTER TABLE $kc_table ADD COLUMN people_count SMALLINT UNSIGNED DEFAULT 0 AFTER valid_until"
+    );
+
+    maybe_add_column(
+        $kc_table,
+        'people_json',
+        "ALTER TABLE $kc_table ADD COLUMN people_json LONGTEXT NULL AFTER people_count"
+    );
+
+    maybe_add_column(
+        $vk_table,
+        'key_type',
+        "ALTER TABLE $vk_table ADD COLUMN key_type VARCHAR(100) DEFAULT '' AFTER key_status"
+    );
 
     echo '<div class="wrap"><h1>🔑 Keychains</h1>';
 
@@ -82,26 +41,80 @@ function keychains_page_function() {
 
         $wpdb->query("DELETE FROM $kc_vk_table");
         $wpdb->query("DELETE FROM $kc_table");
+        $wpdb->query("DELETE FROM $vk_table");
 
         $count = 0;
 
         foreach ($fetched as $kc) {
+            $virtual_keys = array_map(
+                static function ($vk) {
+                    if (!is_array($vk)) {
+                        return [
+                            'id'     => $vk,
+                            'type'   => '',
+                            'status' => '',
+                        ];
+                    }
+
+                    return $vk;
+                },
+                $kc['virtual_keys'] ?? []
+            );
+
+            $people = array_map(
+                static function ($person) {
+                    if (!is_array($person)) {
+                        return [];
+                    }
+
+                    $first = sanitize_text_field($person['first_name'] ?? '');
+                    $last  = sanitize_text_field($person['last_name'] ?? '');
+
+                    return [
+                        'id'         => sanitize_text_field($person['id'] ?? ''),
+                        'type'       => sanitize_text_field($person['type'] ?? ''),
+                        'first_name' => $first,
+                        'last_name'  => $last,
+                        'email'      => sanitize_email($person['email'] ?? ''),
+                    ];
+                },
+                $kc['people'] ?? []
+            );
+
+            $normalized_people = array_values(array_filter(
+                $people,
+                static function ($person) {
+                    return !empty($person['first_name']) || !empty($person['last_name']) || !empty($person['email']);
+                }
+            ));
+
             $wpdb->insert($kc_table, [
+                'keychain_id'  => isset($kc['keychain_id']) ? intval($kc['keychain_id']) : null,
                 'tenant_id'    => $kc['tenant_id'],
                 'unit_id'      => $kc['unit_id'],
                 'name'         => $kc['name'],
                 'valid_from'   => $kc['valid_from'],
-                'valid_until'  => $kc['valid_until']
+                'valid_until'  => $kc['valid_until'],
+                'people_count' => count($normalized_people),
+                'people_json'  => empty($normalized_people) ? null : wp_json_encode($normalized_people),
             ]);
 
             $kc_id = $wpdb->insert_id;
 
-            foreach ($kc['virtual_keys'] as $vk_id) {
+            foreach ($virtual_keys as $vk) {
+                $vk_id     = sanitize_text_field($vk['id'] ?? '');
+                $vk_label  = sanitize_text_field($vk['label'] ?? ($kc['name'] . ' Key'));
+                $vk_type   = sanitize_text_field($vk['type'] ?? '');
+                $vk_status = sanitize_text_field($vk['status'] ?? 'active');
+
                 $wpdb->insert($vk_table, [
-                    'name'           => $kc['name'] . ' Key',
+                    'name'           => $vk_label,
                     'booking_id'     => 0,
                     'virtual_key_id' => $vk_id,
-                    'key_status'     => 'active',
+                    'pin_code'       => isset($vk['pin_code']) ? sanitize_text_field($vk['pin_code']) : null,
+                    'qr_code_url'    => isset($vk['qr_code_url']) ? esc_url_raw($vk['qr_code_url']) : null,
+                    'key_status'     => $vk_status,
+                    'key_type'       => $vk_type,
                 ]);
                 $saved_vk_id = $wpdb->insert_id;
 
@@ -122,45 +135,97 @@ function keychains_page_function() {
     echo '<form method="post"><input type="submit" name="sync_keychains" class="button button-primary" value="🔄 Sync Keychains from ButterflyMX" /></form>';
 
     $per_page = 15;
-    $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-    $offset = ($paged - 1) * $per_page;
+    $paged    = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+    $offset   = ($paged - 1) * $per_page;
 
-    $total = $wpdb->get_var("
-        SELECT COUNT(*) FROM $kc_table
-        WHERE valid_from <= '$now' AND valid_until >= '$now' AND name LIKE '%LOFT%'
-    ");
+    $total = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $kc_table WHERE valid_from <= %s AND valid_until >= %s",
+        $now,
+        $now
+    ));
 
-    $rows = $wpdb->get_results($wpdb->prepare("
-        SELECT kc.*, t.first_name, t.last_name, u.unit_name
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT kc.*, t.first_name, t.last_name, u.unit_name
         FROM $kc_table kc
         LEFT JOIN $tenants_table t ON kc.tenant_id = t.id
         LEFT JOIN $units_table u ON kc.unit_id = u.id
-        WHERE kc.valid_from <= %s AND kc.valid_until >= %s AND kc.name LIKE '%%LOFT%%'
+        WHERE kc.valid_from <= %s AND kc.valid_until >= %s
         ORDER BY kc.valid_until DESC
-        LIMIT %d OFFSET %d
-    ", $now, $now, $per_page, $offset));
+        LIMIT %d OFFSET %d",
+        $now,
+        $now,
+        $per_page,
+        $offset
+    ));
 
     echo '<table class="wp-list-table widefat fixed striped">';
-    echo '<thead><tr><th>ID</th><th>Name</th><th>Tenant</th><th>Unit</th><th>Virtual Keys</th><th>Valid From</th><th>Valid Until</th></tr></thead><tbody>';
+    echo '<thead><tr><th>ID</th><th>Name</th><th>Tenant</th><th>Unit</th><th>People</th><th>Virtual Keys</th><th>Valid From</th><th>Valid Until</th></tr></thead><tbody>';
 
     foreach ($rows as $kc) {
-        $vk_ids = $wpdb->get_col($wpdb->prepare("
-            SELECT vk.virtual_key_id
+        $vk_rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT vk.name, vk.key_type, vk.key_status, vk.virtual_key_id
             FROM $kc_vk_table kvk
             JOIN $vk_table vk ON kvk.key_id = vk.id
-            WHERE kvk.keychain_id = %d AND vk.key_status = 'active'
-        ", $kc->id));
+            WHERE kvk.keychain_id = %d
+            ORDER BY vk.name ASC",
+            $kc->id
+        ));
 
-        $vk_html = empty($vk_ids)
-            ? '<span style="color:gray;">None</span>'
-            : '<details><summary>' . count($vk_ids) . ' keys</summary><ul><li>' .
-              implode('</li><li>', array_map('esc_html', $vk_ids)) . '</li></ul></details>';
+        if (empty($vk_rows)) {
+            $vk_html = '<span style="color:gray;">None</span>';
+        } else {
+            $vk_items = array_map(
+                static function ($vk) {
+                    $type   = $vk->key_type ? esc_html($vk->key_type) : 'Unknown';
+                    $status = $vk->key_status ? esc_html($vk->key_status) : 'n/a';
+
+                    $label_parts = array_filter([
+                        esc_html($vk->name),
+                        '(' . $type . ')',
+                        '[' . $status . ']',
+                    ]);
+
+                    return '<li>' . implode(' ', $label_parts) . '<br><code>' . esc_html($vk->virtual_key_id) . '</code></li>';
+                },
+                $vk_rows
+            );
+
+            $vk_html = '<details><summary>' . count($vk_rows) . ' keys</summary><ul>' . implode('', $vk_items) . '</ul></details>';
+        }
+
+        $people_data = [];
+        if (!empty($kc->people_json)) {
+            $decoded = json_decode($kc->people_json, true);
+            if (is_array($decoded)) {
+                $people_data = array_filter($decoded, static function ($person) {
+                    return !empty($person['first_name']) || !empty($person['last_name']);
+                });
+            }
+        }
+
+        if (empty($people_data)) {
+            $people_html = '<span style="color:gray;">None</span>';
+        } else {
+            $people_items = array_map(
+                static function ($person) {
+                    $name  = trim(($person['first_name'] ?? '') . ' ' . ($person['last_name'] ?? ''));
+                    $type  = !empty($person['type']) ? ' — ' . esc_html($person['type']) : '';
+                    $email = !empty($person['email']) ? '<br><a href="mailto:' . esc_attr($person['email']) . '">' . esc_html($person['email']) . '</a>' : '';
+
+                    return '<li>' . esc_html($name ?: 'Unnamed') . $type . $email . '</li>';
+                },
+                $people_data
+            );
+
+            $people_html = '<details><summary>' . count($people_data) . ' people</summary><ul>' . implode('', $people_items) . '</ul></details>';
+        }
 
         echo '<tr>';
         echo '<td>' . esc_html($kc->id) . '</td>';
         echo '<td>' . esc_html($kc->name) . '</td>';
         echo '<td>' . esc_html(trim("{$kc->first_name} {$kc->last_name}")) . '</td>';
         echo '<td>' . esc_html($kc->unit_name ?: '❌ None') . '</td>';
+        echo '<td>' . $people_html . '</td>';
         echo '<td>' . $vk_html . '</td>';
         echo '<td>' . esc_html($kc->valid_from) . '</td>';
         echo '<td>' . esc_html($kc->valid_until) . '</td>';
@@ -170,16 +235,17 @@ function keychains_page_function() {
     echo '</tbody></table>';
 
     echo paginate_links([
-        'base' => add_query_arg('paged', '%#%'),
-        'format' => '',
+        'base'    => add_query_arg('paged', '%#%'),
+        'format'  => '',
         'prev_text' => '« Prev',
         'next_text' => 'Next »',
-        'total' => ceil($total / $per_page),
+        'total'   => ceil($total / $per_page),
         'current' => $paged
     ]);
 
     echo '</div>';
 }
+
 
 
 
@@ -598,6 +664,20 @@ function wp_loft_booking_sync_keychains_from_api(): array {
             break;
         }
 
+        $included_index = [];
+        if (!empty($body['included']) && is_array($body['included'])) {
+            foreach ($body['included'] as $resource) {
+                $type = $resource['type'] ?? '';
+                $id   = $resource['id'] ?? '';
+
+                if (!$type || !$id) {
+                    continue;
+                }
+
+                $included_index[sprintf('%s:%s', $type, $id)] = $resource;
+            }
+        }
+
         foreach ($body['data'] as $item) {
             $attrs = $item['attributes'];
             $relationships = $item['relationships'];
@@ -624,13 +704,50 @@ function wp_loft_booking_sync_keychains_from_api(): array {
                     ));
                 }
 
+                $virtual_keys = [];
+                foreach ($relationships['virtual_keys']['data'] ?? [] as $vk) {
+                    $lookup_key = sprintf('%s:%s', $vk['type'] ?? 'virtual_keys', $vk['id'] ?? '');
+                    $vk_resource = $included_index[$lookup_key] ?? [];
+                    $vk_attrs = $vk_resource['attributes'] ?? [];
+
+                    $virtual_keys[] = [
+                        'id'        => $vk['id'] ?? '',
+                        'type'      => sanitize_text_field($vk_attrs['distribution_method'] ?? $vk_attrs['type'] ?? ($vk['type'] ?? '')),
+                        'status'    => sanitize_text_field($vk_attrs['status'] ?? ''),
+                        'label'     => sanitize_text_field($vk_attrs['name'] ?? $vk_attrs['label'] ?? ''),
+                        'pin_code'  => $vk_attrs['pin_code'] ?? ($vk_attrs['pin'] ?? null),
+                        'qr_code_url' => $vk_attrs['qr_code_url'] ?? null,
+                    ];
+                }
+
+                if (empty($virtual_keys)) {
+                    continue;
+                }
+
+                $people = [];
+                foreach ($relationships['people']['data'] ?? [] as $person) {
+                    $lookup_key = sprintf('%s:%s', $person['type'] ?? 'people', $person['id'] ?? '');
+                    $person_resource = $included_index[$lookup_key] ?? [];
+                    $person_attrs = $person_resource['attributes'] ?? [];
+
+                    $people[] = [
+                        'id'         => $person['id'] ?? '',
+                        'type'       => $person_attrs['type'] ?? ($person['type'] ?? ''),
+                        'first_name' => $person_attrs['first_name'] ?? '',
+                        'last_name'  => $person_attrs['last_name'] ?? '',
+                        'email'      => $person_attrs['email'] ?? '',
+                    ];
+                }
+
                 $active_keychains[] = [
+                    'keychain_id'  => intval($item['id'] ?? 0),
                     'name'         => sanitize_text_field($attrs['name'] ?? 'Unnamed Keychain'),
                     'tenant_id'    => $external_tenant_id,
                     'unit_id'      => $unit_id,
                     'valid_from'   => $attrs['starts_at'],
                     'valid_until'  => $attrs['ends_at'],
-                    'virtual_keys' => array_map(fn($vk) => $vk['id'], $relationships['virtual_keys']['data'] ?? [])
+                    'virtual_keys' => $virtual_keys,
+                    'people'       => $people,
                 ];
             }
         }
