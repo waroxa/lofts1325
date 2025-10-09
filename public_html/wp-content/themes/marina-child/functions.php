@@ -11,6 +11,19 @@ if ( !function_exists( 'ms_theme_editor_parent_css' ) ):
 endif;
 add_action( 'wp_enqueue_scripts', 'ms_theme_editor_parent_css', 10 );
 
+/**
+ * Enqueue child theme styles.
+ */
+function marina_child_enqueue_custom_assets() {
+    wp_enqueue_style(
+        'marina-child-header-fixes',
+        get_stylesheet_directory_uri() . '/css/header-fixes.css',
+        array( 'chld_thm_cfg_parent' ),
+        '20241009'
+    );
+}
+add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
+
 // END ENQUEUE PARENT ACTION
 
 

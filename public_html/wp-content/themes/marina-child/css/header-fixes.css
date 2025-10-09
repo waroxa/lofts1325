@@ -1,0 +1,8 @@
+#nd_options_header_6 {
+    display: block !important;
+}
+
+#nd_options_header_6 .elementor-section.elementor-invisible {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
