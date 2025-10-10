@@ -6,7 +6,18 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 if ( !function_exists( 'ms_theme_editor_parent_css' ) ):
     function ms_theme_editor_parent_css() {
-        wp_enqueue_style( 'chld_thm_cfg_parent', trailingslashit( get_template_directory_uri() ) . 'style.css', array(  ) );
+        $parent_theme = wp_get_theme()->parent();
+
+        if ( ! $parent_theme instanceof WP_Theme ) {
+            $parent_theme = wp_get_theme();
+        }
+
+        wp_enqueue_style(
+            'chld_thm_cfg_parent',
+            trailingslashit( get_template_directory_uri() ) . 'style.css',
+            array(),
+            $parent_theme->get( 'Version' )
+        );
     }
 endif;
 add_action( 'wp_enqueue_scripts', 'ms_theme_editor_parent_css', 10 );
@@ -15,11 +26,20 @@ add_action( 'wp_enqueue_scripts', 'ms_theme_editor_parent_css', 10 );
  * Enqueue child theme styles.
  */
 function marina_child_enqueue_custom_assets() {
+    $dependencies = array( 'chld_thm_cfg_parent' );
+
+    if ( wp_style_is( 'nd_booking_style', 'enqueued' ) || wp_style_is( 'nd_booking_style', 'registered' ) ) {
+        $dependencies[] = 'nd_booking_style';
+    }
+
+    $header_fixes_path = get_stylesheet_directory() . '/css/header-fixes.css';
+    $header_fixes_version = file_exists( $header_fixes_path ) ? (string) filemtime( $header_fixes_path ) : wp_get_theme()->get( 'Version' );
+
     wp_enqueue_style(
         'marina-child-header-fixes',
         get_stylesheet_directory_uri() . '/css/header-fixes.css',
-        array( 'chld_thm_cfg_parent' ),
-        '20241009'
+        $dependencies,
+        $header_fixes_version
     );
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
@@ -68,11 +88,14 @@ function marina_child_enqueue_search_styles() {
         return;
     }
 
+    $search_styles_path = get_stylesheet_directory() . '/css/search-results.css';
+    $search_styles_version = file_exists( $search_styles_path ) ? (string) filemtime( $search_styles_path ) : wp_get_theme()->get( 'Version' );
+
     wp_enqueue_style(
         'marina-child-search-results',
         get_stylesheet_directory_uri() . '/css/search-results.css',
         array( 'marina-child-header-fixes' ),
-        '20241010'
+        $search_styles_version
     );
 
     $GLOBALS['marina_child_search_styles_enqueued'] = true;
