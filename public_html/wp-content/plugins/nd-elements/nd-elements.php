@@ -2,7 +2,7 @@
 /*
 Plugin Name:       Elements For Elementor
 Description:       The plugin adds some useful Elementor components that can be integrated very easily on your own theme.
-Version:           2.3
+Version:           9999.9
 Plugin URI:        https://nicdark.com
 Author:            Nicdark
 Author URI:        https://nicdark.com
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Nd_Elements_Elementor_Extension {
 
 
-  const VERSION = '1.0.0';
+  const VERSION = '9999.9';
   const MINIMUM_ELEMENTOR_VERSION = '2.0.0';
   const MINIMUM_PHP_VERSION = '7.0';
   private static $_instance = null;
@@ -196,10 +196,15 @@ Nd_Elements_Elementor_Extension::instance();
 
 //START add custom css and js
 function nd_elements_scripts() {
-  
+
   //basic css plugin
-  wp_enqueue_style( 'nd_elements_style', esc_url( plugins_url( 'css/style.css', __FILE__ ) ) );
-  
+  wp_enqueue_style(
+    'nd_elements_style',
+    esc_url( plugin_dir_url( __FILE__ ) . 'css/style.css' ),
+    [],
+    Nd_Elements_Elementor_Extension::VERSION
+  );
+
 }
 add_action( 'wp_enqueue_scripts', 'nd_elements_scripts' );
 //END add custom css and js
