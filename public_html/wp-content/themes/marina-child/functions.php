@@ -24,6 +24,23 @@ function marina_child_enqueue_custom_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
 
+/**
+ * Load the elevated search experience styles when needed.
+ */
+function marina_child_enqueue_search_styles() {
+    if ( ! is_search() ) {
+        return;
+    }
+
+    wp_enqueue_style(
+        'marina-child-search-results',
+        get_stylesheet_directory_uri() . '/css/search-results.css',
+        array( 'marina-child-header-fixes' ),
+        '20241010'
+    );
+}
+add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
+
 // END ENQUEUE PARENT ACTION
 
 
