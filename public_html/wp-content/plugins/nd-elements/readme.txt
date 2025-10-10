@@ -3,7 +3,7 @@ Contributors: nicdark
 Tags: elementor, components, shortcodes, framework, post-grid, prices, team, testimonials, services
 Requires at least: 4.5
 Tested up to: 6.7
-Stable tag: 2.3
+Stable tag: 9999.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

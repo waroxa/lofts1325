@@ -37,6 +37,10 @@ function marina_child_enqueue_search_styles() {
             if ( has_shortcode( $page->post_content, 'nd_booking_search_results' ) ) {
                 $should_enqueue = true;
             }
+
+            if ( ! $should_enqueue && marina_child_post_contains_search_shortcode( $page ) ) {
+                $should_enqueue = true;
+            }
         }
     }
 
@@ -74,6 +78,81 @@ function marina_child_enqueue_search_styles() {
     $GLOBALS['marina_child_search_styles_enqueued'] = true;
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
+
+/**
+ * Determine whether the supplied post (or any Elementor template it references)
+ * includes the ND Booking search results shortcode.
+ *
+ * @param WP_Post $post The post object under evaluation.
+ *
+ * @return bool
+ */
+function marina_child_post_contains_search_shortcode( WP_Post $post ) {
+    if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $post->ID, '_elementor_data', true ) ) ) {
+        return true;
+    }
+
+    if ( false !== stripos( (string) $post->post_content, 'nd_booking_search_results' ) ) {
+        return true;
+    }
+
+    if ( ! has_shortcode( $post->post_content, 'elementor-template' ) ) {
+        return false;
+    }
+
+    preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post->post_content, $matches );
+
+    if ( empty( $matches[1] ) ) {
+        return false;
+    }
+
+    foreach ( $matches[1] as $template_id ) {
+        $template_id = absint( $template_id );
+
+        if ( ! $template_id ) {
+            continue;
+        }
+
+        $template_post = get_post( $template_id );
+
+        if ( ! $template_post instanceof WP_Post ) {
+            continue;
+        }
+
+        if ( false !== stripos( (string) $template_post->post_content, 'nd_booking_search_results' ) ) {
+            return true;
+        }
+
+        if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $template_post->ID, '_elementor_data', true ) ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Inspect Elementor JSON data for the ND Booking search results shortcode reference.
+ *
+ * @param mixed $elementor_data Elementor post meta value.
+ *
+ * @return bool
+ */
+function marina_child_elementor_data_contains_search_shortcode( $elementor_data ) {
+    if ( empty( $elementor_data ) ) {
+        return false;
+    }
+
+    if ( is_array( $elementor_data ) ) {
+        $elementor_data = wp_json_encode( $elementor_data );
+    }
+
+    if ( ! is_string( $elementor_data ) ) {
+        return false;
+    }
+
+    return false !== stripos( $elementor_data, 'nd_booking_search_results' );
+}
 
 /**
  * Output console diagnostics confirming which theme stylesheets load for administrators.
