@@ -129,7 +129,9 @@ $nd_booking_shortcode_right_content .= '
 
             '.$nd_booking_image.'
 
-            <div class="nd_booking_section nd_booking_padding_30 nd_booking_box_sizing_border_box loft-search-card__content">';
+            <div class="nd_booking_section nd_booking_box_sizing_border_box loft-search-card__content">
+                <div class="loft-search-card__body">
+                    <div class="loft-search-card__details">';
 
                 if ( $nd_booking_meta_box_room_woo_product != 0 ){
                     $nd_booking_r_permalink = $nd_booking_permalink;
@@ -138,18 +140,64 @@ $nd_booking_shortcode_right_content .= '
                 }
 
                 $nd_booking_shortcode_right_content .= '
-                <a class="loft-search-card__title-link" href="'.$nd_booking_r_permalink.'"><h2 class="loft-search-card__title">'.$loft_room_title.'</h2></a>
+                        <a class="loft-search-card__title-link" href="'.$nd_booking_r_permalink.'"><h2 class="loft-search-card__title">'.$loft_room_title.'</h2></a>
 
-                <div class="nd_booking_section loft-search-card__meta">
-                    <div class="nd_booking_display_table loft-search-card__feature-list">
-                        <img alt="" class="loft-search-card__feature-icon" width="23" src="'.esc_url(plugins_url('icon-user-grey.svg', __FILE__ )).'">
-                        <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_max_people.' '.__('GUESTS','nd-booking').'</p>
-                        <img alt="" class="loft-search-card__feature-icon" width="20" src="'.esc_url(plugins_url('icon-plan-grey.svg', __FILE__ )).'">
-                        <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_room_size.' '.nd_booking_get_units_of_measure().'</p>
+                        <div class="nd_booking_section loft-search-card__meta">
+                            <div class="nd_booking_display_table loft-search-card__feature-list">
+                                <img alt="" class="loft-search-card__feature-icon" width="23" src="'.esc_url(plugins_url('icon-user-grey.svg', __FILE__ )).'">
+                                <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_max_people.' '.__('GUESTS','nd-booking').'</p>
+                                <img alt="" class="loft-search-card__feature-icon" width="20" src="'.esc_url(plugins_url('icon-plan-grey.svg', __FILE__ )).'">
+                                <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_room_size.' '.nd_booking_get_units_of_measure().'</p>
+                            </div>
+                        </div>
+
+                        <div class="loft-search-card__excerpt">'.$loft_room_excerpt.'</div>';
+
+                $loft_services_markup = '';
+                $nd_booking_meta_box_normal_services_value = get_post_meta( $nd_booking_id, 'nd_booking_meta_box_normal_services', true );
+
+                if ( $nd_booking_meta_box_normal_services_value !== '' ) {
+
+                    $nd_booking_meta_box_normal_services_array = array_filter( array_map( 'trim', explode( ',', $nd_booking_meta_box_normal_services_value ) ) );
+
+                    if ( ! empty( $nd_booking_meta_box_normal_services_array ) ) {
+
+                        $loft_services_markup .= '<div class="loft-search-card__amenities">';
+
+                        $loft_service_icons_markup = '';
+
+                        foreach ( $nd_booking_meta_box_normal_services_array as $nd_booking_meta_box_normal_services_slug ) {
+
+                            $nd_booking_page_by_path = get_page_by_path( $nd_booking_meta_box_normal_services_slug, OBJECT, 'nd_booking_cpt_2' );
+
+                            if ( $nd_booking_page_by_path instanceof WP_Post ) {
+                                $nd_booking_service_id = $nd_booking_page_by_path->ID;
+                                $nd_booking_service_name = get_the_title( $nd_booking_service_id );
+                                $nd_booking_meta_box_cpt_2_icon = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_icon', true );
+
+                                if ( $nd_booking_meta_box_cpt_2_icon !== '' ) {
+                                    $loft_service_icons_markup .= '<a title="' . esc_attr( $nd_booking_service_name ) . '" class="nd_booking_tooltip_jquery loft-search-card__amenity"><img alt="' . esc_attr( $nd_booking_service_name ) . '" class="loft-search-card__amenity-icon" width="23" height="23" src="' . esc_url( $nd_booking_meta_box_cpt_2_icon ) . '"></a>';
+                                }
+                            }
+                        }
+
+                        if ( $loft_service_icons_markup !== '' ) {
+                            $loft_services_markup .= '<div class="loft-search-card__amenities-icons">' . $loft_service_icons_markup . '</div>';
+                        }
+
+                        $loft_services_markup .= '<a href="' . esc_url( $nd_booking_r_permalink ) . '" class="loft-search-card__details-link">';
+                        $loft_services_markup .= '<span class="loft-search-card__details-link-label">' . esc_html__( 'FULL INFO', 'nd-booking' ) . '</span>';
+                        $loft_services_markup .= '<img alt="" class="loft-search-card__details-link-icon" width="10" src="' . esc_url( plugins_url( 'icon-right-arrow-grey.svg', __FILE__ ) ) . '">';
+                        $loft_services_markup .= '</a>';
+                        $loft_services_markup .= '</div>';
+                    }
+                }
+
+                $nd_booking_shortcode_right_content .= $loft_services_markup;
+
+                $nd_booking_shortcode_right_content .= '
                     </div>
-                </div>
-
-                <div class="loft-search-card__excerpt">'.$loft_room_excerpt.'</div>';
+                    <div class="loft-search-card__sidebar">';
 
 
                 $loft_has_cta = false;
@@ -259,53 +307,9 @@ $nd_booking_shortcode_right_content .= '
                     <p class="loft-search-card__unavailable">'.esc_html__( 'Indisponible pour ces dates sélectionnées.', 'marina-child' ).'</p>';
                 }
 
-                
-                //SERVICES explode the string
-                $nd_booking_meta_box_normal_services_array = explode(',', get_post_meta( $nd_booking_id, 'nd_booking_meta_box_normal_services', true ) );
-
-                if ( get_post_meta( $nd_booking_id, 'nd_booking_meta_box_normal_services', true ) != '' ) {
-
-
-                    $nd_booking_shortcode_right_content .= '
-                    <div class="nd_booking_section nd_booking_height_20"></div> 
-                    <div class="nd_booking_section nd_booking_height_1 nd_booking_border_bottom_1_solid_grey"></div> 
-                    <div class="nd_booking_section nd_booking_height_20"></div>';
-
-
-                    //START CICLE
-                    for ($nd_booking_meta_box_normal_services_array_i = 0; $nd_booking_meta_box_normal_services_array_i < count($nd_booking_meta_box_normal_services_array)-1; $nd_booking_meta_box_normal_services_array_i++) {
-                        
-                        $nd_booking_page_by_path = get_page_by_path($nd_booking_meta_box_normal_services_array[$nd_booking_meta_box_normal_services_array_i],OBJECT,'nd_booking_cpt_2');
-                        
-                        //info service
-                        $nd_booking_service_id = $nd_booking_page_by_path->ID;
-                        $nd_booking_service_name = get_the_title($nd_booking_service_id);
-
-                        //metabox
-                        $nd_booking_meta_box_cpt_2_icon = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_icon', true );
-
-                        $nd_booking_shortcode_right_content .= '
-                             <a title="'.$nd_booking_service_name.'" class="nd_booking_tooltip_jquery nd_booking_float_left"><img alt="'.$nd_booking_service_name.'" class="nd_booking_margin_right_15 nd_booking_float_left" width="23" height="23" src="'.$nd_booking_meta_box_cpt_2_icon.'"></a>
-                        ';
-
-                    }
-                    //END CICLE
-
-
-                    $nd_booking_shortcode_right_content .= '
-                    <a href="'.$nd_booking_r_permalink.'" class="nd_booking_margin_top_7 nd_booking_margin_top_20_all_iphone nd_booking_width_100_percentage_all_iphone nd_booking_float_right nd_booking_float_left_all_iphone nd_booking_display_inline_block nd_booking_text_align_center nd_booking_box_sizing_border_box nd_booking_font_size_12">
-                        <span class="nd_booking_float_left nd_booking_font_size_11 nd_booking_letter_spacing_2">'.__('FULL INFO','nd-booking').'</span>
-                        <img alt="" class="nd_booking_margin_left_5 nd_booking_float_left" width="10" src="'.esc_url(plugins_url('icon-right-arrow-grey.svg', __FILE__ )).'">
-                    </a>';
-
-                }
-
-                
-
-
-                
-
-            $nd_booking_shortcode_right_content .= '
+                $nd_booking_shortcode_right_content .= '
+                    </div>
+                </div>
             </div>
         </div>
 
