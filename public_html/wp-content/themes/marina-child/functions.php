@@ -76,33 +76,62 @@ function marina_child_enqueue_search_styles() {
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
 
 /**
- * Output console diagnostics confirming the search stylesheet loads for administrators.
+ * Output console diagnostics confirming which theme stylesheets load for administrators.
  */
-function marina_child_output_search_style_debug_marker() {
+function marina_child_output_stylesheet_debug_report() {
     if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
         return;
     }
 
-    if ( ! wp_style_is( 'marina-child-search-results', 'enqueued' ) ) {
+    $styles_to_check = array(
+        'chld_thm_cfg_parent'       => __( 'Parent theme stylesheet', 'marina-child' ),
+        'marina-child-header-fixes' => __( 'Header fixes stylesheet', 'marina-child' ),
+    );
+
+    if ( ! empty( $GLOBALS['marina_child_search_styles_enqueued'] ) || wp_style_is( 'marina-child-search-results', 'enqueued' ) ) {
+        $styles_to_check['marina-child-search-results'] = __( 'Search results stylesheet', 'marina-child' );
+    }
+
+    $styles_report = array();
+
+    foreach ( $styles_to_check as $handle => $label ) {
+        $styles_report[] = array(
+            'handle'   => $handle,
+            'label'    => $label,
+            'enqueued' => wp_style_is( $handle, 'enqueued' ),
+        );
+    }
+
+    if ( empty( $styles_report ) ) {
         return;
     }
 
     ?>
     <script>
         (function () {
-            var handle = 'marina-child-search-results-css';
-            var stylesheet = document.getElementById(handle);
+            var styles = <?php echo wp_json_encode( $styles_report ); ?>;
 
-            if (stylesheet && stylesheet.href) {
-                console.info('[Marina Child] Search stylesheet detected:', stylesheet.href);
-            } else {
-                console.warn('[Marina Child] Search stylesheet handle enqueued, but link element not found.');
-            }
+            styles.forEach(function (style) {
+                var elementId = style.handle + '-css';
+                var stylesheetEl = document.getElementById(elementId);
+
+                if (stylesheetEl && stylesheetEl.href) {
+                    console.info('[Marina Child] "%s" [%s] loaded from: %s', style.label, style.handle, stylesheetEl.href);
+                    return;
+                }
+
+                if (style.enqueued) {
+                    console.warn('[Marina Child] "%s" [%s] was enqueued, but the link element (#%s) is missing.', style.label, style.handle, elementId);
+                    return;
+                }
+
+                console.warn('[Marina Child] "%s" [%s] is not enqueued on this page.', style.label, style.handle);
+            });
         })();
     </script>
     <?php
 }
-add_action( 'wp_footer', 'marina_child_output_search_style_debug_marker', 100 );
+add_action( 'wp_footer', 'marina_child_output_stylesheet_debug_report', 100 );
 
 // END ENQUEUE PARENT ACTION
 
