@@ -40,8 +40,24 @@ function marina_child_enqueue_search_styles() {
         }
     }
 
-    if ( ! $should_enqueue && isset( $_GET['nd_booking_archive_from_date_range'] ) ) {
-        $should_enqueue = true;
+    if ( ! $should_enqueue ) {
+        $nd_booking_query_params = array(
+            'nd_booking_archive_form_date_range_from',
+            'nd_booking_archive_form_date_range_to',
+            'nd_booking_archive_form_guests',
+            'nd_booking_archive_form_services',
+            'nd_booking_archive_form_additional_services',
+            'nd_booking_archive_form_branch_stars',
+            'nd_booking_archive_form_branches',
+            'nd_booking_archive_form_max_price_for_day',
+        );
+
+        foreach ( $nd_booking_query_params as $query_param ) {
+            if ( isset( $_GET[ $query_param ] ) && '' !== $_GET[ $query_param ] ) {
+                $should_enqueue = true;
+                break;
+            }
+        }
     }
 
     if ( ! $should_enqueue ) {
@@ -54,8 +70,39 @@ function marina_child_enqueue_search_styles() {
         array( 'marina-child-header-fixes' ),
         '20241010'
     );
+
+    $GLOBALS['marina_child_search_styles_enqueued'] = true;
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
+
+/**
+ * Output console diagnostics confirming the search stylesheet loads for administrators.
+ */
+function marina_child_output_search_style_debug_marker() {
+    if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    if ( ! wp_style_is( 'marina-child-search-results', 'enqueued' ) ) {
+        return;
+    }
+
+    ?>
+    <script>
+        (function () {
+            var handle = 'marina-child-search-results-css';
+            var stylesheet = document.getElementById(handle);
+
+            if (stylesheet && stylesheet.href) {
+                console.info('[Marina Child] Search stylesheet detected:', stylesheet.href);
+            } else {
+                console.warn('[Marina Child] Search stylesheet handle enqueued, but link element not found.');
+            }
+        })();
+    </script>
+    <?php
+}
+add_action( 'wp_footer', 'marina_child_output_search_style_debug_marker', 100 );
 
 // END ENQUEUE PARENT ACTION
 
