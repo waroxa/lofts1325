@@ -28,7 +28,23 @@ add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
  * Load the elevated search experience styles when needed.
  */
 function marina_child_enqueue_search_styles() {
-    if ( ! is_search() ) {
+    $should_enqueue = is_search();
+
+    if ( ! $should_enqueue && is_page() ) {
+        $page = get_post();
+
+        if ( $page instanceof WP_Post ) {
+            if ( has_shortcode( $page->post_content, 'nd_booking_search_results' ) ) {
+                $should_enqueue = true;
+            }
+        }
+    }
+
+    if ( ! $should_enqueue && isset( $_GET['nd_booking_archive_from_date_range'] ) ) {
+        $should_enqueue = true;
+    }
+
+    if ( ! $should_enqueue ) {
         return;
     }
 
