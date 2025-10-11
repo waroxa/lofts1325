@@ -299,6 +299,19 @@ function nd_booking_custom_checkout_room_fields_admin_order($order_id){
 //START  nd_booking_search_results
 function nd_booking_shortcode_search_results() {
 
+    if ( ! wp_style_is( 'nd_booking_style', 'enqueued' ) ) {
+        if ( wp_style_is( 'nd_booking_style', 'registered' ) ) {
+            wp_enqueue_style( 'nd_booking_style' );
+        } else {
+            $nd_booking_plugin_root = dirname( dirname( dirname( __FILE__ ) ) );
+            $nd_booking_style_path  = $nd_booking_plugin_root . '/assets/css/style.css';
+            $nd_booking_style_url   = plugins_url( 'assets/css/style.css', $nd_booking_plugin_root . '/nd-booking.php' );
+            $nd_booking_style_version = file_exists( $nd_booking_style_path ) ? filemtime( $nd_booking_style_path ) : false;
+
+            wp_enqueue_style( 'nd_booking_style', $nd_booking_style_url, array(), $nd_booking_style_version );
+        }
+    }
+
     wp_enqueue_script('masonry');
     wp_enqueue_script('jquery-ui-datepicker');
     wp_enqueue_style('jquery-ui-datepicker-css', esc_url(plugins_url('jquery-ui-datepicker.css', __FILE__ )) );
