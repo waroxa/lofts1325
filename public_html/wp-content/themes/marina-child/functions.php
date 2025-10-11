@@ -89,16 +89,41 @@ function marina_child_enqueue_search_styles() {
     }
 
     $search_styles_path = get_stylesheet_directory() . '/css/search-results.css';
-    $search_styles_version = file_exists( $search_styles_path ) ? (string) filemtime( $search_styles_path ) : wp_get_theme()->get( 'Version' );
+    $search_styles_uri  = get_stylesheet_directory_uri() . '/css/search-results.css';
+    $search_styles_exists = file_exists( $search_styles_path ) && is_readable( $search_styles_path );
+    $search_styles_version = $search_styles_exists ? (string) filemtime( $search_styles_path ) : wp_get_theme()->get( 'Version' );
+
+    $nd_booking_handle          = 'nd_booking_style';
+    $nd_booking_style_available = wp_style_is( $nd_booking_handle, 'enqueued' ) || wp_style_is( $nd_booking_handle, 'registered' );
+
+    if ( $search_styles_exists && $nd_booking_style_available ) {
+        $search_styles_css = file_get_contents( $search_styles_path );
+
+        if ( false !== $search_styles_css && '' !== trim( $search_styles_css ) ) {
+            if ( ! wp_style_is( $nd_booking_handle, 'enqueued' ) ) {
+                wp_enqueue_style( $nd_booking_handle );
+            }
+
+            wp_add_inline_style( $nd_booking_handle, $search_styles_css );
+
+            $GLOBALS['marina_child_search_styles_enqueued'] = 'inline';
+
+            return;
+        }
+    }
+
+    if ( ! $search_styles_exists ) {
+        return;
+    }
 
     wp_enqueue_style(
         'marina-child-search-results',
-        get_stylesheet_directory_uri() . '/css/search-results.css',
+        $search_styles_uri,
         array( 'marina-child-header-fixes' ),
         $search_styles_version
     );
 
-    $GLOBALS['marina_child_search_styles_enqueued'] = true;
+    $GLOBALS['marina_child_search_styles_enqueued'] = 'standalone';
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
 
@@ -185,12 +210,14 @@ function marina_child_output_stylesheet_debug_report() {
         return;
     }
 
+    $search_styles_state = isset( $GLOBALS['marina_child_search_styles_enqueued'] ) ? $GLOBALS['marina_child_search_styles_enqueued'] : '';
+
     $styles_to_check = array(
         'chld_thm_cfg_parent'       => __( 'Parent theme stylesheet', 'marina-child' ),
         'marina-child-header-fixes' => __( 'Header fixes stylesheet', 'marina-child' ),
     );
 
-    if ( ! empty( $GLOBALS['marina_child_search_styles_enqueued'] ) || wp_style_is( 'marina-child-search-results', 'enqueued' ) ) {
+    if ( 'standalone' === $search_styles_state || wp_style_is( 'marina-child-search-results', 'enqueued' ) ) {
         $styles_to_check['marina-child-search-results'] = __( 'Search results stylesheet', 'marina-child' );
     }
 
@@ -201,6 +228,15 @@ function marina_child_output_stylesheet_debug_report() {
             'handle'   => $handle,
             'label'    => $label,
             'enqueued' => wp_style_is( $handle, 'enqueued' ),
+        );
+    }
+
+    if ( 'inline' === $search_styles_state ) {
+        $styles_report[] = array(
+            'handle'   => 'nd_booking_style',
+            'label'    => __( 'ND Booking stylesheet (with inline search results styles)', 'marina-child' ),
+            'enqueued' => wp_style_is( 'nd_booking_style', 'enqueued' ),
+            'inline'   => true,
         );
     }
 
@@ -218,12 +254,27 @@ function marina_child_output_stylesheet_debug_report() {
                 var stylesheetEl = document.getElementById(elementId);
 
                 if (stylesheetEl && stylesheetEl.href) {
+                    if (style.inline) {
+                        console.info('[Marina Child] "%s" [%s] loaded from: %s (inline search results styles applied)', style.label, style.handle, stylesheetEl.href);
+                        return;
+                    }
+
                     console.info('[Marina Child] "%s" [%s] loaded from: %s', style.label, style.handle, stylesheetEl.href);
                     return;
                 }
 
                 if (style.enqueued) {
+                    if (style.inline) {
+                        console.warn('[Marina Child] "%s" [%s] was enqueued for inline styles, but the link element (#%s) is missing.', style.label, style.handle, elementId);
+                        return;
+                    }
+
                     console.warn('[Marina Child] "%s" [%s] was enqueued, but the link element (#%s) is missing.', style.label, style.handle, elementId);
+                    return;
+                }
+
+                if (style.inline) {
+                    console.warn('[Marina Child] "%s" [%s] could not apply inline search results styles because the stylesheet is not enqueued.', style.label, style.handle);
                     return;
                 }
 
