@@ -1,364 +1,403 @@
 :root {
-    --loft-deep-navy: #041b2d;
-    --loft-midnight: #092d46;
-    --loft-cerulean: #1f6fbf;
-    --loft-sky: #c9e7ff;
-    --loft-sand: #f8f3ed;
-    --loft-slate: #4c5a67;
     --loft-ink: #1b2530;
+    --loft-slate: #4c5a67;
+    --loft-sand: #f7f4ef;
+    --loft-ice: #f1f5f9;
+    --loft-cerulean: #1f6fbf;
     --loft-success: #3db7a5;
+    --loft-warning: #f5a623;
 }
 
-.loft-search-hero {
-    position: relative;
-    padding: clamp(3rem, 8vw, 6rem) 0;
-    background: radial-gradient(circle at top left, rgba(31, 111, 191, 0.45), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(61, 183, 165, 0.4), transparent 50%),
-        linear-gradient(135deg, rgba(4, 27, 45, 0.92), rgba(9, 45, 70, 0.88));
-    color: #fff;
-    overflow: hidden;
-}
-
-.loft-search-hero::after {
-    content: "";
-    position: absolute;
-    inset: -15% 35% auto -25%;
-    width: clamp(20rem, 55vw, 40rem);
-    height: clamp(20rem, 55vw, 40rem);
-    background: radial-gradient(circle, rgba(201, 231, 255, 0.35), transparent 70%);
-    filter: blur(0px);
-    opacity: 0.6;
-    transform: rotate(18deg);
-}
-
-.loft-search-hero__inner {
-    position: relative;
-    z-index: 1;
-    max-width: 1080px;
-    margin: 0 auto;
+.loft-search-page {
+    max-width: 1200px;
+    margin: clamp(2rem, 6vw, 3.75rem) auto clamp(4rem, 8vw, 5rem);
     padding: 0 clamp(1rem, 4vw, 2.5rem);
-}
-
-.loft-search-hero__eyebrow {
-    font-size: 0.85rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.75);
-    margin-bottom: 1rem;
-}
-
-.loft-search-hero__title {
-    font-size: clamp(2.5rem, 5vw, 3.4rem);
-    line-height: 1.1;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    max-width: 16ch;
-}
-
-.loft-search-hero__description {
-    font-size: clamp(1rem, 2.8vw, 1.25rem);
-    line-height: 1.6;
-    max-width: 50ch;
-    color: rgba(255, 255, 255, 0.82);
-    margin-bottom: 2rem;
-}
-
-.loft-search-hero__rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.loft-search-hero__rating span {
-    font-size: 1.2rem;
-    letter-spacing: 0.25em;
-    color: #ffc94b;
-}
-
-.loft-search-hero__form {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(16px);
-    border-radius: 18px;
-    padding: clamp(1rem, 3vw, 1.75rem);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 30px 60px rgba(3, 18, 32, 0.28);
-}
-
-.loft-search-hero__form form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    align-items: center;
+    grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+    gap: clamp(1.75rem, 5vw, 3.5rem);
 }
 
-.loft-search-hero__form input[type="search"] {
-    padding: 0.85rem 1.1rem;
-    border-radius: 12px;
-    border: none;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.95);
+@media (max-width: 980px) {
+    .loft-search-page {
+        grid-template-columns: 1fr;
+    }
+}
+
+.loft-search-sidebar {
+    background: #fff;
+    border-radius: 26px;
+    border: 1px solid rgba(4, 27, 45, 0.08);
+    box-shadow: 0 28px 48px rgba(4, 27, 45, 0.12);
+    padding: clamp(1.75rem, 4vw, 2.5rem);
+    position: sticky;
+    top: clamp(1rem, 4vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-self: start;
+}
+
+@media (max-width: 980px) {
+    .loft-search-sidebar {
+        position: static;
+    }
+}
+
+.loft-search-sidebar__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.loft-search-sidebar__eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--loft-cerulean);
+}
+
+.loft-search-sidebar__title {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    line-height: 1.15;
+    font-weight: 600;
+    margin: 0;
     color: var(--loft-ink);
 }
 
-.loft-search-hero__form input[type="submit"],
-.loft-search-toolbar__cta {
-    appearance: none;
-    border: none;
-    border-radius: 12px;
-    padding: 0.95rem 1.6rem;
+.loft-search-sidebar__meta {
+    font-size: 1rem;
+    color: var(--loft-slate);
+    line-height: 1.6;
+}
+
+.loft-search-stay-card {
+    background: var(--loft-ice);
+    border-radius: 22px;
+    padding: clamp(1.5rem, 3.5vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.loft-search-stay-card__title {
+    margin: 0;
+    font-size: 1.15rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: linear-gradient(120deg, #45b2a7, #1f6fbf);
+    color: var(--loft-ink);
+}
+
+.loft-search-stay-card__details {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.9rem;
+}
+
+.loft-search-stay-card__details li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--loft-slate);
+}
+
+.loft-search-stay-card__details strong {
+    font-size: 1.05rem;
+    color: var(--loft-ink);
+}
+
+.loft-search-sidebar__form form {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.loft-search-sidebar__form input[type="search"] {
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(4, 27, 45, 0.12);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-search-sidebar__form input[type="search"]:focus {
+    outline: none;
+    border-color: var(--loft-cerulean);
+    box-shadow: 0 0 0 4px rgba(31, 111, 191, 0.18);
+}
+
+.loft-search-sidebar__form input[type="submit"] {
+    padding: 0.9rem 1.2rem;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(120deg, #f6b343, #ef7e14);
     color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 12px 30px rgba(4, 27, 45, 0.28);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.loft-search-hero__form input[type="submit"]:hover,
-.loft-search-toolbar__cta:hover,
-.loft-search-hero__form input[type="submit"]:focus,
-.loft-search-toolbar__cta:focus {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 32px rgba(4, 27, 45, 0.35);
+.loft-search-sidebar__form input[type="submit"]:hover,
+.loft-search-sidebar__form input[type="submit"]:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(239, 126, 20, 0.28);
 }
 
-.loft-search-toolbar {
-    max-width: 1080px;
-    margin: clamp(2.5rem, 5vw, 4rem) auto;
-    padding: 0 clamp(1rem, 4vw, 2.5rem);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
+.loft-search-sidebar__fine-print {
+    font-size: 0.85rem;
+    color: var(--loft-slate);
+    line-height: 1.5;
 }
 
-.loft-search-toolbar__summary {
+.loft-search-sidebar__perks {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.9rem;
 }
 
-.loft-search-toolbar__summary h2 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--loft-ink);
-    margin: 0;
-}
-
-.loft-search-toolbar__summary span {
+.loft-search-perk {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(4, 27, 45, 0.08);
+    padding: 0.75rem 1rem;
     color: var(--loft-slate);
     font-size: 0.95rem;
 }
 
-.loft-filter-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.loft-filter-pill {
-    padding: 0.6rem 1.1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(31, 111, 191, 0.2);
-    background: rgba(255, 255, 255, 0.85);
-    color: var(--loft-ink);
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.loft-filter-pill:hover,
-.loft-filter-pill:focus {
-    background: rgba(31, 111, 191, 0.12);
-    border-color: rgba(31, 111, 191, 0.35);
-    transform: translateY(-1px);
+.loft-search-perk span {
+    font-size: 1.2rem;
 }
 
 .loft-search-results {
-    max-width: 1140px;
-    margin: 0 auto clamp(3rem, 7vw, 4.5rem);
-    padding: 0 clamp(1rem, 4vw, 2.5rem);
-}
-
-.loft-search-results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: clamp(1.75rem, 4vw, 2.5rem);
-}
-
-.loft-card {
-    background: #fff;
-    border-radius: 22px;
-    overflow: hidden;
-    box-shadow: 0 28px 48px rgba(4, 27, 45, 0.12);
-    border: 1px solid rgba(4, 27, 45, 0.05);
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    min-height: 100%;
+    gap: clamp(2rem, 4vw, 2.75rem);
 }
 
-.loft-card:hover,
-.loft-card:focus-within {
-    transform: translateY(-6px);
-    box-shadow: 0 36px 60px rgba(4, 27, 45, 0.18);
+.loft-room-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 3vw, 2rem);
 }
 
-.loft-card__media {
-    position: relative;
-    padding-top: 66%;
-    background: linear-gradient(140deg, rgba(31, 111, 191, 0.3), rgba(61, 183, 165, 0.3));
-    overflow: hidden;
+.loft-room-card {
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid rgba(4, 27, 45, 0.08);
+    box-shadow: 0 26px 46px rgba(4, 27, 45, 0.12);
+    padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 240px);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: stretch;
 }
 
-.loft-card__media img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+@media (max-width: 900px) {
+    .loft-room-card {
+        grid-template-columns: 1fr;
+    }
 }
 
-.loft-card__badge {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(4, 27, 45, 0.68);
-    color: #fff;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+.loft-room-card__content {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+}
+
+.loft-room-card__flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(61, 183, 165, 0.18);
+    color: var(--loft-success);
     text-transform: uppercase;
     font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
 }
 
-.loft-card__body {
-    padding: clamp(1.5rem, 3vw, 2rem);
-    display: flex;
-    flex-direction: column;
-    gap: 1.1rem;
-    flex: 1;
-}
-
-.loft-card__meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--loft-slate);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-}
-
-.loft-card__title {
-    font-size: 1.45rem;
-    line-height: 1.3;
-    color: var(--loft-ink);
+.loft-room-card__title {
     margin: 0;
+    font-size: clamp(1.4rem, 3.5vw, 1.8rem);
+    color: var(--loft-ink);
 }
 
-.loft-card__title a {
+.loft-room-card__title a {
     color: inherit;
     text-decoration: none;
 }
 
-.loft-card__title a:hover,
-.loft-card__title a:focus {
+.loft-room-card__title a:hover,
+.loft-room-card__title a:focus {
     color: var(--loft-cerulean);
 }
 
-.loft-card__excerpt {
-    color: var(--loft-slate);
+.loft-room-card__description {
     font-size: 0.98rem;
     line-height: 1.7;
+    color: var(--loft-slate);
 }
 
-.loft-card__amenities {
+.loft-room-card__media {
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--loft-sand);
+}
+
+.loft-room-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.loft-room-card__perks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
+    gap: 0.6rem;
 }
 
-.loft-card__amenities span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: var(--loft-sand);
-    color: var(--loft-ink);
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
+.loft-room-card__perks li {
+    background: rgba(31, 111, 191, 0.12);
+    color: var(--loft-cerulean);
     font-size: 0.8rem;
     font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
 }
 
-.loft-card__cta {
-    align-self: flex-start;
-    margin-top: auto;
-    text-decoration: none;
-}
-
-.loft-card__cta span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.loft-card__cta svg {
-    width: 1rem;
-    height: 1rem;
-    fill: currentColor;
-}
-
-.loft-no-results {
-    background: #fff;
+.loft-room-card__rate {
+    background: linear-gradient(180deg, rgba(248, 244, 239, 0.9), #fff);
     border-radius: 20px;
-    padding: clamp(2rem, 5vw, 3rem);
-    text-align: center;
-    box-shadow: 0 24px 44px rgba(4, 27, 45, 0.12);
+    border: 1px solid rgba(4, 27, 45, 0.06);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    align-self: stretch;
 }
 
-.loft-no-results h2 {
-    font-size: 1.7rem;
-    margin-bottom: 1rem;
+.loft-room-card__rate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.loft-room-card__rate-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--loft-cerulean);
+}
+
+.loft-room-card__rate-amount {
+    text-align: right;
     color: var(--loft-ink);
 }
 
-.loft-no-results p {
+.loft-room-card__rate-amount strong {
+    font-size: 1.6rem;
+    line-height: 1.1;
+}
+
+.loft-room-card__rate-amount small {
+    display: block;
+    font-size: 0.75rem;
     color: var(--loft-slate);
-    margin-bottom: 2rem;
+}
+
+.loft-room-card__inclusions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--loft-slate);
+}
+
+.loft-room-card__inclusions li::before {
+    content: '•';
+    color: var(--loft-success);
+    margin-right: 0.5rem;
+}
+
+.loft-room-card__cta {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.85rem 1.4rem;
+    border-radius: 12px;
+    background: linear-gradient(110deg, #ef7e14, #f6b343);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-room-card__cta:hover,
+.loft-room-card__cta:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(239, 126, 20, 0.3);
+}
+
+.loft-search-no-results {
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid rgba(4, 27, 45, 0.08);
+    box-shadow: 0 24px 40px rgba(4, 27, 45, 0.12);
+    padding: clamp(2rem, 4vw, 3rem);
+    text-align: center;
+}
+
+.loft-search-no-results h2 {
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    color: var(--loft-ink);
+    margin-bottom: 1rem;
+}
+
+.loft-search-no-results p {
+    color: var(--loft-slate);
+    margin-bottom: 1.5rem;
 }
 
 .loft-pagination {
-    margin-top: clamp(2.5rem, 5vw, 3.5rem);
     display: flex;
     justify-content: center;
 }
 
 .loft-pagination .page-numbers {
     display: inline-flex;
-    gap: 0.6rem;
     align-items: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 0.5rem 0.85rem;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
     border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 18px 32px rgba(4, 27, 45, 0.08);
 }
 
 .loft-pagination .page-numbers > * {
-    padding: 0.4rem 0.9rem;
+    padding: 0.35rem 0.9rem;
     border-radius: 999px;
     font-weight: 600;
     color: var(--loft-ink);
@@ -366,29 +405,13 @@
 }
 
 .loft-pagination .page-numbers .current {
-    background: linear-gradient(120deg, #45b2a7, #1f6fbf);
+    background: linear-gradient(110deg, #ef7e14, #f6b343);
     color: #fff;
 }
 
 .loft-pagination .page-numbers a:hover,
 .loft-pagination .page-numbers a:focus {
-    background: rgba(31, 111, 191, 0.14);
-}
-
-@media (max-width: 720px) {
-    .loft-search-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .loft-search-hero__form form {
-        grid-template-columns: 1fr;
-    }
-
-    .loft-search-toolbar__cta {
-        width: 100%;
-        justify-content: center;
-    }
+    background: rgba(239, 126, 20, 0.16);
 }
 
 @media (prefers-reduced-motion: reduce) {
