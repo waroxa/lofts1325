@@ -3,6 +3,26 @@
 
 $nd_booking_shortcode_right_content = '';
 
+if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_BUTTON_STYLES' ) ) {
+  define( 'ND_BOOKING_LOFT_SEARCH_RESULTS_BUTTON_STYLES', true );
+
+  $nd_booking_shortcode_right_content .= '
+  <style>
+    #nd_booking_search_cpt_1_content .loft-search-card__btn {
+      background: #FFDA44;
+      color: #1A1A1A !important;
+      box-shadow: 0 18px 32px rgba(255, 218, 68, 0.30);
+    }
+
+    #nd_booking_search_cpt_1_content .loft-search-card__btn:hover,
+    #nd_booking_search_cpt_1_content .loft-search-card__btn:focus {
+      background: #FFD029;
+      color: #1A1A1A !important;
+      box-shadow: 0 22px 40px rgba(255, 218, 68, 0.36);
+    }
+  </style>';
+}
+
 //START RIGHT CONTENT
 $nd_booking_shortcode_right_content .= '
 
