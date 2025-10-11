@@ -412,3 +412,13 @@ update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e
 
 
 
+
+add_action( 'wp_enqueue_scripts', function() {
+    // Force load of the child CSS last
+    wp_enqueue_style(
+        'marina-child-style-forced',
+        get_stylesheet_directory_uri() . '/style.css',
+        array(),
+        filemtime( get_stylesheet_directory() . '/style.css' )
+    );
+}, 999 );
