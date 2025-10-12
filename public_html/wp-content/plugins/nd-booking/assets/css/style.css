@@ -561,6 +561,16 @@ body.single-causes .single-featured-image-header { display: none; }
 
 
 /* ----------------- SEARCH CARD LAYOUT IMPROVEMENTS ----------------- */
+
+.loft-search-results-layout {
+        background: transparent;
+        padding: clamp(3rem, 6vw, 4.5rem) clamp(1.25rem, 5vw, 2.5rem) clamp(5rem, 8vw, 6rem);
+}
+
+#nd_booking_search_cpt_1_content {
+        max-width: 1180px;
+}
+
 #nd_booking_search_cpt_1_content .nd_booking_masonry_content {
         display: flex !important;
         flex-direction: column;
@@ -578,11 +588,6 @@ body.single-causes .single-featured-image-header { display: none; }
         top: auto !important;
 }
 
-#nd_booking_search_cpt_1_content .loft-search-card__outer {
-        padding: 0 !important;
-        box-sizing: border-box;
-}
-
 #nd_booking_search_cpt_1_content .loft-search-card {
         display: grid;
         grid-template-columns: clamp(220px, 28%, 292px) minmax(0, 1fr);
@@ -590,10 +595,140 @@ body.single-causes .single-featured-image-header { display: none; }
         width: 100%;
         max-width: 100%;
         border-radius: 20px;
-        overflow: hidden;
+        overflow: visible;
         border: 1px solid #d8dde6;
-        box-shadow: 0 20px 38px rgba(23,30,45,0.12);
+        box-shadow: 0 26px 60px rgba(16,24,40,0.16);
         background-color: #ffffff;
+}
+
+#nd_booking_search_cpt_1_content .loft-search-card__outer {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        padding-left: clamp(0.5rem, 2vw, 1.5rem) !important;
+        padding-right: clamp(0.5rem, 2vw, 1.5rem) !important;
+        box-sizing: border-box;
+}
+
+.loft-search-toolbar {
+        background: #ffffff;
+        border-radius: 26px;
+        box-shadow: 0 28px 64px rgba(15,23,42,0.12);
+        padding: clamp(1.75rem, 4vw, 2.5rem) clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.loft-search-toolbar__grid {
+        align-items: stretch;
+        gap: clamp(1rem, 3vw, 1.75rem);
+}
+
+.loft-search-toolbar__field {
+        gap: 0.65rem;
+}
+
+.loft-search-toolbar__label,
+.loft-search-toolbar__nights-text,
+.loft-search-toolbar__hint {
+        color: var(--loft-slate, #4c5a67);
+        letter-spacing: 0.16em;
+}
+
+.loft-search-toolbar__input,
+.loft-search-toolbar__stepper,
+.loft-search-toolbar__nights {
+        background: #ffffff;
+        border: 1px solid rgba(16, 24, 40, 0.08);
+        border-radius: 16px;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.loft-search-toolbar__input {
+        color: var(--loft-ink, #1b2530);
+        font-size: 1rem;
+        padding: 1rem 1.15rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.loft-search-toolbar__input:focus {
+        background: #fffaf0;
+        border-color: rgba(239, 126, 20, 0.45);
+        box-shadow: 0 0 0 4px rgba(239, 126, 20, 0.18);
+}
+
+.loft-search-toolbar__nights {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0 1rem;
+}
+
+.loft-search-toolbar__nights-count {
+        color: var(--loft-ink, #1b2530);
+        font-size: clamp(1.5rem, 3vw, 1.9rem);
+}
+
+.loft-search-toolbar__stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+}
+
+.loft-search-toolbar__stepper-btn {
+        background: linear-gradient(120deg, #ef7e14, #f6b343);
+        border-radius: 12px;
+        box-shadow: 0 18px 32px rgba(239, 126, 20, 0.28);
+        color: #fff;
+        height: 42px;
+        width: 42px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-search-toolbar__stepper-btn:hover,
+.loft-search-toolbar__stepper-btn:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 22px 40px rgba(239, 126, 20, 0.36);
+}
+
+.loft-search-toolbar__stepper-value {
+        color: var(--loft-ink, #1b2530);
+        font-size: 1.5rem;
+        font-weight: 700;
+        min-width: 2.5rem;
+}
+
+.loft-search-toolbar__field--submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+}
+
+.loft-search-toolbar__submit {
+        background: linear-gradient(110deg, #ef7e14, #f6b343);
+        border-radius: 999px;
+        box-shadow: 0 26px 54px rgba(239, 126, 20, 0.32);
+        color: #fff;
+        letter-spacing: 0.18em;
+        padding: 1rem 2.4rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-search-toolbar__submit:hover,
+.loft-search-toolbar__submit:focus {
+        box-shadow: 0 30px 62px rgba(239, 126, 20, 0.4);
+        transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+        .loft-search-toolbar__grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .loft-search-toolbar__field--submit {
+                grid-column: 1 / -1;
+                justify-content: center;
+        }
 }
 
 #nd_booking_search_cpt_1_content .loft-search-card__media {
@@ -840,7 +975,7 @@ body.single-causes .single-featured-image-header { display: none; }
         gap: 10px;
         border: none !important;
         border-radius: 14px !important;
-        background: linear-gradient(135deg, #ff7a18 0%, #ff512f 100%);
+        background: linear-gradient(110deg, #ef7e14, #f6b343);
         color: #ffffff !important;
         font-weight: 800;
         font-size: 14px;
@@ -849,7 +984,7 @@ body.single-causes .single-featured-image-header { display: none; }
         padding: 18px 34px !important;
         cursor: pointer;
         text-decoration: none;
-        box-shadow: 0 18px 32px rgba(255,81,47,0.3);
+        box-shadow: 0 26px 54px rgba(239,126,20,0.32);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         width: 100%;
         box-sizing: border-box;
@@ -857,8 +992,8 @@ body.single-causes .single-featured-image-header { display: none; }
 
 #nd_booking_search_cpt_1_content .loft-search-card__btn:hover,
 #nd_booking_search_cpt_1_content .loft-search-card__btn:focus {
-        transform: translateY(-3px);
-        box-shadow: 0 22px 40px rgba(255,81,47,0.34);
+        transform: translateY(-1px);
+        box-shadow: 0 30px 62px rgba(239,126,20,0.4);
 }
 
 #nd_booking_search_cpt_1_content .loft-search-card__form {
