@@ -20,6 +20,22 @@ $nd_booking_meta_box_branches = get_post_meta( get_the_ID(), 'nd_booking_meta_bo
 $nd_booking_meta_box_cpt_4_stars = get_post_meta( $nd_booking_meta_box_branches, 'nd_booking_meta_box_cpt_4_stars', true );
 $nd_booking_rooms_left_b = "";
 
+if ( ! isset( $loft_is_best_result ) ) {
+    $loft_is_best_result = false;
+}
+
+$loft_is_best_result = (bool) $loft_is_best_result;
+$loft_card_classes = 'loft-search-card';
+if ( $loft_is_best_result ) {
+    $loft_card_classes .= ' loft-search-card--best';
+}
+$loft_card_attributes = $loft_is_best_result ? ' data-loft-best="true" aria-selected="true"' : '';
+
+$loft_best_badge_markup = '';
+if ( $loft_is_best_result ) {
+    $loft_best_badge_markup = '<span class="loft-search-card__best-badge" aria-label="' . esc_attr__( 'Best value', 'nd-booking' ) . '"><span class="loft-search-card__best-badge-icon" aria-hidden="true">★</span><span>' . esc_html__( 'Best value', 'nd-booking' ) . '</span></span>';
+}
+
 $loft_branch_title = '';
 if ( ! empty( $nd_booking_meta_box_branches ) ) {
     $loft_branch_title = get_the_title( $nd_booking_meta_box_branches );
@@ -125,7 +141,9 @@ $nd_booking_shortcode_right_content .= '
 
     <div class="nd_booking_section nd_booking_padding_15 nd_booking_box_sizing_border_box loft-search-card__outer">
 
-        <div class="nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white loft-search-card">
+        <div class="nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white '.$loft_card_classes.'"'.$loft_card_attributes.'>
+
+            '.$loft_best_badge_markup.'
 
             '.$nd_booking_image.'
 
@@ -244,14 +262,28 @@ $nd_booking_shortcode_right_content .= '
                             $loft_night_label        = _n( 'nuit', 'nuits', $loft_total_nights, 'marina-child' );
                             $loft_total_stay_label   = esc_html( sprintf( __( 'Séjour de %1$d %2$s', 'marina-child' ), $loft_total_nights, $loft_night_label ) );
                             $loft_nightly_label      = esc_html( sprintf( __( '%1$s %2$s par nuit', 'marina-child' ), $loft_nightly_rate_number, $loft_currency_code ) );
+                            $loft_total_label_text   = esc_html__( 'Tarif total', 'marina-child' );
+                            if ( $loft_is_best_result ) {
+                                $loft_total_label_text = esc_html__( 'Tarif total recommandé', 'marina-child' );
+                            }
+
+                            $loft_best_rate_notice = '';
+                            if ( $loft_is_best_result ) {
+                                $loft_best_rate_notice = '<p class="loft-search-card__rate-sub loft-search-card__rate-sub--best">' . esc_html__( 'Notre meilleure offre pour vos dates.', 'marina-child' ) . '</p>';
+                            }
+
                             $loft_button_label       = esc_html( sprintf( __( 'RÉSERVEZ MAINTENANT • %1$s %2$s', 'marina-child' ), $loft_total_price_number, $loft_currency_code ) );
+                            if ( $loft_is_best_result ) {
+                                $loft_button_label = '★ ' . $loft_button_label;
+                            }
 
                             $nd_booking_shortcode_right_content .= '
                             <div class="loft-search-card__rate">
-                                <p class="loft-search-card__rate-label">'.esc_html__( 'Tarif total', 'marina-child' ).'</p>
+                                <p class="loft-search-card__rate-label">'.$loft_total_label_text.'</p>
                                 <p class="loft-search-card__rate-amount">'.$loft_total_price_display.'</p>
                                 <p class="loft-search-card__rate-sub">'.$loft_total_stay_label.'</p>
                                 <p class="loft-search-card__rate-sub">'.$loft_nightly_label.'</p>
+                                '.$loft_best_rate_notice.'
                             </div>
                             <div class="loft-search-card__actions">';
 
