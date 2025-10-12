@@ -322,6 +322,7 @@ function nd_booking_shortcode_search_results() {
     $nd_booking_sorting_params = array(
         'nd_booking_ajaxurl_sorting' => admin_url('admin-ajax.php'),
         'nd_booking_ajaxnonce_sorting' => wp_create_nonce('nd_booking_sorting_nonce'),
+        'nd_booking_loader_text' => esc_html__( 'Checking availability...', 'nd-booking' ),
     );
 
     wp_enqueue_script( 'nd_booking_search_sorting', esc_url( plugins_url( 'sorting.js', __FILE__ ) ), array( 'jquery' ) ); 
@@ -423,6 +424,9 @@ function nd_booking_shortcode_search_results() {
     $args = array(
         'post_type' => 'nd_booking_cpt_1',
         'posts_per_page' => $nd_booking_qnt_posts_per_page,
+        'meta_key' => 'nd_booking_meta_box_min_price',
+        'orderby' => 'meta_value_num',
+        'order' => 'ASC',
         'meta_query' => array(
             array(
                 'key'     => 'nd_booking_meta_box_max_people',
@@ -465,18 +469,14 @@ function nd_booking_shortcode_search_results() {
     $nd_booking_shortcode_result = '';
     $nd_booking_shortcode_result .='
 
-    
 
-    <div class="nd_booking_section">
-    
-        <div id="nd_booking_search_cpt_1_sidebar" class="nd_booking_float_left nd_booking_width_33_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
-            
+
+    <div class="nd_booking_section loft-search-results-layout">
+
+        <div id="nd_booking_search_cpt_1_content" class="nd_booking_section nd_booking_box_sizing_border_box">
+
             '.$nd_booking_shortcode_left_content.'
 
-        </div>
-
-        <div id="nd_booking_search_cpt_1_content" class="nd_booking_float_left nd_booking_width_66_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
-            
             '.$nd_booking_shortcode_right_content.'
 
         </div>
