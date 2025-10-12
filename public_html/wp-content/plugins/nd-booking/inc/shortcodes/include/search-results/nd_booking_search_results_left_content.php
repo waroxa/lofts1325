@@ -30,8 +30,8 @@ if ( empty( $GLOBALS[ $style_namespace ] ) ) {
       .loft-search-toolbar {
         --loft-toolbar-ink: #0b1f33;
         --loft-toolbar-sky: #1f6fbf;
-        --loft-toolbar-gold-start: #f6b343;
-        --loft-toolbar-gold-end: #ef7e14;
+        --loft-toolbar-gold-start: #f6c343;
+        --loft-toolbar-gold-end: #f6c343;
         --loft-toolbar-fog: rgba(15, 31, 51, 0.08);
         background: #ffffff;
         border-radius: 24px;
@@ -118,8 +118,8 @@ if ( empty( $GLOBALS[ $style_namespace ] ) ) {
         align-items: center;
         justify-content: space-between;
         border-radius: 16px;
-        background: rgba(243, 246, 250, 0.6);
-        border: 1px solid rgba(11, 31, 51, 0.18);
+        background: rgba(246, 195, 67, 0.15);
+        border: 1px solid rgba(246, 195, 67, 0.45);
         padding: 0.4rem;
         min-height: 3.1rem;
       }
@@ -128,7 +128,7 @@ if ( empty( $GLOBALS[ $style_namespace ] ) ) {
         appearance: none;
         border: none;
         background: transparent;
-        color: var(--loft-toolbar-sky);
+        color: var(--loft-toolbar-gold-start);
         font-size: 1.4rem;
         font-weight: 600;
         width: 2.4rem;
@@ -140,7 +140,7 @@ if ( empty( $GLOBALS[ $style_namespace ] ) ) {
 
       .loft-search-toolbar__stepper-btn:hover,
       .loft-search-toolbar__stepper-btn:focus {
-        background: rgba(31, 111, 191, 0.12);
+        background: rgba(246, 195, 67, 0.22);
         outline: none;
       }
 
@@ -169,13 +169,13 @@ if ( empty( $GLOBALS[ $style_namespace ] ) ) {
       .loft-search-toolbar__submit:hover,
       .loft-search-toolbar__submit:focus {
         transform: translateY(-2px);
-        box-shadow: 0 18px 30px rgba(239, 126, 20, 0.35);
+        box-shadow: 0 18px 30px rgba(246, 195, 67, 0.35);
         outline: none;
       }
 
       .loft-search-toolbar__submit:active {
         transform: translateY(0);
-        box-shadow: 0 8px 16px rgba(239, 126, 20, 0.25);
+        box-shadow: 0 8px 16px rgba(246, 195, 67, 0.25);
       }
 
       .loft-search-toolbar__field[data-toolbar-field="arrival"],
