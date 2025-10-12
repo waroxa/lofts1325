@@ -760,13 +760,13 @@ body.single-causes .single-featured-image-header { display: none; }
         align-items: center;
         padding: 8px 18px;
         border-radius: 999px;
-        background: linear-gradient(135deg, #1f8f5b 0%, #1ab676 100%);
-        color: #ffffff;
+        background: linear-gradient(135deg, #ef7e14 0%, #f6b343 100%);
+        color: #fff9ed;
         font-size: 12px;
         font-weight: 700;
         letter-spacing: 1.6px;
         text-transform: uppercase;
-        box-shadow: 0 10px 20px rgba(31,143,91,0.22);
+        box-shadow: 0 10px 20px rgba(239,126,20,0.28);
 }
 
 #nd_booking_search_cpt_1_content .loft-search-card__stars {

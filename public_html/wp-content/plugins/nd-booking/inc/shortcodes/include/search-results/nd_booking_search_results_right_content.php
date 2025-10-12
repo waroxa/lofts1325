@@ -213,8 +213,8 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card--best {
-      border-color: rgba(37, 99, 235, 0.52);
-      box-shadow: 0 28px 68px rgba(37, 99, 235, 0.28);
+      border-color: rgba(239, 126, 20, 0.52);
+      box-shadow: 0 28px 68px rgba(239, 126, 20, 0.28);
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card--best::after {
@@ -234,20 +234,21 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, #2563EB, #22D3EE);
-      color: #FFFFFF;
+      background: linear-gradient(135deg, #ef7e14 0%, #f6b343 100%);
+      color: #fff9ed;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.18em;
       padding: 9px 16px;
       border-radius: 999px;
       text-transform: uppercase;
-      box-shadow: 0 18px 32px rgba(37, 99, 235, 0.36);
+      box-shadow: 0 18px 32px rgba(239, 126, 20, 0.36);
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card__best-badge-icon {
       font-size: 14px;
       line-height: 1;
+      color: #fff1cc;
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card__media {
@@ -436,7 +437,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card__rate-sub--best {
-      color: #2563EB;
+      color: #ef7e14;
       font-weight: 600;
     }
 
@@ -453,11 +454,11 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
 
     #nd_booking_search_cpt_1_content .loft-search-card__btn {
       appearance: none;
-      background: #FFDA44;
+      background: linear-gradient(110deg, #ef7e14, #f6b343);
       border: none;
       border-radius: 999px;
-      box-shadow: 0 18px 32px rgba(255, 218, 68, 0.30);
-      color: #1A1A1A !important;
+      box-shadow: 0 26px 54px rgba(239, 126, 20, 0.32);
+      color: #FFFFFF !important;
       cursor: pointer;
       display: inline-flex;
       font-weight: 700;
@@ -471,21 +472,21 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
 
     #nd_booking_search_cpt_1_content .loft-search-card__btn:hover,
     #nd_booking_search_cpt_1_content .loft-search-card__btn:focus {
-      background: #FFD029;
-      box-shadow: 0 22px 40px rgba(255, 218, 68, 0.36);
-      color: #1A1A1A !important;
+      background: linear-gradient(110deg, #f08c2c, #f7c15b);
+      box-shadow: 0 30px 62px rgba(239, 126, 20, 0.4);
+      color: #FFFFFF !important;
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card--best .loft-search-card__btn {
-      background: linear-gradient(135deg, #2563EB, #22D3EE);
-      box-shadow: 0 26px 54px rgba(37, 99, 235, 0.36);
+      background: linear-gradient(110deg, #ef7e14, #f6b343);
+      box-shadow: 0 32px 64px rgba(239, 126, 20, 0.38);
       color: #FFFFFF !important;
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card--best .loft-search-card__btn:hover,
     #nd_booking_search_cpt_1_content .loft-search-card--best .loft-search-card__btn:focus {
-      background: linear-gradient(135deg, #1D4ED8, #0EA5E9);
-      box-shadow: 0 32px 64px rgba(37, 99, 235, 0.4);
+      background: linear-gradient(110deg, #f08c2c, #f7c15b);
+      box-shadow: 0 36px 72px rgba(239, 126, 20, 0.45);
       color: #FFFFFF !important;
     }
 
@@ -553,7 +554,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
 
     .loft-search-loader__icon {
       align-items: flex-end;
-      background: linear-gradient(135deg, #2563EB, #22D3EE);
+      background: linear-gradient(135deg, #ef7e14 0%, #f6b343 100%);
       border-radius: 22px;
       display: flex;
       justify-content: center;
@@ -562,7 +563,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       position: relative;
       width: 96px;
       animation: loftLoaderBob 2.1s ease-in-out infinite;
-      box-shadow: 0 22px 44px rgba(37, 99, 235, 0.28);
+      box-shadow: 0 22px 44px rgba(239, 126, 20, 0.28);
     }
 
     .loft-search-loader__building {
@@ -591,7 +592,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     }
 
     .loft-search-loader__window {
-      background: #C7D2FE;
+      background: #ffe4c4;
       border-radius: 4px;
       height: 12px;
       width: 12px;
@@ -623,8 +624,8 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     }
 
     @keyframes loftWindowGlow {
-      0%, 100% { background: #C7D2FE; }
-      50% { background: #FACC15; }
+      0%, 100% { background: #ffe4c4; }
+      50% { background: #ffd26a; }
     }
 
     @media (max-width: 1200px) {
