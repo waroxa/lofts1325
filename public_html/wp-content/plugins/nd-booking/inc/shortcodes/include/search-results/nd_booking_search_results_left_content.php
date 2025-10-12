@@ -19,6 +19,222 @@ $nd_booking_nights_value    = esc_html( $nd_booking_nights_number );
 $nd_booking_branches_value  = esc_attr( $nd_booking_archive_form_branches );
 $nd_booking_price_value     = esc_attr( $nd_booking_archive_form_max_price_for_day );
 
+$style_namespace = 'loft_search_toolbar_styles';
+
+if ( empty( $GLOBALS[ $style_namespace ] ) ) {
+    $GLOBALS[ $style_namespace ] = true;
+
+    ob_start();
+    ?>
+    <style id="loft-search-toolbar-inline-styles">
+      .loft-search-toolbar {
+        --loft-toolbar-ink: #0b1f33;
+        --loft-toolbar-sky: #1f6fbf;
+        --loft-toolbar-gold-start: #f6b343;
+        --loft-toolbar-gold-end: #ef7e14;
+        --loft-toolbar-fog: rgba(15, 31, 51, 0.08);
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 28px 48px rgba(11, 31, 51, 0.15);
+        border: 1px solid var(--loft-toolbar-fog);
+        padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 4vw, 2rem);
+        margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+      }
+
+      .loft-search-toolbar__form {
+        display: block;
+        width: 100%;
+      }
+
+      .loft-search-toolbar__grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 220px);
+        gap: clamp(0.85rem, 2vw, 1.25rem);
+        align-items: end;
+      }
+
+      .loft-search-toolbar__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        min-width: 0;
+      }
+
+      .loft-search-toolbar__field--submit {
+        align-self: stretch;
+        display: flex;
+        align-items: stretch;
+      }
+
+      .loft-search-toolbar__label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--loft-toolbar-ink);
+        margin: 0;
+      }
+
+      .loft-search-toolbar__input {
+        border-radius: 16px;
+        border: 1px solid rgba(11, 31, 51, 0.18);
+        background: rgba(243, 246, 250, 0.6);
+        color: var(--loft-toolbar-ink);
+        font-size: 1rem;
+        font-weight: 500;
+        padding: 0.85rem 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      }
+
+      .loft-search-toolbar__input:focus {
+        outline: none;
+        border-color: var(--loft-toolbar-sky);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(31, 111, 191, 0.18);
+      }
+
+      .loft-search-toolbar__hint {
+        font-size: 0.75rem;
+        color: rgba(11, 31, 51, 0.55);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .loft-search-toolbar__nights {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.85rem 1.2rem;
+        border-radius: 16px;
+        background: rgba(31, 111, 191, 0.12);
+        color: var(--loft-toolbar-sky);
+        font-weight: 600;
+        font-size: 0.95rem;
+        min-height: 3.1rem;
+      }
+
+      .loft-search-toolbar__stepper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 16px;
+        background: rgba(243, 246, 250, 0.6);
+        border: 1px solid rgba(11, 31, 51, 0.18);
+        padding: 0.4rem;
+        min-height: 3.1rem;
+      }
+
+      .loft-search-toolbar__stepper-btn {
+        appearance: none;
+        border: none;
+        background: transparent;
+        color: var(--loft-toolbar-sky);
+        font-size: 1.4rem;
+        font-weight: 600;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .loft-search-toolbar__stepper-btn:hover,
+      .loft-search-toolbar__stepper-btn:focus {
+        background: rgba(31, 111, 191, 0.12);
+        outline: none;
+      }
+
+      .loft-search-toolbar__stepper-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--loft-toolbar-ink);
+        padding: 0 0.75rem;
+      }
+
+      .loft-search-toolbar__submit {
+        width: 100%;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(110deg, var(--loft-toolbar-gold-start), var(--loft-toolbar-gold-end));
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .loft-search-toolbar__submit:hover,
+      .loft-search-toolbar__submit:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 30px rgba(239, 126, 20, 0.35);
+        outline: none;
+      }
+
+      .loft-search-toolbar__submit:active {
+        transform: translateY(0);
+        box-shadow: 0 8px 16px rgba(239, 126, 20, 0.25);
+      }
+
+      .loft-search-toolbar__field[data-toolbar-field="arrival"],
+      .loft-search-toolbar__field[data-toolbar-field="departure"] {
+        position: relative;
+      }
+
+      .loft-search-toolbar__field[data-toolbar-field="arrival"]::after,
+      .loft-search-toolbar__field[data-toolbar-field="departure"]::after {
+        content: '\f133';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 1.1rem;
+        bottom: 1.1rem;
+        color: rgba(11, 31, 51, 0.35);
+        pointer-events: none;
+      }
+
+      @media (max-width: 1200px) {
+        .loft-search-toolbar__grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 220px);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .loft-search-toolbar {
+          border-radius: 20px;
+        }
+
+        .loft-search-toolbar__grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .loft-search-toolbar__field--submit {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .loft-search-toolbar__grid {
+          grid-template-columns: 1fr;
+        }
+
+        .loft-search-toolbar__field {
+          align-items: stretch;
+        }
+
+        .loft-search-toolbar__nights,
+        .loft-search-toolbar__stepper {
+          justify-content: space-between;
+          width: 100%;
+        }
+      }
+    </style>
+    <?php
+    $nd_booking_shortcode_left_content .= ob_get_clean();
+}
+
 $nd_booking_shortcode_left_content .= '
   <div class="loft-search-toolbar" aria-label="'.esc_attr__( 'Search controls', 'nd-booking' ).'">
     <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" autocomplete="off">
