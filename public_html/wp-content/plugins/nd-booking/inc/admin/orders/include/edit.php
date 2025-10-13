@@ -113,11 +113,6 @@ if ( empty($nd_booking_orders) ) {
     //define action type
     $nd_booking_new_action_type = str_replace("_"," ",$nd_booking_order->action_type);
 
-    $guest_id_front  = esc_url( get_post_meta( $nd_booking_order->id, 'guest_id_front', true ) );
-    $guest_id_back   = esc_url( get_post_meta( $nd_booking_order->id, 'guest_id_back', true ) );
-    $guest_id_number = sanitize_text_field( get_post_meta( $nd_booking_order->id, 'guest_id_number', true ) );
-    $guest_id_type   = sanitize_text_field( get_post_meta( $nd_booking_order->id, 'guest_id_type', true ) );
-
 
     $nd_booking_result .= '
 
@@ -264,18 +259,10 @@ if ( empty($nd_booking_orders) ) {
             </div>
             
           
-          </div>';
+          </div>
 
-          if ( current_user_can('manage_options') ) {
-            $nd_booking_result .= '<div class="nd_booking_section nd_booking_margin_top_20"><h3>'.__('Guest ID','nd-booking').'</h3>';
-            if ( $guest_id_number != '' ) { $nd_booking_result .= '<p>'.__('ID Number','nd-booking').': '.esc_html($guest_id_number).'</p>'; }
-            if ( $guest_id_type != '' ) { $nd_booking_result .= '<p>'.__('ID Type','nd-booking').': '.esc_html($guest_id_type).'</p>'; }
-            if ( $guest_id_front != '' ) { $nd_booking_result .= '<p><a href="'.$guest_id_front.'" target="_blank"><img src="'.$guest_id_front.'" width="150" /></a></p>'; }
-            if ( $guest_id_back != '' ) { $nd_booking_result .= '<p><a href="'.$guest_id_back.'" target="_blank"><img src="'.$guest_id_back.'" width="150" /></a></p>'; }
-            $nd_booking_result .= '</div>';
-          }
-
-          $nd_booking_result .= '<div style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba(0,0,0,.04);" class="nd_booking_section nd_booking_background_color_ffffff nd_booking_margin_top_20">
+          
+          <div style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba(0,0,0,.04);" class="nd_booking_section nd_booking_background_color_ffffff nd_booking_margin_top_20">
             
             <div class="nd_booking_custom_tables nd_booking_section nd_booking_box_sizing_border_box nd_booking_padding_30">
 
@@ -376,79 +363,9 @@ if ( empty($nd_booking_orders) ) {
 
               }
 
-              //price room and taxes
-              $nd_booking_tax_lodging_raw = get_post_meta( $nd_booking_order->id, 'nd_booking_tax_lodging', true );
-              $nd_booking_tax_gst_raw = get_post_meta( $nd_booking_order->id, 'nd_booking_tax_gst', true );
-              $nd_booking_tax_qst_raw = get_post_meta( $nd_booking_order->id, 'nd_booking_tax_qst', true );
-
-              $nd_booking_tax_lodging = max( 0, floatval( $nd_booking_tax_lodging_raw ) );
-              $nd_booking_tax_gst = max( 0, floatval( $nd_booking_tax_gst_raw ) );
-              $nd_booking_tax_qst = max( 0, floatval( $nd_booking_tax_qst_raw ) );
-
-              $nd_booking_total_tax = $nd_booking_tax_lodging + $nd_booking_tax_gst + $nd_booking_tax_qst;
-
-              $nd_booking_final_trip_price_amount = floatval( $nd_booking_order->final_trip_price );
-              $nd_booking_final_trip_price_display = number_format_i18n( $nd_booking_final_trip_price_amount, 2 );
-              $nd_booking_tot_services_amount = floatval( $nd_booking_tot_services );
-              $nd_booking_room_subtotal = $nd_booking_final_trip_price_amount - $nd_booking_tot_services_amount - $nd_booking_total_tax;
-              if ( $nd_booking_room_subtotal < 0 ) { $nd_booking_room_subtotal = 0; }
-
-              $nd_booking_total_guests = absint( $nd_booking_order->guests );
-              if ( $nd_booking_total_guests > 0 ) {
-                $nd_booking_price_room = $nd_booking_room_subtotal / $nd_booking_total_guests;
-              }else{
-                $nd_booking_price_room = 0;
-              }
-
-              $nd_booking_currency = nd_booking_get_currency();
-              $nd_booking_price_room_display = number_format_i18n( $nd_booking_price_room, 2 );
-              $nd_booking_room_subtotal_display = number_format_i18n( $nd_booking_room_subtotal, 2 );
-              $nd_booking_tax_lodging_display = number_format_i18n( $nd_booking_tax_lodging, 2 );
-              $nd_booking_tax_gst_display = number_format_i18n( $nd_booking_tax_gst, 2 );
-              $nd_booking_tax_qst_display = number_format_i18n( $nd_booking_tax_qst, 2 );
-              $nd_booking_total_tax_display = number_format_i18n( $nd_booking_total_tax, 2 );
-
-              $nd_booking_has_tax_values = false;
-              $nd_booking_tax_component_values = array(
-                array(
-                  'raw' => $nd_booking_tax_lodging_raw,
-                  'amount' => $nd_booking_tax_lodging,
-                  'display' => $nd_booking_tax_lodging_display,
-                  'label' => __( 'Lodging Tax', 'nd-booking' ),
-                ),
-                array(
-                  'raw' => $nd_booking_tax_gst_raw,
-                  'amount' => $nd_booking_tax_gst,
-                  'display' => $nd_booking_tax_gst_display,
-                  'label' => __( 'GST', 'nd-booking' ),
-                ),
-                array(
-                  'raw' => $nd_booking_tax_qst_raw,
-                  'amount' => $nd_booking_tax_qst,
-                  'display' => $nd_booking_tax_qst_display,
-                  'label' => __( 'QST', 'nd-booking' ),
-                ),
-              );
-
-              foreach ( $nd_booking_tax_component_values as $nd_booking_tax_component_value ) {
-                if ( '' !== $nd_booking_tax_component_value['raw'] && null !== $nd_booking_tax_component_value['raw'] ) {
-                  $nd_booking_has_tax_values = true;
-                  break;
-                }
-              }
-
-              $nd_booking_tax_rows_markup = '';
-              foreach ( $nd_booking_tax_component_values as $nd_booking_tax_component_value ) {
-                if ( $nd_booking_tax_component_value['amount'] > 0 || ( '' !== $nd_booking_tax_component_value['raw'] && null !== $nd_booking_tax_component_value['raw'] ) ) {
-                  $nd_booking_tax_rows_markup .= '
-                  <tr>
-                    <td style="width:70%;">'.$nd_booking_tax_component_value['label'].'</td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p></p></td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p></p></td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_tax_component_value['display'].' '.$nd_booking_currency.'</p></td>
-                  </tr>';
-                }
-              }
+              //price room
+              $nd_booking_tot_room = $nd_booking_order->final_trip_price - $nd_booking_tot_services;
+              $nd_booking_price_room = $nd_booking_tot_room/$nd_booking_order->guests;
 
 
               $nd_booking_result .= '
@@ -457,41 +374,19 @@ if ( empty($nd_booking_orders) ) {
                 <table class="nd_booking_section">
                   <tr>
                     <td style="width:70%;">
-                      <span style="text-transform: capitalize;">'.nd_booking_get_slug('singular').'</span> '.__('Subtotal','nd-booking').'
+                      <span style="text-transform: capitalize;">'.nd_booking_get_slug('singular').'</span>
                     </td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_price_room_display.' '.$nd_booking_currency.'</p></td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_total_guests.'</p></td>
-                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_room_subtotal_display.' '.$nd_booking_currency.'</p></td>
+                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_price_room.' '.nd_booking_get_currency().'</p></td>
+                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_order->guests.'</p></td>
+                    <td style="width:10%;" class="nd_booking_text_align_right"><p>'.$nd_booking_tot_room.' '.nd_booking_get_currency().'</p></td>
                   </tr>
 
                 </table>
 
               </div>
 
-              ';
 
 
-              if ( $nd_booking_tax_rows_markup != '' || $nd_booking_total_tax > 0 || $nd_booking_has_tax_values ) {
-                $nd_booking_result .= '
-                <div style="border-top:4px double #eee;" class="nd_booking_width_100_percentage nd_booking_width_100_percentage_all_iphone nd_booking_float_left">
-
-                  <table class="nd_booking_section">'.$nd_booking_tax_rows_markup.'
-                    <tr>
-                      <td style="width:70%;">
-                        <strong>'.__('TOTAL TAX','nd-booking').'</strong>
-                      </td>
-                      <td style="width:10%;" class="nd_booking_text_align_right"><p></p></td>
-                      <td style="width:10%;" class="nd_booking_text_align_right"><p></p></td>
-                      <td style="width:10%;" class="nd_booking_text_align_right"><p><strong>'.$nd_booking_total_tax_display.' '.$nd_booking_currency.'</strong></p></td>
-                    </tr>
-                  </table>
-
-                </div>';
-              }
-
-
-
-              $nd_booking_result .= '
               <div style="border-top:4px double #eee;" class="nd_booking_width_100_percentage nd_booking_width_100_percentage_all_iphone nd_booking_float_left">
 
                 <table class="nd_booking_section">
@@ -507,8 +402,8 @@ if ( empty($nd_booking_orders) ) {
                       $nd_booking_result .= '**';
                     }
 
-                    $nd_booking_result .= '
-                    '.$nd_booking_final_trip_price_display.' '.$nd_booking_currency.'</h2></td>
+                    $nd_booking_result .= ' 
+                    '.$nd_booking_order->final_trip_price.' '.nd_booking_get_currency().'</h2></td>
                   </tr>
                 </table>
 
@@ -521,7 +416,7 @@ if ( empty($nd_booking_orders) ) {
                 if ( $nd_booking_order->user_coupon != '' ) {
                   $nd_booking_result .= '<p class="nd_booking_margin_0">** '.__('One coupon was applied, the original price was :','nd-booking').' '.nd_booking_get_price_before_coupon($nd_booking_order->user_coupon,$nd_booking_order->final_trip_price).' '.nd_booking_get_currency().'</p>';
                 }
-
+                
 
               $nd_booking_result .= '
               </div>

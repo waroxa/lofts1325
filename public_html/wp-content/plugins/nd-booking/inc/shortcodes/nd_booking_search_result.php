@@ -1,8 +1,6 @@
 <?php
 
-if (function_exists('wp_loft_booking_full_sync')) {
-    wp_loft_booking_full_sync();
-} elseif (function_exists('wp_loft_booking_sync_units')) {
+if (function_exists('wp_loft_booking_sync_units')) {
     wp_loft_booking_sync_units();
 }
 
@@ -145,9 +143,7 @@ function nd_booking_woo_thankyou_content( $order_id ) {
             $nd_booking_booking_form_payment_status,
             $nd_booking_booking_form_currency,
             $nd_booking_paypal_tx,
-            $nd_booking_booking_form_action_type,
-            '',
-            ''
+            $nd_booking_booking_form_action_type
         );
         
     }
@@ -473,7 +469,7 @@ function nd_booking_shortcode_search_results() {
 
 
     return $nd_booking_shortcode_result;
-        
+		
 
 
 }

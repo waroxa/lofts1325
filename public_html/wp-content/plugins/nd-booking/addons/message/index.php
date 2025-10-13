@@ -145,43 +145,11 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 
 
 	   
-            //tax breakdown
-            $nd_booking_email_tax_breakdown = nd_booking_calculate_tax_breakdown_from_total( $nd_booking_final_trip_price );
-            $nd_booking_email_subtotal = nd_booking_format_decimal( $nd_booking_email_tax_breakdown['base'] );
-            $nd_booking_email_total_tax = nd_booking_format_decimal( $nd_booking_email_tax_breakdown['total_tax'] );
-            $nd_booking_email_grand_total = nd_booking_format_decimal( $nd_booking_email_tax_breakdown['total'] );
-
-            $nd_booking_email_known_tax_labels = array(
-                'lodging' => __( 'Lodging Tax', 'nd-booking' ),
-                'gst'     => __( 'GST', 'nd-booking' ),
-                'qst'     => __( 'QST', 'nd-booking' ),
-            );
-
-            $nd_booking_email_tax_lines_default = '<p>'.__( 'Subtotal', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
-            $nd_booking_email_tax_lines_template = '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__( 'Subtotal', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
-
-            foreach ( $nd_booking_email_known_tax_labels as $nd_booking_tax_key => $nd_booking_tax_label ) {
-                if ( isset( $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ] ) && $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ]['amount'] > 0 ) {
-                    $nd_booking_tax_rate = nd_booking_format_percentage( $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ]['rate'] );
-                    $nd_booking_tax_amount_formatted = nd_booking_format_decimal( $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ]['amount'] );
-                    $nd_booking_display_label = sprintf( __( '%1$s (%2$s%%)', 'nd-booking' ), $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ]['label'], $nd_booking_tax_rate );
-                    $nd_booking_email_tax_lines_default .= '<p>'.$nd_booking_display_label.' : '.$nd_booking_tax_amount_formatted.' '.$nd_booking_paypal_currency.'</p>';
-                    $nd_booking_email_tax_lines_template .= '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.$nd_booking_display_label.' : '.$nd_booking_tax_amount_formatted.' '.$nd_booking_paypal_currency.'</p>';
-                }
-            }
-
-            $nd_booking_email_tax_lines_default .= '<p>'.__( 'Total Tax', 'nd-booking' ).' : '.$nd_booking_email_total_tax.' '.$nd_booking_paypal_currency.'</p>';
-            $nd_booking_email_tax_lines_default .= '<p>'.__( 'Grand Total', 'nd-booking' ).' : '.$nd_booking_email_grand_total.' '.$nd_booking_paypal_currency.'</p>';
-
-            $nd_booking_email_tax_lines_template .= '<div style="float:left; width:100%; height:10px;"></div>';
-            $nd_booking_email_tax_lines_template .= '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787; font-weight:bold;">'.__( 'Total Tax', 'nd-booking' ).' : '.$nd_booking_email_total_tax.' '.$nd_booking_paypal_currency.'</p>';
-            $nd_booking_email_tax_lines_template .= '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787; font-weight:bold;">'.__( 'Grand Total', 'nd-booking' ).' : '.$nd_booking_email_grand_total.' '.$nd_booking_paypal_currency.'</p>';
-
-            //get logo
-            $nd_booking_customizer_logo = get_option( 'nicdark_customizer_logo_img' );
-            if ( $nd_booking_customizer_logo == '' ) {
-                    $nd_booking_email_logo = '';
-            }else{
+	    //get logo
+		$nd_booking_customizer_logo = get_option( 'nicdark_customizer_logo_img' );
+		if ( $nd_booking_customizer_logo == '' ) { 
+		 	$nd_booking_email_logo = '';  
+		}else{
 		    $nd_booking_customizer_logo_src = wp_get_attachment_url($nd_booking_customizer_logo);
 		    $nd_booking_email_logo = '<img src="'.$nd_booking_customizer_logo_src.'">';  
 		}
@@ -212,8 +180,8 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 		  <p>'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
 		  <p>'.__('Guests','nd-booking').' : '.$nd_booking_guests.'</p><br/>
 
-                  <p><strong>'.__('TOTAL PRICE','nd-booking').' :</strong></p>
-                  '.$nd_booking_email_tax_lines_default.'<br/>
+		  <p><strong>'.__('TOTAL PRICE','nd-booking').' :</strong></p>
+		  <p>'.__('Price','nd-booking').' : '.$nd_booking_final_trip_price.' '.$nd_booking_paypal_currency.'</p><br/>
 
 		  <p><strong>'.__('EXTRA SERVICES ( included in the price )','nd-booking').' :</strong></p>
 		  '.$nd_booking_extra_services_result.'<br/>
@@ -299,9 +267,9 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 					<div style="float:left; width:100%; height:40px;"></div>
 					<h2 style="float:left; width:100%; text-align:center; color:#727475; font-weight:normal; margin:0px; padding:0px;">'.__('Total Price','nd-booking').' :</h2>
 					<div style="float:left; width:100%; height:20px;"></div>
-                                        <div style="float:left; width:100%; background-color:#f9f9f9; padding:20px; box-sizing:border-box;">
-                                                '.$nd_booking_email_tax_lines_template.'
-                                        </div>
+					<div style="float:left; width:100%; background-color:#f9f9f9; padding:20px; box-sizing:border-box;">
+						<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Price','nd-booking').' : '.$nd_booking_final_trip_price.' '.$nd_booking_paypal_currency.'</p>
+					</div>
 					
 				</div>
 				<!--START SECTION-->
