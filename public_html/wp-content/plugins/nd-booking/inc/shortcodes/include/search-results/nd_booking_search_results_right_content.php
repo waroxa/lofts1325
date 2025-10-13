@@ -155,15 +155,15 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     /* --- BEST VALUE RIBBON --- */
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__ribbon {
       position: absolute;
-      top: 18px;
-      left: -30px;
+      top: 12px;
+      left: -46px;
       background: linear-gradient(135deg, #FFD43B 0%, #FFBF00 100%);
       color: #1A1A1A;
       font-weight: 800;
       font-size: 11px;
       letter-spacing: 0.6px;
       text-transform: uppercase;
-      padding: 8px 50px;
+      padding: 10px 66px;
       transform: rotate(-45deg);
       box-shadow: 0 6px 14px rgba(255, 218, 68, 0.45);
       z-index: 15;
