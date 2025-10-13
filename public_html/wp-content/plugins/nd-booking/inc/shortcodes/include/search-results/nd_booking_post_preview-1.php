@@ -52,13 +52,20 @@ if ( isset( $nd_booking_pricing_cache ) && isset( $nd_booking_pricing_cache[ $nd
 
 $price = isset( $price ) ? (float) $price : 0.0;
 
+$nd_booking_is_best_value_card = isset( $nd_booking_is_best_value_card ) ? (bool) $nd_booking_is_best_value_card : false;
+$nd_booking_best_value_post_id = isset( $nd_booking_best_value_post_id ) ? $nd_booking_best_value_post_id : null;
+
 if ( isset( $lowest_price ) ) {
     $lowest_price = (float) $lowest_price;
 } else {
     $lowest_price = null;
 }
 
-$is_best_value = ( null !== $lowest_price && abs( $price - $lowest_price ) < 0.01 );
+$is_best_value = $nd_booking_is_best_value_card;
+
+if ( ! $is_best_value && ( null === $nd_booking_best_value_post_id ) && null !== $lowest_price ) {
+    $is_best_value = abs( $price - $lowest_price ) < 0.01;
+}
 
 $loft_card_classes      = 'nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white loft-search-card';
 if ( $is_best_value ) {
