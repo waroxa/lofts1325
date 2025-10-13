@@ -8,13 +8,80 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
 
   $nd_booking_shortcode_right_content .= '
   <style>
+    #nd_booking_search_cpt_1_content {
+      position: relative;
+    }
+
+    #nd_booking_search_cpt_1_content .nd_booking_masonry_content {
+      display: grid;
+      gap: 32px;
+    }
+
     #nd_booking_search_cpt_1_content .nd_booking_masonry_item {
       width: 100% !important;
+      margin: 0;
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card__outer {
-      margin: 0 auto;
-      max-width: 980px;
+      width: 100%;
+      margin: 0;
+    }
+
+    #nd_booking_search_cpt_1_content .nd_booking_search_results_stage {
+      position: relative;
+      min-height: 320px;
+    }
+
+    #nd_booking_search_cpt_1_content #nd_booking_search_results_loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.86);
+      z-index: 5;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    #nd_booking_search_cpt_1_content #nd_booking_search_results_loader .nd_booking_search_results_loader_inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 40px 48px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 28px 60px rgba(15, 23, 42, 0.18);
+      border: 1px solid rgba(209, 213, 219, 0.6);
+      text-align: center;
+    }
+
+    #nd_booking_search_cpt_1_content #nd_booking_search_results_loader p {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: #1F2937;
+    }
+
+    #nd_booking_search_cpt_1_content #nd_booking_search_results_loader .nd_booking_loader_spinner {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 4px solid rgba(212, 175, 55, 0.18);
+      border-top-color: #d4af37;
+      animation: ndBookingLoaderSpin 1s linear infinite;
+    }
+
+    #nd_booking_search_cpt_1_content #nd_booking_search_results_loader.nd_booking_search_results_loader--hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    @keyframes ndBookingLoaderSpin {
+      to { transform: rotate(360deg); }
     }
 
     #nd_booking_search_cpt_1_content .loft-search-card {
@@ -292,7 +359,22 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       }
     }
 
+    @media (max-width: 1024px) {
+      #nd_booking_search_cpt_1_content .nd_booking_masonry_content {
+        gap: 24px;
+      }
+    }
+
     @media (max-width: 767px) {
+      #nd_booking_search_cpt_1_content .nd_booking_masonry_content {
+        gap: 20px;
+      }
+
+      #nd_booking_search_cpt_1_content #nd_booking_search_results_loader .nd_booking_search_results_loader_inner {
+        padding: 28px 32px;
+        border-radius: 22px;
+      }
+
       #nd_booking_search_cpt_1_content .loft-search-card__media {
         min-height: 220px;
       }
@@ -313,25 +395,32 @@ $nd_booking_shortcode_right_content .= '
 
         <!--<h3>'.__('Results Founded : ','nd-booking').''.$nd_booking_qnt_results_posts.'</h3>-->';
 
-        //if NO RESULT
-        if ( $nd_booking_qnt_results_posts == 0 ) { 
+        $nd_booking_shortcode_right_content .= '
+        <div class="nd_booking_search_results_stage">
+
+          <div id="nd_booking_search_results_loader" class="nd_booking_search_results_loader">
+            <div class="nd_booking_search_results_loader_inner">
+              <div class="nd_booking_loader_spinner"></div>
+              <p>'.__('Checking availability for your dates...','nd-booking').'</p>
+            </div>
+          </div>
+
+          <div class="nd_booking_section nd_booking_masonry_content">';
+
+        if ( $nd_booking_qnt_results_posts == 0 ) {
 
           $nd_booking_shortcode_right_content .= '
 
-          <div class="nd_booking_section nd_booking_padding_15 nd_booking_box_sizing_border_box">
-            <div class="nd_booking_section nd_booking_bg_yellow nd_booking_padding_15_20 nd_booking_box_sizing_border_box">
-              <img class="nd_booking_float_left nd_booking_display_none_all_iphone" width="20" src="'.esc_url(plugins_url('icon-warning-white.svg', __FILE__ )).'">
-              <h3 class="nd_booking_float_left nd_options_color_white nd_booking_color_white nd_options_first_font nd_booking_margin_left_10">'.__('No results for this search','nd-booking').'</h3>
+            <div class="nd_booking_section nd_booking_padding_15 nd_booking_box_sizing_border_box">
+              <div class="nd_booking_section nd_booking_bg_yellow nd_booking_padding_15_20 nd_booking_box_sizing_border_box">
+                <img class="nd_booking_float_left nd_booking_display_none_all_iphone" width="20" src="'.esc_url(plugins_url('icon-warning-white.svg', __FILE__ )).'">
+                <h3 class="nd_booking_float_left nd_options_color_white nd_booking_color_white nd_options_first_font nd_booking_margin_left_10">'.__('No results for this search','nd-booking').'</h3>
+              </div>
             </div>
-          </div>
-          
-          '; 
+
+          ';
 
         }
-        //END if
-
-        $nd_booking_shortcode_right_content .= '
-        <div class="nd_booking_section nd_booking_masonry_content">';
 
           //START loop
           while ( $the_query->have_posts() ) : $the_query->the_post();
@@ -342,6 +431,7 @@ $nd_booking_shortcode_right_content .= '
           //END loop
 
         $nd_booking_shortcode_right_content .= '
+          </div>
         </div>
 
 
@@ -350,15 +440,31 @@ $nd_booking_shortcode_right_content .= '
         jQuery(document).ready(function() {
 
           jQuery(function ($) {
-            
-            var $nd_booking_masonry_content = $(".nd_booking_masonry_content").imagesLoaded( function() {
-              // init Masonry after all images have loaded
-              $nd_booking_masonry_content.masonry({
-                itemSelector: ".nd_booking_masonry_item"
+
+            var $content = $(".nd_booking_masonry_content");
+            var $loader = $("#nd_booking_search_results_loader");
+
+            var hideLoader = function() {
+              if ($loader.length) {
+                $loader.addClass("nd_booking_search_results_loader--hidden");
+              }
+            };
+
+            if (typeof $.fn.imagesLoaded === "function" && $content.length) {
+              $content.imagesLoaded().always(function() {
+                setTimeout(hideLoader, 150);
               });
+            } else {
+              setTimeout(hideLoader, 200);
+            }
+
+            $(window).off("load.ndBookingResults").on("load.ndBookingResults", function() {
+              setTimeout(hideLoader, 120);
             });
 
-            $( ".nd_booking_tooltip_jquery" ).tooltip({ 
+            setTimeout(hideLoader, 1600);
+
+            $( ".nd_booking_tooltip_jquery" ).tooltip({
               tooltipClass: "nd_booking_tooltip_jquery_content",
               position: {
                 my: "center top",
