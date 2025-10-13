@@ -76,8 +76,8 @@ function wp_loft_booking_full_sync() {
         $results['tenants'] = wp_loft_booking_fetch_and_save_tenants();
     }
 
-    if ( function_exists( 'wp_loft_booking_sync_keychains' ) ) {
-        $results['keychains'] = wp_loft_booking_sync_keychains();
+    if ( function_exists( 'keychains_page_function' ) ) {
+        $results['keychains'] = keychains_page_function();
     }
 
     if ( function_exists( 'wp_loft_booking_sync_units_only' ) ) {

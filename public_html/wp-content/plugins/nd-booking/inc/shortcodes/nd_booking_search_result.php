@@ -299,19 +299,6 @@ function nd_booking_custom_checkout_room_fields_admin_order($order_id){
 //START  nd_booking_search_results
 function nd_booking_shortcode_search_results() {
 
-    if ( ! wp_style_is( 'nd_booking_style', 'enqueued' ) ) {
-        if ( wp_style_is( 'nd_booking_style', 'registered' ) ) {
-            wp_enqueue_style( 'nd_booking_style' );
-        } else {
-            $nd_booking_plugin_root = dirname( dirname( dirname( __FILE__ ) ) );
-            $nd_booking_style_path  = $nd_booking_plugin_root . '/assets/css/style.css';
-            $nd_booking_style_url   = plugins_url( 'assets/css/style.css', $nd_booking_plugin_root . '/nd-booking.php' );
-            $nd_booking_style_version = file_exists( $nd_booking_style_path ) ? filemtime( $nd_booking_style_path ) : false;
-
-            wp_enqueue_style( 'nd_booking_style', $nd_booking_style_url, array(), $nd_booking_style_version );
-        }
-    }
-
     wp_enqueue_script('masonry');
     wp_enqueue_script('jquery-ui-datepicker');
     wp_enqueue_style('jquery-ui-datepicker-css', esc_url(plugins_url('jquery-ui-datepicker.css', __FILE__ )) );
@@ -322,7 +309,6 @@ function nd_booking_shortcode_search_results() {
     $nd_booking_sorting_params = array(
         'nd_booking_ajaxurl_sorting' => admin_url('admin-ajax.php'),
         'nd_booking_ajaxnonce_sorting' => wp_create_nonce('nd_booking_sorting_nonce'),
-        'nd_booking_loader_text' => esc_html__( 'Checking availability...', 'nd-booking' ),
     );
 
     wp_enqueue_script( 'nd_booking_search_sorting', esc_url( plugins_url( 'sorting.js', __FILE__ ) ), array( 'jquery' ) ); 
@@ -424,9 +410,6 @@ function nd_booking_shortcode_search_results() {
     $args = array(
         'post_type' => 'nd_booking_cpt_1',
         'posts_per_page' => $nd_booking_qnt_posts_per_page,
-        'meta_key' => 'nd_booking_meta_box_min_price',
-        'orderby' => 'meta_value_num',
-        'order' => 'ASC',
         'meta_query' => array(
             array(
                 'key'     => 'nd_booking_meta_box_max_people',
@@ -469,14 +452,18 @@ function nd_booking_shortcode_search_results() {
     $nd_booking_shortcode_result = '';
     $nd_booking_shortcode_result .='
 
+    
 
-
-    <div class="nd_booking_section loft-search-results-layout">
-
-        <div id="nd_booking_search_cpt_1_content" class="nd_booking_section nd_booking_box_sizing_border_box">
-
+    <div class="nd_booking_section">
+    
+        <div id="nd_booking_search_cpt_1_sidebar" class="nd_booking_float_left nd_booking_width_33_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
+            
             '.$nd_booking_shortcode_left_content.'
 
+        </div>
+
+        <div id="nd_booking_search_cpt_1_content" class="nd_booking_float_left nd_booking_width_66_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
+            
             '.$nd_booking_shortcode_right_content.'
 
         </div>

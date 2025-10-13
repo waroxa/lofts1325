@@ -5,20 +5,6 @@ function nd_booking_sorting(paged){
 
   var nd_booking_sorting_result_loader = jQuery('<div id="nd_booking_sorting_result_loader" class="nd_booking_position_absolute nd_booking_top_0 nd_booking_z_index_9 nd_booking_left_0 nd_booking_bg_white  nd_booking_cursor_progress nd_booking_height_100_percentage nd_booking_width_100_percentage"></div>').hide();
   jQuery( "#nd_booking_archive_search_masonry_container" ).append(nd_booking_sorting_result_loader);
-  var nd_booking_loader_text = ( typeof nd_booking_my_vars_sorting !== 'undefined' && nd_booking_my_vars_sorting.nd_booking_loader_text ) ? nd_booking_my_vars_sorting.nd_booking_loader_text : 'Checking availability...';
-  var nd_booking_loader_markup = ''+
-    '<div class="loft-search-loader" role="status" aria-live="polite">'+
-      '<div class="loft-search-loader__icon">'+
-        '<div class="loft-search-loader__building">'+
-          '<span class="loft-search-loader__window"></span>'+
-          '<span class="loft-search-loader__window"></span>'+
-          '<span class="loft-search-loader__window"></span>'+
-          '<span class="loft-search-loader__window"></span>'+
-        '</div>'+
-      '</div>'+
-      '<p class="loft-search-loader__text">'+ nd_booking_loader_text +'</p>'+
-    '</div>';
-  nd_booking_sorting_result_loader.html(nd_booking_loader_markup);
   nd_booking_sorting_result_loader.fadeIn('slow');
 
   var nd_booking_search_filter_options_meta_key = jQuery( "#nd_booking_search_filter_options .nd_booking_search_filter_options_active").attr('data-meta-key');
