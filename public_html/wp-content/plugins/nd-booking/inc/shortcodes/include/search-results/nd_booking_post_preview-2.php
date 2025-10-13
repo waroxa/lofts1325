@@ -167,7 +167,7 @@ $nd_booking_shortcode_right_content .= '
                             if ( $nd_booking_meta_box_room_woo_product != 0 ) {
                                 $nd_booking_shortcode_right_content .= '
 
-                                    <button onclick="nd_booking_woo('.$nd_booking_trip_price.','.$nd_booking_id.')" style=" border:2px solid '.$nd_booking_meta_box_color.'; color:'.$nd_booking_meta_box_color.';" class=" nd_booking_float_left nd_booking_padding_15_30_important nd_options_second_font_important nd_booking_border_radius_0_important nd_booking_background_color_transparent_important nd_booking_cursor_pointer nd_booking_display_inline_block nd_booking_font_size_11 nd_booking_font_weight_bold nd_booking_letter_spacing_2">'.__('BOOK NOW','nd-booking').' '.__('FOR','nd-booking').' '.$nd_booking_trip_price.' '.nd_booking_get_currency().'</button>';
+                                <button onclick="nd_booking_woo('.$nd_booking_trip_price.','.$nd_booking_id.')" style=" border:2px solid #FFDA44; background-color:#FFDA44; color:#FFFFFF;" class=" nd_booking_float_left nd_booking_padding_15_30_important nd_options_second_font_important nd_booking_border_radius_0_important nd_booking_cursor_pointer nd_booking_display_inline_block nd_booking_font_size_11 nd_booking_font_weight_bold nd_booking_letter_spacing_2">'.__('BOOK NOW','nd-booking').' '.__('FOR','nd-booking').' '.$nd_booking_trip_price.' '.nd_booking_get_currency().'</button>';
                                 $nd_booking_insub_woo_class = 'nd_booking_display_none_important';
 
                             }
@@ -191,7 +191,7 @@ $nd_booking_shortcode_right_content .= '
                                 <input type="hidden" name="nd_booking_form_booking_guests" value="'.$nd_booking_archive_form_guests.'">
                                 <input type="hidden" name="nd_booking_form_booking_arrive_advs" value="1">
 
-                                <input style=" border:2px solid '.$nd_booking_meta_box_color.'; color:'.$nd_booking_meta_box_color.';" class=" nd_booking_float_left nd_booking_padding_15_30_important nd_options_second_font_important nd_booking_border_radius_0_important nd_booking_background_color_transparent_important nd_booking_cursor_pointer nd_booking_display_inline_block nd_booking_font_size_11 nd_booking_font_weight_bold nd_booking_letter_spacing_2 '.$nd_booking_insub_woo_class.' " type="submit" value="'.__('BOOK NOW','nd-booking').' '.__('FOR','nd-booking').' '.$nd_booking_trip_price.' '.nd_booking_get_currency().'">';
+                                <input style=" border:2px solid #FFDA44; background-color:#FFDA44; color:#FFFFFF;" class=" nd_booking_float_left nd_booking_padding_15_30_important nd_options_second_font_important nd_booking_border_radius_0_important nd_booking_cursor_pointer nd_booking_display_inline_block nd_booking_font_size_11 nd_booking_font_weight_bold nd_booking_letter_spacing_2 '.$nd_booking_insub_woo_class.' " type="submit" value="'.__('BOOK NOW','nd-booking').' '.__('FOR','nd-booking').' '.$nd_booking_trip_price.' '.nd_booking_get_currency().'">';
 
                             $nd_booking_shortcode_right_content .= ' 
                             </form>';

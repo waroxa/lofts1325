@@ -1,6 +1,10 @@
 <?php
 
 
+$nd_booking_initial_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_trip_price );
+$nd_booking_initial_final_price = $nd_booking_initial_breakdown['total'];
+$nd_booking_initial_base_price = $nd_booking_initial_breakdown['base'];
+
 $nd_booking_shortcode_right_content = '
 
 <div class="nd_booking_section nd_booking_height_2 nd_booking_bg_grey"></div>
@@ -10,11 +14,12 @@ $nd_booking_shortcode_right_content = '
   <h1>'.__('Add Your Informations','nd-booking').' :</h1>
   <div class="nd_booking_section nd_booking_height_30"></div>
 
-  <form method="post" action="'.nd_booking_checkout_page().'">
+  <form method="post" enctype="multipart/form-data" action="'.nd_booking_checkout_page().'">
       
       <input type="hidden" id="nd_booking_form_booking_arrive" name="nd_booking_form_booking_arrive" value="1">
-      <input type="hidden" id="nd_booking_booking_form_final_price" name="nd_booking_booking_form_final_price" value="'.$nd_booking_trip_price.'">
-      <input type="hidden" id="nd_booking_booking_form_trip_price" name="nd_booking_booking_form_trip_price" value="'.$nd_booking_trip_price.'">
+      <input type="hidden" id="nd_booking_booking_form_final_price" name="nd_booking_booking_form_final_price" value="'.nd_booking_format_decimal( $nd_booking_initial_final_price ).'">
+      <input type="hidden" id="nd_booking_booking_form_base_price" name="nd_booking_booking_form_base_price" value="'.nd_booking_format_decimal( $nd_booking_initial_base_price ).'">
+      <input type="hidden" id="nd_booking_booking_form_trip_price" name="nd_booking_booking_form_trip_price" value="'.nd_booking_format_decimal( $nd_booking_trip_price ).'">
       <input type="hidden" id="nd_booking_booking_form_date_from" name="nd_booking_booking_form_date_from" value="'.$nd_booking_date_from.'">
       <input type="hidden" id="nd_booking_booking_form_date_to" name="nd_booking_booking_form_date_to" value="'.$nd_booking_date_tooo.'">
       <input type="hidden" id="nd_booking_booking_form_guests" name="nd_booking_booking_form_guests" value="'.$nd_booking_form_booking_guests.'">
@@ -65,8 +70,37 @@ $nd_booking_shortcode_right_content = '
           <div class="nicdark_section nicdark_height_5"></div>
           <input class="nd_booking_section" id="nd_booking_booking_form_zip" name="nd_booking_booking_form_zip" type="text" >
       </div>
-      <div class="nd_booking_section nd_booking_height_20"></div>
-      <div id="nd_booking_booking_form_requests_container"  class="nd_booking_width_100_percentage nd_booking_box_sizing_border_box nd_booking_float_left">
+        <div class="nd_booking_section nd_booking_height_20"></div>
+        <h3>'.__('Upload ID','nd-booking').'</h3>
+        <div class="nd_booking_section nd_booking_height_20"></div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('ID Number','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" id="guest_id_number" name="guest_id_number" type="text" >
+        </div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('ID Type','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <select class="nd_booking_section" id="guest_id_type" name="guest_id_type">
+                <option>'.__('Driver\'s License','nd-booking').'</option>
+                <option>'.__('Passport','nd-booking').'</option>
+            </select>
+        </div>
+        <div class="nd_booking_section nd_booking_height_20"></div>
+
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_right_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('Guest ID Front','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" type="file" name="guest_id_front" accept="image/*" />
+        </div>
+        <div class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone nd_booking_padding_left_10 nd_booking_box_sizing_border_box nd_booking_float_left">
+            <p>'.__('Guest ID Back','nd-booking').'</p>
+            <div class="nicdark_section nicdark_height_5"></div>
+            <input class="nd_booking_section" type="file" name="guest_id_back" accept="image/*" />
+        </div>
+        <div class="nd_booking_section nd_booking_height_20"></div>
+
+        <div id="nd_booking_booking_form_requests_container"  class="nd_booking_width_100_percentage nd_booking_box_sizing_border_box nd_booking_float_left">
           <p>'.__('Requests','nd-booking').'</p>
           <div class="nicdark_section nicdark_height_5"></div>
           <textarea class="nd_booking_section" id="nd_booking_booking_form_requests" rows="6" name="nd_booking_booking_form_requests"></textarea>
@@ -75,33 +109,8 @@ $nd_booking_shortcode_right_content = '
       <div class=" nd_booking_width_100_percentage nd_booking_width_100_percentage_all_iphone nd_booking_padding_0_all_iphone  nd_booking_box_sizing_border_box nd_booking_float_left">
           <p>'.__('Arrival','nd-booking').'</p>
           <div class="nicdark_section nicdark_height_5"></div>
-          <select class="nd_booking_section" class="nd_booking_width_100_percentage" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival">
-              <option>'.__('I do not know','nd-booking').'</option>
-              <option>12:00 - 1:00 '.__('am','nd-booking').'</option>
-              <option>1:00 - 2:00 '.__('am','nd-booking').'</option>
-              <option>2:00 - 3:00 '.__('am','nd-booking').'</option>
-              <option>3:00 - 4:00 '.__('am','nd-booking').'</option>
-              <option>4:00 - 5:00 '.__('am','nd-booking').'</option>
-              <option>5:00 - 6:00 '.__('am','nd-booking').'</option>
-              <option>6:00 - 7:00 '.__('am','nd-booking').'</option>
-              <option>7:00 - 8:00 '.__('am','nd-booking').'</option>
-              <option>8:00 - 9:00 '.__('am','nd-booking').'</option>
-              <option>9:00 - 10:00 '.__('am','nd-booking').'</option>
-              <option>10:00 - 11:00 '.__('am','nd-booking').'</option>
-              <option>11:00 - 12:00 '.__('am','nd-booking').'</option>
-              <option>12:00 - 1:00 '.__('pm','nd-booking').'</option>
-              <option>1:00 - 2:00 '.__('pm','nd-booking').'</option>
-              <option>2:00 - 3:00 '.__('pm','nd-booking').'</option>
-              <option>3:00 - 4:00 '.__('pm','nd-booking').'</option>
-              <option>4:00 - 5:00 '.__('pm','nd-booking').'</option>
-              <option>5:00 - 6:00 '.__('pm','nd-booking').'</option>
-              <option>6:00 - 7:00 '.__('pm','nd-booking').'</option>
-              <option>7:00 - 8:00 '.__('pm','nd-booking').'</option>
-              <option>8:00 - 9:00 '.__('pm','nd-booking').'</option>
-              <option>9:00 - 10:00 '.__('pm','nd-booking').'</option>
-              <option>10:00 - 11:00 '.__('pm','nd-booking').'</option>
-              <option>11:00 - 12:00 '.__('pm','nd-booking').'</option>
-          </select>
+          <p><small><em>'.__('Check-in starts at 4 PM; checkout is at 12 PM.','nd-booking').'</em></small></p>
+          <input type="hidden" class="nd_booking_section" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival" value="4:00 - 5:00 '. __('pm','nd-booking').'" >
       </div>
       <div class="nd_booking_section nd_booking_height_20 '.nd_booking_get_coupon_enable_class().' "></div>
       <div id="nd_booking_booking_form_coupon_container" class="nd_booking_width_100_percentage '.nd_booking_get_coupon_enable_class().' nd_booking_box_sizing_border_box nd_booking_float_left">
