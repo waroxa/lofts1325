@@ -50,26 +50,18 @@ if ( isset( $nd_booking_pricing_cache ) && isset( $nd_booking_pricing_cache[ $nd
     $loft_pricing_details = nd_booking_calculate_search_card_pricing( $nd_booking_id, $nd_booking_id_room, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
 }
 
-$loft_is_best_value = false;
-if (
-    ! empty( $loft_pricing_details['has_cta'] ) &&
-    isset( $nd_booking_best_value_price ) &&
-    null !== $nd_booking_best_value_price &&
-    isset( $loft_pricing_details['trip_price'] ) &&
-    null !== $loft_pricing_details['trip_price']
-) {
-    if ( abs( (float) $loft_pricing_details['trip_price'] - (float) $nd_booking_best_value_price ) < 0.01 ) {
-        $loft_is_best_value = true;
-    }
+$price = isset( $price ) ? (float) $price : 0.0;
+
+if ( isset( $lowest_price ) ) {
+    $lowest_price = (float) $lowest_price;
+} else {
+    $lowest_price = null;
 }
 
-$loft_best_value_badge_markup = '';
-if ( $loft_is_best_value ) {
-    $loft_best_value_badge_markup = '<span class="loft-search-card__badge loft-search-card__badge--value">⭐ ' . esc_html__( 'BEST VALUE', 'nd-booking' ) . '</span>';
-}
+$is_best_value = ( null !== $lowest_price && abs( $price - $lowest_price ) < 0.01 );
 
 $loft_card_classes      = 'nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white loft-search-card';
-if ( $loft_is_best_value ) {
+if ( $is_best_value ) {
     $loft_card_classes .= ' has-best-value';
 }
 $loft_card_wrapper_open = '<div class="' . esc_attr( $loft_card_classes ) . '">';
@@ -111,6 +103,11 @@ if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd
 //image
 if ( has_post_thumbnail() ) {
 
+    $loft_best_value_ribbon_markup = '';
+    if ( $is_best_value ) {
+        $loft_best_value_ribbon_markup = '<div class="loft-search-card__ribbon"><span class="loft-search-card__ribbon-text">' . esc_html__( 'BEST VALUE', 'nd-booking' ) . '</span></div>';
+    }
+
     $loft_room_image_src = esc_url( nd_booking_get_post_img_src( get_the_ID() ) );
 
     $loft_media_overlay = '';
@@ -136,7 +133,7 @@ if ( has_post_thumbnail() ) {
 
             '.$nd_booking_rooms_left_b.'
 
-            '.$loft_best_value_badge_markup.'
+            '.$loft_best_value_ribbon_markup.'
 
             <img alt="" class="nd_booking_section loft-search-card__media-img" src="'.$loft_room_image_src.'">
 

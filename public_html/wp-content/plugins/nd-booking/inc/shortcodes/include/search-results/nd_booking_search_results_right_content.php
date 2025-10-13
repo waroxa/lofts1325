@@ -152,32 +152,62 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       text-transform: uppercase;
     }
 
-    [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__badge--value {
+    /* --- BEST VALUE RIBBON --- */
+    [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__ribbon {
       position: absolute;
-      top: 16px;
-      left: 16px;
-      background: #FFDA44;
+      top: 18px;
+      left: -30px;
+      background: linear-gradient(135deg, #FFD43B 0%, #FFBF00 100%);
       color: #1A1A1A;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      padding: 6px 16px;
-      border-radius: 999px;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(255, 218, 68, 0.4);
-      z-index: 10;
-      pointer-events: none;
+      padding: 8px 50px;
+      transform: rotate(-45deg);
+      box-shadow: 0 6px 14px rgba(255, 218, 68, 0.45);
+      z-index: 15;
     }
 
+    [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__ribbon-text {
+      display: inline-block;
+      position: relative;
+      top: 2px;
+    }
+
+    /* --- Card highlight stays --- */
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card.has-best-value {
       border: 2px solid #FFDA44 !important;
-      box-shadow: 0 0 24px rgba(255, 218, 68, 0.25);
-      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 0 28px rgba(255, 218, 68, 0.3);
+      transition: all 0.3s ease-in-out;
     }
 
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card.has-best-value:hover {
-      box-shadow: 0 0 32px rgba(255, 218, 68, 0.35);
+      box-shadow: 0 0 32px rgba(255, 218, 68, 0.4);
+    }
+
+    .nd-booking-sort-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .nd-booking-sort-bar label {
+      font-weight: 600;
+      color: #1F2937;
+    }
+
+    .nd-booking-sort-bar select {
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 8px 28px 8px 16px;
+      background: #FFFFFF;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111827;
     }
 
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__stars {
@@ -539,6 +569,96 @@ $nd_booking_shortcode_right_content .= '
 
         <!--<h3>'.__('Results Founded : ','nd-booking').''.$nd_booking_qnt_results_posts.'</h3>-->';
 
+        $nd_booking_sort_by = 'best';
+        if ( isset( $_GET['sort_by'] ) ) {
+          $nd_booking_sort_by = sanitize_key( wp_unslash( $_GET['sort_by'] ) );
+        }
+
+        if ( ! in_array( $nd_booking_sort_by, array( 'best', 'low', 'high' ), true ) ) {
+          $nd_booking_sort_by = 'best';
+        }
+
+        $posts_with_price = array();
+        $lowest_price     = null;
+
+        if ( $nd_booking_qnt_results_posts > 0 ) {
+          while ( $the_query->have_posts() ) {
+            $the_query->the_post();
+
+            $nd_booking_post_price = (float) get_post_meta( get_the_ID(), 'nd_booking_meta_price_total', true );
+
+            $posts_with_price[] = array(
+              'post'  => get_post(),
+              'price' => $nd_booking_post_price,
+            );
+          }
+
+          wp_reset_postdata();
+
+          if ( ! empty( $posts_with_price ) ) {
+            usort(
+              $posts_with_price,
+              static function ( $a, $b ) {
+                return $a['price'] <=> $b['price'];
+              }
+            );
+
+            $lowest_price = $posts_with_price[0]['price'];
+
+            if ( 'high' === $nd_booking_sort_by ) {
+              usort(
+                $posts_with_price,
+                static function ( $a, $b ) {
+                  return $b['price'] <=> $a['price'];
+                }
+              );
+            }
+          }
+        }
+
+        $nd_booking_sort_bar_markup = '';
+        if ( ! empty( $posts_with_price ) ) {
+          $nd_booking_sort_bar_markup .= '<div class="nd-booking-sort-bar">';
+          $nd_booking_sort_bar_markup .= '<form method="get">';
+
+          foreach ( $_GET as $nd_booking_query_key => $nd_booking_query_value ) {
+            if ( 'sort_by' === $nd_booking_query_key ) {
+              continue;
+            }
+
+            if ( is_scalar( $nd_booking_query_value ) ) {
+              $nd_booking_sort_bar_markup .= '<input type="hidden" name="' . esc_attr( $nd_booking_query_key ) . '" value="' . esc_attr( wp_unslash( $nd_booking_query_value ) ) . '">';
+            }
+          }
+
+          $nd_booking_sort_bar_markup .= '<label for="nd_booking_sort_by">' . esc_html__( 'Sort by:', 'nd-booking' ) . '</label>';
+          $nd_booking_sort_bar_markup .= '<select id="nd_booking_sort_by" name="sort_by" onchange="this.form.submit()">';
+
+          $nd_booking_sort_options = array(
+            'best' => __( 'Best Value', 'nd-booking' ),
+            'low'  => __( 'Price: Low to High', 'nd-booking' ),
+            'high' => __( 'Price: High to Low', 'nd-booking' ),
+          );
+
+          foreach ( $nd_booking_sort_options as $nd_booking_sort_value => $nd_booking_sort_label ) {
+            $nd_booking_selected_attr = selected( $nd_booking_sort_by, $nd_booking_sort_value, false );
+            $nd_booking_sort_bar_markup .= '<option value="' . esc_attr( $nd_booking_sort_value ) . '" ' . $nd_booking_selected_attr . '>' . esc_html( $nd_booking_sort_label ) . '</option>';
+          }
+
+          $nd_booking_sort_bar_markup .= '</select>';
+          $nd_booking_sort_bar_markup .= '</form>';
+          $nd_booking_sort_bar_markup .= '</div>';
+
+          if ( 'low' === $nd_booking_sort_by || 'best' === $nd_booking_sort_by ) {
+            usort(
+              $posts_with_price,
+              static function ( $a, $b ) {
+                return $a['price'] <=> $b['price'];
+              }
+            );
+          }
+        }
+
         $nd_booking_shortcode_right_content .= '
         <div class="nd_booking_search_results_stage">
 
@@ -548,6 +668,8 @@ $nd_booking_shortcode_right_content .= '
               <p>'.__('Vérification des disponibilités pour vos dates…','nd-booking').'</p>
             </div>
           </div>
+
+          '.$nd_booking_sort_bar_markup.'
 
           <div class="nd_booking_section nd_booking_masonry_content">';
 
@@ -567,11 +689,20 @@ $nd_booking_shortcode_right_content .= '
         }
 
           //START loop
-          while ( $the_query->have_posts() ) : $the_query->the_post();
+          if ( ! empty( $posts_with_price ) ) {
+            global $post;
 
-              include realpath(dirname( __FILE__ ).'/nd_booking_post_preview-1.php'); 
+            foreach ( $posts_with_price as $nd_booking_post_with_price ) {
+              $post  = $nd_booking_post_with_price['post'];
+              $price = isset( $nd_booking_post_with_price['price'] ) ? (float) $nd_booking_post_with_price['price'] : 0.0;
 
-          endwhile;
+              setup_postdata( $post );
+
+              include realpath(dirname( __FILE__ ).'/nd_booking_post_preview-1.php');
+            }
+
+            wp_reset_postdata();
+          }
           //END loop
 
         $nd_booking_shortcode_right_content .= '
