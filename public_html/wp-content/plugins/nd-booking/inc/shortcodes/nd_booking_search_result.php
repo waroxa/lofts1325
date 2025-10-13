@@ -480,7 +480,7 @@ function nd_booking_shortcode_search_results() {
     ob_start();
     ?>
     <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $nd_booking_form_action ); ?>" method="get" onsubmit="return false;">
-        <div id="nd_booking_search_main_bg" class="loft-search-toolbar">
+        <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
                 <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrival', 'nd-booking' ); ?></label>
@@ -680,100 +680,142 @@ function nd_booking_shortcode_search_results() {
             width: 100%;
           }
 
-          .loft-search-toolbar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          .nd_booking_search_form {
+            width: 100%;
+            max-width: 1240px;
+            margin: 0 auto 48px auto;
+            padding: 28px 32px;
+            display: flex;
+            flex-wrap: wrap;
             gap: 24px;
             align-items: stretch;
-            padding: 28px 32px;
-            margin: 0 0 40px;
+            justify-content: flex-start;
             background: #ffffff;
-            border-radius: 18px;
             border: 1px solid rgba(16, 24, 40, 0.08);
+            border-radius: 18px;
             box-shadow: 0 24px 60px rgba(16, 24, 40, 0.16);
+            box-sizing: border-box;
             animation: loftSearchToolbarFadeIn 0.4s ease-out both;
-            transition: transform 0.35s ease, box-shadow 0.35s ease;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
           }
 
-          .loft-search-toolbar:hover {
+          .nd_booking_search_form:hover {
             transform: translateY(-2px);
             box-shadow: 0 28px 70px rgba(16, 24, 40, 0.18);
           }
 
-          .loft-search-toolbar__field {
+          .nd_booking_search_form .loft-search-toolbar__field {
+            flex: 1 1 220px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             min-width: 0;
-            height: 100%;
           }
 
-          .loft-search-toolbar__label {
-            font-size: 11px;
+          .nd_booking_search_form .loft-search-toolbar__field--summary {
+            flex: 1 1 160px;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__field--actions {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-self: stretch;
+            min-width: 200px;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__label {
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             color: #475467;
+            margin: 0;
           }
 
-          .loft-search-toolbar__control,
-          .loft-search-toolbar__summary {
+          .nd_booking_search_form .loft-search-toolbar__field--actions .loft-search-toolbar__label {
+            height: 0;
+            overflow: hidden;
+            visibility: hidden;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control,
+          .nd_booking_search_form .loft-search-toolbar__summary {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            padding: 16px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(148, 163, 184, 0.24);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 24, 40, 0.08);
             background: #ffffff;
-            box-shadow: 0 18px 44px rgba(16, 24, 40, 0.12);
-            min-height: 60px;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+            box-shadow: 0 4px 10px rgba(16, 24, 40, 0.06);
+            min-height: 56px;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
           }
 
-          .loft-search-toolbar__control:hover,
-          .loft-search-toolbar__summary:hover {
-            border-color: rgba(255, 218, 68, 0.45);
-            box-shadow: 0 20px 50px rgba(16, 24, 40, 0.14);
+          .nd_booking_search_form .loft-search-toolbar__control:hover,
+          .nd_booking_search_form .loft-search-toolbar__summary:hover {
+            border-color: rgba(255, 218, 68, 0.36);
+            box-shadow: 0 6px 14px rgba(16, 24, 40, 0.1);
+            transform: translateY(-1px);
           }
 
-          .loft-search-toolbar__control:focus-within {
-            border-color: rgba(255, 218, 68, 0.75);
-            box-shadow: 0 20px 50px rgba(16, 24, 40, 0.16), 0 0 0 3px rgba(255, 218, 68, 0.24);
-            background: #ffffff;
+          .nd_booking_search_form .loft-search-toolbar__control:focus-within,
+          .nd_booking_search_form .loft-search-toolbar__summary:focus-within {
+            border-color: #FFD029;
+            box-shadow: 0 6px 14px rgba(255, 218, 68, 0.25);
+            transform: translateY(-1px);
           }
 
-          .loft-search-toolbar__input {
+          .nd_booking_search_form .loft-search-toolbar__input,
+          .nd_booking_search_form input,
+          .nd_booking_search_form select {
             width: 100%;
             border: none;
             background: transparent;
             font-size: 15px;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 500;
+            color: #1F2937;
             outline: none;
             padding: 0;
+            box-shadow: none;
           }
 
-          .loft-search-toolbar__control--date {
+          .nd_booking_search_form input:focus,
+          .nd_booking_search_form select:focus {
+            outline: none;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__summary {
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1F2937;
+            cursor: default;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date {
             cursor: pointer;
           }
 
-          .loft-search-toolbar__control--date .loft-search-toolbar__input {
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input {
             cursor: pointer;
           }
 
-          .loft-search-toolbar__control--guests {
+          .nd_booking_search_form .loft-search-toolbar__control--guests {
             justify-content: space-between;
             gap: 10px;
           }
 
-          .loft-search-toolbar__guest-btn {
+          .nd_booking_search_form .loft-search-toolbar__guest-btn {
             width: 36px;
             height: 36px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 218, 68, 0.5);
-            background: linear-gradient(135deg, rgba(255, 218, 68, 0.24), rgba(239, 126, 20, 0.24));
-            color: #7a4a00;
+            border: 1px solid rgba(255, 218, 68, 0.45);
+            background: #FFF7C7;
+            color: #7A4A00;
             font-weight: 600;
             font-size: 18px;
             line-height: 1;
@@ -781,142 +823,121 @@ function nd_booking_shortcode_search_results() {
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 16px 36px rgba(255, 218, 68, 0.26);
-            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+            box-shadow: 0 3px 8px rgba(255, 218, 68, 0.25);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
           }
 
-          .loft-search-toolbar__guest-btn:hover,
-          .loft-search-toolbar__guest-btn:focus {
+          .nd_booking_search_form .loft-search-toolbar__guest-btn:hover,
+          .nd_booking_search_form .loft-search-toolbar__guest-btn:focus {
             transform: translateY(-2px);
-            box-shadow: 0 22px 42px rgba(255, 218, 68, 0.32);
-            background: linear-gradient(135deg, rgba(255, 218, 68, 0.3), rgba(239, 126, 20, 0.32));
-            border-color: rgba(255, 218, 68, 0.8);
+            box-shadow: 0 6px 16px rgba(255, 218, 68, 0.32);
+            background: #FFEFA1;
+            border-color: rgba(255, 218, 68, 0.7);
             outline: none;
           }
 
-          .loft-search-toolbar__guests-value {
+          .nd_booking_search_form .loft-search-toolbar__guests-value {
             flex: 1 1 auto;
             text-align: center;
             font-size: 15px;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 500;
+            color: #1F2937;
           }
 
-          .loft-search-toolbar__summary {
-            justify-content: center;
-            font-size: 15px;
-            font-weight: 600;
-            color: #0f172a;
-          }
-
-          .loft-search-toolbar__field--actions {
-            display: flex;
-            flex-direction: column;
-            align-self: stretch;
-          }
-
-          .loft-search-toolbar__field--actions .loft-search-toolbar__label {
-            height: 0;
-            overflow: hidden;
-            visibility: hidden;
-          }
-
-          button.loft-search-toolbar__submit {
+          .nd_booking_search_form button.loft-search-toolbar__submit {
             width: 100%;
             height: 100%;
-            min-height: 60px;
+            min-height: 56px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(13px, 1.8vw, 15px);
+            font-size: 15px;
             font-weight: 700;
-            padding: 16px 28px;
+            padding: 16px 36px;
             appearance: none;
-            background: linear-gradient(135deg, #ffe28e 0%, #f6b343 38%, #ef7e14 100%);
+            background: #FFDA44;
             border: none;
             border-radius: 999px;
-            box-shadow: 0 18px 38px rgba(239, 126, 20, 0.3);
-            color: #1a1a1a;
+            box-shadow: 0 18px 32px rgba(255, 218, 68, 0.30);
+            color: #1A1A1A;
             cursor: pointer;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background 0.2s ease-in-out;
           }
 
-          button.loft-search-toolbar__submit:hover,
-          button.loft-search-toolbar__submit:focus {
+          .nd_booking_search_form button.loft-search-toolbar__submit:hover,
+          .nd_booking_search_form button.loft-search-toolbar__submit:focus {
             transform: translateY(-2px);
-            box-shadow: 0 24px 48px rgba(239, 126, 20, 0.36);
+            background: #FFD029;
+            box-shadow: 0 22px 40px rgba(255, 218, 68, 0.36);
             outline: none;
           }
 
-          button.loft-search-toolbar__submit:focus-visible {
-            box-shadow: 0 24px 48px rgba(239, 126, 20, 0.36), 0 0 0 3px rgba(255, 218, 68, 0.35);
+          .nd_booking_search_form button.loft-search-toolbar__submit:focus-visible {
+            box-shadow: 0 22px 40px rgba(255, 218, 68, 0.36), 0 0 0 3px rgba(255, 218, 68, 0.38);
           }
 
           @media (max-width: 1200px) {
-            .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-              gap: 20px;
+            .nd_booking_search_form {
               padding: 26px 28px;
+              gap: 22px;
             }
           }
 
           @media (max-width: 1024px) {
-            .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-              gap: 18px;
+            .nd_booking_search_form {
               padding: 24px;
+              gap: 20px;
             }
           }
 
           @media (max-width: 768px) {
-            .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-              gap: 16px;
-              padding: 22px;
+            .nd_booking_search_form {
+              padding: 24px;
+              gap: 18px;
             }
 
-            .loft-search-toolbar__control,
-            .loft-search-toolbar__summary {
-              min-height: 56px;
+            .nd_booking_search_form .loft-search-toolbar__field {
+              flex: 1 1 100%;
             }
 
-            button.loft-search-toolbar__submit {
-              min-height: 56px;
+            .nd_booking_search_form .loft-search-toolbar__field--actions {
+              min-width: 0;
+            }
+
+            .nd_booking_search_form button.loft-search-toolbar__submit {
+              width: 100%;
             }
           }
 
           @media (max-width: 600px) {
-            .loft-search-toolbar {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
+            .nd_booking_search_form {
+              padding: 22px;
               gap: 16px;
-              padding: 20px;
             }
           }
 
           @media (max-width: 480px) {
-            .loft-search-toolbar {
-              grid-template-columns: 1fr;
-              gap: 14px;
-              padding: 18px;
+            .nd_booking_search_form {
+              padding: 20px;
             }
 
-            button.loft-search-toolbar__submit {
+            .nd_booking_search_form button.loft-search-toolbar__submit {
               min-height: 52px;
             }
           }
 
           @media (prefers-reduced-motion: reduce) {
-            .loft-search-toolbar {
+            .nd_booking_search_form {
               animation: none;
             }
 
-            .loft-search-toolbar:hover,
-            .loft-search-toolbar__guest-btn:hover,
-            .loft-search-toolbar__guest-btn:focus,
-            button.loft-search-toolbar__submit:hover,
-            button.loft-search-toolbar__submit:focus {
+            .nd_booking_search_form:hover,
+            .nd_booking_search_form .loft-search-toolbar__guest-btn:hover,
+            .nd_booking_search_form .loft-search-toolbar__guest-btn:focus,
+            .nd_booking_search_form button.loft-search-toolbar__submit:hover,
+            .nd_booking_search_form button.loft-search-toolbar__submit:focus {
               transform: none;
             }
           }
