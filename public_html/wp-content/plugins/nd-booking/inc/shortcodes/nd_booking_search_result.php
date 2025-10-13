@@ -453,6 +453,38 @@ function nd_booking_shortcode_search_results() {
     );
     $the_query = new WP_Query( $args );
 
+    $nd_booking_pricing_cache    = array();
+    $nd_booking_best_value_price = null;
+
+    if ( $the_query->have_posts() ) {
+        foreach ( $the_query->posts as $nd_booking_cached_post ) {
+            $nd_booking_cached_id   = $nd_booking_cached_post->ID;
+            $nd_booking_cached_room = get_post_meta( $nd_booking_cached_id, 'nd_booking_id_room', true );
+
+            if ( $nd_booking_cached_room == '' ) {
+                $nd_booking_cached_room = $nd_booking_cached_id;
+            }
+
+            $nd_booking_cached_pricing = nd_booking_calculate_search_card_pricing(
+                $nd_booking_cached_id,
+                $nd_booking_cached_room,
+                $nd_booking_date_from,
+                $nd_booking_date_to,
+                $nd_booking_archive_form_guests
+            );
+
+            $nd_booking_pricing_cache[ $nd_booking_cached_id ] = $nd_booking_cached_pricing;
+
+            if ( ! empty( $nd_booking_cached_pricing['has_cta'] ) && null !== $nd_booking_cached_pricing['trip_price'] ) {
+                $nd_booking_trip_price_float = (float) $nd_booking_cached_pricing['trip_price'];
+
+                if ( $nd_booking_best_value_price === null || $nd_booking_trip_price_float < $nd_booking_best_value_price ) {
+                    $nd_booking_best_value_price = $nd_booking_trip_price_float;
+                }
+            }
+        }
+    }
+
     //pagination
     $nd_booking_qnt_results_posts = $the_query->found_posts;
     $nd_booking_qnt_pagination = ceil($nd_booking_qnt_results_posts / $nd_booking_qnt_posts_per_page);
@@ -1102,6 +1134,93 @@ function nd_booking_shortcode_search_results() {
 add_shortcode('nd_booking_search_results', 'nd_booking_shortcode_search_results');
 //END nd_booking_search_results
 
+if ( ! function_exists( 'nd_booking_calculate_search_card_pricing' ) ) {
+    function nd_booking_calculate_search_card_pricing( $nd_booking_room_post_id, $nd_booking_id_room, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests ) {
+
+        $nd_booking_pricing = array(
+            'has_cta'             => false,
+            'trip_price'          => null,
+            'total_price_number'  => '',
+            'total_price_display' => '',
+            'total_stay_label'    => '',
+            'nightly_label'       => '',
+            'button_label'        => '',
+            'total_nights'        => 0,
+            'nightly_rate_number' => '',
+        );
+
+        if ( empty( $nd_booking_id_room ) ) {
+            $nd_booking_id_room = $nd_booking_room_post_id;
+        }
+
+        if ( nd_booking_is_available_block( $nd_booking_id_room, $nd_booking_date_from, $nd_booking_date_to ) != 1 ) {
+            return $nd_booking_pricing;
+        }
+
+        $nd_booking_is_available = nd_booking_is_available( $nd_booking_id_room, $nd_booking_date_from, $nd_booking_date_to );
+        if ( nd_booking_is_qnt_available( $nd_booking_is_available, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_id_room ) != 1 ) {
+            return $nd_booking_pricing;
+        }
+
+        $nd_booking_meta_box_min_booking_day = get_post_meta( $nd_booking_id_room, 'nd_booking_meta_box_min_booking_day', true );
+        if ( $nd_booking_meta_box_min_booking_day == '' ) {
+            $nd_booking_meta_box_min_booking_day = 1;
+        }
+
+        $nd_booking_total_nights = nd_booking_get_number_night( $nd_booking_date_from, $nd_booking_date_to );
+        if ( $nd_booking_total_nights < $nd_booking_meta_box_min_booking_day ) {
+            return $nd_booking_pricing;
+        }
+
+        $nd_booking_trip_price = 0;
+        $nd_booking_index      = 1;
+        $nd_booking_date_cicle = $nd_booking_date_from;
+
+        while ( $nd_booking_index <= $nd_booking_total_nights ) {
+            $nd_booking_trip_price += nd_booking_get_final_price( $nd_booking_room_post_id, $nd_booking_date_cicle );
+            $nd_booking_date_cicle  = date( 'Y/m/d', strtotime( $nd_booking_date_cicle . ' + 1 days' ) );
+            $nd_booking_index++;
+        }
+
+        if ( get_option( 'nd_booking_price_guests' ) == 1 ) {
+            $nd_booking_trip_price = $nd_booking_trip_price * $nd_booking_archive_form_guests;
+        }
+
+        $nd_booking_price_decimals     = ( floor( $nd_booking_trip_price ) == $nd_booking_trip_price ) ? 0 : 2;
+        $nd_booking_total_price_number = number_format_i18n( $nd_booking_trip_price, $nd_booking_price_decimals );
+        $nd_booking_currency_code      = nd_booking_get_currency();
+
+        $nd_booking_total_price_display = esc_html( sprintf( __( '%1$s %2$s', 'marina-child' ), $nd_booking_total_price_number, $nd_booking_currency_code ) );
+
+        $nd_booking_total_nights_for_rate = $nd_booking_total_nights;
+        if ( $nd_booking_total_nights_for_rate <= 0 ) {
+            $nd_booking_total_nights_for_rate = 1;
+        }
+
+        $nd_booking_nightly_rate         = ( $nd_booking_total_nights_for_rate > 0 ) ? $nd_booking_trip_price / $nd_booking_total_nights_for_rate : 0;
+        $nd_booking_nightly_decimals     = ( floor( $nd_booking_nightly_rate ) == $nd_booking_nightly_rate ) ? 0 : 2;
+        $nd_booking_nightly_rate_number  = number_format_i18n( $nd_booking_nightly_rate, $nd_booking_nightly_decimals );
+        $nd_booking_night_label          = _n( 'nuit', 'nuits', $nd_booking_total_nights_for_rate, 'marina-child' );
+        $nd_booking_total_stay_label     = esc_html( sprintf( __( 'Séjour de %1$d %2$s', 'marina-child' ), $nd_booking_total_nights_for_rate, $nd_booking_night_label ) );
+        $nd_booking_nightly_label        = esc_html( sprintf( __( '%1$s %2$s par nuit', 'marina-child' ), $nd_booking_nightly_rate_number, $nd_booking_currency_code ) );
+        $nd_booking_button_label         = esc_html( sprintf( __( 'RÉSERVEZ MAINTENANT • %1$s %2$s', 'marina-child' ), $nd_booking_total_price_number, $nd_booking_currency_code ) );
+
+        $nd_booking_pricing['has_cta']             = true;
+        $nd_booking_pricing['trip_price']          = (float) $nd_booking_trip_price;
+        $nd_booking_pricing['total_price_number']  = $nd_booking_total_price_number;
+        $nd_booking_pricing['total_price_display'] = $nd_booking_total_price_display;
+        $nd_booking_pricing['total_stay_label']    = $nd_booking_total_stay_label;
+        $nd_booking_pricing['nightly_label']       = $nd_booking_nightly_label;
+        $nd_booking_pricing['button_label']        = $nd_booking_button_label;
+        $nd_booking_pricing['total_nights']        = (int) $nd_booking_total_nights_for_rate;
+        $nd_booking_pricing['nightly_rate_number'] = $nd_booking_nightly_rate_number;
+
+        return $nd_booking_pricing;
+    }
+}
+
+
+
 
 
 
@@ -1220,6 +1339,38 @@ function nd_booking_sorting_php() {
     //END
 
     $the_query = new WP_Query( $args );
+
+    $nd_booking_pricing_cache    = array();
+    $nd_booking_best_value_price = null;
+
+    if ( $the_query->have_posts() ) {
+        foreach ( $the_query->posts as $nd_booking_cached_post ) {
+            $nd_booking_cached_id   = $nd_booking_cached_post->ID;
+            $nd_booking_cached_room = get_post_meta( $nd_booking_cached_id, 'nd_booking_id_room', true );
+
+            if ( $nd_booking_cached_room == '' ) {
+                $nd_booking_cached_room = $nd_booking_cached_id;
+            }
+
+            $nd_booking_cached_pricing = nd_booking_calculate_search_card_pricing(
+                $nd_booking_cached_id,
+                $nd_booking_cached_room,
+                $nd_booking_date_from,
+                $nd_booking_date_to,
+                $nd_booking_archive_form_guests
+            );
+
+            $nd_booking_pricing_cache[ $nd_booking_cached_id ] = $nd_booking_cached_pricing;
+
+            if ( ! empty( $nd_booking_cached_pricing['has_cta'] ) && null !== $nd_booking_cached_pricing['trip_price'] ) {
+                $nd_booking_trip_price_float = (float) $nd_booking_cached_pricing['trip_price'];
+
+                if ( $nd_booking_best_value_price === null || $nd_booking_trip_price_float < $nd_booking_best_value_price ) {
+                    $nd_booking_best_value_price = $nd_booking_trip_price_float;
+                }
+            }
+        }
+    }
 
     //pagination
     $nd_booking_qnt_results_posts = $the_query->found_posts;
