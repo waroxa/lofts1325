@@ -448,18 +448,52 @@ function nd_booking_shortcode_search_results() {
     $nd_booking_shortcode_result = '';
     $nd_booking_shortcode_result .='
 
-    
 
-    <div class="nd_booking_section">
-    
-        <div id="nd_booking_search_cpt_1_sidebar" class="nd_booking_float_left nd_booking_width_33_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
-            
+
+    <style>
+        #nd_booking_search_layout_wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        #nd_booking_search_cpt_1_sidebar,
+        #nd_booking_search_cpt_1_content {
+            width: 100% !important;
+            float: none !important;
+        }
+
+        #nd_booking_search_cpt_1_sidebar {
+            margin-bottom: 0;
+        }
+
+        #nd_booking_archive_search_masonry_container,
+        #nd_booking_content_result,
+        .nd_booking_masonry_content {
+            width: 100% !important;
+        }
+
+        #nd_booking_archive_search_masonry_container {
+            overflow: visible;
+        }
+
+        @media (min-width: 768px) {
+            #nd_booking_search_layout_wrapper {
+                gap: 40px;
+            }
+        }
+    </style>
+
+    <div class="nd_booking_section" id="nd_booking_search_layout_wrapper">
+
+        <div id="nd_booking_search_cpt_1_sidebar" class="nd_booking_box_sizing_border_box">
+
             '.$nd_booking_shortcode_left_content.'
 
         </div>
 
-        <div id="nd_booking_search_cpt_1_content" class="nd_booking_float_left nd_booking_width_66_percentage nd_booking_box_sizing_border_box nd_booking_width_100_percentage_responsive">
-            
+        <div id="nd_booking_search_cpt_1_content" class="nd_booking_box_sizing_border_box">
+
             '.$nd_booking_shortcode_right_content.'
 
         </div>
