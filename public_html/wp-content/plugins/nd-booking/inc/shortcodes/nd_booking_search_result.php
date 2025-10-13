@@ -386,8 +386,11 @@ function nd_booking_shortcode_search_results() {
         
     
     //default price range
-    if ( get_option('nd_booking_price_range_default_value') == '' ) { $nd_booking_price_range_default_value = 300; }else{ $nd_booking_price_range_default_value = get_option('nd_booking_price_range_default_value'); }    
+    if ( get_option('nd_booking_price_range_default_value') == '' ) { $nd_booking_price_range_default_value = 300; }else{ $nd_booking_price_range_default_value = get_option('nd_booking_price_range_default_value'); }
     $nd_booking_archive_form_max_price_for_day = $nd_booking_price_range_default_value;
+    if ( isset( $_GET['nd_booking_archive_form_max_price_for_day'] ) && $_GET['nd_booking_archive_form_max_price_for_day'] !== '' ) {
+        $nd_booking_archive_form_max_price_for_day = sanitize_text_field( $_GET['nd_booking_archive_form_max_price_for_day'] );
+    }
     
 
     //branches
@@ -401,14 +404,18 @@ function nd_booking_shortcode_search_results() {
 
     }
     
-    if ( $nd_booking_archive_form_branches == 0 ) { 
+    if ( $nd_booking_archive_form_branches == 0 ) {
         $nd_booking_archive_form_branches_value = 0;
-        $nd_booking_archive_form_branches_compare = '>'; 
-    }else{  
+        $nd_booking_archive_form_branches_compare = '>';
+    }else{
         $nd_booking_archive_form_branches_value = $nd_booking_archive_form_branches;
         $nd_booking_archive_form_branches_compare = 'IN';
     }
     //end branches
+
+    $nd_booking_archive_form_services_default = isset( $_GET['nd_booking_archive_form_services'] ) ? sanitize_text_field( $_GET['nd_booking_archive_form_services'] ) : '';
+    $nd_booking_archive_form_additional_services_default = isset( $_GET['nd_booking_archive_form_additional_services'] ) ? sanitize_text_field( $_GET['nd_booking_archive_form_additional_services'] ) : '';
+    $nd_booking_archive_form_branch_stars_default = isset( $_GET['nd_booking_archive_form_branch_stars'] ) ? sanitize_text_field( $_GET['nd_booking_archive_form_branch_stars'] ) : '';
 
 
     $nd_booking_new_date_to = new DateTime($nd_booking_date_to);
@@ -459,7 +466,197 @@ function nd_booking_shortcode_search_results() {
     }
 
     include realpath(dirname( __FILE__ ).'/include/search-results/nd_booking_search_results_right_content.php');
-    include realpath(dirname( __FILE__ ).'/include/search-results/nd_booking_search_results_left_content.php');
+
+    global $wp;
+
+    $nd_booking_form_action = home_url();
+    if ( isset( $wp ) && isset( $wp->request ) ) {
+        $nd_booking_form_action = home_url( add_query_arg( array(), $wp->request ) );
+    }
+
+    $nd_booking_branches_args = array( 'posts_per_page' => -1, 'post_type'=> 'nd_booking_cpt_4' );
+    $nd_booking_branches = get_posts( $nd_booking_branches_args );
+    $nd_booking_nights_label = sprintf( _n( '%s Night', '%s Nights', $nd_booking_nights_number, 'nd-booking' ), number_format_i18n( $nd_booking_nights_number ) );
+    $nd_booking_guests_label = sprintf( _n( '%s Guest', '%s Guests', $nd_booking_archive_form_guests, 'nd-booking' ), number_format_i18n( $nd_booking_archive_form_guests ) );
+
+    ob_start();
+    ?>
+    <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $nd_booking_form_action ); ?>" method="get" onsubmit="return false;">
+        <div id="nd_booking_search_main_bg" class="loft-search-toolbar">
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--select">
+                <label for="nd_booking_archive_form_branches" class="loft-search-toolbar__label"><?php esc_html_e( 'Choose a location', 'nd-booking' ); ?></label>
+                <div class="loft-search-toolbar__control">
+                    <select class="loft-search-toolbar__select" name="nd_booking_archive_form_branches" id="nd_booking_archive_form_branches">
+                        <option value="0" <?php selected( $nd_booking_archive_form_branches, 0 ); ?>><?php esc_html_e( 'All Branches', 'nd-booking' ); ?></option>
+                        <?php foreach ( $nd_booking_branches as $nd_booking_meta_box_branche ) : ?>
+                            <option value="<?php echo esc_attr( $nd_booking_meta_box_branche->ID ); ?>" <?php selected( $nd_booking_archive_form_branches, $nd_booking_meta_box_branche->ID ); ?>><?php echo esc_html( $nd_booking_meta_box_branche->post_title ); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
+                <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrival', 'nd-booking' ); ?></label>
+                <div class="loft-search-toolbar__control loft-search-toolbar__control--date">
+                    <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__input" value="<?php echo esc_attr( $nd_booking_date_from ); ?>" autocomplete="off" readonly />
+                </div>
+            </div>
+
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
+                <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php esc_html_e( 'Departure', 'nd-booking' ); ?></label>
+                <div class="loft-search-toolbar__control loft-search-toolbar__control--date">
+                    <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__input" value="<?php echo esc_attr( $nd_booking_new_date_to_format_mdy ); ?>" autocomplete="off" readonly />
+                </div>
+            </div>
+
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
+                <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php esc_html_e( 'Guests', 'nd-booking' ); ?></label>
+                <div class="loft-search-toolbar__control loft-search-toolbar__control--guests">
+                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php esc_attr_e( 'Decrease guests', 'nd-booking' ); ?>">−</button>
+                    <span class="loft-search-toolbar__guests-value" id="loft_search_guest_display"><?php echo esc_html( $nd_booking_guests_label ); ?></span>
+                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php esc_attr_e( 'Increase guests', 'nd-booking' ); ?>">+</button>
+                </div>
+                <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $nd_booking_archive_form_guests ); ?>" />
+            </div>
+
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--summary">
+                <span class="loft-search-toolbar__label"><?php esc_html_e( 'Nights', 'nd-booking' ); ?></span>
+                <div class="loft-search-toolbar__summary" id="nd_booking_nights_display"><?php echo esc_html( $nd_booking_nights_label ); ?></div>
+            </div>
+
+            <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
+                <span class="loft-search-toolbar__label">&nbsp;</span>
+                <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php esc_html_e( 'Search', 'nd-booking' ); ?></button>
+            </div>
+        </div>
+
+        <input type="hidden" id="nd_booking_archive_form_max_price_for_day" name="nd_booking_archive_form_max_price_for_day" value="<?php echo esc_attr( $nd_booking_archive_form_max_price_for_day ); ?>" />
+        <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="<?php echo esc_attr( $nd_booking_archive_form_services_default ); ?>" />
+        <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="<?php echo esc_attr( $nd_booking_archive_form_additional_services_default ); ?>" />
+        <input type="hidden" id="nd_booking_archive_form_branch_stars" name="nd_booking_archive_form_branch_stars" value="<?php echo esc_attr( $nd_booking_archive_form_branch_stars_default ); ?>" />
+    </form>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function($){
+        var nightsLabelSingular = '<?php echo esc_js( __( 'Night', 'nd-booking' ) ); ?>';
+        var nightsLabelPlural = '<?php echo esc_js( __( 'Nights', 'nd-booking' ) ); ?>';
+        var guestsLabelSingular = '<?php echo esc_js( __( 'Guest', 'nd-booking' ) ); ?>';
+        var guestsLabelPlural = '<?php echo esc_js( __( 'Guests', 'nd-booking' ) ); ?>';
+
+        var $checkIn = $('#nd_booking_archive_form_date_range_from');
+        var $checkOut = $('#nd_booking_archive_form_date_range_to');
+        var $guestInput = $('#nd_booking_archive_form_guests');
+        var $guestDisplay = $('#loft_search_guest_display');
+        var $nightsDisplay = $('#nd_booking_nights_display');
+        var $searchButton = $('.loft-search-toolbar__submit');
+        var $branchSelect = $('#nd_booking_archive_form_branches');
+
+        function formatGuests(value){
+            return value + ' ' + (value === 1 ? guestsLabelSingular : guestsLabelPlural);
+        }
+
+        function formatNights(value){
+            return value + ' ' + (value === 1 ? nightsLabelSingular : nightsLabelPlural);
+        }
+
+        function updateNightsDisplay(){
+            var checkInVal = $checkIn.val();
+            var checkOutVal = $checkOut.val();
+
+            if (!checkInVal || !checkOutVal) {
+                $nightsDisplay.text('—');
+                return;
+            }
+
+            var start = $.datepicker.parseDate('mm/dd/yy', checkInVal);
+            var end = $.datepicker.parseDate('mm/dd/yy', checkOutVal);
+
+            if (!start) {
+                return;
+            }
+
+            if (!end || end <= start) {
+                end = new Date(start.getTime());
+                end.setDate(end.getDate() + 1);
+                $checkOut.datepicker('setDate', end);
+            }
+
+            var nights = Math.max(1, Math.round((end - start) / 86400000));
+            $nightsDisplay.text(formatNights(nights));
+        }
+
+        $checkIn.datepicker({
+            defaultDate: '+0',
+            minDate: 0,
+            dateFormat: 'mm/dd/yy',
+            firstDay: 0,
+            numberOfMonths: 1,
+            onClose: function(){
+                var minDate = $checkIn.datepicker('getDate');
+                if (minDate) {
+                    var minCheckout = new Date(minDate.getTime());
+                    minCheckout.setDate(minCheckout.getDate() + 1);
+                    $checkOut.datepicker('option', 'minDate', minCheckout);
+                    var currentCheckout = $checkOut.datepicker('getDate');
+                    if (!currentCheckout || currentCheckout <= minDate) {
+                        $checkOut.datepicker('setDate', minCheckout);
+                    }
+                }
+                updateNightsDisplay();
+                nd_booking_sorting(1);
+            }
+        });
+
+        $checkOut.datepicker({
+            defaultDate: '+1',
+            minDate: '+1d',
+            dateFormat: 'mm/dd/yy',
+            firstDay: 0,
+            numberOfMonths: 1,
+            onClose: function(){
+                updateNightsDisplay();
+                nd_booking_sorting(1);
+            }
+        });
+
+        var initialCheckIn = '<?php echo esc_js( $nd_booking_date_from ); ?>';
+        if (initialCheckIn) {
+            $checkIn.datepicker('setDate', $.datepicker.parseDate('mm/dd/yy', initialCheckIn));
+        }
+
+        var initialCheckOut = '<?php echo esc_js( $nd_booking_new_date_to_format_mdy ); ?>';
+        if (initialCheckOut) {
+            $checkOut.datepicker('setDate', $.datepicker.parseDate('mm/dd/yy', initialCheckOut));
+            $checkOut.datepicker('option', 'minDate', $checkIn.datepicker('getDate') ? new Date($checkIn.datepicker('getDate').getTime() + 86400000) : '+1d');
+        }
+
+        updateNightsDisplay();
+        $guestDisplay.text(formatGuests(parseInt($guestInput.val(), 10) || 1));
+
+        $('.loft-search-toolbar__control--date').on('click', function(){
+            $(this).find('.loft-search-toolbar__input').datepicker('show');
+        });
+
+        $('.loft-search-toolbar__guest-btn').on('click', function(){
+            var direction = $(this).data('direction');
+            var current = parseInt($guestInput.val(), 10) || 1;
+            current = direction === 'up' ? current + 1 : Math.max(1, current - 1);
+            $guestInput.val(current);
+            $guestDisplay.text(formatGuests(current));
+            nd_booking_sorting(1);
+        });
+
+        $branchSelect.on('change', function(){
+            nd_booking_sorting(1);
+        });
+
+        $searchButton.on('click', function(){
+            nd_booking_sorting(1);
+        });
+    });
+    </script>
+    <?php
+    $nd_booking_shortcode_left_content = ob_get_clean();
 
     //START final result
     $nd_booking_shortcode_result = '';
@@ -472,254 +669,194 @@ function nd_booking_shortcode_search_results() {
           .nd_booking_search_results_layout {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 36px;
           }
 
           #nd_booking_search_cpt_1_filters {
-            position: static;
-            top: auto;
-            z-index: 1;
             background: transparent;
             padding: 0;
-            border-radius: 0;
             border: 0;
             box-shadow: none;
-          }
-
-          body.admin-bar #nd_booking_search_cpt_1_filters {
-            top: auto;
+            width: 100%;
           }
 
           #nd_booking_search_cpt_1_filters form {
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+            width: 100%;
           }
 
-          #nd_booking_search_main_bg {
-            background: #ffffff !important;
-            border-radius: 20px;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
-            padding: 18px 22px !important;
+          .loft-search-toolbar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 12px;
-            align-items: stretch;
+            gap: 22px;
+            align-items: end;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 26px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14);
           }
 
-          #nd_booking_search_main_bg > div {
-            float: none !important;
-            width: auto !important;
-            padding: 0 !important;
-          }
-
-          #nd_booking_search_main_bg .nd_booking_section {
-            width: 100% !important;
-          }
-
-          #nd_booking_search_main_bg .nd_booking_bg_greydark,
-          #nd_booking_search_main_bg .nd_booking_bg_greydark_2 {
-            background: transparent !important;
-            border-radius: 16px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            padding: 16px !important;
-            box-shadow: none;
-            min-height: 100%;
+          .loft-search-toolbar__field {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 10px;
-            text-align: left;
+            gap: 12px;
           }
 
-          #nd_booking_search_main_bg .nd_booking_display_inline_flex {
+          .loft-search-toolbar__label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #475467;
+          }
+
+          .loft-search-toolbar__control,
+          .loft-search-toolbar__summary {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 14px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            background: #f8fafc;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            min-height: 64px;
+          }
+
+          .loft-search-toolbar__control:focus-within {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.18);
+            background: #ffffff;
+          }
+
+          .loft-search-toolbar__input,
+          .loft-search-toolbar__select {
             width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            padding: 0;
           }
 
-          #nd_booking_search_main_bg h6,
-          #nd_booking_search_main_bg .nd_options_color_white,
-          #nd_booking_search_main_bg .nd_booking_color_white {
-            color: #4f5d75 !important;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-          }
-
-          #nd_booking_search_main_bg h1,
-          #nd_booking_search_main_bg .nd_booking_color_yellow_important,
-          #nd_booking_search_main_bg .nd_booking_guests_number,
-          #nd_booking_search_main_bg .nd_booking_nights_number {
-            color: #ff6b2c !important;
-          }
-
-          #nd_booking_search_main_bg h1.nd_booking_font_size_50 {
-            font-size: 32px;
-            line-height: 1.1;
-          }
-
-          #nd_booking_search_main_bg img {
-            filter: invert(52%) sepia(86%) saturate(1736%) hue-rotate(-12deg) brightness(101%) contrast(104%);
-          }
-
-          #nd_booking_search_main_bg .nd_booking_guests_increase,
-          #nd_booking_search_main_bg .nd_booking_guests_decrease {
-            padding: 8px;
-            border-radius: 10px;
-            background: rgba(255, 107, 44, 0.12);
-          }
-
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches {
-            margin: 0;
-          }
-
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches .nd_booking_branch_ul_1 {
-            display: none !important;
-          }
-
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches select {
-            display: block !important;
+          .loft-search-toolbar__select {
             appearance: none;
             -webkit-appearance: none;
-            width: 100%;
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid rgba(148, 163, 184, 0.45);
-            padding: 16px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #0f172a;
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            -moz-appearance: none;
             cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27%3E%3Cpath d=%27M6.75 9l5.25 5 5.25-5%27 stroke=%27%23ff6b2c%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-            background-size: 18px;
           }
 
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches select:focus {
-            outline: none;
-            border-color: #ff6b2c;
-            box-shadow: 0 0 0 3px rgba(255, 107, 44, 0.18);
+          .loft-search-toolbar__field--select .loft-search-toolbar__control {
+            position: relative;
           }
 
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range,
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_normal_services,
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_extra_services,
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branch_stars {
-            float: none !important;
-            width: 100% !important;
-            background: #ffffff;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
-            padding: 18px 22px;
+          .loft-search-toolbar__field--select .loft-search-toolbar__control::after {
+            content: "";
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            width: 10px;
+            height: 6px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #d4af37;
+            transform: translateY(-50%);
+            pointer-events: none;
+          }
+
+          .loft-search-toolbar__control--date {
+            cursor: pointer;
+          }
+
+          .loft-search-toolbar__control--date .loft-search-toolbar__input {
+            cursor: pointer;
+          }
+
+          .loft-search-toolbar__control--guests {
+            justify-content: center;
+          }
+
+          .loft-search-toolbar__guest-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            background: #fff7e0;
+            color: #a16207;
+            font-weight: 700;
+            font-size: 22px;
+            line-height: 1;
             display: flex;
-            flex-direction: column;
-            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
           }
 
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range .nd_booking_section.nd_booking_height_20,
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range .nd_booking_section.nd_booking_height_5,
-          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range .nd_booking_section.nd_booking_height_2 {
-            display: none;
+          .loft-search-toolbar__guest-btn:hover,
+          .loft-search-toolbar__guest-btn:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.25);
+            outline: none;
           }
 
-          #nd_booking_search_cpt_1_filters h3 {
-            color: #0f172a;
+          .loft-search-toolbar__guests-value {
             font-size: 18px;
             font-weight: 700;
-            letter-spacing: 0.06em;
-            margin: 0;
-          }
-
-          #nd_booking_search_cpt_1_filters p {
-            color: #4f5d75;
-            font-size: 14px;
-            margin: 0;
-          }
-
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_services_open_content,
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_services_close_content,
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_additional_services_open_content,
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_additional_services_close_content,
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_branch_stars_open_content,
-          #nd_booking_search_cpt_1_filters .nd_booking_toogle_branch_stars_close_content {
-            right: 22px;
-            color: #ff6b2c;
-            letter-spacing: 0.2em;
-            font-weight: 700;
-          }
-
-          #nd_booking_search_cpt_1_filters .ui-slider-horizontal {
-            height: 6px;
-            border-radius: 999px;
-            border: none;
-            background: rgba(148, 163, 184, 0.22);
-          }
-
-          #nd_booking_search_cpt_1_filters .ui-slider-range {
-            background: linear-gradient(135deg, #ff7a18 0%, #ff512f 100%);
-          }
-
-          #nd_booking_search_cpt_1_filters .ui-slider-handle {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: none;
-            top: -6px;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(255, 107, 44, 0.25);
-          }
-
-          #nd_booking_search_cpt_1_filters .ui-slider-handle:focus {
-            outline: none;
-            box-shadow: 0 0 0 6px rgba(255, 107, 44, 0.28);
-          }
-
-          #nd_booking_search_cpt_1_filters .nd_booking_section.nd_booking_margin_top_20,
-          #nd_booking_search_cpt_1_filters .nd_booking_section.nd_booking_height_20 {
-            margin: 0 !important;
-            height: auto !important;
-          }
-
-          #nd_booking_search_cpt_1_filters .nd_booking_checkbox_label,
-          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options label {
             color: #0f172a;
-            font-size: 14px;
-            font-weight: 600;
           }
 
-          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options input[type="radio"],
-          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options input[type="checkbox"] {
-            accent-color: #ff6b2c;
+          .loft-search-toolbar__summary {
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            background: #fef3c7;
+            border-color: rgba(212, 175, 55, 0.4);
           }
 
-          @media (max-width: 1180px) {
-            #nd_booking_search_main_bg {
+          .loft-search-toolbar__field--actions {
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+          }
+
+          .loft-search-toolbar__field--actions .loft-search-toolbar__label {
+            visibility: hidden;
+          }
+
+          button.loft-search-toolbar__submit {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 18px 24px;
+          }
+
+          @media (max-width: 1024px) {
+            .loft-search-toolbar {
               grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-              padding: 16px 18px !important;
+              padding: 24px;
+              gap: 18px;
             }
           }
 
-          @media (max-width: 767px) {
-            #nd_booking_search_main_bg {
+          @media (max-width: 640px) {
+            .loft-search-toolbar {
               grid-template-columns: 1fr;
-              gap: 10px;
-              padding: 16px !important;
-              box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+              gap: 16px;
+              padding: 22px;
             }
 
-            #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range,
-            #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_normal_services,
-            #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_extra_services,
-            #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branch_stars {
-              padding: 16px 18px;
-              border-radius: 16px;
+            .loft-search-toolbar__field--actions {
+              order: 99;
             }
           }
         </style>';
