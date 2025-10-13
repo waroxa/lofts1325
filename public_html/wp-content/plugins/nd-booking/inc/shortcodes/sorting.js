@@ -65,21 +65,38 @@ function nd_booking_sorting(paged){
         jQuery( "#nd_booking_content_result" ).remove();
         jQuery( "#nd_booking_archive_search_masonry_container" ).append(nd_booking_sorting_result);
 
+        var nd_booking_hide_loader_element = function(forceRemove) {
+          var loaderEl = document.getElementById('nd_booking_search_results_loader');
+
+          if (!loaderEl) {
+            return;
+          }
+
+          loaderEl.classList.add('nd_booking_search_results_loader--hidden');
+
+          if (forceRemove !== false) {
+            setTimeout(function() {
+              if (loaderEl && loaderEl.parentNode) {
+                loaderEl.parentNode.removeChild(loaderEl);
+              }
+            }, 320);
+          }
+        };
+
         var nd_booking_force_hide_loader = function(forceRemove) {
           if (typeof window.ndBookingHideResultsLoader === 'function') {
             window.ndBookingHideResultsLoader(forceRemove !== false);
           } else {
+            nd_booking_hide_loader_element(forceRemove);
             jQuery(document).trigger('ndBooking:hideResultsLoader');
           }
         };
 
-        setTimeout(function() {
-          nd_booking_force_hide_loader(true);
-        }, 120);
-
-        setTimeout(function() {
-          nd_booking_force_hide_loader(true);
-        }, 2000);
+        [120, 480, 2000].forEach(function(delay) {
+          setTimeout(function() {
+            nd_booking_force_hide_loader(true);
+          }, delay);
+        });
 
         jQuery( "#nd_booking_sorting_result_loader" ).fadeOut( "slow", function() {
           jQuery( "#nd_booking_sorting_result_loader" ).remove();
