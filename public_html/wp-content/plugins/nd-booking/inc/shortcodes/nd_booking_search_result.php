@@ -1021,7 +1021,7 @@ function nd_booking_sorting_php() {
             <div id="nd_booking_search_results_loader" class="nd_booking_search_results_loader">
                 <div class="nd_booking_search_results_loader_inner">
                     <div class="nd_booking_loader_spinner"></div>
-                    <p>'.__('Checking availability for your dates...','nd-booking').'</p>
+                    <p>'.__('Vérification des disponibilités pour vos dates…','nd-booking').'</p>
                 </div>
             </div>
             <div class="nd_booking_section nd_booking_masonry_content">';
@@ -1033,7 +1033,7 @@ function nd_booking_sorting_php() {
                 <div id="nd_booking_search_cpt_1_no_results" class="nd_booking_section nd_booking_padding_15 nd_booking_box_sizing_border_box">
                     <div class="nd_booking_section nd_booking_bg_yellow nd_booking_padding_15_20 nd_booking_box_sizing_border_box">
                       <img class="nd_booking_float_left nd_booking_display_none_all_iphone" width="20" src="'.esc_url(plugins_url('icon-warning-white.svg', __FILE__ )).'">
-                      <h3 class="nd_booking_float_left nd_options_color_white nd_booking_color_white nd_options_first_font nd_booking_margin_left_10">'.__('No results for this search','nd-booking').'</h3>
+                      <h3 class="nd_booking_float_left nd_options_color_white nd_booking_color_white nd_options_first_font nd_booking_margin_left_10">'.__('Aucun résultat pour cette recherche','nd-booking').'</h3>
                     </div>
                 </div>
 
@@ -1061,26 +1061,55 @@ function nd_booking_sorting_php() {
 
                         var $content = $(".nd_booking_masonry_content");
                         var $loader = $("#nd_booking_search_results_loader");
+                        var loaderRemoved = false;
 
-                        var hideLoader = function() {
-                            if ($loader.length) {
-                                $loader.addClass("nd_booking_search_results_loader--hidden");
+                        var hideLoader = function(forceRemove) {
+                            if (!$loader.length) {
+                                return;
+                            }
+
+                            $loader.addClass("nd_booking_search_results_loader--hidden");
+
+                            if (forceRemove || !loaderRemoved) {
+                                loaderRemoved = true;
+
+                                setTimeout(function() {
+                                    $loader.remove();
+                                }, 320);
                             }
                         };
 
+                        window.ndBookingHideResultsLoader = function(forceRemove) {
+                            hideLoader(forceRemove !== false);
+                        };
+
+                        $(document)
+                            .off("ndBooking:hideResultsLoader")
+                            .on("ndBooking:hideResultsLoader", function() {
+                                hideLoader(true);
+                            });
+
                         if (typeof $.fn.imagesLoaded === "function" && $content.length) {
                             $content.imagesLoaded().always(function() {
-                                setTimeout(hideLoader, 150);
+                                setTimeout(function() {
+                                    hideLoader(true);
+                                }, 150);
                             });
                         } else {
-                            setTimeout(hideLoader, 200);
+                            setTimeout(function() {
+                                hideLoader(true);
+                            }, 200);
                         }
 
                         $(window).off("load.ndBookingResults").on("load.ndBookingResults", function() {
-                            setTimeout(hideLoader, 120);
+                            setTimeout(function() {
+                                hideLoader(true);
+                            }, 120);
                         });
 
-                        setTimeout(hideLoader, 1600);
+                        setTimeout(function() {
+                            hideLoader(true);
+                        }, 2000);
 
                         $( ".nd_booking_tooltip_jquery" ).tooltip({
                             tooltipClass: "nd_booking_tooltip_jquery_content",
