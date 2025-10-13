@@ -32,7 +32,7 @@ function nd_booking_sorting(paged){
   
 
   //START post method
-  jQuery.get(
+  var nd_booking_request = jQuery.get(
     
   
     //ajax
@@ -50,7 +50,8 @@ function nd_booking_sorting(paged){
       nd_booking_search_filter_options_meta_key : nd_booking_search_filter_options_meta_key,
       nd_booking_search_filter_options_order : nd_booking_search_filter_options_order,
       nd_booking_search_filter_layout : nd_booking_search_filter_layout,
-      nd_booking_archive_form_branch_stars : nd_booking_archive_form_branch_stars
+      nd_booking_archive_form_branch_stars : nd_booking_archive_form_branch_stars,
+      nd_booking_sorting_security : nd_booking_my_vars_sorting.nd_booking_ajaxnonce_sorting,
     },
     //end ajax
 
@@ -64,20 +65,68 @@ function nd_booking_sorting(paged){
         jQuery( "#nd_booking_content_result" ).remove();
         jQuery( "#nd_booking_archive_search_masonry_container" ).append(nd_booking_sorting_result);
 
+        var nd_booking_hide_loader_element = function(forceRemove) {
+          var loaderEl = document.getElementById('nd_booking_search_results_loader');
+
+          if (!loaderEl) {
+            return;
+          }
+
+          loaderEl.classList.add('nd_booking_search_results_loader--hidden');
+
+          if (forceRemove !== false) {
+            setTimeout(function() {
+              if (loaderEl && loaderEl.parentNode) {
+                loaderEl.parentNode.removeChild(loaderEl);
+              }
+            }, 320);
+          }
+        };
+
+        var nd_booking_force_hide_loader = function(forceRemove) {
+          if (typeof window.ndBookingHideResultsLoader === 'function') {
+            window.ndBookingHideResultsLoader(forceRemove !== false);
+          } else {
+            nd_booking_hide_loader_element(forceRemove);
+            jQuery(document).trigger('ndBooking:hideResultsLoader');
+          }
+        };
+
+        [120, 480, 2000].forEach(function(delay) {
+          setTimeout(function() {
+            nd_booking_force_hide_loader(true);
+          }, delay);
+        });
+
         jQuery( "#nd_booking_sorting_result_loader" ).fadeOut( "slow", function() {
           jQuery( "#nd_booking_sorting_result_loader" ).remove();
-          jQuery( "#nd_booking_sorting_result_layer" ).remove();  
+          jQuery( "#nd_booking_sorting_result_layer" ).remove();
         });
 
       },10);
 
-      
+
     }
     //END
 
     
 
   );
+
+  if (nd_booking_request && typeof nd_booking_request.fail === 'function') {
+    nd_booking_request.fail(function() {
+      jQuery( "#nd_booking_sorting_result_loader" ).fadeOut( "fast", function() {
+        jQuery( "#nd_booking_sorting_result_loader" ).remove();
+      });
+      jQuery( "#nd_booking_sorting_result_layer" ).remove();
+
+      if (typeof window.ndBookingHideResultsLoader === 'function') {
+        window.ndBookingHideResultsLoader(true);
+      } else {
+        jQuery(document).trigger('ndBooking:hideResultsLoader');
+      }
+    });
+  }
   //END
 
   

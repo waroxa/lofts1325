@@ -33,14 +33,16 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     }
 
     #nd_booking_search_cpt_1_content #nd_booking_search_results_loader {
-      position: absolute;
+      position: fixed;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(255, 255, 255, 0.86);
-      z-index: 5;
+      z-index: 9999;
       transition: opacity 0.4s ease, visibility 0.4s ease;
+      min-height: 100vh;
+      width: 100%;
     }
 
     #nd_booking_search_cpt_1_content #nd_booking_search_results_loader .nd_booking_search_results_loader_inner {
