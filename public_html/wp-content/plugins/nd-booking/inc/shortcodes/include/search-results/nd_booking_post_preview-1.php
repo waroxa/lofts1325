@@ -65,8 +65,14 @@ if (
 
 $loft_best_value_badge_markup = '';
 if ( $loft_is_best_value ) {
-    $loft_best_value_badge_markup = '<span class="loft-search-card__badge loft-search-card__badge--value">⭐ ' . esc_html__( 'Best Value', 'nd-booking' ) . '</span>';
+    $loft_best_value_badge_markup = '<span class="loft-search-card__badge loft-search-card__badge--value">⭐ ' . esc_html__( 'BEST VALUE', 'nd-booking' ) . '</span>';
 }
+
+$loft_card_classes      = 'nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white loft-search-card';
+if ( $loft_is_best_value ) {
+    $loft_card_classes .= ' has-best-value';
+}
+$loft_card_wrapper_open = '<div class="' . esc_attr( $loft_card_classes ) . '">';
 
 
 if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd_booking_date_to) == 0 ) {
@@ -153,7 +159,7 @@ $nd_booking_shortcode_right_content .= '
 
     <div class="nd_booking_section nd_booking_padding_15 nd_booking_box_sizing_border_box loft-search-card__outer">
 
-        <div class="nd_booking_section nd_booking_border_1_solid_grey nd_booking_bg_white loft-search-card">
+        '.$loft_card_wrapper_open.'
 
             '.$nd_booking_image.'
 
