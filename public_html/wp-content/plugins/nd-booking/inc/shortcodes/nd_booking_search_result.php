@@ -474,8 +474,6 @@ function nd_booking_shortcode_search_results() {
         $nd_booking_form_action = home_url( add_query_arg( array(), $wp->request ) );
     }
 
-    $nd_booking_branches_args = array( 'posts_per_page' => -1, 'post_type'=> 'nd_booking_cpt_4' );
-    $nd_booking_branches = get_posts( $nd_booking_branches_args );
     $nd_booking_nights_label = sprintf( _n( '%s Night', '%s Nights', $nd_booking_nights_number, 'nd-booking' ), number_format_i18n( $nd_booking_nights_number ) );
     $nd_booking_guests_label = sprintf( _n( '%s Guest', '%s Guests', $nd_booking_archive_form_guests, 'nd-booking' ), number_format_i18n( $nd_booking_archive_form_guests ) );
 
@@ -483,17 +481,6 @@ function nd_booking_shortcode_search_results() {
     ?>
     <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $nd_booking_form_action ); ?>" method="get" onsubmit="return false;">
         <div id="nd_booking_search_main_bg" class="loft-search-toolbar">
-            <div class="loft-search-toolbar__field loft-search-toolbar__field--select">
-                <label for="nd_booking_archive_form_branches" class="loft-search-toolbar__label"><?php esc_html_e( 'Choose a location', 'nd-booking' ); ?></label>
-                <div class="loft-search-toolbar__control">
-                    <select class="loft-search-toolbar__select" name="nd_booking_archive_form_branches" id="nd_booking_archive_form_branches">
-                        <option value="0" <?php selected( $nd_booking_archive_form_branches, 0 ); ?>><?php esc_html_e( 'All Branches', 'nd-booking' ); ?></option>
-                        <?php foreach ( $nd_booking_branches as $nd_booking_meta_box_branche ) : ?>
-                            <option value="<?php echo esc_attr( $nd_booking_meta_box_branche->ID ); ?>" <?php selected( $nd_booking_archive_form_branches, $nd_booking_meta_box_branche->ID ); ?>><?php echo esc_html( $nd_booking_meta_box_branche->post_title ); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
                 <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrival', 'nd-booking' ); ?></label>
@@ -530,6 +517,7 @@ function nd_booking_shortcode_search_results() {
             </div>
         </div>
 
+        <input type="hidden" id="nd_booking_archive_form_branches" name="nd_booking_archive_form_branches" value="<?php echo esc_attr( $nd_booking_archive_form_branches ); ?>" />
         <input type="hidden" id="nd_booking_archive_form_max_price_for_day" name="nd_booking_archive_form_max_price_for_day" value="<?php echo esc_attr( $nd_booking_archive_form_max_price_for_day ); ?>" />
         <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="<?php echo esc_attr( $nd_booking_archive_form_services_default ); ?>" />
         <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="<?php echo esc_attr( $nd_booking_archive_form_additional_services_default ); ?>" />
@@ -549,7 +537,6 @@ function nd_booking_shortcode_search_results() {
         var $guestDisplay = $('#loft_search_guest_display');
         var $nightsDisplay = $('#nd_booking_nights_display');
         var $searchButton = $('.loft-search-toolbar__submit');
-        var $branchSelect = $('#nd_booking_archive_form_branches');
 
         function formatGuests(value){
             return value + ' ' + (value === 1 ? guestsLabelSingular : guestsLabelPlural);
@@ -646,10 +633,6 @@ function nd_booking_shortcode_search_results() {
             nd_booking_sorting(1);
         });
 
-        $branchSelect.on('change', function(){
-            nd_booking_sorting(1);
-        });
-
         $searchButton.on('click', function(){
             nd_booking_sorting(1);
         });
@@ -686,11 +669,11 @@ function nd_booking_shortcode_search_results() {
           }
 
           .loft-search-toolbar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 22px;
-            align-items: end;
-            padding: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            align-items: flex-end;
+            padding: 26px 30px;
             background: #ffffff;
             border-radius: 26px;
             border: 1px solid rgba(15, 23, 42, 0.08);
@@ -700,7 +683,9 @@ function nd_booking_shortcode_search_results() {
           .loft-search-toolbar__field {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            flex: 1 1 200px;
+            min-width: 190px;
           }
 
           .loft-search-toolbar__label {
@@ -731,8 +716,7 @@ function nd_booking_shortcode_search_results() {
             background: #ffffff;
           }
 
-          .loft-search-toolbar__input,
-          .loft-search-toolbar__select {
+          .loft-search-toolbar__input {
             width: 100%;
             border: none;
             background: transparent;
@@ -741,31 +725,6 @@ function nd_booking_shortcode_search_results() {
             color: #0f172a;
             outline: none;
             padding: 0;
-          }
-
-          .loft-search-toolbar__select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            cursor: pointer;
-          }
-
-          .loft-search-toolbar__field--select .loft-search-toolbar__control {
-            position: relative;
-          }
-
-          .loft-search-toolbar__field--select .loft-search-toolbar__control::after {
-            content: "";
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            width: 10px;
-            height: 6px;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 6px solid #d4af37;
-            transform: translateY(-50%);
-            pointer-events: none;
           }
 
           .loft-search-toolbar__control--date {
@@ -819,11 +778,21 @@ function nd_booking_shortcode_search_results() {
             border-color: rgba(212, 175, 55, 0.4);
           }
 
+          .loft-search-toolbar__field--summary {
+            flex: 0.8 1 180px;
+          }
+
+          .loft-search-toolbar__field--guests {
+            flex: 0.8 1 200px;
+          }
+
           .loft-search-toolbar__field--actions {
             align-self: stretch;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
+            flex: 0 0 auto;
+            min-width: 190px;
           }
 
           .loft-search-toolbar__field--actions .loft-search-toolbar__label {
@@ -837,26 +806,56 @@ function nd_booking_shortcode_search_results() {
             justify-content: center;
             font-size: 16px;
             font-weight: 700;
-            padding: 18px 24px;
+            padding: 18px 28px;
+            appearance: none;
+            background: #FFDA44;
+            border: none;
+            border-radius: 999px;
+            box-shadow: 0 18px 32px rgba(255, 218, 68, 0.30);
+            color: #1A1A1A;
+            cursor: pointer;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            transition: all 0.2s ease-in-out;
           }
 
-          @media (max-width: 1024px) {
+          button.loft-search-toolbar__submit:hover,
+          button.loft-search-toolbar__submit:focus {
+            background: #FFD029;
+            box-shadow: 0 22px 40px rgba(255, 218, 68, 0.36);
+            color: #1A1A1A;
+          }
+
+          @media (max-width: 1200px) {
             .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-              padding: 24px;
-              gap: 18px;
+              padding: 24px 26px;
+              gap: 16px;
+            }
+
+            .loft-search-toolbar__field {
+              flex: 1 1 180px;
+              min-width: 180px;
             }
           }
 
-          @media (max-width: 640px) {
+          @media (max-width: 768px) {
             .loft-search-toolbar {
-              grid-template-columns: 1fr;
-              gap: 16px;
               padding: 22px;
             }
 
             .loft-search-toolbar__field--actions {
+              min-width: 100%;
               order: 99;
+            }
+
+            button.loft-search-toolbar__submit {
+              justify-content: center;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .loft-search-toolbar__field {
+              min-width: 100%;
             }
           }
         </style>';
