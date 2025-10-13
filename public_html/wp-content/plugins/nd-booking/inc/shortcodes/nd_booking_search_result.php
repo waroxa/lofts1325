@@ -472,57 +472,139 @@ function nd_booking_shortcode_search_results() {
           .nd_booking_search_results_layout {
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            gap: 28px;
           }
 
           #nd_booking_search_cpt_1_filters {
-            position: sticky;
-            top: 0;
-            z-index: 90;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border-radius: 28px;
-            padding: 28px 32px;
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.14);
-            border: 1px solid rgba(148, 163, 184, 0.16);
+            position: static;
+            top: auto;
+            z-index: 1;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            border: 0;
+            box-shadow: none;
           }
 
           body.admin-bar #nd_booking_search_cpt_1_filters {
-            top: 32px;
-          }
-
-          @media (max-width: 782px) {
-            body.admin-bar #nd_booking_search_cpt_1_filters {
-              top: 46px;
-            }
+            top: auto;
           }
 
           #nd_booking_search_cpt_1_filters form {
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 18px;
           }
 
           #nd_booking_search_main_bg {
-            background: transparent !important;
-            border-radius: 22px;
-            padding: 0 !important;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            background: #ffffff !important;
+            border-radius: 20px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+            padding: 18px 22px !important;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
             align-items: stretch;
           }
 
           #nd_booking_search_main_bg > div {
             float: none !important;
             width: auto !important;
-            flex: 1 1 220px;
-            min-width: 200px;
+            padding: 0 !important;
           }
 
-          #nd_booking_search_main_bg > div > .nd_booking_section {
+          #nd_booking_search_main_bg .nd_booking_section {
+            width: 100% !important;
+          }
+
+          #nd_booking_search_main_bg .nd_booking_bg_greydark,
+          #nd_booking_search_main_bg .nd_booking_bg_greydark_2 {
+            background: transparent !important;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 16px !important;
+            box-shadow: none;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+            text-align: left;
+          }
+
+          #nd_booking_search_main_bg .nd_booking_display_inline_flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
             width: 100%;
+          }
+
+          #nd_booking_search_main_bg h6,
+          #nd_booking_search_main_bg .nd_options_color_white,
+          #nd_booking_search_main_bg .nd_booking_color_white {
+            color: #4f5d75 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+          }
+
+          #nd_booking_search_main_bg h1,
+          #nd_booking_search_main_bg .nd_booking_color_yellow_important,
+          #nd_booking_search_main_bg .nd_booking_guests_number,
+          #nd_booking_search_main_bg .nd_booking_nights_number {
+            color: #ff6b2c !important;
+          }
+
+          #nd_booking_search_main_bg h1.nd_booking_font_size_50 {
+            font-size: 32px;
+            line-height: 1.1;
+          }
+
+          #nd_booking_search_main_bg img {
+            filter: invert(52%) sepia(86%) saturate(1736%) hue-rotate(-12deg) brightness(101%) contrast(104%);
+          }
+
+          #nd_booking_search_main_bg .nd_booking_guests_increase,
+          #nd_booking_search_main_bg .nd_booking_guests_decrease {
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(255, 107, 44, 0.12);
+          }
+
+          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches {
+            margin: 0;
+          }
+
+          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches .nd_booking_branch_ul_1 {
+            display: none !important;
+          }
+
+          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches select {
+            display: block !important;
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            padding: 16px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27%3E%3Cpath d=%27M6.75 9l5.25 5 5.25-5%27 stroke=%27%23ff6b2c%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 18px;
+          }
+
+          #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branches select:focus {
+            outline: none;
+            border-color: #ff6b2c;
+            box-shadow: 0 0 0 3px rgba(255, 107, 44, 0.18);
           }
 
           #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range,
@@ -531,10 +613,14 @@ function nd_booking_shortcode_search_results() {
           #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branch_stars {
             float: none !important;
             width: 100% !important;
-            background: rgba(15, 23, 42, 0.035);
-            border-radius: 24px;
-            padding: 16px 24px;
-            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
           }
 
           #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range .nd_booking_section.nd_booking_height_20,
@@ -543,22 +629,18 @@ function nd_booking_shortcode_search_results() {
             display: none;
           }
 
-          #nd_booking_search_cpt_1_filters .nd_booking_branch_ul_1 {
-            width: 100%;
+          #nd_booking_search_cpt_1_filters h3 {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin: 0;
           }
 
-          #nd_booking_search_cpt_1_filters .nd_booking_branch_ul_1 > li {
-            border-radius: 22px;
-            background: rgba(15, 23, 42, 0.85);
-          }
-
-          #nd_booking_search_cpt_1_filters .nd_booking_branch_select_sub_menu {
-            border-radius: 20px;
-            overflow: hidden;
-          }
-
-          #nd_booking_search_cpt_1_filters .nd_booking_branch_select_sub_menu li {
-            background: rgba(15, 23, 42, 0.85);
+          #nd_booking_search_cpt_1_filters p {
+            color: #4f5d75;
+            font-size: 14px;
+            margin: 0;
           }
 
           #nd_booking_search_cpt_1_filters .nd_booking_toogle_services_open_content,
@@ -567,44 +649,77 @@ function nd_booking_shortcode_search_results() {
           #nd_booking_search_cpt_1_filters .nd_booking_toogle_additional_services_close_content,
           #nd_booking_search_cpt_1_filters .nd_booking_toogle_branch_stars_open_content,
           #nd_booking_search_cpt_1_filters .nd_booking_toogle_branch_stars_close_content {
-            right: 24px;
+            right: 22px;
+            color: #ff6b2c;
+            letter-spacing: 0.2em;
+            font-weight: 700;
           }
 
-          @media (max-width: 1024px) {
-            #nd_booking_search_cpt_1_filters {
-              padding: 24px;
-              border-radius: 24px;
-            }
+          #nd_booking_search_cpt_1_filters .ui-slider-horizontal {
+            height: 6px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(148, 163, 184, 0.22);
+          }
 
-            #nd_booking_search_main_bg > div {
-              flex: 1 1 260px;
-              min-width: 180px;
+          #nd_booking_search_cpt_1_filters .ui-slider-range {
+            background: linear-gradient(135deg, #ff7a18 0%, #ff512f 100%);
+          }
+
+          #nd_booking_search_cpt_1_filters .ui-slider-handle {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: none;
+            top: -6px;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(255, 107, 44, 0.25);
+          }
+
+          #nd_booking_search_cpt_1_filters .ui-slider-handle:focus {
+            outline: none;
+            box-shadow: 0 0 0 6px rgba(255, 107, 44, 0.28);
+          }
+
+          #nd_booking_search_cpt_1_filters .nd_booking_section.nd_booking_margin_top_20,
+          #nd_booking_search_cpt_1_filters .nd_booking_section.nd_booking_height_20 {
+            margin: 0 !important;
+            height: auto !important;
+          }
+
+          #nd_booking_search_cpt_1_filters .nd_booking_checkbox_label,
+          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options label {
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+          }
+
+          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options input[type="radio"],
+          #nd_booking_search_cpt_1_filters .nd_booking_search_filter_options input[type="checkbox"] {
+            accent-color: #ff6b2c;
+          }
+
+          @media (max-width: 1180px) {
+            #nd_booking_search_main_bg {
+              grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+              padding: 16px 18px !important;
             }
           }
 
           @media (max-width: 767px) {
-            #nd_booking_search_cpt_1_filters {
-              padding: 20px;
-              margin-left: -16px;
-              margin-right: -16px;
-              border-radius: 0;
-            }
-
             #nd_booking_search_main_bg {
-              gap: 12px;
-            }
-
-            #nd_booking_search_main_bg > div {
-              flex: 1 1 100%;
-              min-width: 100%;
+              grid-template-columns: 1fr;
+              gap: 10px;
+              padding: 16px !important;
+              box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
             }
 
             #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_night_range,
             #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_normal_services,
             #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_extra_services,
             #nd_booking_search_cpt_1_filters #nd_booking_search_cpt_1_form_branch_stars {
-              padding: 12px 18px;
-              border-radius: 18px;
+              padding: 16px 18px;
+              border-radius: 16px;
             }
           }
         </style>';
