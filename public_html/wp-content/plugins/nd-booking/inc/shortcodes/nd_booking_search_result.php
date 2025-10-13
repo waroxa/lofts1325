@@ -474,8 +474,8 @@ function nd_booking_shortcode_search_results() {
         $nd_booking_form_action = home_url( add_query_arg( array(), $wp->request ) );
     }
 
-    $nd_booking_nights_label = sprintf( _n( '%s Night', '%s Nights', $nd_booking_nights_number, 'nd-booking' ), number_format_i18n( $nd_booking_nights_number ) );
-    $nd_booking_guests_label = sprintf( _n( '%s Guest', '%s Guests', $nd_booking_archive_form_guests, 'nd-booking' ), number_format_i18n( $nd_booking_archive_form_guests ) );
+    $nd_booking_nights_label = sprintf( _n( '%s nuit', '%s nuits', $nd_booking_nights_number, 'nd-booking' ), number_format_i18n( $nd_booking_nights_number ) );
+    $nd_booking_guests_label = sprintf( _n( '%s invité', '%s invités', $nd_booking_archive_form_guests, 'nd-booking' ), number_format_i18n( $nd_booking_archive_form_guests ) );
 
     ob_start();
     ?>
@@ -483,37 +483,37 @@ function nd_booking_shortcode_search_results() {
         <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrival', 'nd-booking' ); ?></label>
+                <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrivée', 'nd-booking' ); ?></label>
                 <div class="loft-search-toolbar__control loft-search-toolbar__control--date">
                     <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__input" value="<?php echo esc_attr( $nd_booking_date_from ); ?>" autocomplete="off" readonly />
                 </div>
             </div>
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php esc_html_e( 'Departure', 'nd-booking' ); ?></label>
+                <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php esc_html_e( 'Départ', 'nd-booking' ); ?></label>
                 <div class="loft-search-toolbar__control loft-search-toolbar__control--date">
                     <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__input" value="<?php echo esc_attr( $nd_booking_new_date_to_format_mdy ); ?>" autocomplete="off" readonly />
                 </div>
             </div>
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
-                <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php esc_html_e( 'Guests', 'nd-booking' ); ?></label>
+                <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php esc_html_e( 'Invités', 'nd-booking' ); ?></label>
                 <div class="loft-search-toolbar__control loft-search-toolbar__control--guests">
-                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php esc_attr_e( 'Decrease guests', 'nd-booking' ); ?>">−</button>
+                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php esc_attr_e( 'Diminuer le nombre d’invités', 'nd-booking' ); ?>">−</button>
                     <span class="loft-search-toolbar__guests-value" id="loft_search_guest_display"><?php echo esc_html( $nd_booking_guests_label ); ?></span>
-                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php esc_attr_e( 'Increase guests', 'nd-booking' ); ?>">+</button>
+                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php esc_attr_e( 'Augmenter le nombre d’invités', 'nd-booking' ); ?>">+</button>
                 </div>
                 <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $nd_booking_archive_form_guests ); ?>" />
             </div>
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--summary">
-                <span class="loft-search-toolbar__label"><?php esc_html_e( 'Nights', 'nd-booking' ); ?></span>
+                <span class="loft-search-toolbar__label"><?php esc_html_e( 'Nuits', 'nd-booking' ); ?></span>
                 <div class="loft-search-toolbar__summary" id="nd_booking_nights_display"><?php echo esc_html( $nd_booking_nights_label ); ?></div>
             </div>
 
             <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
                 <span class="loft-search-toolbar__label">&nbsp;</span>
-                <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php esc_html_e( 'Search', 'nd-booking' ); ?></button>
+                <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php esc_html_e( 'Recherche', 'nd-booking' ); ?></button>
             </div>
         </div>
 
@@ -526,10 +526,10 @@ function nd_booking_shortcode_search_results() {
 
     <script type="text/javascript">
     jQuery(document).ready(function($){
-        var nightsLabelSingular = '<?php echo esc_js( __( 'Night', 'nd-booking' ) ); ?>';
-        var nightsLabelPlural = '<?php echo esc_js( __( 'Nights', 'nd-booking' ) ); ?>';
-        var guestsLabelSingular = '<?php echo esc_js( __( 'Guest', 'nd-booking' ) ); ?>';
-        var guestsLabelPlural = '<?php echo esc_js( __( 'Guests', 'nd-booking' ) ); ?>';
+        var nightsLabelSingular = '<?php echo esc_js( __( 'nuit', 'nd-booking' ) ); ?>';
+        var nightsLabelPlural = '<?php echo esc_js( __( 'nuits', 'nd-booking' ) ); ?>';
+        var guestsLabelSingular = '<?php echo esc_js( __( 'invité', 'nd-booking' ) ); ?>';
+        var guestsLabelPlural = '<?php echo esc_js( __( 'invités', 'nd-booking' ) ); ?>';
 
         var $checkIn = $('#nd_booking_archive_form_date_range_from');
         var $checkOut = $('#nd_booking_archive_form_date_range_to');
@@ -619,6 +619,16 @@ function nd_booking_shortcode_search_results() {
 
         updateNightsDisplay();
         $guestDisplay.text(formatGuests(parseInt($guestInput.val(), 10) || 1));
+
+        $checkIn.on('change', function(){
+            updateNightsDisplay();
+            nd_booking_sorting(1);
+        });
+
+        $checkOut.on('change', function(){
+            updateNightsDisplay();
+            nd_booking_sorting(1);
+        });
 
         $('.loft-search-toolbar__control--date').on('click', function(){
             $(this).find('.loft-search-toolbar__input').datepicker('show');
@@ -800,24 +810,103 @@ function nd_booking_shortcode_search_results() {
           }
 
           .nd_booking_search_form .loft-search-toolbar__control--date {
-            cursor: pointer;
-          }
-
-          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input {
-            cursor: pointer;
-            height: 100%;
-            background: transparent;
-          }
-
-          .nd_booking_search_form .loft-search-toolbar__input.hasDatepicker {
+            position: relative;
             padding: 0;
+            border: none;
             background: transparent;
+            box-shadow: none;
+            display: block;
+            cursor: pointer;
           }
 
-          .nd_booking_search_form .loft-search-toolbar__input.hasDatepicker::-webkit-inner-spin-button,
-          .nd_booking_search_form .loft-search-toolbar__input.hasDatepicker::-webkit-calendar-picker-indicator {
-            display: none;
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input,
+          .nd_booking_search_form input[type="date"] {
             -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid rgba(16, 24, 40, 0.08);
+            border-radius: 12px;
+            padding: 12px 48px 12px 18px;
+            color: #1F2937;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(16, 24, 40, 0.06);
+            transition: all 0.25s ease-in-out;
+            cursor: pointer;
+            line-height: 1.3;
+            height: auto;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-webkit-datetime-edit,
+          .nd_booking_search_form input[type="date"]::-webkit-datetime-edit,
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-webkit-inner-spin-button,
+          .nd_booking_search_form input[type="date"]::-webkit-inner-spin-button,
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-webkit-calendar-picker-indicator,
+          .nd_booking_search_form input[type="date"]::-webkit-calendar-picker-indicator {
+            background: none;
+            border: none;
+            outline: none;
+            box-shadow: none;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input:focus,
+          .nd_booking_search_form input[type="date"]:focus {
+            border-color: #FFD029;
+            box-shadow: 0 6px 14px rgba(255, 218, 68, 0.25);
+            outline: none;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input:hover,
+          .nd_booking_search_form input[type="date"]:hover {
+            transform: translateY(-1px);
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-webkit-calendar-picker-indicator,
+          .nd_booking_search_form input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0.65;
+            filter: brightness(0) saturate(100%) invert(74%) sepia(58%) saturate(438%) hue-rotate(3deg) brightness(105%) contrast(99%);
+            transition: all 0.25s ease-in-out;
+            cursor: pointer;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input:hover::-webkit-calendar-picker-indicator,
+          .nd_booking_search_form input[type="date"]:hover::-webkit-calendar-picker-indicator {
+            opacity: 1;
+            filter: brightness(1.1) sepia(90%) hue-rotate(5deg) saturate(300%) contrast(110%);
+            transform: scale(1.05);
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23C6A756%22 stroke-width=%221.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%224.5%22 width=%2218%22 height=%2216%22 rx=%222.5%22 ry=%222.5%22/%3E%3Cline x1=%228%22 y1=%222.5%22 x2=%228%22 y2=%227%22/%3E%3Cline x1=%2216%22 y1=%222.5%22 x2=%2216%22 y2=%227%22/%3E%3Cline x1=%223%22 y1=%2211%22 x2=%2221%22 y2=%2211%22/%3E%3C/svg%3E") no-repeat center;
+            transform: translateY(-50%);
+            opacity: 0.7;
+            transition: opacity 0.25s ease-in-out, filter 0.25s ease-in-out, transform 0.25s ease-in-out;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date:hover::after,
+          .nd_booking_search_form .loft-search-toolbar__control--date:focus-within::after {
+            opacity: 1;
+            filter: drop-shadow(0 0 6px rgba(255, 208, 41, 0.35)) brightness(1.08) sepia(25%) saturate(220%) hue-rotate(5deg);
+            transform: translateY(-50%) scale(1.05);
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-webkit-datetime-edit-fields-wrapper,
+          .nd_booking_search_form input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+          }
+
+          .nd_booking_search_form .loft-search-toolbar__control--date .loft-search-toolbar__input::-moz-focus-inner,
+          .nd_booking_search_form input[type="date"]::-moz-focus-inner {
+            border: 0;
           }
 
           .nd_booking_search_form .loft-search-toolbar__control--guests {
