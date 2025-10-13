@@ -436,77 +436,134 @@ $nd_booking_shortcode_right_content .= '
 
 
         <script type="text/javascript">
+(function() {
+  var initializeLoader = function() {
+    var jq = window.jQuery || null;
+    var loader = document.getElementById("nd_booking_search_results_loader");
+    var loaderRemoved = false;
+    var masonryContentSelector = ".nd_booking_masonry_content";
 
-        jQuery(document).ready(function() {
+    if (!loader) {
+      window.ndBookingHideResultsLoader = function() {};
+      return;
+    }
 
-          jQuery(function ($) {
+    var removeLoaderElement = function() {
+      if (!loader || loaderRemoved) {
+        return;
+      }
 
-            var $content = $(".nd_booking_masonry_content");
-            var $loader = $("#nd_booking_search_results_loader");
-            var loaderRemoved = false;
+      loaderRemoved = true;
 
-            var hideLoader = function(forceRemove) {
-              if (!$loader.length) {
-                return;
-              }
+      setTimeout(function() {
+        if (loader && loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
 
-              $loader.addClass("nd_booking_search_results_loader--hidden");
+        loader = null;
+      }, 320);
+    };
 
-              if (forceRemove || !loaderRemoved) {
-                loaderRemoved = true;
+    var hideLoader = function(forceRemove) {
+      if (!loader) {
+        return;
+      }
 
-                setTimeout(function() {
-                  $loader.remove();
-                }, 320);
-              }
-            };
+      var shouldRemove = forceRemove !== false;
 
-            window.ndBookingHideResultsLoader = function(forceRemove) {
-              hideLoader(forceRemove !== false);
-            };
+      loader.classList.add("nd_booking_search_results_loader--hidden");
 
-            $(document)
-              .off("ndBooking:hideResultsLoader")
-              .on("ndBooking:hideResultsLoader", function() {
-                hideLoader(true);
-              });
+      if (shouldRemove) {
+        removeLoaderElement();
+      }
+    };
 
-            if (typeof $.fn.imagesLoaded === "function" && $content.length) {
-              $content.imagesLoaded().always(function() {
-                setTimeout(function() {
-                  hideLoader(true);
-                }, 150);
-              });
-            } else {
-              setTimeout(function() {
-                hideLoader(true);
-              }, 200);
-            }
+    window.ndBookingHideResultsLoader = function(forceRemove) {
+      hideLoader(forceRemove);
+    };
 
-            $(window).off("load.ndBookingResults").on("load.ndBookingResults", function() {
-              setTimeout(function() {
-                hideLoader(true);
-              }, 120);
-            });
+    var triggerHide = function(delay, forceRemove) {
+      window.setTimeout(function() {
+        hideLoader(forceRemove);
+      }, delay);
+    };
 
-            setTimeout(function() {
-              hideLoader(true);
-            }, 2000);
+    var nativeHideHandler = function() {
+      hideLoader(true);
+    };
 
-            $( ".nd_booking_tooltip_jquery" ).tooltip({
-              tooltipClass: "nd_booking_tooltip_jquery_content",
-              position: {
-                my: "center top",
-                at: "center-7 top-33",
-              }
-            });
+    if (window.ndBookingNativeHideResultsLoader) {
+      document.removeEventListener("ndBooking:hideResultsLoader", window.ndBookingNativeHideResultsLoader);
+    }
 
+    window.ndBookingNativeHideResultsLoader = nativeHideHandler;
+    document.addEventListener("ndBooking:hideResultsLoader", nativeHideHandler);
 
-          });
+    if (jq && jq(document)) {
+      jq(document)
+        .off("ndBooking:hideResultsLoader")
+        .on("ndBooking:hideResultsLoader", function() {
+          hideLoader(true);
+        });
+    }
 
+    if (jq && jq.fn) {
+      var $content = jq(masonryContentSelector);
+
+      if (typeof jq.fn.imagesLoaded === "function" && $content.length) {
+        $content.imagesLoaded().always(function() {
+          triggerHide(150, true);
+        });
+      } else {
+        triggerHide(200, true);
+      }
+
+      jq(window)
+        .off("load.ndBookingResults")
+        .on("load.ndBookingResults", function() {
+          triggerHide(120, true);
         });
 
-      </script>';
+      if (typeof jq.fn.tooltip === "function") {
+        jq(".nd_booking_tooltip_jquery").tooltip({
+          tooltipClass: "nd_booking_tooltip_jquery_content",
+          position: {
+            my: "center top",
+            at: "center-7 top-33",
+          }
+        });
+      }
+    } else {
+      triggerHide(200, true);
+
+      if (window.ndBookingResultsLoaderOnLoadHandler) {
+        window.removeEventListener("load", window.ndBookingResultsLoaderOnLoadHandler);
+      }
+
+      var onLoad = function() {
+        triggerHide(120, true);
+
+        if (window.ndBookingResultsLoaderOnLoadHandler === onLoad) {
+          window.ndBookingResultsLoaderOnLoadHandler = null;
+        }
+
+        window.removeEventListener("load", onLoad);
+      };
+
+      window.ndBookingResultsLoaderOnLoadHandler = onLoad;
+      window.addEventListener("load", onLoad);
+    }
+
+    triggerHide(2000, true);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeLoader);
+  } else {
+    initializeLoader();
+  }
+})();
+</script>';
 
 
       include realpath(dirname( __FILE__ ).'/nd_booking_search_results_pagination.php');
