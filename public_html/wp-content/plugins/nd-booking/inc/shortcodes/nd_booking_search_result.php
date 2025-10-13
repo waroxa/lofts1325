@@ -649,6 +649,18 @@ function nd_booking_shortcode_search_results() {
 
         $nd_booking_shortcode_result .= '
         <style>
+          @keyframes loftSearchToolbarFadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(14px);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
           .nd_booking_search_results_layout {
             display: flex;
             flex-direction: column;
@@ -670,20 +682,28 @@ function nd_booking_shortcode_search_results() {
 
           .loft-search-toolbar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
             align-items: stretch;
-            padding: 24px 26px;
+            padding: 28px 32px;
+            margin: 0 0 40px;
             background: #ffffff;
             border-radius: 18px;
             border: 1px solid rgba(16, 24, 40, 0.08);
             box-shadow: 0 24px 60px rgba(16, 24, 40, 0.16);
+            animation: loftSearchToolbarFadeIn 0.4s ease-out both;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+          }
+
+          .loft-search-toolbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 70px rgba(16, 24, 40, 0.18);
           }
 
           .loft-search-toolbar__field {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             min-width: 0;
             height: 100%;
           }
@@ -701,19 +721,25 @@ function nd_booking_shortcode_search_results() {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.24);
             background: #ffffff;
-            box-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
-            min-height: 56px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 18px 44px rgba(16, 24, 40, 0.12);
+            min-height: 60px;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+          }
+
+          .loft-search-toolbar__control:hover,
+          .loft-search-toolbar__summary:hover {
+            border-color: rgba(255, 218, 68, 0.45);
+            box-shadow: 0 20px 50px rgba(16, 24, 40, 0.14);
           }
 
           .loft-search-toolbar__control:focus-within {
             border-color: rgba(255, 218, 68, 0.75);
-            box-shadow: 0 0 0 3px rgba(255, 218, 68, 0.28);
+            box-shadow: 0 20px 50px rgba(16, 24, 40, 0.16), 0 0 0 3px rgba(255, 218, 68, 0.24);
             background: #ffffff;
           }
 
@@ -738,16 +764,16 @@ function nd_booking_shortcode_search_results() {
 
           .loft-search-toolbar__control--guests {
             justify-content: space-between;
-            gap: 8px;
+            gap: 10px;
           }
 
           .loft-search-toolbar__guest-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 218, 68, 0.55);
-            background: rgba(255, 218, 68, 0.18);
-            color: #8a5800;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 218, 68, 0.5);
+            background: linear-gradient(135deg, rgba(255, 218, 68, 0.24), rgba(239, 126, 20, 0.24));
+            color: #7a4a00;
             font-weight: 600;
             font-size: 18px;
             line-height: 1;
@@ -755,15 +781,15 @@ function nd_booking_shortcode_search_results() {
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 12px 26px rgba(255, 218, 68, 0.28);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 16px 36px rgba(255, 218, 68, 0.26);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
           }
 
           .loft-search-toolbar__guest-btn:hover,
           .loft-search-toolbar__guest-btn:focus {
-            transform: translateY(-1px);
-            box-shadow: 0 18px 38px rgba(255, 218, 68, 0.32);
-            background: rgba(255, 218, 68, 0.24);
+            transform: translateY(-2px);
+            box-shadow: 0 22px 42px rgba(255, 218, 68, 0.32);
+            background: linear-gradient(135deg, rgba(255, 218, 68, 0.3), rgba(239, 126, 20, 0.32));
             border-color: rgba(255, 218, 68, 0.8);
             outline: none;
           }
@@ -798,59 +824,100 @@ function nd_booking_shortcode_search_results() {
           button.loft-search-toolbar__submit {
             width: 100%;
             height: 100%;
-            min-height: 52px;
+            min-height: 60px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
+            font-size: clamp(13px, 1.8vw, 15px);
             font-weight: 700;
-            padding: 0 18px;
+            padding: 16px 28px;
             appearance: none;
-            background: linear-gradient(120deg, #f6b343, #ef7e14);
+            background: linear-gradient(135deg, #ffe28e 0%, #f6b343 38%, #ef7e14 100%);
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 14px 28px rgba(239, 126, 20, 0.28);
-            color: #ffffff;
+            border-radius: 999px;
+            box-shadow: 0 18px 38px rgba(239, 126, 20, 0.3);
+            color: #1a1a1a;
             cursor: pointer;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
           }
 
           button.loft-search-toolbar__submit:hover,
           button.loft-search-toolbar__submit:focus {
-            transform: translateY(-1px);
-            box-shadow: 0 18px 36px rgba(239, 126, 20, 0.32);
+            transform: translateY(-2px);
+            box-shadow: 0 24px 48px rgba(239, 126, 20, 0.36);
             outline: none;
+          }
+
+          button.loft-search-toolbar__submit:focus-visible {
+            box-shadow: 0 24px 48px rgba(239, 126, 20, 0.36), 0 0 0 3px rgba(255, 218, 68, 0.35);
+          }
+
+          @media (max-width: 1200px) {
+            .loft-search-toolbar {
+              grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+              gap: 20px;
+              padding: 26px 28px;
+            }
           }
 
           @media (max-width: 1024px) {
             .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-              gap: 12px;
-              padding: 16px 18px;
+              grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: 18px;
+              padding: 24px;
             }
           }
 
           @media (max-width: 768px) {
             .loft-search-toolbar {
-              grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+              gap: 16px;
+              padding: 22px;
+            }
+
+            .loft-search-toolbar__control,
+            .loft-search-toolbar__summary {
+              min-height: 56px;
+            }
+
+            button.loft-search-toolbar__submit {
+              min-height: 56px;
             }
           }
 
           @media (max-width: 600px) {
             .loft-search-toolbar {
               grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 16px;
+              padding: 20px;
             }
           }
 
           @media (max-width: 480px) {
             .loft-search-toolbar {
               grid-template-columns: 1fr;
+              gap: 14px;
+              padding: 18px;
             }
 
             button.loft-search-toolbar__submit {
-              min-height: 48px;
+              min-height: 52px;
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .loft-search-toolbar {
+              animation: none;
+            }
+
+            .loft-search-toolbar:hover,
+            .loft-search-toolbar__guest-btn:hover,
+            .loft-search-toolbar__guest-btn:focus,
+            button.loft-search-toolbar__submit:hover,
+            button.loft-search-toolbar__submit:focus {
+              transform: none;
             }
           }
         </style>';
