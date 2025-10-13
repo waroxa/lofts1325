@@ -382,7 +382,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
 
     @media (min-width: 1024px) {
       [id^="nd_booking_search_cpt_"][id$="_content"] .nd_booking_masonry_content {
-        grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+        grid-template-columns: minmax(0, 1fr);
       }
 
       [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__content {
