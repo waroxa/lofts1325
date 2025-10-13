@@ -578,14 +578,28 @@ $nd_booking_shortcode_right_content .= '
           $nd_booking_sort_by = 'best';
         }
 
-        $posts_with_price = array();
-        $lowest_price     = null;
+        $posts_with_price             = array();
+        $lowest_price                 = null;
+        $nd_booking_best_value_post_id = null;
 
         if ( $nd_booking_qnt_results_posts > 0 ) {
           while ( $the_query->have_posts() ) {
             $the_query->the_post();
 
-            $nd_booking_post_price = (float) get_post_meta( get_the_ID(), 'nd_booking_meta_price_total', true );
+            $nd_booking_post_id    = get_the_ID();
+            $nd_booking_post_price = 0.0;
+
+            if ( isset( $nd_booking_pricing_cache ) && isset( $nd_booking_pricing_cache[ $nd_booking_post_id ] ) ) {
+              $nd_booking_cached_pricing = $nd_booking_pricing_cache[ $nd_booking_post_id ];
+
+              if ( ! empty( $nd_booking_cached_pricing['has_cta'] ) && null !== $nd_booking_cached_pricing['trip_price'] ) {
+                $nd_booking_post_price = (float) $nd_booking_cached_pricing['trip_price'];
+              }
+            }
+
+            if ( $nd_booking_post_price <= 0 ) {
+              $nd_booking_post_price = (float) get_post_meta( $nd_booking_post_id, 'nd_booking_meta_price_total', true );
+            }
 
             $posts_with_price[] = array(
               'post'  => get_post(),
@@ -657,6 +671,19 @@ $nd_booking_shortcode_right_content .= '
               }
             );
           }
+
+          if ( null !== $nd_booking_best_value_price ) {
+            foreach ( $posts_with_price as $nd_booking_post_with_price ) {
+              if ( abs( (float) $nd_booking_post_with_price['price'] - (float) $nd_booking_best_value_price ) < 0.01 ) {
+                $nd_booking_best_value_post_id = $nd_booking_post_with_price['post']->ID;
+                break;
+              }
+            }
+          }
+
+          if ( null === $nd_booking_best_value_post_id && ! empty( $posts_with_price ) ) {
+            $nd_booking_best_value_post_id = $posts_with_price[0]['post']->ID;
+          }
         }
 
         $nd_booking_shortcode_right_content .= '
@@ -695,6 +722,7 @@ $nd_booking_shortcode_right_content .= '
             foreach ( $posts_with_price as $nd_booking_post_with_price ) {
               $post  = $nd_booking_post_with_price['post'];
               $price = isset( $nd_booking_post_with_price['price'] ) ? (float) $nd_booking_post_with_price['price'] : 0.0;
+              $nd_booking_is_best_value_card = ( null !== $nd_booking_best_value_post_id && (int) $nd_booking_best_value_post_id === (int) $post->ID );
 
               setup_postdata( $post );
 
