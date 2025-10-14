@@ -76,7 +76,7 @@ $loft_card_wrapper_open = '<div class="' . esc_attr( $loft_card_classes ) . '">'
 
 if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd_booking_date_to) == 0 ) {
     
-    $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NOT AVAILABLE','nd-booking')."</span>";
+    $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NON DISPONIBLE','nd-booking')."</span>";
 
 }else{
 
@@ -95,13 +95,13 @@ if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd
 
         }else{
 
-            $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_greydark'>".__('MINIMUM BOOKING DAYS','nd-booking')." : ".$nd_booking_meta_box_min_booking_day."</span>";
+            $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_greydark'>".__('NOMBRE MINIMAL DE NUITS','nd-booking')." : ".$nd_booking_meta_box_min_booking_day."</span>";
 
         }
 
 
     }else{
-        $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NOT AVAILABLE','nd-booking')."</span>";
+        $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NON DISPONIBLE','nd-booking')."</span>";
     }
 
 }
@@ -112,7 +112,7 @@ if ( has_post_thumbnail() ) {
 
     $loft_best_value_ribbon_markup = '';
     if ( $is_best_value ) {
-        $loft_best_value_ribbon_markup = '<div class="loft-search-card__ribbon"><span class="loft-search-card__ribbon-text">' . esc_html__( 'BEST VALUE', 'nd-booking' ) . '</span></div>';
+        $loft_best_value_ribbon_markup = '<div class="loft-search-card__ribbon"><span class="loft-search-card__ribbon-text">' . esc_html__( 'MEILLEUR TARIF', 'nd-booking' ) . '</span></div>';
     }
 
     $loft_room_image_src = esc_url( nd_booking_get_post_img_src( get_the_ID() ) );
@@ -183,7 +183,7 @@ $nd_booking_shortcode_right_content .= '
                         <div class="nd_booking_section loft-search-card__meta">
                             <div class="nd_booking_display_table loft-search-card__feature-list">
                                 <img alt="" class="loft-search-card__feature-icon" width="23" src="'.esc_url(plugins_url('icon-user-grey.svg', __FILE__ )).'">
-                                <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_max_people.' '.__('GUESTS','nd-booking').'</p>
+                                <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_max_people.' '.__('INVITÉS','nd-booking').'</p>
                                 <img alt="" class="loft-search-card__feature-icon" width="20" src="'.esc_url(plugins_url('icon-plan-grey.svg', __FILE__ )).'">
                                 <p class="loft-search-card__feature-text nd_booking_display_table_cell nd_booking_vertical_align_middle">'.$nd_booking_meta_box_room_size.' '.nd_booking_get_units_of_measure().'</p>
                             </div>
@@ -224,7 +224,7 @@ $nd_booking_shortcode_right_content .= '
                         }
 
                         $loft_services_markup .= '<a href="' . esc_url( $nd_booking_r_permalink ) . '" class="loft-search-card__details-link">';
-                        $loft_services_markup .= '<span class="loft-search-card__details-link-label">' . esc_html__( 'FULL INFO', 'nd-booking' ) . '</span>';
+                        $loft_services_markup .= '<span class="loft-search-card__details-link-label">' . esc_html__( 'TOUS LES DÉTAILS', 'nd-booking' ) . '</span>';
                         $loft_services_markup .= '<img alt="" class="loft-search-card__details-link-icon" width="10" src="' . esc_url( plugins_url( 'icon-right-arrow-grey.svg', __FILE__ ) ) . '">';
                         $loft_services_markup .= '</a>';
                         $loft_services_markup .= '</div>';

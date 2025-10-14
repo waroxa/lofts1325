@@ -27,7 +27,7 @@ if ( $nd_booking_meta_box_room_woo_product == '' ){ $nd_booking_meta_box_room_wo
 
 if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd_booking_date_to) == 0 ) {
     
-    $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NOT AVAILABLE','nd-booking')."</span>";
+    $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NON DISPONIBLE','nd-booking')."</span>";
 
 }else{
 
@@ -46,13 +46,13 @@ if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd
 
         }else{
 
-            $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_greydark'>".__('MINIMUM BOOKING DAYS','nd-booking')." : ".$nd_booking_meta_box_min_booking_day."</span>";
+            $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_greydark'>".__('NOMBRE MINIMAL DE NUITS','nd-booking')." : ".$nd_booking_meta_box_min_booking_day."</span>";
 
         }
 
 
     }else{
-        $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NOT AVAILABLE','nd-booking')."</span>";
+        $nd_booking_availability = "<span class='nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_yellow'>".__('NON DISPONIBLE','nd-booking')."</span>";
     }
 
 }
@@ -122,7 +122,7 @@ $nd_booking_shortcode_right_content .= '
                 <div class="nd_booking_section">
                     <div class="nd_booking_display_table nd_booking_float_left">
                         <img alt="" class="nd_booking_margin_right_10 nd_booking_display_table_cell nd_booking_vertical_align_middle" width="23" src="'.esc_url(plugins_url('icon-user-grey.svg', __FILE__ )).'">
-                        <p class="  nd_booking_display_table_cell nd_booking_vertical_align_middle nd_booking_font_size_12 nd_booking_line_height_26">'.$nd_booking_meta_box_max_people.' '.__('GUESTS','nd-booking').'</p>
+                        <p class="  nd_booking_display_table_cell nd_booking_vertical_align_middle nd_booking_font_size_12 nd_booking_line_height_26">'.$nd_booking_meta_box_max_people.' '.__('INVITÉS','nd-booking').'</p>
                         <img alt="" class="nd_booking_margin_right_10 nd_booking_margin_left_20 nd_booking_display_table_cell nd_booking_vertical_align_middle" width="20" src="'.esc_url(plugins_url('icon-plan-grey.svg', __FILE__ )).'">
                         <p class="  nd_booking_display_table_cell nd_booking_vertical_align_middle nd_booking_font_size_12 nd_booking_line_height_26">'.$nd_booking_meta_box_room_size.' '.nd_booking_get_units_of_measure().'</p>
                     </div>
