@@ -667,6 +667,420 @@ body.single-causes .single-featured-image-header { display: none; }
   min-width: 260px;
 }
 
+/* Booking intake layout */
+.loft-booking-intake {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 40px auto;
+  max-width: 1200px;
+  width: calc(100% - 40px);
+}
+
+.loft-booking-intake__sidebar {
+  flex: 0 0 340px;
+  max-width: 100%;
+}
+
+.loft-booking-intake__content {
+  flex: 1 1 420px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loft-booking-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loft-booking-sidebar__card.loft-search-card {
+  border-radius: 14px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.loft-booking-sidebar__card .loft-search-card__content {
+  padding: 24px;
+}
+
+.loft-booking-sidebar__card .loft-search-card__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.loft-booking-sidebar__card .loft-search-card__feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.loft-booking-summary-panel {
+  background: linear-gradient(155deg, #10b981 0%, #16a34a 100%);
+  border-radius: 18px;
+  color: #ecfdf5;
+  padding: 28px;
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.28);
+}
+
+.loft-booking-summary-panel__banner {
+  margin-bottom: 16px;
+}
+
+.loft-booking-summary-panel__badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.loft-booking-summary-panel__title {
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.loft-booking-summary-panel__details {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.loft-booking-summary-panel__details .label {
+  font-weight: 600;
+}
+
+.loft-booking-summary-panel__details li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: rgba(236, 253, 245, 0.92);
+}
+
+.loft-booking-summary-panel__total {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.loft-booking-summary-panel__total .summary-label {
+  margin: 0 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.loft-booking-summary-panel__total .summary-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.loft-booking-summary-panel__total .summary-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(236, 253, 245, 0.8);
+}
+
+.loft-booking-summary-panel__taxes {
+  font-size: 12px;
+  margin: 0 0 18px;
+  color: rgba(236, 253, 245, 0.85);
+}
+
+.loft-booking-summary-panel__breakdown {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.loft-booking-summary-panel__breakdown .breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.loft-booking-summary-panel__breakdown .breakdown-row--total {
+  font-weight: 700;
+}
+
+.loft-booking-summary-panel__support {
+  margin-top: 22px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.loft-booking-summary-panel__support .support-link {
+  color: #fef3c7;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.loft-booking-alert {
+  background: #fef3c7;
+  border-radius: 12px;
+  padding: 16px 18px;
+  color: #78350f;
+  font-size: 14px;
+  margin-bottom: 24px;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.2);
+}
+
+.loft-booking-alert__link {
+  color: #b45309;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.loft-booking-form__title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.loft-booking-form__subtitle {
+  margin: 0 0 24px;
+  color: #4b5563;
+  font-size: 16px;
+}
+
+.loft-booking-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loft-form-section {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.loft-form-section h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #111827;
+}
+
+.loft-form-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.loft-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loft-form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.loft-input,
+.loft-form-field select,
+.loft-form-field textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  padding: 12px 14px;
+  font-size: 15px;
+  color: #111827;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-input:focus,
+.loft-form-field select:focus,
+.loft-form-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.loft-form-field--file input[type="file"] {
+  padding: 10px 12px;
+  background: #f1f5f9;
+}
+
+.loft-help-text {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+}
+
+.loft-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.loft-checkbox__input {
+  margin-top: 3px;
+}
+
+.loft-checkbox__label a {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.loft-form-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.loft-button {
+  background: linear-gradient(135deg, #fde047 0%, #facc15 100%);
+  border: none;
+  border-radius: 999px;
+  color: #1f2937;
+  font-weight: 700;
+  padding: 14px 32px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-button:hover,
+.loft-button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(250, 204, 21, 0.32);
+  outline: none;
+}
+
+.loft-button--hidden {
+  display: none;
+}
+
+.loft-addon-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.loft-addon-item {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+}
+
+.loft-addon-item__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.loft-addon-item__header input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #16a34a;
+}
+
+.loft-addon-item__description {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.loft-addon-item__price {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.loft-addon-item__total {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.loft-addon-mandatory {
+  background: #f97316;
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 991px) {
+  .loft-booking-intake {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .loft-booking-intake__sidebar,
+  .loft-booking-intake__content {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .loft-booking-form__title {
+    font-size: 24px;
+  }
+
+  .loft-booking-summary-panel {
+    padding: 22px;
+  }
+
+  .loft-booking-summary-panel__total .summary-amount {
+    font-size: 28px;
+  }
+
+  .loft-form-section {
+    padding: 20px;
+  }
+
+  .loft-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .loft-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 .loft-progress-indicator {
   font-size: 13px;
   font-weight: 600;

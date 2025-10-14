@@ -141,10 +141,9 @@ function nd_booking_shortcode_booking() {
             }else{
 
               $nd_booking_alert_login = '
-                <div class="nd_booking_booking_alert_login_register nd_booking_section nd_booking_bg_red nd_booking_padding_5_10 nd_booking_box_sizing_border_box">
-                  <p class="nd_options_color_white">'.__('You are booking as guest,','nd-booking').' <a target="_blank" class="nd_options_color_white nd_booking_border_bottom_1_solid_white" href="'.nd_booking_account_page().'">'.__('LOGIN','nd-booking').'</a> '.__('or','nd-booking').' <a target="_blank" class="nd_options_color_white nd_booking_border_bottom_1_solid_white" href="'.nd_booking_account_page().'">'.__('REGISTER','nd-booking').'</a> '.__('if you want to save your reservation on your account.','nd-booking').'</p>
+                <div class="loft-booking-alert" role="status">
+                  <p>'.__('You are booking as a guest.','nd-booking').' <a class="loft-booking-alert__link" target="_blank" href="'.nd_booking_account_page().'">'.__('Log in','nd-booking').'</a> '.__('or','nd-booking').' <a class="loft-booking-alert__link" target="_blank" href="'.nd_booking_account_page().'">'.__('create an account','nd-booking').'</a> '.__('to save your reservation details.','nd-booking').'</p>
                 </div>
-                <div class="nd_booking_booking_alert_login_register nd_booking_section nd_booking_height_40"></div>
               ';
 
             }
@@ -156,20 +155,16 @@ function nd_booking_shortcode_booking() {
             $nd_booking_shortcode_result = '';
             $nd_booking_shortcode_result .= '
 
-            <div class="nd_booking_section">
-            
-                <div class="nd_booking_float_left nd_booking_width_33_percentage nd_booking_width_100_percentage_responsive nd_booking_padding_right_15 nd_booking_padding_0_responsive nd_booking_box_sizing_border_box">
-                    
-                    '.$nd_booking_shortcode_left_content.'
+            <div class="loft-booking-intake">
 
+                <div class="loft-booking-intake__sidebar">
+                    '.$nd_booking_shortcode_left_content.'
                 </div>
 
-                <div class="nd_booking_float_left nd_booking_width_66_percentage nd_booking_width_100_percentage_responsive nd_booking_padding_left_15 nd_booking_padding_0_responsive nd_booking_box_sizing_border_box">
-                    
+                <div class="loft-booking-intake__content">
                     '.$nd_booking_alert_login.'
                     '.$nd_booking_additional_services.'
                     '.$nd_booking_shortcode_right_content.'
-
                 </div>
 
             </div>
