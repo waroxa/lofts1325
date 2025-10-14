@@ -645,13 +645,13 @@ $nd_booking_shortcode_right_content .= '
             }
           }
 
-          $nd_booking_sort_bar_markup .= '<label for="nd_booking_sort_by">' . esc_html__( 'Sort by:', 'nd-booking' ) . '</label>';
+          $nd_booking_sort_bar_markup .= '<label for="nd_booking_sort_by">' . esc_html__( 'Trier par :', 'nd-booking' ) . '</label>';
           $nd_booking_sort_bar_markup .= '<select id="nd_booking_sort_by" name="sort_by" onchange="this.form.submit()">';
 
           $nd_booking_sort_options = array(
-            'best' => __( 'Best Value', 'nd-booking' ),
-            'low'  => __( 'Price: Low to High', 'nd-booking' ),
-            'high' => __( 'Price: High to Low', 'nd-booking' ),
+            'best' => __( 'Meilleur rapport qualité-prix', 'nd-booking' ),
+            'low'  => __( 'Prix : du plus bas au plus élevé', 'nd-booking' ),
+            'high' => __( 'Prix : du plus élevé au plus bas', 'nd-booking' ),
           );
 
           foreach ( $nd_booking_sort_options as $nd_booking_sort_value => $nd_booking_sort_label ) {
