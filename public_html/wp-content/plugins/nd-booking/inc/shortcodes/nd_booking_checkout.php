@@ -183,24 +183,17 @@ function nd_booking_shortcode_checkout() {
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_left_content.php');
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_right_content.php');
         include realpath(dirname( __FILE__ ).'/include/checkout/nd_booking_checkout_payment_options.php');
-        
+
+        if ( isset( $nd_booking_conditions_markup ) ) {
+            $nd_booking_shortcode_right_content .= $nd_booking_conditions_markup;
+        }
+
+        $nd_booking_shortcode_right_content .= '</div>';
+
         $nd_booking_shortcode_result .= '
-
-        <div class="nd_booking_section">
-        
-
-            <div class="nd_booking_float_left nd_booking_width_33_percentage nd_booking_width_100_percentage_responsive nd_booking_padding_0_responsive nd_booking_padding_right_15 nd_booking_box_sizing_border_box">
-                
-                '.$nd_booking_shortcode_left_content.'
-
-            </div>
-
-            <div class="nd_booking_float_left nd_booking_width_66_percentage nd_booking_width_100_percentage_responsive nd_booking_padding_0_responsive nd_booking_padding_left_15 nd_booking_box_sizing_border_box">
-                
-                '.$nd_booking_shortcode_right_content.'
-
-            </div>
-
+        <div class="loft-booking-checkout">
+            ' . $nd_booking_shortcode_left_content . '
+            ' . $nd_booking_shortcode_right_content . '
         </div>
         ';
 
