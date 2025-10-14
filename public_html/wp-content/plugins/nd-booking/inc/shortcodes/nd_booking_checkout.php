@@ -226,6 +226,7 @@ function nd_booking_shortcode_checkout() {
         $nd_booking_image_src      = get_the_post_thumbnail_url( get_the_ID(), 'large' );
         $nd_booking_image_alt      = $nd_booking_booking_title ? $nd_booking_booking_title : __( 'Room', 'nd-booking' );
 
+        
         $nd_booking_checkout_form_markup = $nd_booking_shortcode_right_content;
         remove_shortcode( 'nd_booking_form_checkout' );
         add_shortcode(
@@ -237,197 +238,290 @@ function nd_booking_shortcode_checkout() {
 
         ob_start();
         ?>
-        <div class="loft-booking-container">
-          <div class="loft-booking-header">
-            <h2 class="booking-title"><?php echo esc_html( $nd_booking_booking_title ); ?></h2>
+        <div class="loft-checkout-wrapper">
+          <div class="checkout-header">
+            <h2>Finalisez votre réservation</h2>
+            <p>Réservez votre séjour en toute sécurité.</p>
+            <div class="checkout-countdown">
+              <span class="timer-icon">⏳</span>
+              <span class="timer-text">9:41 restantes pour sécuriser ce tarif.</span>
+            </div>
           </div>
 
-          <div class="loft-booking-content">
-            <div class="booking-summary">
-              <?php if ( $nd_booking_image_src ) : ?>
-              <img src="<?php echo esc_url( $nd_booking_image_src ); ?>" alt="<?php echo esc_attr( $nd_booking_image_alt ); ?>" class="booking-image" />
-              <?php endif; ?>
-              <div class="booking-info">
-                <h3><?php esc_html_e( 'Votre réservation', 'nd-booking' ); ?></h3>
-                <ul>
-                  <?php if ( $nd_booking_meta_data['check_in'] ) : ?>
-                  <li><strong><?php esc_html_e( 'Arrivée:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['check_in'] ); ?></li>
-                  <?php endif; ?>
-                  <?php if ( $nd_booking_meta_data['check_out'] ) : ?>
-                  <li><strong><?php esc_html_e( 'Départ:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['check_out'] ); ?></li>
-                  <?php endif; ?>
-                  <?php if ( $nd_booking_meta_data['nights'] ) : ?>
-                  <li><strong><?php esc_html_e( 'Nuits:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['nights'] ); ?></li>
-                  <?php endif; ?>
-                  <?php if ( $nd_booking_meta_data['guests'] ) : ?>
-                  <li><strong><?php esc_html_e( 'Invités:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['guests'] ); ?></li>
-                  <?php endif; ?>
-                </ul>
-                <div class="booking-total">
-                  <p><?php esc_html_e( 'Total', 'nd-booking' ); ?></p>
-                  <h2><?php echo esc_html( $nd_booking_price_total_form ); ?> <?php echo esc_html( $nd_booking_currency ); ?></h2>
-                  <p class="per-night"><?php esc_html_e( 'Approx.', 'nd-booking' ); ?> <?php echo esc_html( $nd_booking_price_night_form ); ?> <?php echo esc_html( $nd_booking_currency ); ?> <?php esc_html_e( 'par nuit', 'nd-booking' ); ?></p>
+          <div class="checkout-main">
+            <div class="checkout-summary">
+              <div class="summary-card">
+                <?php if ( $nd_booking_image_src ) : ?>
+                <img src="<?php echo esc_url( $nd_booking_image_src ); ?>" alt="<?php echo esc_attr( $nd_booking_image_alt ); ?>" class="summary-image">
+                <?php endif; ?>
+                <div class="summary-details">
+                  <h3><?php echo esc_html( $nd_booking_booking_title ); ?></h3>
+                  <ul>
+                    <?php if ( ! empty( $nd_booking_meta_data['check_in'] ) ) : ?>
+                    <li><strong>Arrivée:</strong> <?php echo esc_html( $nd_booking_meta_data['check_in'] ); ?></li>
+                    <?php endif; ?>
+                    <?php if ( ! empty( $nd_booking_meta_data['check_out'] ) ) : ?>
+                    <li><strong>Départ:</strong> <?php echo esc_html( $nd_booking_meta_data['check_out'] ); ?></li>
+                    <?php endif; ?>
+                    <?php if ( ! empty( $nd_booking_meta_data['nights'] ) ) : ?>
+                    <li><strong>Nuits:</strong> <?php echo esc_html( $nd_booking_meta_data['nights'] ); ?></li>
+                    <?php endif; ?>
+                    <?php if ( ! empty( $nd_booking_meta_data['guests'] ) ) : ?>
+                    <li><strong>Invités:</strong> <?php echo esc_html( $nd_booking_meta_data['guests'] ); ?></li>
+                    <?php endif; ?>
+                  </ul>
+                  <div class="summary-total">
+                    <div class="summary-badge">Meilleur tarif garanti</div>
+                    <p>Total</p>
+                    <h2><?php echo esc_html( $nd_booking_price_total_form ); ?> <?php echo esc_html( $nd_booking_currency ); ?></h2>
+                    <p class="per-night">Taxes incluses</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="booking-form-section">
-              <h3><?php esc_html_e( 'Ajoutez vos informations :', 'nd-booking' ); ?></h3>
+            <div class="checkout-form">
+              <div class="secure-banner">
+                <span class="lock-icon">🔒</span> Paiement sécurisé SSL 256-bit
+              </div>
+              <div class="card-logos">
+                <span class="card-logo">Visa</span>
+                <span class="card-logo">Mastercard</span>
+                <span class="card-logo">Amex</span>
+                <span class="card-logo">Interac</span>
+              </div>
+              <h3>Informations du client</h3>
               <?php echo do_shortcode( '[nd_booking_form_checkout]' ); ?>
             </div>
           </div>
         </div>
 
         <style>
-        /* === GLOBAL LAYOUT === */
-        .loft-booking-container {
-          background: #fff;
-          border-radius: 16px;
-          box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-          padding: 40px;
-          margin: 60px auto;
-          max-width: 1100px;
+        body {
+          background: #f8fafc;
           font-family: "Poppins", sans-serif;
+          color: #222;
         }
 
-        .loft-booking-header {
+        .loft-checkout-wrapper {
+          padding: 0 24px 80px;
+        }
+
+        /* HEADER */
+        .checkout-header {
           text-align: center;
-          margin-bottom: 30px;
+          margin: 60px 0 40px;
         }
-
-        .loft-booking-header .booking-title {
-          font-size: 24px;
+        .checkout-header h2 {
+          font-size: 28px;
           font-weight: 700;
-          color: #1c1c1c;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
+          color: #1b1b1b;
+        }
+        .checkout-header p {
+          color: #666;
+          font-size: 15px;
+          margin-bottom: 18px;
         }
 
-        /* === CONTENT SPLIT === */
-        .loft-booking-content {
+        .checkout-countdown {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: #fff;
+          padding: 10px 18px;
+          border-radius: 999px;
+          border: 1px solid rgba(27,27,27,0.1);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+          font-weight: 600;
+          color: #1b1b1b;
+        }
+
+        .timer-icon {
+          font-size: 16px;
+        }
+
+        /* MAIN LAYOUT */
+        .checkout-main {
           display: flex;
           flex-wrap: wrap;
           gap: 40px;
+          max-width: 1100px;
+          margin: 0 auto;
         }
 
-        /* === LEFT SUMMARY === */
-        .booking-summary {
+        /* LEFT SUMMARY */
+        .checkout-summary {
           flex: 0 0 35%;
-          background: #f9fafb;
-          border-radius: 12px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .summary-card {
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+          overflow: hidden;
+          border: 1px solid #f0f0f0;
+        }
+        .summary-image {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        .summary-details {
           padding: 24px;
         }
-
-        .booking-image {
-          width: 100%;
-          border-radius: 12px;
-          margin-bottom: 16px;
-        }
-
-        .booking-info h3 {
-          font-size: 18px;
-          font-weight: 700;
-          margin-bottom: 16px;
-        }
-
-        .booking-info ul {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 16px;
-        }
-
-        .booking-info li {
-          font-size: 14px;
-          color: #333;
-          margin-bottom: 6px;
-        }
-
-        /* === TOTAL === */
-        .booking-total {
-          background: #fff;
-          border: 1px solid #FFD43B;
-          border-radius: 12px;
-          padding: 16px;
-          text-align: center;
-          box-shadow: 0 4px 12px rgba(255,212,59,0.3);
-        }
-
-        .booking-total h2 {
-          font-size: 26px;
-          margin: 4px 0;
+        .summary-details h3 {
+          font-size: 20px;
+          font-weight: 600;
+          margin-bottom: 12px;
           color: #111;
         }
-
-        .booking-total .per-night {
-          font-size: 13px;
-          color: #777;
+        .summary-details ul {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 20px;
         }
-
-        /* === RIGHT FORM === */
-        .booking-form-section {
-          flex: 1;
-          border: 1px solid #eee;
+        .summary-details li {
+          font-size: 14px;
+          color: #555;
+          margin-bottom: 6px;
+        }
+        .summary-total {
+          background: #fff8dc;
+          border: 1px solid #FFD43B;
           border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+          text-align: center;
+          padding: 18px 16px;
+          box-shadow: 0 4px 10px rgba(255,212,59,0.3);
+        }
+        .summary-total h2 {
+          margin: 6px 0 4px;
+          font-size: 26px;
+          color: #1a1a1a;
+          letter-spacing: 0.5px;
+        }
+        .summary-total p {
+          margin: 0;
+        }
+        .summary-total .per-night {
+          font-size: 13px;
+          color: #6b6b6b;
+          margin-top: 6px;
+        }
+        .summary-badge {
+          display: inline-block;
+          background: #FFD43B;
+          color: #1a1a1a;
+          font-weight: 600;
+          padding: 6px 16px;
+          border-radius: 999px;
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 6px 16px rgba(255,212,59,0.4);
         }
 
-        .booking-form-section h3 {
-          font-size: 18px;
+        /* RIGHT FORM */
+        .checkout-form {
+          flex: 1;
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+          padding: 40px;
+        }
+        .secure-banner {
+          background: #f1fff4;
+          color: #1d7a1d;
+          font-weight: 600;
+          border: 1px solid #b6e3b7;
+          border-radius: 10px;
+          padding: 12px 18px;
+          display: inline-flex;
+          align-items: center;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          margin-bottom: 18px;
+          gap: 8px;
+        }
+        .lock-icon {
+          font-size: 16px;
+        }
+        .card-logos {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 25px;
+          flex-wrap: wrap;
+        }
+        .card-logo {
+          padding: 8px 14px;
+          border-radius: 8px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.4px;
+          color: #1b1b1b;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.08);
+        }
+        .checkout-form h3 {
+          font-size: 20px;
           font-weight: 700;
-          margin-bottom: 20px;
-          color: #1c1c1c;
+          color: #1b1b1b;
+          margin-bottom: 25px;
         }
 
-        /* === INPUTS === */
-        .booking-form-section input,
-        .booking-form-section select {
+        /* INPUTS */
+        .checkout-form input,
+        .checkout-form select,
+        .checkout-form textarea {
           width: 100%;
           border: 1px solid #ddd;
           border-radius: 8px;
-          padding: 10px 14px;
-          margin-bottom: 14px;
-          font-size: 14px;
+          padding: 12px 14px;
+          margin-bottom: 16px;
+          font-size: 15px;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-
-        .booking-form-section input:focus,
-        .booking-form-section select:focus {
+        .checkout-form input:focus,
+        .checkout-form select:focus,
+        .checkout-form textarea:focus {
           border-color: #FFD43B;
           outline: none;
-          box-shadow: 0 0 6px rgba(255,212,59,0.5);
+          box-shadow: 0 0 8px rgba(255,212,59,0.35);
         }
 
-        /* === BUTTON === */
-        .booking-form-section .button-primary {
+        /* BUTTON */
+        .checkout-form .button-primary,
+        .checkout-form button[type="submit"] {
           background: #FFD43B;
-          border: none;
           color: #000;
+          border: none;
+          border-radius: 30px;
+          padding: 14px 20px;
+          width: 100%;
           font-weight: 700;
           text-transform: uppercase;
-          padding: 14px 20px;
-          border-radius: 30px;
-          width: 100%;
           cursor: pointer;
           transition: 0.3s ease;
+          letter-spacing: 1px;
         }
-
-        .booking-form-section .button-primary:hover {
+        .checkout-form .button-primary:hover,
+        .checkout-form button[type="submit"]:hover {
           background: #FFC300;
         }
 
-        /* === RESPONSIVE === */
+        /* MOBILE */
         @media (max-width: 768px) {
-          .loft-booking-content {
+          .checkout-main {
             flex-direction: column;
           }
-          .booking-summary, .booking-form-section {
+          .checkout-summary,
+          .checkout-form {
             flex: 1;
+          }
+          .checkout-form {
+            padding: 32px;
           }
         }
         </style>
         <?php
-
         $nd_booking_shortcode_result .= ob_get_clean();
 
     //START PAYMENT ON CHECKOUT PAGE
