@@ -155,24 +155,32 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
     /* --- BEST VALUE RIBBON --- */
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__ribbon {
       position: absolute;
-      top: 12px;
-      left: -46px;
+      top: 18px;
+      left: -90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(100% + 180px);
+      padding: 12px 0;
       background: linear-gradient(135deg, #FFD43B 0%, #FFBF00 100%);
       color: #1A1A1A;
       font-weight: 800;
       font-size: 11px;
       letter-spacing: 0.6px;
       text-transform: uppercase;
-      padding: 10px 66px;
       transform: rotate(-45deg);
+      transform-origin: center;
       box-shadow: 0 6px 14px rgba(255, 218, 68, 0.45);
       z-index: 15;
+      box-sizing: border-box;
     }
 
     [id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__ribbon-text {
-      display: inline-block;
-      position: relative;
-      top: 2px;
+      display: block;
+      width: 100%;
+      text-align: center;
+      line-height: 1.4;
+      letter-spacing: inherit;
     }
 
     /* --- Card highlight stays --- */
