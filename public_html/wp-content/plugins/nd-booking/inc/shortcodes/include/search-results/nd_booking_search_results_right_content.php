@@ -157,6 +157,9 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       position: absolute;
       top: 12px;
       left: -46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: linear-gradient(135deg, #FFD43B 0%, #FFBF00 100%);
       color: #1A1A1A;
       font-weight: 800;
@@ -174,6 +177,7 @@ if ( ! defined( 'ND_BOOKING_LOFT_SEARCH_RESULTS_STYLES' ) ) {
       display: inline-block;
       position: relative;
       top: 2px;
+      text-align: center;
     }
 
     /* --- Card highlight stays --- */
