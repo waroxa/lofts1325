@@ -190,12 +190,245 @@ function nd_booking_shortcode_checkout() {
 
         $nd_booking_shortcode_right_content .= '</div>';
 
-        $nd_booking_shortcode_result .= '
-        <div class="loft-booking-checkout">
-            ' . $nd_booking_shortcode_left_content . '
-            ' . $nd_booking_shortcode_right_content . '
+        $nd_booking_checkin_timestamp  = $nd_booking_booking_form_date_from ? strtotime( $nd_booking_booking_form_date_from ) : false;
+        $nd_booking_checkout_timestamp = $nd_booking_booking_form_date_to ? strtotime( $nd_booking_booking_form_date_to ) : false;
+
+        $nd_booking_meta_data = array(
+            'check_in'  => $nd_booking_checkin_timestamp ? date_i18n( get_option( 'date_format', 'M j, Y' ), $nd_booking_checkin_timestamp ) : '',
+            'check_out' => $nd_booking_checkout_timestamp ? date_i18n( get_option( 'date_format', 'M j, Y' ), $nd_booking_checkout_timestamp ) : '',
+            'nights'    => '',
+            'guests'    => '',
+        );
+
+        $nd_booking_total_nights = absint( nd_booking_get_number_night( $nd_booking_booking_form_date_from, $nd_booking_booking_form_date_to ) );
+        if ( $nd_booking_total_nights > 0 ) {
+            $nd_booking_meta_data['nights'] = sprintf(
+                _n( '%s nuit', '%s nuits', $nd_booking_total_nights, 'nd-booking' ),
+                number_format_i18n( $nd_booking_total_nights )
+            );
+        }
+
+        $nd_booking_total_guests = absint( $nd_booking_booking_form_guests );
+        if ( $nd_booking_total_guests > 0 ) {
+            $nd_booking_meta_data['guests'] = sprintf(
+                _n( '%s invité', '%s invités', $nd_booking_total_guests, 'nd-booking' ),
+                number_format_i18n( $nd_booking_total_guests )
+            );
+        }
+
+        $nd_booking_price_total      = floatval( $nd_booking_booking_form_final_price );
+        $nd_booking_price_per_night  = $nd_booking_total_nights > 0 ? $nd_booking_price_total / $nd_booking_total_nights : $nd_booking_price_total;
+        $nd_booking_price_total_form = nd_booking_format_decimal( $nd_booking_price_total );
+        $nd_booking_price_night_form = nd_booking_format_decimal( $nd_booking_price_per_night );
+        $nd_booking_currency         = nd_booking_get_currency();
+
+        $nd_booking_booking_title = get_the_title();
+        $nd_booking_image_src      = get_the_post_thumbnail_url( get_the_ID(), 'large' );
+        $nd_booking_image_alt      = $nd_booking_booking_title ? $nd_booking_booking_title : __( 'Room', 'nd-booking' );
+
+        $nd_booking_checkout_form_markup = $nd_booking_shortcode_right_content;
+        remove_shortcode( 'nd_booking_form_checkout' );
+        add_shortcode(
+            'nd_booking_form_checkout',
+            function () use ( $nd_booking_checkout_form_markup ) {
+                return $nd_booking_checkout_form_markup;
+            }
+        );
+
+        ob_start();
+        ?>
+        <div class="loft-booking-container">
+          <div class="loft-booking-header">
+            <h2 class="booking-title"><?php echo esc_html( $nd_booking_booking_title ); ?></h2>
+          </div>
+
+          <div class="loft-booking-content">
+            <div class="booking-summary">
+              <?php if ( $nd_booking_image_src ) : ?>
+              <img src="<?php echo esc_url( $nd_booking_image_src ); ?>" alt="<?php echo esc_attr( $nd_booking_image_alt ); ?>" class="booking-image" />
+              <?php endif; ?>
+              <div class="booking-info">
+                <h3><?php esc_html_e( 'Votre réservation', 'nd-booking' ); ?></h3>
+                <ul>
+                  <?php if ( $nd_booking_meta_data['check_in'] ) : ?>
+                  <li><strong><?php esc_html_e( 'Arrivée:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['check_in'] ); ?></li>
+                  <?php endif; ?>
+                  <?php if ( $nd_booking_meta_data['check_out'] ) : ?>
+                  <li><strong><?php esc_html_e( 'Départ:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['check_out'] ); ?></li>
+                  <?php endif; ?>
+                  <?php if ( $nd_booking_meta_data['nights'] ) : ?>
+                  <li><strong><?php esc_html_e( 'Nuits:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['nights'] ); ?></li>
+                  <?php endif; ?>
+                  <?php if ( $nd_booking_meta_data['guests'] ) : ?>
+                  <li><strong><?php esc_html_e( 'Invités:', 'nd-booking' ); ?></strong> <?php echo esc_html( $nd_booking_meta_data['guests'] ); ?></li>
+                  <?php endif; ?>
+                </ul>
+                <div class="booking-total">
+                  <p><?php esc_html_e( 'Total', 'nd-booking' ); ?></p>
+                  <h2><?php echo esc_html( $nd_booking_price_total_form ); ?> <?php echo esc_html( $nd_booking_currency ); ?></h2>
+                  <p class="per-night"><?php esc_html_e( 'Approx.', 'nd-booking' ); ?> <?php echo esc_html( $nd_booking_price_night_form ); ?> <?php echo esc_html( $nd_booking_currency ); ?> <?php esc_html_e( 'par nuit', 'nd-booking' ); ?></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-form-section">
+              <h3><?php esc_html_e( 'Ajoutez vos informations :', 'nd-booking' ); ?></h3>
+              <?php echo do_shortcode( '[nd_booking_form_checkout]' ); ?>
+            </div>
+          </div>
         </div>
-        ';
+
+        <style>
+        /* === GLOBAL LAYOUT === */
+        .loft-booking-container {
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+          padding: 40px;
+          margin: 60px auto;
+          max-width: 1100px;
+          font-family: "Poppins", sans-serif;
+        }
+
+        .loft-booking-header {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+
+        .loft-booking-header .booking-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1c1c1c;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+        }
+
+        /* === CONTENT SPLIT === */
+        .loft-booking-content {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 40px;
+        }
+
+        /* === LEFT SUMMARY === */
+        .booking-summary {
+          flex: 0 0 35%;
+          background: #f9fafb;
+          border-radius: 12px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          padding: 24px;
+        }
+
+        .booking-image {
+          width: 100%;
+          border-radius: 12px;
+          margin-bottom: 16px;
+        }
+
+        .booking-info h3 {
+          font-size: 18px;
+          font-weight: 700;
+          margin-bottom: 16px;
+        }
+
+        .booking-info ul {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 16px;
+        }
+
+        .booking-info li {
+          font-size: 14px;
+          color: #333;
+          margin-bottom: 6px;
+        }
+
+        /* === TOTAL === */
+        .booking-total {
+          background: #fff;
+          border: 1px solid #FFD43B;
+          border-radius: 12px;
+          padding: 16px;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(255,212,59,0.3);
+        }
+
+        .booking-total h2 {
+          font-size: 26px;
+          margin: 4px 0;
+          color: #111;
+        }
+
+        .booking-total .per-night {
+          font-size: 13px;
+          color: #777;
+        }
+
+        /* === RIGHT FORM === */
+        .booking-form-section {
+          flex: 1;
+          border: 1px solid #eee;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .booking-form-section h3 {
+          font-size: 18px;
+          font-weight: 700;
+          margin-bottom: 20px;
+          color: #1c1c1c;
+        }
+
+        /* === INPUTS === */
+        .booking-form-section input,
+        .booking-form-section select {
+          width: 100%;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 10px 14px;
+          margin-bottom: 14px;
+          font-size: 14px;
+        }
+
+        .booking-form-section input:focus,
+        .booking-form-section select:focus {
+          border-color: #FFD43B;
+          outline: none;
+          box-shadow: 0 0 6px rgba(255,212,59,0.5);
+        }
+
+        /* === BUTTON === */
+        .booking-form-section .button-primary {
+          background: #FFD43B;
+          border: none;
+          color: #000;
+          font-weight: 700;
+          text-transform: uppercase;
+          padding: 14px 20px;
+          border-radius: 30px;
+          width: 100%;
+          cursor: pointer;
+          transition: 0.3s ease;
+        }
+
+        .booking-form-section .button-primary:hover {
+          background: #FFC300;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+          .loft-booking-content {
+            flex-direction: column;
+          }
+          .booking-summary, .booking-form-section {
+            flex: 1;
+          }
+        }
+        </style>
+        <?php
+
+        $nd_booking_shortcode_result .= ob_get_clean();
 
     //START PAYMENT ON CHECKOUT PAGE
     }elseif ( $nd_booking_form_checkout_arrive == 1 OR isset($_GET['tx']) OR $nd_booking_form_checkout_arrive == 2 ) {
