@@ -175,8 +175,8 @@ if ( ! defined( 'ND_BOOKING_LOFT_BOOKING_FORM_STYLES' ) ) {
 
       .loft-input:focus {
         outline: none;
-        border-color: #F97316;
-        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.18);
+        border-color: #f4b942;
+        box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.22);
       }
 
       .loft-form-field--file input[type="file"] {
@@ -227,16 +227,16 @@ if ( ! defined( 'ND_BOOKING_LOFT_BOOKING_FORM_STYLES' ) ) {
         padding: 14px 32px;
         font-size: 16px;
         font-weight: 600;
-        color: #FFFFFF;
-        background: linear-gradient(135deg, #FF6A3D 0%, #FF8938 100%);
-        box-shadow: 0 12px 30px rgba(255, 106, 61, 0.35);
+        color: #1f2937;
+        background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+        box-shadow: 0 16px 32px rgba(244, 185, 66, 0.38);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
 
       .loft-button:hover,
       .loft-button:focus {
         transform: translateY(-1px);
-        box-shadow: 0 16px 34px rgba(255, 106, 61, 0.45);
+        box-shadow: 0 20px 36px rgba(244, 185, 66, 0.45);
         outline: none;
       }
 
