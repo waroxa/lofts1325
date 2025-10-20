@@ -141,32 +141,421 @@ function nd_booking_shortcode_booking() {
             }else{
 
               $nd_booking_alert_login = '
-                <div class="loft-booking-alert" role="status">
-                  <p>'.__('You are booking as a guest.','nd-booking').' <a class="loft-booking-alert__link" target="_blank" href="'.nd_booking_account_page().'">'.__('Log in','nd-booking').'</a> '.__('or','nd-booking').' <a class="loft-booking-alert__link" target="_blank" href="'.nd_booking_account_page().'">'.__('create an account','nd-booking').'</a> '.__('to save your reservation details.','nd-booking').'</p>
+                <div class="nd_booking_booking_alert_login_register">
+                  <p>'.__('You are booking as guest,','nd-booking').' <a target="_blank" href="'.nd_booking_account_page().'">'.__('LOGIN','nd-booking').'</a> '.__('or','nd-booking').' <a target="_blank" href="'.nd_booking_account_page().'">'.__('REGISTER','nd-booking').'</a> '.__('if you want to save your reservation on your account.','nd-booking').'</p>
                 </div>
               ';
 
             }
 
-            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_additional_services.php'); 
-            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_left_content.php'); 
-            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_right_content.php'); 
-            
+            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_additional_services.php');
+            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_left_content.php');
+            include realpath(dirname( __FILE__ ).'/include/booking/nd_booking_booking_right_content.php');
+
             $nd_booking_shortcode_result = '';
+
+            if ( ! defined( 'ND_BOOKING_BOOKING_PAGE_LAYOUT_STYLES' ) ) {
+                define( 'ND_BOOKING_BOOKING_PAGE_LAYOUT_STYLES', true );
+                $nd_booking_shortcode_result .= '<style>
+                .ndb-booking-wrapper {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: flex-start;
+                    justify-content: center;
+                    gap: 2.5rem;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 2.5rem;
+                    background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+                    border-radius: 1.75rem;
+                    box-shadow: 0 32px 90px rgba(15, 23, 42, 0.08);
+                    box-sizing: border-box;
+                }
+
+                .ndb-booking-layout__sidebar {
+                    flex: 0 0 320px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .ndb-booking-layout__main {
+                    flex: 1 1 520px;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .ndb-booking-summary,
+                .ndb-booking-form,
+                .ndb-booking-extras,
+                .nd_booking_booking_alert_login_register {
+                    background: #ffffff;
+                    border-radius: 1.5rem;
+                    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+                    border: 1px solid rgba(148, 163, 184, 0.18);
+                    padding: 2rem;
+                    box-sizing: border-box;
+                }
+
+                .nd_booking_booking_alert_login_register {
+                    color: #1f2937;
+                    background: #fef3c7;
+                    border: 1px solid rgba(245, 158, 11, 0.25);
+                    box-shadow: none;
+                }
+
+                .nd_booking_booking_alert_login_register p {
+                    margin: 0;
+                }
+
+                .nd_booking_booking_alert_login_register a {
+                    color: #92400e;
+                    font-weight: 600;
+                }
+
+                .ndb-booking-extras {
+                    padding: 0;
+                    overflow: hidden;
+                }
+
+                .ndb-booking-extras > * {
+                    width: 100%;
+                }
+
+                .ndb-booking-summary__card {
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 1.25rem;
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                    background: linear-gradient(150deg, #0f172a 0%, #1e293b 100%);
+                    color: #f8fafc;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.25rem;
+                }
+
+                .ndb-booking-summary__media {
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 1.25rem 1.25rem 0 0;
+                }
+
+                .ndb-booking-summary__media-overlay {
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    padding: 1rem;
+                    background: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0) 100%);
+                }
+
+                .ndb-booking-summary__badge {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.35rem 0.85rem;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.25);
+                    font-size: 0.7rem;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    font-weight: 700;
+                }
+
+                .ndb-booking-summary__stars img {
+                    display: inline-block;
+                    filter: drop-shadow(0 4px 8px rgba(15, 23, 42, 0.4));
+                }
+
+                .ndb-booking-summary__title {
+                    margin: 0;
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                }
+
+                .ndb-booking-summary__excerpt {
+                    color: rgba(248, 250, 252, 0.85);
+                    font-size: 0.95rem;
+                }
+
+                .ndb-booking-summary__meta {
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.75rem 1rem;
+                    color: rgba(248, 250, 252, 0.85);
+                    font-size: 0.9rem;
+                }
+
+                .ndb-booking-summary__details {
+                    margin-top: 1.75rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .ndb-booking-summary__list {
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    display: grid;
+                    gap: 0.75rem;
+                }
+
+                .ndb-booking-summary__list .label {
+                    display: block;
+                    font-size: 0.75rem;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: rgba(15, 23, 42, 0.65);
+                }
+
+                .ndb-booking-summary__list .value {
+                    font-weight: 600;
+                    color: #111827;
+                }
+
+                .ndb-booking-summary__total {
+                    background: linear-gradient(145deg, #0f172a 0%, #1d4ed8 100%);
+                    color: #f8fafc;
+                    border-radius: 1.25rem;
+                    padding: 1.5rem;
+                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+                }
+
+                .ndb-booking-summary__total .summary-amount {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 0.35rem;
+                    font-size: 2.25rem;
+                    font-weight: 700;
+                }
+
+                .ndb-booking-summary__total .summary-note {
+                    margin: 0.75rem 0 0;
+                    font-size: 0.85rem;
+                    color: rgba(248, 250, 252, 0.85);
+                }
+
+                .ndb-booking-summary__breakdown {
+                    display: grid;
+                    gap: 0.5rem;
+                    font-size: 0.95rem;
+                }
+
+                .ndb-booking-summary__breakdown .label {
+                    color: #6b7280;
+                }
+
+                .ndb-booking-summary__breakdown .value {
+                    font-weight: 600;
+                    color: #111827;
+                }
+
+                .ndb-booking-summary__taxes {
+                    margin: 0;
+                    font-size: 0.85rem;
+                    color: #475569;
+                }
+
+                .ndb-booking-summary__support {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 0.9rem;
+                    color: #0f172a;
+                }
+
+                .ndb-booking-summary__support .support-link {
+                    font-weight: 600;
+                    color: #0ea5e9;
+                    text-decoration: none;
+                }
+
+                .ndb-booking-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.75rem;
+                }
+
+                .ndb-booking-form__progress {
+                    font-size: 0.75rem;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: #9ca3af;
+                    margin: 0;
+                }
+
+                .ndb-booking-form__title {
+                    margin: 0;
+                    font-size: 1.85rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                }
+
+                .ndb-booking-form__subtitle {
+                    margin: 0;
+                    font-size: 1rem;
+                    color: #4b5563;
+                    max-width: 38ch;
+                }
+
+                .ndb-booking-form__body {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .ndb-form-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    background: #f9fafb;
+                    border-radius: 1.25rem;
+                    padding: 1.5rem 1.75rem;
+                    border: 1px solid rgba(209, 213, 219, 0.6);
+                }
+
+                .ndb-form-section h2 {
+                    margin: 0;
+                    font-size: 1.05rem;
+                    color: #0f172a;
+                    font-weight: 600;
+                }
+
+                .ndb-form-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 1rem 1.25rem;
+                }
+
+                .ndb-form-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .ndb-input {
+                    width: 100%;
+                    border-radius: 0.9rem;
+                    border: 1px solid rgba(148, 163, 184, 0.6);
+                    background: #ffffff;
+                    padding: 0.75rem 0.9rem;
+                    font-size: 0.95rem;
+                    color: #0f172a;
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                }
+
+                .ndb-input:focus {
+                    outline: none;
+                    border-color: #f4b942;
+                    box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.2);
+                }
+
+                .ndb-form-field--file input[type="file"] {
+                    padding: 0.65rem;
+                }
+
+                .ndb-help-text {
+                    margin: 0;
+                    font-size: 0.9rem;
+                    color: #4b5563;
+                }
+
+                .ndb-checkbox {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: flex-start;
+                }
+
+                .ndb-checkbox__input {
+                    margin-top: 0.3rem;
+                    width: 1.1rem;
+                    height: 1.1rem;
+                }
+
+                .ndb-checkbox__label a {
+                    color: #1d4ed8;
+                }
+
+                .ndb-form-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    align-items: center;
+                }
+
+                .ndb-button {
+                    border: none;
+                    border-radius: 999px;
+                    padding: 0.85rem 2rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    color: #1f2937;
+                    background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+                    box-shadow: 0 16px 32px rgba(244, 185, 66, 0.28);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+
+                .ndb-button:hover,
+                .ndb-button:focus {
+                    transform: translateY(-1px);
+                    box-shadow: 0 20px 40px rgba(244, 185, 66, 0.35);
+                }
+
+                .ndb-button--ghost {
+                    display: none;
+                }
+
+                @media (max-width: 1100px) {
+                    .ndb-booking-wrapper {
+                        flex-direction: column;
+                        padding: 2rem;
+                    }
+
+                    .ndb-booking-layout__sidebar,
+                    .ndb-booking-layout__main {
+                        width: 100%;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .ndb-booking-summary,
+                    .ndb-booking-form,
+                    .nd_booking_booking_alert_login_register,
+                    .ndb-booking-extras {
+                        border-radius: 1.1rem;
+                        padding: 1.5rem;
+                    }
+
+                    .ndb-form-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+                </style>';
+            }
+
+            $nd_booking_additional_services_markup = '';
+            if ( trim( $nd_booking_additional_services ) !== '' ) {
+                $nd_booking_additional_services_markup = '<div class="ndb-booking-extras">' . $nd_booking_additional_services . '</div>';
+            }
+
             $nd_booking_shortcode_result .= '
-
-            <div class="loft-booking-intake">
-
-                <div class="loft-booking-intake__sidebar">
-                    '.$nd_booking_shortcode_left_content.'
+            <div class="ndb-booking-wrapper">
+                <div class="ndb-booking-layout__sidebar">
+                    ' . $nd_booking_shortcode_left_content . '
                 </div>
-
-                <div class="loft-booking-intake__content">
-                    '.$nd_booking_alert_login.'
-                    '.$nd_booking_additional_services.'
-                    '.$nd_booking_shortcode_right_content.'
+                <div class="ndb-booking-layout__main">
+                    ' . $nd_booking_alert_login . '
+                    ' . $nd_booking_additional_services_markup . '
+                    ' . $nd_booking_shortcode_right_content . '
                 </div>
-
             </div>
             ';
 
@@ -246,74 +635,24 @@ function nd_booking_final_price_php() {
     check_ajax_referer( 'nd_booking_final_price_nonce', 'nd_booking_final_price_security' );
 
     //recover var
-    $nd_booking_booking_checkbox_services = isset( $_GET['nd_booking_booking_checkbox_services'] ) ? sanitize_text_field( wp_unslash( $_GET['nd_booking_booking_checkbox_services'] ) ) : '';
-    $nd_booking_booking_form_final_price = isset( $_GET['nd_booking_booking_form_final_price'] ) ? sanitize_text_field( wp_unslash( $_GET['nd_booking_booking_form_final_price'] ) ) : 0;
+    $nd_booking_booking_checkbox_services = sanitize_text_field($_GET['nd_booking_booking_checkbox_services']);
+    $nd_booking_booking_form_final_price = sanitize_text_field($_GET['nd_booking_booking_form_final_price']);
 
-    $nd_booking_booking_result = floatval( $nd_booking_booking_form_final_price );
+    //declare
+    $nd_booking_final_price_result = $nd_booking_booking_form_final_price;
 
-    $nd_booking_additional_services_value_array = array_filter( explode( ',', $nd_booking_booking_checkbox_services ) );
-    foreach ( $nd_booking_additional_services_value_array as $nd_booking_service_value ) {
-        $nd_booking_booking_result += floatval( $nd_booking_service_value );
+    $nd_booking_additional_services_value_array = explode(',', $nd_booking_booking_checkbox_services );
+    for ($nd_booking_i = 0; $nd_booking_i < count($nd_booking_additional_services_value_array)-1; $nd_booking_i++) {
+        
+        $nd_booking_final_price_result = $nd_booking_final_price_result + $nd_booking_additional_services_value_array[$nd_booking_i];   
+
     }
 
-    $nd_booking_breakdown = nd_booking_calculate_tax_breakdown( $nd_booking_booking_result );
-    $nd_booking_currency = nd_booking_get_currency();
+    $nd_booking_booking_result = $nd_booking_final_price_result;
 
-    $nd_booking_lodging_tax = isset( $nd_booking_breakdown['taxes']['lodging'] ) ? $nd_booking_breakdown['taxes']['lodging']['amount'] : 0.0;
-    $nd_booking_gst_tax = isset( $nd_booking_breakdown['taxes']['gst'] ) ? $nd_booking_breakdown['taxes']['gst']['amount'] : 0.0;
-    $nd_booking_qst_tax = isset( $nd_booking_breakdown['taxes']['qst'] ) ? $nd_booking_breakdown['taxes']['qst']['amount'] : 0.0;
-    $nd_booking_total_tax = $nd_booking_breakdown['total_tax'];
-    $nd_booking_final_with_tax = $nd_booking_breakdown['total'];
+    echo esc_html($nd_booking_booking_result);
 
-    if ( function_exists( 'session_status' ) ) {
-        if ( PHP_SESSION_NONE === session_status() ) {
-            session_start();
-        }
-    } elseif ( ! session_id() ) {
-        session_start();
-    }
-
-    if ( ! isset( $_SESSION ) || ! is_array( $_SESSION ) ) {
-        $_SESSION = array();
-    }
-
-    $_SESSION['nd_booking_tax_base'] = $nd_booking_breakdown['base'];
-    $_SESSION['nd_booking_tax_lodging'] = $nd_booking_lodging_tax;
-    $_SESSION['nd_booking_tax_gst'] = $nd_booking_gst_tax;
-    $_SESSION['nd_booking_tax_qst'] = $nd_booking_qst_tax;
-    $_SESSION['nd_booking_tax_total'] = $nd_booking_total_tax;
-    $_SESSION['nd_booking_final_price'] = $nd_booking_final_with_tax;
-
-    $nd_booking_response = array(
-        'currency'             => $nd_booking_currency,
-        'base_raw'             => nd_booking_format_decimal( $nd_booking_breakdown['base'] ),
-        'base_formatted'       => nd_booking_format_decimal( $nd_booking_breakdown['base'] ),
-        'total_tax_raw'        => nd_booking_format_decimal( $nd_booking_total_tax ),
-        'total_tax_formatted'  => nd_booking_format_decimal( $nd_booking_total_tax ),
-        'total_raw'            => nd_booking_format_decimal( $nd_booking_final_with_tax ),
-        'total_formatted'      => nd_booking_format_decimal( $nd_booking_final_with_tax ),
-        'taxes'                => array(),
-        'subtotal_label'       => __( 'Subtotal', 'nd-booking' ),
-        'total_tax_label'      => __( 'Total Tax', 'nd-booking' ),
-        'grand_total_label'    => __( 'Grand Total', 'nd-booking' ),
-    );
-
-    $nd_booking_known_taxes = array( 'lodging', 'gst', 'qst' );
-    foreach ( $nd_booking_known_taxes as $nd_booking_tax_key ) {
-        if ( isset( $nd_booking_breakdown['taxes'][ $nd_booking_tax_key ] ) ) {
-            $nd_booking_tax_data = $nd_booking_breakdown['taxes'][ $nd_booking_tax_key ];
-            $nd_booking_response['taxes'][] = array(
-                'key'             => $nd_booking_tax_key,
-                'label'           => $nd_booking_tax_data['label'],
-                'display_label'   => $nd_booking_tax_data['display_label'],
-                'rate'            => nd_booking_format_percentage( $nd_booking_tax_data['rate'] ),
-                'amount_raw'      => nd_booking_format_decimal( $nd_booking_tax_data['amount'] ),
-                'amount_formatted'=> nd_booking_format_decimal( $nd_booking_tax_data['amount'] ),
-            );
-        }
-    }
-
-    wp_send_json_success( $nd_booking_response );
+    die();
 
 }
 add_action( 'wp_ajax_nd_booking_final_price_php', 'nd_booking_final_price_php' );

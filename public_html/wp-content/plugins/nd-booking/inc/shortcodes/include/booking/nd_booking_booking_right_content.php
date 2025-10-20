@@ -597,3 +597,4 @@ $nd_booking_shortcode_right_content .= '      </div>';
 $nd_booking_shortcode_right_content .= '  </form>';
 $nd_booking_shortcode_right_content .= '</div>';
 
+$nd_booking_shortcode_right_content = ob_get_clean();
