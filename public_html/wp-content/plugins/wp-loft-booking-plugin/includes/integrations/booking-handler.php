@@ -81,38 +81,98 @@ function wp_loft_booking_handle_booking(
 }
 
 function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $date_from, $date_to) {
-    $access_token = get_option('butterflymx_access_token_v4');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    global $wpdb;
 
-    $api_url = ($environment === 'production') 
-        ? "https://api.butterflymx.com/v4/virtual_keys"
-        : "https://api.na.sandbox.butterflymx.com/v4/virtual_keys";
-
-    $response = wp_remote_post($api_url, [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $access_token,
-            'Content-Type'  => 'application/json',
-        ],
-        'body' => json_encode([
-            'unit_id'         => intval($unit_id),
-            'recipient'       => $email,
-            'phone_number'    => $phone,
-            'delivery_methods' => ['email', 'sms'],
-            'start_time'      => $date_from . 'T15:00:00Z',
-            'end_time'        => $date_to . 'T11:00:00Z',
-        ]),
-    ]);
-    if (is_wp_error($response)) {
-        error_log('❌ ButterflyMX key creation failed: ' . $response->get_error_message());
+    if (empty($unit_id)) {
+        error_log('❌ Unable to create ButterflyMX keychain: missing unit ID.');
         return;
     }
 
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    if (!empty($body['data'])) {
-        error_log('✅ ButterflyMX key created successfully');
-    } else {
-        error_log('❌ ButterflyMX key creation failed: ' . wp_remote_retrieve_body($response));
+    $units_table    = $wpdb->prefix . 'loft_units';
+    $branches_table = $wpdb->prefix . 'loft_branches';
+
+    $unit = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT u.unit_id_api, u.unit_name, b.building_id FROM {$units_table} u LEFT JOIN {$branches_table} b ON u.branch_id = b.id WHERE u.id = %d",
+            $unit_id
+        )
+    );
+
+    if (!$unit) {
+        error_log('❌ Unable to create ButterflyMX keychain: unit not found for ID ' . intval($unit_id));
+        return;
     }
+
+    if (empty($unit->unit_id_api)) {
+        error_log('❌ Unable to create ButterflyMX keychain: missing ButterflyMX unit ID for unit ' . $unit->unit_name);
+        return;
+    }
+
+    if (empty($unit->building_id)) {
+        error_log('❌ Unable to create ButterflyMX keychain: missing building ID for unit ' . $unit->unit_name);
+        return;
+    }
+
+    $environment = get_option('butterflymx_environment', 'sandbox');
+
+    $timezone_string = get_option('timezone_string');
+    if (empty($timezone_string)) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    try {
+        $checkin_local  = new DateTime($date_from, new DateTimeZone($timezone_string));
+        $checkout_local = new DateTime($date_to, new DateTimeZone($timezone_string));
+    } catch (Exception $e) {
+        error_log('❌ Unable to parse booking dates for ButterflyMX keychain: ' . $e->getMessage());
+        return;
+    }
+
+    $checkin_local->setTime(15, 0, 0);
+    $checkout_local->setTime(11, 0, 0);
+
+    $checkin_utc  = clone $checkin_local;
+    $checkout_utc = clone $checkout_local;
+
+    $checkin_utc->setTimezone(new DateTimeZone('UTC'));
+    $checkout_utc->setTimezone(new DateTimeZone('UTC'));
+
+    $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
+    $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
+
+    $recipients = array();
+
+    if (!empty($email)) {
+        $recipients[] = $email;
+    }
+
+    if (!empty($phone)) {
+        $normalized_phone = wp_loft_booking_normalize_phone_number($phone);
+        if (!empty($normalized_phone)) {
+            $recipients[] = $normalized_phone;
+        }
+    }
+
+    $result = wp_loft_booking_create_visitor_pass_for_unit(
+        intval($unit->building_id),
+        intval($unit->unit_id_api),
+        $starts_at,
+        $ends_at,
+        $recipients,
+        intval($unit->unit_id_api),
+        $environment
+    );
+
+    if (is_wp_error($result)) {
+        error_log('❌ ButterflyMX keychain creation failed: ' . $result->get_error_message());
+        return;
+    }
+
+    error_log(sprintf(
+        '✅ ButterflyMX keychain %d created with access points: %s',
+        $result['keychain_id'],
+        implode(', ', $result['access_point_ids'])
+    ));
 }
 
 function wp_loft_booking_create_google_event($booking) {
