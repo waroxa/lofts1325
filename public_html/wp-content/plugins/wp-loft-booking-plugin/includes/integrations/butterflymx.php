@@ -476,20 +476,94 @@ function wp_loft_booking_get_shared_access_points(
  *
  * @param int         $building_id      Building id.
  * @param int         $target_unit_id   Unit id for the new loft.
- * @param string      $starts_at_utc    UTC ISO8601 start time (with Z).
- * @param string      $ends_at_utc      UTC ISO8601 end time (with Z).
- * @param string|null $recipient_email  Email to send the virtual key to.
- * @param int|null    $template_unit_id Optional unit id to copy APs from.
- * @param string      $environment      'production' or 'sandbox'.
+ * @param string       $starts_at_utc    UTC ISO8601 start time (with Z).
+ * @param string       $ends_at_utc      UTC ISO8601 end time (with Z).
+ * @param array|string $recipients       Email/phone recipients for notifications.
+ * @param int|null     $template_unit_id Optional unit id to copy APs from.
+ * @param string       $environment      'production' or 'sandbox'.
  *
  * @return array|WP_Error On success: ['keychain_id'=>int,'virtual_key_ids'=>int[],'access_point_ids'=>int[]].
  */
+if ( ! function_exists( 'wp_loft_booking_normalize_phone_number' ) ) {
+    /**
+     * Normalize a phone number to an approximate E.164 representation.
+     *
+     * @param string $phone Raw phone input.
+     *
+     * @return string Normalized phone (including leading +) or empty string when invalid.
+     */
+    function wp_loft_booking_normalize_phone_number( $phone ) {
+        $phone = trim( (string) $phone );
+
+        if ( '' === $phone ) {
+            return '';
+        }
+
+        if ( 0 === strpos( $phone, '+' ) ) {
+            $digits = preg_replace( '/\D+/', '', substr( $phone, 1 ) );
+            return $digits ? '+' . $digits : '';
+        }
+
+        $digits = preg_replace( '/\D+/', '', $phone );
+
+        if ( '' === $digits ) {
+            return '';
+        }
+
+        if ( strlen( $digits ) === 11 && 0 === strpos( $digits, '1' ) ) {
+            return '+' . $digits;
+        }
+
+        if ( strlen( $digits ) === 10 ) {
+            return '+1' . $digits;
+        }
+
+        return '+' . $digits;
+    }
+}
+
+/**
+ * Prepare a sanitized list of ButterflyMX recipients (emails and phone numbers).
+ *
+ * @param array $recipients Raw recipients.
+ *
+ * @return array Sanitized recipients.
+ */
+function wp_loft_booking_prepare_butterflymx_recipients( $recipients ) {
+    $sanitized = array();
+
+    foreach ( (array) $recipients as $recipient ) {
+        $recipient = trim( (string) $recipient );
+
+        if ( '' === $recipient ) {
+            continue;
+        }
+
+        if ( is_email( $recipient ) ) {
+            $sanitized[] = sanitize_email( $recipient );
+            continue;
+        }
+
+        $normalized_phone = wp_loft_booking_normalize_phone_number( $recipient );
+
+        if ( '' !== $normalized_phone ) {
+            $sanitized[] = $normalized_phone;
+        }
+    }
+
+    if ( empty( $sanitized ) ) {
+        return array();
+    }
+
+    return array_values( array_unique( $sanitized ) );
+}
+
 function wp_loft_booking_create_visitor_pass_for_unit(
     $building_id,
     $target_unit_id,
     $starts_at_utc,
     $ends_at_utc,
-    $recipient_email = null,
+    $recipients = array(),
     $template_unit_id = null,
     $environment = 'production'
 ) {
@@ -516,8 +590,12 @@ function wp_loft_booking_create_visitor_pass_for_unit(
         ),
     );
 
-    if ( $recipient_email ) {
-        $payload['keychain']['recipients'] = array( sanitize_email( $recipient_email ) );
+    if ( ! empty( $recipients ) ) {
+        $sanitized = wp_loft_booking_prepare_butterflymx_recipients( $recipients );
+
+        if ( ! empty( $sanitized ) ) {
+            $payload['keychain']['recipients'] = $sanitized;
+        }
     }
 
     $resp = wp_remote_post(
@@ -569,12 +647,18 @@ function wp_loft_booking_create_keychain_with_vk($tenant, $unit_id_api, $access_
     $building_id = get_option('butterflymx_building_id');
     $environment = get_option('butterflymx_environment', 'sandbox');
 
+    $recipients = array();
+
+    if ( ! empty( $tenant['email'] ) ) {
+        $recipients[] = $tenant['email'];
+    }
+
     $result = wp_loft_booking_create_visitor_pass_for_unit(
         intval( $building_id ),
         intval( $unit_id_api ),
         $start,
         $end,
-        $tenant['email'] ?? null,
+        $recipients,
         null,
         $environment
     );
