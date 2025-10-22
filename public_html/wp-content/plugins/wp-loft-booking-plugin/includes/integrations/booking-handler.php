@@ -271,7 +271,8 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         intval($unit->unit_id_api),
         $environment,
         $access_point_ids,
-        $device_ids
+        $device_ids,
+        $unit->unit_name
     );
 
     if (is_wp_error($result)) {
