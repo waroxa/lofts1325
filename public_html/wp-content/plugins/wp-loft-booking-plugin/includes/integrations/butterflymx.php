@@ -13,14 +13,27 @@ function wp_loft_booking_get_butterflymx_base_url( $environment = 'production' )
         : 'https://api.na.sandbox.butterflymx.com/v4';
 }
 
+/**
+ * Determine the active ButterflyMX environment.
+ *
+ * Defaults to production unless the sandbox value is explicitly stored.
+ *
+ * @return string 'production' or 'sandbox'.
+ */
+function wp_loft_booking_get_butterflymx_environment() {
+    $environment = get_option( 'butterflymx_environment' );
+
+    return ( 'sandbox' === $environment ) ? 'sandbox' : 'production';
+}
+
 function wp_loft_booking_get_authorization_url($version) {
-    $client_id = get_option('butterflymx_client_id');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $client_id   = get_option('butterflymx_client_id');
+    $environment = wp_loft_booking_get_butterflymx_environment();
     $redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'; // Static redirect URI for out-of-band OAuth flow
  
 
     // Choose URL based on environment
-    $authorize_url = ($environment === 'production') 
+    $authorize_url = ($environment === 'production')
         ? "https://accounts.butterflymx.com/oauth/authorize"
         : "https://accountssandbox.butterflymx.com/oauth/authorize";
 
@@ -53,7 +66,7 @@ if (isset($_POST['submit_code_v4'])) {
 function wp_loft_booking_exchange_code_for_token($authorization_code, $version) {
     $client_id = get_option('butterflymx_client_id');
     $client_secret = get_option('butterflymx_client_secret');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
     $redirect_uri = 'urn:ietf:wg:oauth:2.0:oob';
 
     // Check for required credentials
@@ -83,7 +96,7 @@ function wp_loft_booking_exchange_code_for_token($authorization_code, $version) 
     $response = wp_remote_post($token_url, array(
         'body'      => $post_fields,
         'timeout'   => 30,
-        'sslverify' => false, // Set to true in production
+        'sslverify' => true,
     ));
 
     if (is_wp_error($response)) {
@@ -128,13 +141,11 @@ function wp_loft_booking_exchange_code_for_token($authorization_code, $version) 
 
 function wp_loft_booking_get_buildings() {
     $token_v4 = get_option('butterflymx_access_token_v4'); // Use access_token directly
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
     
     error_log("Using token_v4: " . $token_v4);
     
-    $buildings_url = ($environment === 'production') 
-        ? "https://api.butterflymx.com/v4/buildings" 
-        : "https://apisandbox.butterflymx.com/v4/buildings";
+    $buildings_url = wp_loft_booking_get_butterflymx_base_url( $environment ) . '/buildings';
 
     $response = wp_remote_get($buildings_url, array(
         'headers' => array(
@@ -165,7 +176,7 @@ function wp_loft_booking_get_buildings() {
 function wp_loft_booking_refresh_token($version) {
     $client_id = get_option('butterflymx_client_id');
     $client_secret = get_option('butterflymx_client_secret');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
 
     $token_url = ($environment === 'production') 
         ? "https://accounts.butterflymx.com/oauth/token"
@@ -205,7 +216,7 @@ function wp_loft_booking_refresh_token($version) {
 function get_butterflymx_access_token($version = 'v3') {
     $clientId = get_option('butterflymx_client_id');
     $clientSecret = get_option('butterflymx_client_secret');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
 
     if ($version === 'v3') {
         $tokenEndpoint = 'https://' . ($environment === 'production' ? '' : 'sandbox.') . 'butterflymx.com/oauth/token';
@@ -246,7 +257,7 @@ function get_butterflymx_access_token($version = 'v3') {
 // Function to check room availability
 function is_room_available($roomId) {
     $accessToken = get_butterflymx_access_token();
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
     $buildingId = get_option('butterflymx_building_id');
 
     $unitsEndpoint = 'https://' . ($environment === 'production' ? '' : 'sandbox.') . 'butterflymx.com/v3/buildings/' . $buildingId . '/units';
@@ -274,7 +285,7 @@ function wp_loft_booking_refresh_code_token($version) {
     $client_id = get_option('butterflymx_client_id');
     $client_secret = get_option('butterflymx_client_secret');
     $refresh_token = get_option("butterflymx_refresh_token_{$version}");
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
 
     if (!$client_id || !$client_secret) {
         error_log("Error: Missing ButterflyMX Client ID or Secret for v{$version}.");
@@ -303,7 +314,7 @@ function wp_loft_booking_refresh_code_token($version) {
     $response = wp_remote_post($token_url, [
         'body'      => $post_fields,
         'timeout'   => 30,
-        'sslverify' => false, // Set to true in production
+        'sslverify' => true,
     ]);
 
     if (is_wp_error($response)) {
@@ -346,10 +357,8 @@ function wp_loft_booking_refresh_code_token($version) {
 
 function wp_loft_booking_get_access_group_id($loft_name) {
     $token       = get_option('butterflymx_access_token_v4');
-    $environment = get_option('butterflymx_environment', 'sandbox');
-    $base_url    = $environment === 'production'
-        ? 'https://api.butterflymx.com/v4'
-        : 'https://api.na.sandbox.butterflymx.com/v4';
+    $environment = wp_loft_booking_get_butterflymx_environment();
+    $base_url    = wp_loft_booking_get_butterflymx_base_url( $environment );
 
     if (!$token) {
         error_log('❌ Missing ButterflyMX token.');
@@ -755,7 +764,7 @@ function wp_loft_booking_create_visitor_pass_for_unit(
  */
 function wp_loft_booking_create_keychain_with_vk($tenant, $unit_id_api, $access_group_id, $start, $end) {
     $building_id = get_option('butterflymx_building_id');
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
 
     $recipients = array();
 

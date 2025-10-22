@@ -108,7 +108,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         return;
     }
 
-    $environment = get_option('butterflymx_environment', 'sandbox');
+    $environment = wp_loft_booking_get_butterflymx_environment();
 
     $building_id = (int) ($unit->building_id ?? 0);
     $access_point_ids = array();
