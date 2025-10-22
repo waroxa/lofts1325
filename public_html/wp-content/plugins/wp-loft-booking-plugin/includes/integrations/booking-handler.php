@@ -108,12 +108,34 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         return;
     }
 
-    if (empty($unit->building_id)) {
+    $environment = wp_loft_booking_get_butterflymx_environment();
+
+    $building_id = (int) ($unit->building_id ?? 0);
+    $access_point_ids = array();
+    $device_ids       = array();
+
+    $remote_profile = wp_loft_booking_fetch_unit_profile((int) $unit->unit_id_api, $environment);
+
+    if (is_wp_error($remote_profile)) {
+        error_log('⚠️ Unable to fetch ButterflyMX unit profile: ' . $remote_profile->get_error_message());
+    } else {
+        if (!empty($remote_profile['building_id'])) {
+            $building_id = $building_id > 0 ? $building_id : (int) $remote_profile['building_id'];
+        }
+
+        if (!empty($remote_profile['access_point_ids'])) {
+            $access_point_ids = (array) $remote_profile['access_point_ids'];
+        }
+
+        if (!empty($remote_profile['device_ids'])) {
+            $device_ids = (array) $remote_profile['device_ids'];
+        }
+    }
+
+    if ($building_id <= 0) {
         error_log('❌ Unable to create ButterflyMX keychain: missing building ID for unit ' . $unit->unit_name);
         return;
     }
-
-    $environment = get_option('butterflymx_environment', 'sandbox');
 
     $timezone_string = get_option('timezone_string');
     if (empty($timezone_string)) {
@@ -154,13 +176,15 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
     }
 
     $result = wp_loft_booking_create_visitor_pass_for_unit(
-        intval($unit->building_id),
+        $building_id,
         intval($unit->unit_id_api),
         $starts_at,
         $ends_at,
         $recipients,
         intval($unit->unit_id_api),
-        $environment
+        $environment,
+        $access_point_ids,
+        $device_ids
     );
 
     if (is_wp_error($result)) {
