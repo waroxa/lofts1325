@@ -380,6 +380,84 @@ function wp_loft_booking_get_access_group_id($loft_name) {
 }
 
 /**
+ * Fetch a ButterflyMX unit profile including device and access point ids.
+ *
+ * @param int    $unit_id     ButterflyMX unit identifier.
+ * @param string $environment Environment slug (production|sandbox).
+ *
+ * @return array|WP_Error Array with keys building_id, access_point_ids, device_ids.
+ */
+function wp_loft_booking_fetch_unit_profile( $unit_id, $environment = 'production' ) {
+    $unit_id = (int) $unit_id;
+
+    if ( $unit_id <= 0 ) {
+        return new WP_Error( 'invalid_unit_id', 'Invalid ButterflyMX unit id.' );
+    }
+
+    $token = get_butterflymx_access_token( 'v4' );
+
+    if ( empty( $token ) ) {
+        return new WP_Error( 'no_token', 'ButterflyMX access token missing.' );
+    }
+
+    $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
+
+    $response = wp_remote_get(
+        $base_url . '/units/' . $unit_id,
+        array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ),
+            'timeout' => 20,
+        )
+    );
+
+    if ( is_wp_error( $response ) ) {
+        return new WP_Error( 'http_request_failed', $response->get_error_message() );
+    }
+
+    $status = wp_remote_retrieve_response_code( $response );
+    $body   = json_decode( wp_remote_retrieve_body( $response ), true );
+
+    if ( $status >= 300 ) {
+        $message = isset( $body['message'] ) ? trim( $body['message'] ) : 'ButterflyMX API error.';
+        return new WP_Error( 'http_error', $message, array( 'status' => $status ) );
+    }
+
+    $unit = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+
+    if ( empty( $unit ) ) {
+        return new WP_Error( 'unit_not_found', 'ButterflyMX unit payload was empty.' );
+    }
+
+    $building_id       = (int) ( $unit['building_id'] ?? 0 );
+    $access_point_ids  = array();
+    $device_ids        = array();
+
+    foreach ( (array) ( $unit['access_point_ids'] ?? array() ) as $id ) {
+        $id = (int) $id;
+        if ( $id > 0 ) {
+            $access_point_ids[] = $id;
+        }
+    }
+
+    foreach ( (array) ( $unit['device_ids'] ?? array() ) as $id ) {
+        $id = (int) $id;
+        if ( $id > 0 ) {
+            $device_ids[] = $id;
+        }
+    }
+
+    return array(
+        'building_id'      => $building_id,
+        'access_point_ids' => array_values( array_unique( $access_point_ids ) ),
+        'device_ids'       => array_values( array_unique( $device_ids ) ),
+        'raw'              => $unit,
+    );
+}
+
+/**
  * Determine shared access points for a unit by copying from a template unit's
  * access groups or falling back to all building-level access points.
  *
@@ -479,8 +557,10 @@ function wp_loft_booking_get_shared_access_points(
  * @param string       $starts_at_utc    UTC ISO8601 start time (with Z).
  * @param string       $ends_at_utc      UTC ISO8601 end time (with Z).
  * @param array|string $recipients       Email/phone recipients for notifications.
- * @param int|null     $template_unit_id Optional unit id to copy APs from.
- * @param string       $environment      'production' or 'sandbox'.
+ * @param int|null     $template_unit_id  Optional unit id to copy APs from.
+ * @param string       $environment       'production' or 'sandbox'.
+ * @param int[]        $access_point_ids  Optional preselected access point ids.
+ * @param int[]        $device_ids        Optional device ids to associate with the keychain.
  *
  * @return array|WP_Error On success: ['keychain_id'=>int,'virtual_key_ids'=>int[],'access_point_ids'=>int[]].
  */
@@ -565,7 +645,9 @@ function wp_loft_booking_create_visitor_pass_for_unit(
     $ends_at_utc,
     $recipients = array(),
     $template_unit_id = null,
-    $environment = 'production'
+    $environment = 'production',
+    $access_point_ids = array(),
+    $device_ids = array()
 ) {
     $token    = get_butterflymx_access_token( 'v4' );
     $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
@@ -574,9 +656,23 @@ function wp_loft_booking_create_visitor_pass_for_unit(
         return new WP_Error( 'no_token', 'ButterflyMX access token missing.' );
     }
 
-    $ap_ids = wp_loft_booking_get_shared_access_points( $building_id, $template_unit_id, $environment );
-    if ( is_wp_error( $ap_ids ) ) {
-        return $ap_ids;
+    $ap_ids = array();
+
+    foreach ( (array) $access_point_ids as $id ) {
+        $id = (int) $id;
+        if ( $id > 0 ) {
+            $ap_ids[] = $id;
+        }
+    }
+
+    $ap_ids = array_values( array_unique( $ap_ids ) );
+
+    if ( empty( $ap_ids ) ) {
+        $ap_ids = wp_loft_booking_get_shared_access_points( $building_id, $template_unit_id, $environment );
+
+        if ( is_wp_error( $ap_ids ) ) {
+            return $ap_ids;
+        }
     }
 
     $payload = array(
@@ -589,6 +685,20 @@ function wp_loft_booking_create_visitor_pass_for_unit(
             'notes'            => 'Booking via WP',
         ),
     );
+
+    $sanitized_device_ids = array();
+
+    foreach ( (array) $device_ids as $device_id ) {
+        $device_id = (int) $device_id;
+
+        if ( $device_id > 0 ) {
+            $sanitized_device_ids[] = $device_id;
+        }
+    }
+
+    if ( ! empty( $sanitized_device_ids ) ) {
+        $payload['keychain']['device_ids'] = array_values( array_unique( $sanitized_device_ids ) );
+    }
 
     if ( ! empty( $recipients ) ) {
         $sanitized = wp_loft_booking_prepare_butterflymx_recipients( $recipients );
