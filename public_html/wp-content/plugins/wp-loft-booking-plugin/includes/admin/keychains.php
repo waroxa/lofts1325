@@ -60,9 +60,14 @@ function keychains_page_function() {
     if (isset($_POST['sync_keychains'])) {
         $fetched = wp_loft_booking_sync_keychains_from_api();
 
+        $existing_key_ids = $wpdb->get_col("SELECT key_id FROM $kc_vk_table");
+        if (!empty($existing_key_ids)) {
+            $placeholders = implode(', ', array_fill(0, count($existing_key_ids), '%d'));
+            $wpdb->query($wpdb->prepare("DELETE FROM $vk_table WHERE id IN ($placeholders)", $existing_key_ids));
+        }
+
         $wpdb->query("DELETE FROM $kc_vk_table");
         $wpdb->query("DELETE FROM $kc_table");
-        $wpdb->query("DELETE FROM $vk_table");
 
         $count = 0;
 
@@ -113,7 +118,7 @@ function keychains_page_function() {
                 'keychain_id'  => isset($kc['keychain_id']) ? intval($kc['keychain_id']) : null,
                 'tenant_id'    => isset($kc['tenant_id']) && $kc['tenant_id'] ? intval($kc['tenant_id']) : null,
                 'unit_id'      => isset($kc['unit_id']) && $kc['unit_id'] ? intval($kc['unit_id']) : null,
-                'name'         => $kc['name'],
+                'name'         => sanitize_text_field($kc['name']),
                 'valid_from'   => $kc['valid_from'],
                 'valid_until'  => $kc['valid_until'],
                 'people_count' => count($normalized_people),
@@ -128,13 +133,17 @@ function keychains_page_function() {
                 $vk_type   = sanitize_text_field($vk['type'] ?? '');
                 $vk_status = sanitize_text_field($vk['status'] ?? 'active');
 
+                if ($vk_type === '') {
+                    $vk_type = 'keychain';
+                }
+
                 $wpdb->insert($vk_table, [
                     'name'           => $vk_label,
-                    'booking_id'     => 0,
+                    'booking_id'     => null,
                     'virtual_key_id' => $vk_id,
                     'pin_code'       => isset($vk['pin_code']) ? sanitize_text_field($vk['pin_code']) : null,
                     'qr_code_url'    => isset($vk['qr_code_url']) ? esc_url_raw($vk['qr_code_url']) : null,
-                    'key_status'     => $vk_status,
+                    'key_status'     => $vk_status ?: 'active',
                     'key_type'       => $vk_type,
                 ]);
                 $saved_vk_id = $wpdb->insert_id;
@@ -758,7 +767,7 @@ function wp_loft_booking_sync_keychains_chunked() {
 function wp_loft_booking_sync_keychains_from_api(): array {
     global $wpdb;
     $access_token = get_option('butterflymx_access_token_v3');
-    $now = strtotime(current_time('mysql'));
+    $now = current_time('timestamp');
 
     if (!$access_token) {
         error_log('❌ ButterflyMX token missing.');
@@ -812,7 +821,7 @@ function wp_loft_booking_sync_keychains_from_api(): array {
             }
 
             // Keep keychains that are currently active or scheduled in the future.
-            if ($valid_until >= $now) {
+            if ($valid_until !== false && $valid_until >= $now) {
                 // Extract tenant and unit via panel
                 $external_tenant_id = $relationships['tenant']['data']['id'] ?? null;
 
@@ -880,13 +889,18 @@ function wp_loft_booking_sync_keychains_from_api(): array {
                     ];
                 }
 
+                $valid_from_gmt  = gmdate('Y-m-d H:i:s', $valid_from);
+                $valid_until_gmt = gmdate('Y-m-d H:i:s', $valid_until);
+                $valid_from_local = get_date_from_gmt($valid_from_gmt, 'Y-m-d H:i:s');
+                $valid_until_local = get_date_from_gmt($valid_until_gmt, 'Y-m-d H:i:s');
+
                 $active_keychains[] = [
                     'keychain_id'          => intval($item['id'] ?? 0),
                     'name'                 => sanitize_text_field($attrs['name'] ?? 'Unnamed Keychain'),
                     'tenant_id'            => $tenant_id,
                     'unit_id'              => $unit_id ? intval($unit_id) : null,
-                    'valid_from'           => gmdate('Y-m-d H:i:s', $valid_from),
-                    'valid_until'          => gmdate('Y-m-d H:i:s', $valid_until),
+                    'valid_from'           => $valid_from_local,
+                    'valid_until'          => $valid_until_local,
                     'virtual_keys'         => $virtual_keys,
                     'people'               => $people,
                     'external_tenant_id'   => $external_tenant_id,
