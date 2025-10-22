@@ -128,53 +128,6 @@ function marina_child_enqueue_search_styles() {
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
 
 /**
- * Ensure Elementor assets load for the Header 6 layout on non-Elementor pages.
- */
-function marina_child_maybe_enqueue_header_elementor_assets() {
-    if ( is_admin() || ! did_action( 'elementor/loaded' ) ) {
-        return;
-    }
-
-    $active_layout = get_option( 'nd_options_customizer_header_layout', '' );
-
-    if ( 'header-6' !== $active_layout ) {
-        return;
-    }
-
-    $header_document_id = absint( get_option( 'nd_options_customizer_header_6_content' ) );
-
-    if ( ! $header_document_id ) {
-        return;
-    }
-
-    $elementor = \Elementor\Plugin::instance();
-
-    // Load Elementor's base assets so header widgets render correctly everywhere.
-    $elementor->frontend->enqueue_styles();
-    $elementor->frontend->enqueue_scripts();
-
-    // Mirror Elementor's page asset loading for the header document.
-    $page_assets = get_post_meta( $header_document_id, \Elementor\Core\Page_Assets\Manager::ASSETS_META_KEY, true );
-
-    if ( ! empty( $page_assets ) ) {
-        $elementor->assets_loader->enable_assets( $page_assets );
-    } else {
-        $header_document = $elementor->documents->get( $header_document_id );
-
-        if ( $header_document ) {
-            $header_document->update_runtime_elements();
-        }
-    }
-
-    $header_css = \Elementor\Core\Files\CSS\Post::create( $header_document_id );
-
-    if ( $header_css ) {
-        $header_css->enqueue();
-    }
-}
-add_action( 'wp_enqueue_scripts', 'marina_child_maybe_enqueue_header_elementor_assets', 15 );
-
-/**
  * Determine whether the supplied post (or any Elementor template it references)
  * includes the ND Booking search results shortcode.
  *
