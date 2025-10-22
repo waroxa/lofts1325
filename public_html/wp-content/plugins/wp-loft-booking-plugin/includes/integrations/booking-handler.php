@@ -31,14 +31,18 @@ function wp_loft_booking_handle_booking(
     global $wpdb;
 
     $booking = [
-        'room_id'   => $id_post,
-        'name'      => $user_first_name,
-        'surname'   => $user_last_name,
-        'email'     => $paypal_email,
-        'phone'     => $user_phone,
-        'country'   => $user_country,
-        'date_from' => $date_from,
-        'date_to'   => $date_to,
+        'room_id'        => $id_post,
+        'name'           => $user_first_name,
+        'surname'        => $user_last_name,
+        'email'          => $paypal_email,
+        'phone'          => $user_phone,
+        'country'        => $user_country,
+        'date_from'      => $date_from,
+        'date_to'        => $date_to,
+        'room_name'      => $title_post,
+        'total'          => $final_trip_price,
+        'extra_services' => $extra_services,
+        'guests'         => $guests,
     ];
 
     $units_table    = $wpdb->prefix . 'loft_units';
@@ -67,7 +71,7 @@ function wp_loft_booking_handle_booking(
     }
 
     // 🔐 Generar llave virtual con ButterflyMX
-    wp_loft_booking_generate_virtual_key(
+    $virtual_key_result = wp_loft_booking_generate_virtual_key(
         $booking['room_id'],
         $booking['name'],
         $booking['email'],
@@ -78,6 +82,9 @@ function wp_loft_booking_handle_booking(
 
     // 🗓️ Crear evento en Google Calendar
     wp_loft_booking_create_google_event($booking);
+
+    // 📧 Enviar correo de confirmación al huésped
+    wp_loft_booking_send_confirmation_email($booking, $virtual_key_result);
 }
 
 function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $date_from, $date_to) {
@@ -85,7 +92,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
     if (empty($unit_id)) {
         error_log('❌ Unable to create ButterflyMX keychain: missing unit ID.');
-        return;
+        return new WP_Error('missing_unit_id', 'Missing unit ID.');
     }
 
     $units_table    = $wpdb->prefix . 'loft_units';
@@ -100,12 +107,12 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
     if (!$unit) {
         error_log('❌ Unable to create ButterflyMX keychain: unit not found for ID ' . intval($unit_id));
-        return;
+        return new WP_Error('unit_not_found', 'Unit not found.');
     }
 
     if (empty($unit->unit_id_api)) {
         error_log('❌ Unable to create ButterflyMX keychain: missing ButterflyMX unit ID for unit ' . $unit->unit_name);
-        return;
+        return new WP_Error('missing_unit_api', 'Missing ButterflyMX unit ID.');
     }
 
     $environment = wp_loft_booking_get_butterflymx_environment();
@@ -134,7 +141,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
     if ($building_id <= 0) {
         error_log('❌ Unable to create ButterflyMX keychain: missing building ID for unit ' . $unit->unit_name);
-        return;
+        return new WP_Error('missing_building_id', 'Missing building ID.');
     }
 
     $timezone_string = get_option('timezone_string');
@@ -147,7 +154,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         $checkout_local = new DateTime($date_to, new DateTimeZone($timezone_string));
     } catch (Exception $e) {
         error_log('❌ Unable to parse booking dates for ButterflyMX keychain: ' . $e->getMessage());
-        return;
+        return new WP_Error('invalid_dates', 'Invalid booking dates.');
     }
 
     $checkin_local->setTime(15, 0, 0);
@@ -189,7 +196,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
     if (is_wp_error($result)) {
         error_log('❌ ButterflyMX keychain creation failed: ' . $result->get_error_message());
-        return;
+        return $result;
     }
 
     error_log(sprintf(
@@ -197,6 +204,122 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         $result['keychain_id'],
         implode(', ', $result['access_point_ids'])
     ));
+
+    return $result;
+}
+
+function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual = false) {
+    $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
+
+    if (empty($recipient) || !is_email($recipient)) {
+        error_log('⚠️ Booking confirmation email skipped: invalid recipient.');
+        return;
+    }
+
+    $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
+    if (empty($guest_name)) {
+        $guest_name = __('Invité', 'wp-loft-booking');
+    }
+
+    $room_name = !empty($booking['room_name']) ? $booking['room_name'] : __('Votre loft', 'wp-loft-booking');
+
+    $checkin  = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
+    $checkout = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+
+    $checkin_fr  = !empty($booking['date_from']) ? wp_date('j F Y', strtotime($booking['date_from'])) : __('N/D', 'wp-loft-booking');
+    $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : __('N/D', 'wp-loft-booking');
+
+    $total = isset($booking['total']) && $booking['total'] !== '' ? sprintf('$%s', number_format((float) $booking['total'], 2)) : __('Non disponible', 'wp-loft-booking');
+
+    $virtual_key_success = !is_wp_error($virtual_key_result);
+    $virtual_key_message_fr = $virtual_key_success
+        ? __('Votre clé virtuelle sera envoyée automatiquement par courriel et par SMS peu avant votre arrivée.', 'wp-loft-booking')
+        : __('Nous n’avons pas pu créer votre clé virtuelle automatiquement. Un membre de notre équipe communiquera avec vous sous peu.', 'wp-loft-booking');
+
+    $virtual_key_message_en = $virtual_key_success
+        ? __('Your virtual key will be sent automatically via email and SMS shortly before your arrival.', 'wp-loft-booking')
+        : __('We were unable to create your virtual key automatically. A member of our team will contact you shortly.', 'wp-loft-booking');
+
+    if (is_wp_error($virtual_key_result)) {
+        error_log('⚠️ Virtual key error for confirmation email: ' . $virtual_key_result->get_error_message());
+    }
+
+    $support_email = sanitize_email(get_option('admin_email'));
+    $headers       = ['Content-Type: text/html; charset=UTF-8'];
+
+    if ($support_email && is_email($support_email)) {
+        $headers[] = 'Bcc: ' . $support_email;
+    }
+
+    $subject = 'Loft 1325 – Confirmation de réservation | Reservation Confirmation';
+
+    ob_start();
+    ?>
+    <div style="margin:0;padding:0;background-color:#f4f5f7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f4f5f7;padding:30px 0;">
+            <tr>
+                <td align="center">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
+                        <tr>
+                            <td style="padding:30px 40px;background:linear-gradient(135deg,#0f172a,#1f2937);color:#ffffff;">
+                                <h1 style="margin:0;font-size:24px;font-weight:700;">Loft 1325</h1>
+                                <p style="margin:8px 0 0;font-size:16px;letter-spacing:0.03em;text-transform:uppercase;">Expérience d’hospitalité cinq étoiles</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:30px 40px;">
+                                <h2 style="margin-top:0;font-size:20px;font-weight:700;color:#111827;">Bonjour <?php echo esc_html($guest_name); ?>,</h2>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 16px;color:#374151;">Merci d’avoir choisi <strong>Loft 1325</strong> pour votre séjour. Nous avons le plaisir de confirmer votre réservation dans <strong><?php echo esc_html($room_name); ?></strong>.</p>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Dates&nbsp;: <strong><?php echo esc_html($checkin_fr); ?></strong> au <strong><?php echo esc_html($checkout_fr); ?></strong><br>Total du séjour&nbsp;: <strong><?php echo esc_html($total); ?></strong></p>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;"><?php echo esc_html($virtual_key_message_fr); ?></p>
+                                <div style="margin:24px 0;padding:24px;background-color:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
+                                    <h3 style="margin-top:0;margin-bottom:12px;font-size:16px;font-weight:700;color:#111827;">Informations importantes</h3>
+                                    <ul style="margin:0;padding-left:20px;color:#4b5563;font-size:14px;line-height:1.7;">
+                                        <li>Arrivée à partir de 15&nbsp;h (Heure de l’Est)</li>
+                                        <li>Départ au plus tard à 11&nbsp;h (Heure de l’Est)</li>
+                                        <li>Veuillez avoir une pièce d’identité valide lors de votre arrivée</li>
+                                    </ul>
+                                </div>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Pour toute demande spéciale ou pour obtenir de l’aide, écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;">
+                                <h2 style="font-size:20px;font-weight:700;color:#111827;margin-bottom:12px;">Hello <?php echo esc_html($guest_name); ?>,</h2>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 16px;color:#374151;">Thank you for choosing <strong>Loft 1325</strong> for your stay. We are delighted to confirm your reservation in <strong><?php echo esc_html($room_name); ?></strong>.</p>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Dates: <strong><?php echo esc_html($checkin); ?></strong> to <strong><?php echo esc_html($checkout); ?></strong><br>Total stay: <strong><?php echo esc_html($total); ?></strong></p>
+                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;"><?php echo esc_html($virtual_key_message_en); ?></p>
+                                <div style="margin:24px 0;padding:24px;background-color:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
+                                    <h3 style="margin-top:0;margin-bottom:12px;font-size:16px;font-weight:700;color:#111827;">Important information</h3>
+                                    <ul style="margin:0;padding-left:20px;color:#4b5563;font-size:14px;line-height:1.7;">
+                                        <li>Check-in from 3:00&nbsp;PM (Eastern Time)</li>
+                                        <li>Check-out by 11:00&nbsp;AM (Eastern Time)</li>
+                                        <li>Please have a valid photo ID ready upon arrival</li>
+                                    </ul>
+                                </div>
+                                <p style="font-size:15px;line-height:1.7;margin:0;color:#374151;">If you need anything before your arrival, reach out to us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                <?php if ($is_manual) : ?>
+                                    <p style="font-size:13px;line-height:1.7;margin:24px 0 0;color:#6b7280;">Cette confirmation a été générée depuis le portail administrateur de Loft 1325. / This confirmation was issued from the Loft 1325 admin portal.</p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:20px 40px;background-color:#0f172a;color:#9ca3af;font-size:12px;text-align:center;">
+                                &copy; <?php echo esc_html(wp_date('Y')); ?> Loft 1325 &middot; 1325 3e Avenue, Val-d’Or, QC
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <?php
+    $body = ob_get_clean();
+
+    $sent = wp_mail($recipient, $subject, $body, $headers);
+
+    if (!$sent) {
+        error_log('❌ Booking confirmation email could not be sent to ' . $recipient);
+    } else {
+        error_log('✅ Booking confirmation email sent to ' . $recipient);
+    }
 }
 
 function wp_loft_booking_create_google_event($booking) {
