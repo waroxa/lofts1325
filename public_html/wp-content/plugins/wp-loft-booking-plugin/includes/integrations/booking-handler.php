@@ -70,6 +70,34 @@ function wp_loft_booking_handle_booking(
         }
     }
 
+    $timezone_string = get_option('timezone_string');
+    if (empty($timezone_string)) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    $starts_at = null;
+    $ends_at   = null;
+    $availability_until = null;
+
+    try {
+        $site_timezone   = new DateTimeZone($timezone_string);
+        $checkin_local   = new DateTime($booking['date_from'], $site_timezone);
+        $checkout_local  = new DateTime($booking['date_to'], $site_timezone);
+        $checkin_local->setTime(15, 0, 0);
+        $checkout_local->setTime(11, 0, 0);
+
+        $checkin_utc  = clone $checkin_local;
+        $checkout_utc = clone $checkout_local;
+        $checkin_utc->setTimezone(new DateTimeZone('UTC'));
+        $checkout_utc->setTimezone(new DateTimeZone('UTC'));
+
+        $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
+        $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
+        $availability_until = $checkout_local->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+        error_log('⚠️ Unable to prepare booking window for ButterflyMX storage: ' . $e->getMessage());
+    }
+
     // 🔐 Generar llave virtual con ButterflyMX
     $virtual_key_result = wp_loft_booking_generate_virtual_key(
         $booking['room_id'],
@@ -85,6 +113,35 @@ function wp_loft_booking_handle_booking(
 
     // 📧 Enviar correo de confirmación al huésped
     wp_loft_booking_send_confirmation_email($booking, $virtual_key_result);
+
+    if (!is_wp_error($virtual_key_result)) {
+        $keychain_id = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : 0;
+        $primary_virtual_key_id = $virtual_key_result['virtual_key_ids'][0] ?? null;
+
+        if ($keychain_id > 0 && $starts_at && $ends_at) {
+            wp_loft_booking_save_keychain_data(
+                $id_post,
+                $booking['room_id'],
+                $keychain_id,
+                $primary_virtual_key_id,
+                $starts_at,
+                $ends_at
+            );
+        }
+
+        if (!empty($booking['room_id']) && $availability_until) {
+            $wpdb->update(
+                $units_table,
+                [
+                    'status'             => 'occupied',
+                    'availability_until' => $availability_until,
+                ],
+                ['id' => (int) $booking['room_id']],
+                ['%s', '%s'],
+                ['%d']
+            );
+        }
+    }
 }
 
 function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $date_from, $date_to) {

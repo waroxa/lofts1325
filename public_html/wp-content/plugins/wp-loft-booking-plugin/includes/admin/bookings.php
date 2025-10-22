@@ -74,6 +74,8 @@ function wp_loft_booking_nd_stripe_payment_complete($payload) {
 }
 
 function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name = 'Guest', $last_name = 'Booking', $booking_id = 0, $phone = '') {
+    global $wpdb;
+
     $room_type = strtoupper($room_type);
 
     $loft = find_first_available_loft_unit($room_type);
@@ -143,6 +145,21 @@ function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout
             $start,
             $end
         );
+
+        if (isset($checkout_local)) {
+            $availability_until = $checkout_local->format('Y-m-d H:i:s');
+
+            $wpdb->update(
+                $wpdb->prefix . 'loft_units',
+                [
+                    'status'             => 'occupied',
+                    'availability_until' => $availability_until,
+                ],
+                ['id' => $loft->id],
+                ['%s', '%s'],
+                ['%d']
+            );
+        }
     } else {
         error_log('⚠️ ButterflyMX keychain created without a valid keychain ID.');
     }

@@ -540,8 +540,16 @@ function wplb_admin_generate_virtual_key() {
         wp_send_json_error(['message' => __('The guest email address is not valid.', 'wp-loft-booking')], 400);
     }
 
-    $checkin_dt  = DateTime::createFromFormat('Y-m-d', $checkin);
-    $checkout_dt = DateTime::createFromFormat('Y-m-d', $checkout);
+    $timezone_string = get_option('timezone_string');
+    if (empty($timezone_string)) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    $site_timezone = new DateTimeZone($timezone_string);
+    $utc_timezone  = new DateTimeZone('UTC');
+
+    $checkin_dt  = DateTime::createFromFormat('Y-m-d', $checkin, $site_timezone);
+    $checkout_dt = DateTime::createFromFormat('Y-m-d', $checkout, $site_timezone);
 
     if (!$checkin_dt || $checkin_dt->format('Y-m-d') !== $checkin) {
         wp_send_json_error(['message' => __('The check-in date format must be YYYY-MM-DD.', 'wp-loft-booking')], 400);
@@ -568,6 +576,21 @@ function wplb_admin_generate_virtual_key() {
         wp_send_json_error(['message' => __('This loft is not currently available for key generation.', 'wp-loft-booking')], 400);
     }
 
+    $checkin_local  = clone $checkin_dt;
+    $checkout_local = clone $checkout_dt;
+
+    $checkin_local->setTime(15, 0, 0);
+    $checkout_local->setTime(11, 0, 0);
+
+    $checkin_utc  = clone $checkin_local;
+    $checkout_utc = clone $checkout_local;
+
+    $checkin_utc->setTimezone($utc_timezone);
+    $checkout_utc->setTimezone($utc_timezone);
+
+    $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
+    $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
+
     $result = wp_loft_booking_generate_virtual_key(
         $unit_id,
         $guest_name,
@@ -581,14 +604,27 @@ function wplb_admin_generate_virtual_key() {
         wp_send_json_error(['message' => $result->get_error_message()], 500);
     }
 
-    $availability_until = clone $checkout_dt;
-    $availability_until->setTime(11, 0, 0);
+    $availability_until = $checkout_local->format('Y-m-d H:i:s');
+
+    $keychain_id = isset($result['keychain_id']) ? (int) $result['keychain_id'] : 0;
+    $primary_virtual_key_id = $result['virtual_key_ids'][0] ?? null;
+
+    if ($keychain_id > 0) {
+        wp_loft_booking_save_keychain_data(
+            null,
+            $unit_id,
+            $keychain_id,
+            $primary_virtual_key_id,
+            $starts_at,
+            $ends_at
+        );
+    }
 
     $wpdb->update(
         $units_table,
         [
             'status'             => 'occupied',
-            'availability_until' => $availability_until->format('Y-m-d H:i:s'),
+            'availability_until' => $availability_until,
         ],
         ['id' => $unit_id],
         ['%s', '%s'],
