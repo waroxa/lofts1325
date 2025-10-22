@@ -63,14 +63,22 @@ function wp_loft_booking_sync_units_only() {
     $summary = ['SIMPLE' => 0, 'DOUBLE' => 0, 'PENTHOUSE' => 0];
 
     // Fetch all valid keychains
-    $active_keys = $wpdb->get_results("SELECT name, valid_until FROM $keychains_table WHERE valid_until >= '$now'");
+    $active_keys = $wpdb->get_results("SELECT name, valid_from, valid_until FROM $keychains_table WHERE valid_until >= '$now'");
     $active_key_data = array_map(function($row) {
         // Normalize keychain name: uppercase, trim, enforce space before "("
         $normalized_name = strtoupper(trim($row->name));
         $normalized_name = preg_replace('/\s*\(/', ' (', $normalized_name); // ensure space before "("
+        $valid_from    = $row->valid_from ?? null;
+        $valid_until   = $row->valid_until ?? null;
+        $valid_from_ts = $valid_from ? strtotime($valid_from) : false;
+        $valid_until_ts = $valid_until ? strtotime($valid_until) : false;
+
         return [
-            'name' => $normalized_name,
-            'valid_until' => $row->valid_until
+            'name'           => $normalized_name,
+            'valid_from'     => $valid_from,
+            'valid_until'    => $valid_until,
+            'valid_from_ts'  => $valid_from_ts !== false ? $valid_from_ts : null,
+            'valid_until_ts' => $valid_until_ts !== false ? $valid_until_ts : null,
         ];
     }, $active_keys);
 
@@ -162,13 +170,56 @@ function wp_loft_booking_sync_units_only() {
                     $status = 'occupied';
                     $available_until = date('Y-m-d H:i:s', strtotime($active_tenants[$unit_label]));
                     error_log("🏠 MARKED OCCUPIED: $unit_name | UNTIL: $available_until | TENANT");
+                
                 } elseif ($unit_number) {
+                    $current_booking  = null;
+                    $upcoming_booking = null;
+
                     foreach ($active_key_data as $key) {
-                        if (preg_match('/^LOFT\s*' . preg_quote($unit_number, '/') . '(\s|\(|$)/i', $key['name'])) {
-                            $status = 'occupied';
-                            $available_until = date('Y-m-d H:i:s', strtotime($key['valid_until']));
-                            error_log("📛 MARKED OCCUPIED: $unit_name | UNTIL: $available_until | KEYCHAIN: {$key['name']}");
+                        if (!preg_match('/^LOFT\s*' . preg_quote($unit_number, '/') . '(\s|\(|$)/i', $key['name'])) {
+                            continue;
+                        }
+
+                        $valid_from_ts  = $key['valid_from_ts'];
+                        $valid_until_ts = $key['valid_until_ts'];
+
+                        if ($valid_from_ts && $valid_from_ts <= $now_ts && $valid_until_ts && $valid_until_ts >= $now_ts) {
+                            $current_booking = $key;
                             break;
+                        }
+
+                        if ($valid_from_ts && $valid_from_ts > $now_ts) {
+                            if ($upcoming_booking === null || $valid_from_ts < ($upcoming_booking['valid_from_ts'] ?? PHP_INT_MAX)) {
+                                $upcoming_booking = $key;
+                            }
+                        }
+                    }
+
+                    if ($current_booking) {
+                        $status = 'occupied';
+                        $available_until = $current_booking['valid_until_ts']
+                            ? date('Y-m-d H:i:s', $current_booking['valid_until_ts'])
+                            : ($current_booking['valid_until'] ?? null);
+                        error_log("📛 MARKED OCCUPIED: $unit_name | UNTIL: " . ($available_until ?? 'N/A') . " | KEYCHAIN: {$current_booking['name']}");
+                    } elseif ($upcoming_booking && !empty($upcoming_booking['valid_from_ts'])) {
+                        $hours_until_start = ($upcoming_booking['valid_from_ts'] - $now_ts) / HOUR_IN_SECONDS;
+
+                        if ($hours_until_start < 24) {
+                            $status = 'unavailable';
+                            $available_until = $upcoming_booking['valid_until_ts']
+                                ? date('Y-m-d H:i:s', $upcoming_booking['valid_until_ts'])
+                                : ($upcoming_booking['valid_from'] ?? null);
+                            error_log("⏳ MARKED UNAVAILABLE (<24H): $unit_name | STARTS: " . date('Y-m-d H:i:s', $upcoming_booking['valid_from_ts']) . " | KEYCHAIN: {$upcoming_booking['name']}");
+                        } else {
+                            $status = 'available';
+                            $cutoff_ts = $upcoming_booking['valid_from_ts'] - DAY_IN_SECONDS;
+
+                            if ($cutoff_ts < $now_ts) {
+                                $cutoff_ts = $now_ts;
+                            }
+
+                            $available_until = date('Y-m-d H:i:s', $cutoff_ts);
+                            error_log("🕒 AVAILABLE WITH BUFFER: $unit_name | RENTABLE UNTIL: $available_until | NEXT START: " . date('Y-m-d H:i:s', $upcoming_booking['valid_from_ts']));
                         }
                     }
                 } else {

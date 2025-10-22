@@ -765,11 +765,19 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
     }
 
     $targets = array(
+        'loft'     => null,
         '105'      => null,
         '106'      => null,
         '111'      => null,
         'intercom' => null,
-        'loft'     => null,
+    );
+
+    $keyword_matches = array(
+        'loft'     => array(),
+        '105'      => array(),
+        '106'      => array(),
+        '111'      => array(),
+        'intercom' => array(),
     );
 
     foreach ( $details as $id => $info ) {
@@ -780,52 +788,93 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         }
 
         $normalized_name = strtolower( remove_accents( $name ) );
+        $int_id          = (int) $id;
 
-        if ( null === $targets['105'] && wp_loft_booking_access_point_name_has_number( $normalized_name, '105' ) ) {
-            $targets['105'] = (int) $id;
-        }
-
-        if ( null === $targets['106'] && wp_loft_booking_access_point_name_has_number( $normalized_name, '106' ) ) {
-            $targets['106'] = (int) $id;
-        }
-
-        if ( null === $targets['111'] && wp_loft_booking_access_point_name_has_number( $normalized_name, '111' ) ) {
-            $targets['111'] = (int) $id;
-        }
-
-        if ( null === $targets['intercom'] && false !== strpos( $normalized_name, 'intercom' ) ) {
-            if ( false !== strpos( $normalized_name, 'exterieur' ) || false !== strpos( $normalized_name, 'exterior' ) ) {
-                $targets['intercom'] = (int) $id;
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '105' ) ) {
+            if ( null === $targets['105'] ) {
+                $targets['105'] = $int_id;
             }
+            $keyword_matches['105'][] = $int_id;
         }
 
-        if ( $loft_number && null === $targets['loft'] ) {
-            if ( false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_name, $loft_number ) ) {
-                $targets['loft'] = (int) $id;
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '106' ) ) {
+            if ( null === $targets['106'] ) {
+                $targets['106'] = $int_id;
             }
+            $keyword_matches['106'][] = $int_id;
+        }
+
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '111' ) ) {
+            if ( null === $targets['111'] ) {
+                $targets['111'] = $int_id;
+            }
+            $keyword_matches['111'][] = $int_id;
+        }
+
+        if ( false !== strpos( $normalized_name, 'intercom' ) ) {
+            if ( null === $targets['intercom'] && ( false !== strpos( $normalized_name, 'exterieur' ) || false !== strpos( $normalized_name, 'exterior' ) ) ) {
+                $targets['intercom'] = $int_id;
+            }
+            $keyword_matches['intercom'][] = $int_id;
+        }
+
+        if ( $loft_number && false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_name, $loft_number ) ) {
+            if ( null === $targets['loft'] ) {
+                $targets['loft'] = $int_id;
+            }
+            $keyword_matches['loft'][] = $int_id;
         }
     }
 
-    $preferred_ids = array_values(
-        array_filter(
-            $targets,
-            static function ( $value ) {
-                return is_int( $value ) && $value > 0;
-            }
-        )
-    );
+    $priority_order = array( 'loft', '105', '106', '111', 'intercom' );
+
+    $preferred_ids = array();
+
+    foreach ( $priority_order as $key ) {
+        if ( isset( $targets[ $key ] ) && is_int( $targets[ $key ] ) && $targets[ $key ] > 0 ) {
+            $preferred_ids[] = $targets[ $key ];
+        }
+    }
+
+    if ( ! empty( $candidate_ids ) && ! empty( $preferred_ids ) ) {
+        $preferred_ids = array_values(
+            array_filter(
+                $preferred_ids,
+                static function ( $id ) use ( $candidate_ids ) {
+                    return in_array( $id, $candidate_ids, true );
+                }
+            )
+        );
+    }
 
     $preferred_ids = array_values( array_unique( $preferred_ids ) );
 
-    if ( ! empty( $candidate_ids ) && ! empty( $preferred_ids ) ) {
-        $intersect = array_values( array_intersect( $candidate_ids, $preferred_ids ) );
+    if ( ! empty( $preferred_ids ) ) {
+        return $preferred_ids;
+    }
 
-        if ( ! empty( $intersect ) ) {
-            return $intersect;
+    $fallback_ids = array();
+
+    foreach ( $priority_order as $key ) {
+        $matches = array_unique( $keyword_matches[ $key ] ?? array() );
+
+        foreach ( $matches as $matched_id ) {
+            if ( ! empty( $candidate_ids ) && ! in_array( $matched_id, $candidate_ids, true ) ) {
+                continue;
+            }
+
+            $fallback_ids[] = $matched_id;
+            break;
         }
     }
 
-    return $preferred_ids;
+    $fallback_ids = array_values( array_unique( $fallback_ids ) );
+
+    if ( ! empty( $fallback_ids ) ) {
+        return $fallback_ids;
+    }
+
+    return $candidate_ids;
 }
 
 /**
@@ -1087,9 +1136,11 @@ function wp_loft_booking_create_visitor_pass_for_unit(
         $ap_ids = $selected_ap_ids;
     }
 
+    $keychain_name = '' !== $unit_label ? $unit_label : 'Visitor - ' . (int) $target_unit_id;
+
     $payload = array(
         'keychain' => array(
-            'name'             => 'Visitor - ' . (int) $target_unit_id,
+            'name'             => sanitize_text_field( $keychain_name ),
             'unit_id'          => (int) $target_unit_id,
             'starts_at'        => $starts_at_utc,
             'ends_at'          => $ends_at_utc,
