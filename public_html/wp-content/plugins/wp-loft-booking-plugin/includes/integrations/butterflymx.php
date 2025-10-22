@@ -228,27 +228,51 @@ function get_butterflymx_access_token($version = 'v3') {
         $expires = get_option('butterflymx_token_v4_expires');
     }
 
+    if (empty($clientId) || empty($clientSecret)) {
+        error_log('Error: Missing ButterflyMX Client ID or Secret.');
+        return $token;
+    }
+
     if (empty($token) || $expires < time()) {
-        $response = json_decode(wp_remote_post($tokenEndpoint, [
-            'method' => 'POST',
+        $http_response = wp_remote_post($tokenEndpoint, [
+            'method'  => 'POST',
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-            'body' => [
-                'grant_type' => 'client_credentials',
-                'client_id' => $clientId,
+            'body'    => [
+                'grant_type'    => 'client_credentials',
+                'client_id'     => $clientId,
                 'client_secret' => $clientSecret,
             ],
-        ]), true);
+        ]);
+
+        if (is_wp_error($http_response)) {
+            error_log('Error: Failed to contact ButterflyMX OAuth endpoint: ' . $http_response->get_error_message());
+            return $token;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($http_response);
+        $body        = wp_remote_retrieve_body($http_response);
+        $response    = json_decode($body, true);
+
+        if ($status_code !== 200 || !is_array($response)) {
+            error_log('Error: Unexpected ButterflyMX OAuth response. Status: ' . $status_code . ' Body: ' . $body);
+            return $token;
+        }
 
         if (isset($response['access_token'])) {
+            $expires_in = isset($response['expires_in']) ? max(60, (int) $response['expires_in']) : 3600;
+
             if ($version === 'v3') {
                 update_option('butterflymx_token_v3', $response['access_token']);
-                update_option('butterflymx_token_v3_expires', time() + $response['expires_in']);
+                update_option('butterflymx_token_v3_expires', time() + $expires_in);
             } else {
                 update_option('butterflymx_token_v4', $response['access_token']);
-                update_option('butterflymx_token_v4_expires', time() + $response['expires_in']);
+                update_option('butterflymx_token_v4_expires', time() + $expires_in);
             }
             return $response['access_token'];
         }
+
+        error_log('Error: ButterflyMX OAuth response missing access_token. Body: ' . $body);
+        return $token;
     }
 
     return $token;
