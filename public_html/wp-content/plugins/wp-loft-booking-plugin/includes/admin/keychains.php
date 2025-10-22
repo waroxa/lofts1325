@@ -60,23 +60,29 @@ function keychains_page_function() {
     if (isset($_POST['sync_keychains'])) {
         $fetched = wp_loft_booking_sync_keychains_from_api();
 
-        $existing_key_ids = $wpdb->get_col("SELECT key_id FROM $kc_vk_table");
-        if (!empty($existing_key_ids)) {
-            $placeholders = implode(', ', array_fill(0, count($existing_key_ids), '%d'));
-            $wpdb->query($wpdb->prepare("DELETE FROM $vk_table WHERE id IN ($placeholders)", $existing_key_ids));
-        }
+        if (is_wp_error($fetched)) {
+            $error_message = esc_html($fetched->get_error_message());
+            echo "<div class='notice notice-error'><p>❌ Failed to sync keychains: {$error_message}</p></div>";
+        } elseif (empty($fetched)) {
+            echo "<div class='notice notice-warning'><p>⚠️ No keychains were returned by ButterflyMX. Existing keychains were left untouched.</p></div>";
+        } else {
+            $existing_key_ids = $wpdb->get_col("SELECT key_id FROM $kc_vk_table");
+            if (!empty($existing_key_ids)) {
+                $placeholders = implode(', ', array_fill(0, count($existing_key_ids), '%d'));
+                $wpdb->query($wpdb->prepare("DELETE FROM $vk_table WHERE id IN ($placeholders)", $existing_key_ids));
+            }
 
-        $wpdb->query("DELETE FROM $kc_vk_table");
-        $wpdb->query("DELETE FROM $kc_table");
+            $wpdb->query("DELETE FROM $kc_vk_table");
+            $wpdb->query("DELETE FROM $kc_table");
 
-        $count = 0;
+            $count = 0;
 
-        foreach ($fetched as $kc) {
-            $virtual_keys = array_map(
-                static function ($vk) {
-                    if (!is_array($vk)) {
-                        return [
-                            'id'     => $vk,
+            foreach ($fetched as $kc) {
+                $virtual_keys = array_map(
+                    static function ($vk) {
+                        if (!is_array($vk)) {
+                            return [
+                                'id'     => $vk,
                             'type'   => '',
                             'status' => '',
                         ];
@@ -156,10 +162,11 @@ function keychains_page_function() {
                 }
             }
 
-            $count++;
-        }
+                $count++;
+            }
 
-        echo "<div class='updated'><p>✅ Synced $count active keychains.</p></div>";
+            echo "<div class='updated'><p>✅ Synced $count active keychains.</p></div>";
+        }
     }
 
     echo '<form method="post" style="margin-bottom:12px;">';
@@ -764,31 +771,76 @@ function wp_loft_booking_sync_keychains_chunked() {
     return $total;
 }
 
-function wp_loft_booking_sync_keychains_from_api(): array {
+function wp_loft_booking_sync_keychains_from_api() {
     global $wpdb;
+
+    $environment = function_exists('wp_loft_booking_get_butterflymx_environment')
+        ? wp_loft_booking_get_butterflymx_environment()
+        : get_option('butterflymx_environment', 'sandbox');
+
     $access_token = get_option('butterflymx_access_token_v3');
-    $now = current_time('timestamp');
+    $version      = 'v3';
+
+    if (!$access_token) {
+        $access_token = get_option('butterflymx_token_v3');
+    }
+
+    if (!$access_token) {
+        $alternate = get_option('butterflymx_access_token_v4');
+        if ($alternate) {
+            $access_token = $alternate;
+            $version      = 'v4';
+        }
+    }
 
     if (!$access_token) {
         error_log('❌ ButterflyMX token missing.');
-        return [];
+        return new WP_Error('wp_loft_booking_missing_token', 'ButterflyMX access token is not configured.');
     }
 
+    $now = current_time('timestamp');
     $active_keychains = [];
-    $url = "https://api.butterflymx.com/v3/keychains";
+
+    if ($version === 'v4') {
+        $api_base = ($environment === 'production')
+            ? 'https://api.butterflymx.com/v4/'
+            : 'https://api.na.sandbox.butterflymx.com/v4/';
+    } else {
+        $api_base = ($environment === 'production')
+            ? 'https://api.butterflymx.com/v3/'
+            : 'https://api.na.sandbox.butterflymx.com/v3/';
+    }
+
+    $url = $api_base . 'keychains';
 
     while ($url) {
         $response = wp_remote_get($url, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $access_token,
-                'Accept' => 'application/json',
+                'Accept'        => 'application/vnd.api+json',
+                'Content-Type'  => 'application/vnd.api+json',
             ],
             'timeout' => 20
         ]);
 
         if (is_wp_error($response)) {
             error_log('❌ API error: ' . $response->get_error_message());
-            break;
+            return $response;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        if ($status_code >= 400) {
+            $raw_body = wp_remote_retrieve_body($response);
+            error_log(sprintf('❌ ButterflyMX API error (%d): %s', $status_code, $raw_body));
+
+            return new WP_Error(
+                'wp_loft_booking_http_error',
+                sprintf('ButterflyMX API returned HTTP %d.', $status_code),
+                [
+                    'status' => $status_code,
+                    'body'   => $raw_body,
+                ]
+            );
         }
 
         $body = json_decode(wp_remote_retrieve_body($response), true);
