@@ -1037,7 +1037,17 @@ function wp_loft_booking_get_shared_access_points(
         if ( ! is_wp_error( $resp ) ) {
             $groups = json_decode( wp_remote_retrieve_body( $resp ), true );
             foreach ( $groups['data'] ?? array() as $group ) {
-                if ( ! empty( $group['units_ids'] ) && in_array( (int) $template_unit_id, $group['units_ids'], true ) ) {
+                $group_unit_ids = array();
+
+                if ( isset( $group['units_ids'] ) ) {
+                    $group_unit_ids = (array) $group['units_ids'];
+                } elseif ( isset( $group['unit_ids'] ) ) {
+                    $group_unit_ids = (array) $group['unit_ids'];
+                }
+
+                $group_unit_ids = array_map( 'intval', $group_unit_ids );
+
+                if ( ! empty( $group_unit_ids ) && in_array( (int) $template_unit_id, $group_unit_ids, true ) ) {
                     $g_resp = wp_remote_get(
                         $base_url . '/access_groups/' . (int) $group['id'],
                         array(
@@ -1057,6 +1067,14 @@ function wp_loft_booking_get_shared_access_points(
                     }
                 }
             }
+        }
+    }
+
+    if ( empty( $ap_ids ) && $template_unit_id ) {
+        $profile = wp_loft_booking_fetch_unit_profile( $template_unit_id, $environment );
+
+        if ( ! is_wp_error( $profile ) && ! empty( $profile['access_point_ids'] ) ) {
+            $ap_ids = (array) $profile['access_point_ids'];
         }
     }
 
