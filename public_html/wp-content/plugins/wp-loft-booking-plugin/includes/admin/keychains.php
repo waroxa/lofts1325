@@ -811,7 +811,8 @@ function wp_loft_booking_sync_keychains_from_api(): array {
                 continue;
             }
 
-            if ($valid_from <= $now && $valid_until >= $now) {
+            // Keep keychains that are currently active or scheduled in the future.
+            if ($valid_until >= $now) {
                 // Extract tenant and unit via panel
                 $external_tenant_id = $relationships['tenant']['data']['id'] ?? null;
 
