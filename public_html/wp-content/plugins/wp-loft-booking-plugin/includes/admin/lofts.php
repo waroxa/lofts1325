@@ -206,13 +206,35 @@ function wp_loft_booking_display_units() {
 
     echo '<table class="widefat fixed striped">
             <thead><tr>
-              <th>Unit Name</th><th>Floor</th><th>Access Group</th>
-              <th>Tenants</th><th>Max Adults</th><th>Max Children</th>
+              <th>Unit Name</th><th>ButterflyMX Unit ID</th><th>Building ID</th>
+              <th>Unit Access Points</th><th>Building Access Points</th>
               <th>Status</th><th>Available Until</th><th>Actions</th>
             </tr></thead>
             <tbody>';
 
-    $units = $wpdb->get_results("SELECT * FROM $units_table WHERE unit_name LIKE '%LOFT%'");
+    $units = $wpdb->get_results(
+        "SELECT u.*, b.building_id AS branch_building_id
+           FROM $units_table u
+      LEFT JOIN {$wpdb->prefix}loft_branches b ON u.branch_id = b.id
+          WHERE u.unit_name LIKE '%LOFT%'
+       ORDER BY u.unit_name ASC"
+    );
+
+    $unit_profiles_cache   = array();
+    $building_access_cache = array();
+    $environment           = wp_loft_booking_get_butterflymx_environment();
+    $format_access_points  = static function( $ids ) {
+        if ( empty( $ids ) ) {
+            return '<span class="description">None</span>';
+        }
+
+        $parts = array();
+        foreach ( $ids as $id ) {
+            $parts[] = '<code>' . esc_html( (string) $id ) . '</code>';
+        }
+
+        return implode( ', ', $parts );
+    };
     foreach ($units as $unit) {
         $status      = strtolower($unit->status);
         $label       = normalize_label($unit->unit_name);
@@ -272,17 +294,64 @@ function wp_loft_booking_display_units() {
             $button_label
         );
 
-        echo "<tr>
-                <td>{$unit->unit_name}</td>
-                <td>N/A</td>
-                <td>N/A</td>
-                <td>0</td>
-                <td>N/A</td>
-                <td>N/A</td>
-                <td style=\"color:{$color};font-weight:bold;\">{$text}</td>
-                <td>{$avail}</td>
-                <td>{$button_html}</td>
-              </tr>";
+        $unit_api_id = (int) $unit->unit_id_api;
+        $branch_building_id = isset($unit->branch_building_id) ? trim((string) $unit->branch_building_id) : '';
+        $display_building_id = $branch_building_id;
+        $building_id_for_api = ctype_digit($branch_building_id) ? (int) $branch_building_id : 0;
+        $unit_access_points  = '<span class="description">—</span>';
+        $building_access     = '<span class="description">—</span>';
+
+        if ($unit_api_id > 0) {
+            if (!array_key_exists($unit_api_id, $unit_profiles_cache)) {
+                $unit_profiles_cache[$unit_api_id] = wp_loft_booking_fetch_unit_profile($unit_api_id, $environment);
+            }
+
+            $profile = $unit_profiles_cache[$unit_api_id];
+
+            if (is_wp_error($profile)) {
+                $unit_access_points = '<span style="color:#b91c1c;font-weight:600;">' . esc_html($profile->get_error_message()) . '</span>';
+            } else {
+                if (!empty($profile['building_id'])) {
+                    $display_building_id = (string) $profile['building_id'];
+                    $building_id_for_api = (int) $profile['building_id'];
+                }
+
+                $unit_access_points = $format_access_points($profile['access_point_ids'] ?? array());
+            }
+        }
+
+        if ($building_id_for_api > 0) {
+            if (!array_key_exists($building_id_for_api, $building_access_cache)) {
+                $building_access_cache[$building_id_for_api] = wp_loft_booking_fetch_building_access_points($building_id_for_api, $environment);
+            }
+
+            $building_points = $building_access_cache[$building_id_for_api];
+
+            if (is_wp_error($building_points)) {
+                if ('no_access_points' === $building_points->get_error_code()) {
+                    $building_access = '<span class="description">None</span>';
+                } else {
+                    $building_access = '<span style="color:#b91c1c;font-weight:600;">' . esc_html($building_points->get_error_message()) . '</span>';
+                }
+            } else {
+                $building_access = $format_access_points($building_points);
+            }
+        }
+
+        $unit_id_display      = $unit_api_id > 0 ? (string) $unit_api_id : '—';
+        $building_id_display  = $display_building_id !== '' ? $display_building_id : '—';
+        $availability_display = ($avail === 'N/A' || empty($avail)) ? '—' : $avail;
+
+        echo '<tr>';
+        echo '<td>' . esc_html($unit->unit_name) . '</td>';
+        echo '<td>' . esc_html($unit_id_display) . '</td>';
+        echo '<td>' . esc_html($building_id_display) . '</td>';
+        echo '<td>' . wp_kses_post($unit_access_points) . '</td>';
+        echo '<td>' . wp_kses_post($building_access) . '</td>';
+        echo '<td style="color:' . esc_attr($color) . ';font-weight:bold;">' . esc_html($text) . '</td>';
+        echo '<td>' . esc_html($availability_display) . '</td>';
+        echo '<td>' . wp_kses_post($button_html) . '</td>';
+        echo '</tr>';
     }
 
     echo '</tbody></table>';
