@@ -124,7 +124,19 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
     $remote_profile = wp_loft_booking_fetch_unit_profile((int) $unit->unit_id_api, $environment);
 
     if (is_wp_error($remote_profile)) {
-        error_log('⚠️ Unable to fetch ButterflyMX unit profile: ' . $remote_profile->get_error_message());
+        $log_message = sprintf(
+            '⚠️ Unable to fetch ButterflyMX unit profile (code: %s): %s',
+            $remote_profile->get_error_code(),
+            $remote_profile->get_error_message()
+        );
+
+        $error_data = $remote_profile->get_error_data();
+
+        if (is_array($error_data) && !empty($error_data['status'])) {
+            $log_message .= sprintf(' [status %s]', $error_data['status']);
+        }
+
+        error_log($log_message);
     } else {
         if (!empty($remote_profile['building_id'])) {
             $building_id = $building_id > 0 ? $building_id : (int) $remote_profile['building_id'];
