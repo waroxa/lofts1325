@@ -132,8 +132,19 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
         $error_data = $remote_profile->get_error_data();
 
-        if (is_array($error_data) && !empty($error_data['status'])) {
-            $log_message .= sprintf(' [status %s]', $error_data['status']);
+        if (is_array($error_data)) {
+            if (!empty($error_data['status'])) {
+                $log_message .= sprintf(' [status %s]', $error_data['status']);
+            }
+
+            if (array_key_exists('body', $error_data) && null !== $error_data['body']) {
+                $body = $error_data['body'];
+                $log_message .= ' Body: ' . (
+                    is_string($body)
+                        ? $body
+                        : wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                );
+            }
         }
 
         error_log($log_message);
@@ -207,7 +218,26 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
     );
 
     if (is_wp_error($result)) {
-        error_log('❌ ButterflyMX keychain creation failed: ' . $result->get_error_message());
+        $log_message = '❌ ButterflyMX keychain creation failed: ' . $result->get_error_message();
+
+        $error_data = $result->get_error_data();
+
+        if (is_array($error_data)) {
+            if (!empty($error_data['status'])) {
+                $log_message .= sprintf(' [status %s]', $error_data['status']);
+            }
+
+            if (array_key_exists('body', $error_data) && null !== $error_data['body']) {
+                $body = $error_data['body'];
+                $log_message .= ' Body: ' . (
+                    is_string($body)
+                        ? $body
+                        : wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                );
+            }
+        }
+
+        error_log($log_message);
         return $result;
     }
 

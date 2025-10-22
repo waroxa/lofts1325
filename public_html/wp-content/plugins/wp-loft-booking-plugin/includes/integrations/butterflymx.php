@@ -451,8 +451,9 @@ function wp_loft_booking_fetch_unit_profile( $unit_id, $environment = 'productio
         return new WP_Error( 'http_request_failed', $response->get_error_message() );
     }
 
-    $status = wp_remote_retrieve_response_code( $response );
-    $body   = json_decode( wp_remote_retrieve_body( $response ), true );
+    $status   = wp_remote_retrieve_response_code( $response );
+    $raw_body = wp_remote_retrieve_body( $response );
+    $body     = json_decode( $raw_body, true );
 
     if ( $status >= 300 ) {
         $message = '';
@@ -472,12 +473,14 @@ function wp_loft_booking_fetch_unit_profile( $unit_id, $environment = 'productio
             $message,
             array(
                 'status' => $status,
-                'body'   => $body,
+                'body'   => is_null( $body ) ? $raw_body : $body,
             )
         );
     }
 
-    $unit = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+    $data = is_array( $body ) ? $body : array();
+
+    $unit = isset( $data['data'] ) && is_array( $data['data'] ) ? $data['data'] : array();
 
     if ( empty( $unit ) ) {
         return new WP_Error( 'unit_not_found', 'ButterflyMX unit payload was empty.' );
@@ -898,13 +901,21 @@ function wp_loft_booking_create_visitor_pass_for_unit(
         return new WP_Error( 'http_request_failed', $resp->get_error_message() );
     }
 
-    $status = wp_remote_retrieve_response_code( $resp );
-    $data   = json_decode( wp_remote_retrieve_body( $resp ), true );
+    $status   = wp_remote_retrieve_response_code( $resp );
+    $raw_body = wp_remote_retrieve_body( $resp );
+    $data     = json_decode( $raw_body, true );
 
     if ( $status >= 300 ) {
         $message = isset( $data['message'] ) ? trim( $data['message'] ) : 'ButterflyMX API error.';
         error_log( sprintf( '❌ ButterflyMX API error (%d): %s', $status, $message ) );
-        return new WP_Error( 'http_error', $message, array( 'status' => $status ) );
+        return new WP_Error(
+            'http_error',
+            $message,
+            array(
+                'status' => $status,
+                'body'   => is_null( $data ) ? $raw_body : $data,
+            )
+        );
     }
 
     $keychain_id = (int) ( $data['data']['id'] ?? 0 );
