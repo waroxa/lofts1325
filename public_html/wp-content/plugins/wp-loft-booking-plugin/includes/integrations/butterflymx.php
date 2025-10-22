@@ -716,6 +716,20 @@ function wp_loft_booking_access_point_name_has_number( $normalized_name, $number
 }
 
 /**
+ * Normalize an access point label to simplify string comparisons.
+ *
+ * @param string $label Original access point label.
+ *
+ * @return string Normalized label (lowercase, accents stripped, consecutive whitespace collapsed).
+ */
+function wp_loft_booking_normalize_access_point_label( $label ) {
+    $normalized = strtolower( remove_accents( (string) $label ) );
+    $normalized = preg_replace( '/\s+/', ' ', $normalized );
+
+    return trim( (string) $normalized );
+}
+
+/**
  * Build the preferred access point set for a loft (105, 106, 111, exterior intercom and loft door).
  *
  * @param int      $building_id     ButterflyMX building identifier.
@@ -780,6 +794,40 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         'intercom' => array(),
     );
 
+    $target_phrases = array(
+        '105'      => array(
+            '105- acces porte interieur escalier loft 1325',
+            '105 acces porte interieur escalier loft 1325',
+        ),
+        '106'      => array(
+            '106-porte exterieur 1325',
+            '106 porte exterieur 1325',
+        ),
+        '111'      => array(
+            '111- ascenseur',
+            '111 ascenseur',
+        ),
+        'intercom' => array(
+            'intercom (porte 1325)exterieur',
+            'intercom (porte 1325) exterieur',
+        ),
+    );
+
+    foreach ( $target_phrases as $key => $phrases ) {
+        $target_phrases[ $key ] = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        static function ( $phrase ) {
+                            return wp_loft_booking_normalize_access_point_label( $phrase );
+                        },
+                        $phrases
+                    )
+                )
+            )
+        );
+    }
+
     foreach ( $details as $id => $info ) {
         $name = isset( $info['name'] ) ? (string) $info['name'] : '';
 
@@ -787,42 +835,69 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
             continue;
         }
 
-        $normalized_name = strtolower( remove_accents( $name ) );
-        $int_id          = (int) $id;
+        $normalized_raw     = strtolower( remove_accents( $name ) );
+        $normalized_name    = wp_loft_booking_normalize_access_point_label( $name );
+        $int_id             = (int) $id;
 
-        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '105' ) ) {
-            if ( null === $targets['105'] ) {
-                $targets['105'] = $int_id;
-            }
-            $keyword_matches['105'][] = $int_id;
+        if ( '' === $normalized_name ) {
+            continue;
         }
 
-        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '106' ) ) {
-            if ( null === $targets['106'] ) {
-                $targets['106'] = $int_id;
+        foreach ( $target_phrases as $key => $phrases ) {
+            foreach ( $phrases as $phrase ) {
+                if ( '' === $phrase ) {
+                    continue;
+                }
+
+                if ( false !== strpos( $normalized_name, $phrase ) ) {
+                    if ( null === $targets[ $key ] ) {
+                        $targets[ $key ] = $int_id;
+                    }
+
+                    $keyword_matches[ $key ][] = $int_id;
+                    break;
+                }
             }
-            $keyword_matches['106'][] = $int_id;
         }
 
-        if ( wp_loft_booking_access_point_name_has_number( $normalized_name, '111' ) ) {
-            if ( null === $targets['111'] ) {
-                $targets['111'] = $int_id;
-            }
-            $keyword_matches['111'][] = $int_id;
-        }
-
-        if ( false !== strpos( $normalized_name, 'intercom' ) ) {
-            if ( null === $targets['intercom'] && ( false !== strpos( $normalized_name, 'exterieur' ) || false !== strpos( $normalized_name, 'exterior' ) ) ) {
-                $targets['intercom'] = $int_id;
-            }
-            $keyword_matches['intercom'][] = $int_id;
-        }
-
-        if ( $loft_number && false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_name, $loft_number ) ) {
+        if ( $loft_number && false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_raw, $loft_number ) ) {
             if ( null === $targets['loft'] ) {
                 $targets['loft'] = $int_id;
             }
+
             $keyword_matches['loft'][] = $int_id;
+        }
+
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_raw, '105' ) ) {
+            if ( null === $targets['105'] ) {
+                $targets['105'] = $int_id;
+            }
+
+            $keyword_matches['105'][] = $int_id;
+        }
+
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_raw, '106' ) ) {
+            if ( null === $targets['106'] ) {
+                $targets['106'] = $int_id;
+            }
+
+            $keyword_matches['106'][] = $int_id;
+        }
+
+        if ( wp_loft_booking_access_point_name_has_number( $normalized_raw, '111' ) ) {
+            if ( null === $targets['111'] ) {
+                $targets['111'] = $int_id;
+            }
+
+            $keyword_matches['111'][] = $int_id;
+        }
+
+        if ( false !== strpos( $normalized_raw, 'intercom' ) ) {
+            if ( null === $targets['intercom'] && ( false !== strpos( $normalized_raw, 'exterieur' ) || false !== strpos( $normalized_raw, 'exterior' ) ) ) {
+                $targets['intercom'] = $int_id;
+            }
+
+            $keyword_matches['intercom'][] = $int_id;
         }
     }
 

@@ -817,7 +817,18 @@ function wp_loft_booking_sync_keychains_from_api() {
             : 'https://api.na.sandbox.butterflymx.com/v3/';
     }
 
-    $url = $api_base . 'keychains';
+    $query_args = [
+        'include' => 'virtual_keys,virtual_key_distributions,people,tenant,devices',
+    ];
+
+    if ($version === 'v4') {
+        $query_args['page[size]'] = 100;
+    } else {
+        $query_args['per_page'] = 100;
+    }
+
+    $url = add_query_arg($query_args, $api_base . 'keychains');
+    $api_root = rtrim($api_base, '/');
 
     while ($url) {
         $response = wp_remote_get($url, [
@@ -967,7 +978,19 @@ function wp_loft_booking_sync_keychains_from_api() {
             }
         }
 
-        $url = $body['links']['next'] ?? null; // follow cursor-based pagination
+        $next = $body['links']['next'] ?? null; // follow cursor-based pagination
+
+        if ($next) {
+            if (strpos($next, 'http') === 0) {
+                $url = $next;
+            } elseif (strpos($next, '/') === 0) {
+                $url = $api_root . $next;
+            } else {
+                $url = trailingslashit($api_base) . ltrim($next, '/');
+            }
+        } else {
+            $url = null;
+        }
     }
 
     return $active_keychains;
