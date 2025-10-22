@@ -203,15 +203,9 @@ function wp_loft_booking_sync_units_only() {
                         error_log("📛 MARKED OCCUPIED: $unit_name | UNTIL: " . ($available_until ?? 'N/A') . " | KEYCHAIN: {$current_booking['name']}");
                     } elseif ($upcoming_booking && !empty($upcoming_booking['valid_from_ts'])) {
                         $hours_until_start = ($upcoming_booking['valid_from_ts'] - $now_ts) / HOUR_IN_SECONDS;
+                        $status             = 'available';
 
-                        if ($hours_until_start < 24) {
-                            $status = 'unavailable';
-                            $available_until = $upcoming_booking['valid_until_ts']
-                                ? date('Y-m-d H:i:s', $upcoming_booking['valid_until_ts'])
-                                : ($upcoming_booking['valid_from'] ?? null);
-                            error_log("⏳ MARKED UNAVAILABLE (<24H): $unit_name | STARTS: " . date('Y-m-d H:i:s', $upcoming_booking['valid_from_ts']) . " | KEYCHAIN: {$upcoming_booking['name']}");
-                        } else {
-                            $status = 'available';
+                        if ($hours_until_start >= 24) {
                             $cutoff_ts = $upcoming_booking['valid_from_ts'] - DAY_IN_SECONDS;
 
                             if ($cutoff_ts < $now_ts) {
@@ -220,6 +214,10 @@ function wp_loft_booking_sync_units_only() {
 
                             $available_until = date('Y-m-d H:i:s', $cutoff_ts);
                             error_log("🕒 AVAILABLE WITH BUFFER: $unit_name | RENTABLE UNTIL: $available_until | NEXT START: " . date('Y-m-d H:i:s', $upcoming_booking['valid_from_ts']));
+                        } else {
+                            $available_until_ts = max($now_ts, $upcoming_booking['valid_from_ts']);
+                            $available_until    = date('Y-m-d H:i:s', $available_until_ts);
+                            error_log("✅ AVAILABLE UNTIL NEXT CHECK-IN (<24H): $unit_name | RENTABLE UNTIL: $available_until | KEYCHAIN: {$upcoming_booking['name']}");
                         }
                     }
                 } else {
