@@ -111,8 +111,8 @@ function keychains_page_function() {
 
             $wpdb->insert($kc_table, [
                 'keychain_id'  => isset($kc['keychain_id']) ? intval($kc['keychain_id']) : null,
-                'tenant_id'    => $kc['tenant_id'],
-                'unit_id'      => $kc['unit_id'],
+                'tenant_id'    => isset($kc['tenant_id']) && $kc['tenant_id'] ? intval($kc['tenant_id']) : null,
+                'unit_id'      => isset($kc['unit_id']) && $kc['unit_id'] ? intval($kc['unit_id']) : null,
                 'name'         => $kc['name'],
                 'valid_from'   => $kc['valid_from'],
                 'valid_until'  => $kc['valid_until'],
@@ -789,14 +789,31 @@ function wp_loft_booking_sync_keychains_from_api(): array {
         }
 
         foreach ($body['data'] as $item) {
-            $attrs = $item['attributes'];
+            $attrs         = $item['attributes'];
             $relationships = $item['relationships'];
-            $valid_from = strtotime($attrs['starts_at']);
-            $valid_until = strtotime($attrs['ends_at']);
+            $valid_from    = strtotime($attrs['starts_at']);
+            $valid_until   = strtotime($attrs['ends_at']);
+
+            if ($valid_from === false || $valid_until === false) {
+                continue;
+            }
 
             if ($valid_from <= $now && $valid_until >= $now) {
                 // Extract tenant and unit via panel
                 $external_tenant_id = $relationships['tenant']['data']['id'] ?? null;
+
+                $tenant_id = null;
+                if ($external_tenant_id) {
+                    $tenant_id = $wpdb->get_var(
+                        $wpdb->prepare(
+                            "SELECT id FROM {$wpdb->prefix}loft_tenants WHERE tenant_id = %s",
+                            $external_tenant_id
+                        )
+                    );
+                    if ($tenant_id) {
+                        $tenant_id = intval($tenant_id);
+                    }
+                }
 
                 $devices = $relationships['devices']['data'] ?? [];
                 $unit_api_id = null;
@@ -850,14 +867,16 @@ function wp_loft_booking_sync_keychains_from_api(): array {
                 }
 
                 $active_keychains[] = [
-                    'keychain_id'  => intval($item['id'] ?? 0),
-                    'name'         => sanitize_text_field($attrs['name'] ?? 'Unnamed Keychain'),
-                    'tenant_id'    => $external_tenant_id,
-                    'unit_id'      => $unit_id,
-                    'valid_from'   => $attrs['starts_at'],
-                    'valid_until'  => $attrs['ends_at'],
-                    'virtual_keys' => $virtual_keys,
-                    'people'       => $people,
+                    'keychain_id'          => intval($item['id'] ?? 0),
+                    'name'                 => sanitize_text_field($attrs['name'] ?? 'Unnamed Keychain'),
+                    'tenant_id'            => $tenant_id,
+                    'unit_id'              => $unit_id ? intval($unit_id) : null,
+                    'valid_from'           => gmdate('Y-m-d H:i:s', $valid_from),
+                    'valid_until'          => gmdate('Y-m-d H:i:s', $valid_until),
+                    'virtual_keys'         => $virtual_keys,
+                    'people'               => $people,
+                    'external_tenant_id'   => $external_tenant_id,
+                    'external_unit_api_id' => $unit_api_id,
                 ];
             }
         }
