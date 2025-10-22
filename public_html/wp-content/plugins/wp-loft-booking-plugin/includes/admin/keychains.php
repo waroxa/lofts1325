@@ -18,6 +18,12 @@ function keychains_page_function() {
 
     maybe_add_column(
         $kc_table,
+        'keychain_id',
+        "ALTER TABLE $kc_table ADD COLUMN keychain_id INT UNSIGNED DEFAULT NULL AFTER id"
+    );
+
+    maybe_add_column(
+        $kc_table,
         'people_count',
         "ALTER TABLE $kc_table ADD COLUMN people_count SMALLINT UNSIGNED DEFAULT 0 AFTER valid_until"
     );
