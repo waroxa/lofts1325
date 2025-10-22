@@ -792,23 +792,42 @@ function wp_loft_booking_save_keychain_data($booking_id, $unit_id, $keychain_id,
     $vk_table   = $wpdb->prefix . 'loft_virtual_keys';
     $link_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
 
-    $wpdb->insert($kc_table, [
-        'keychain_id' => $keychain_id,
-        'booking_id'  => $booking_id,
-        'unit_id'     => $unit_id,
-        'name'        => 'Booking ' . $booking_id,
-        'valid_from'  => $start,
-        'valid_until' => $end,
-    ]);
-    $saved_kc_id = $wpdb->insert_id;
+    $booking_fk = (is_numeric($booking_id) && (int) $booking_id > 0) ? (int) $booking_id : null;
+    $unit_fk    = (is_numeric($unit_id) && (int) $unit_id > 0) ? (int) $unit_id : null;
 
-    $wpdb->insert($vk_table, [
-        'name'           => 'Virtual Key ' . $virtual_key_id,
-        'booking_id'     => $booking_id,
-        'virtual_key_id' => $virtual_key_id,
+    $valid_from = gmdate('Y-m-d H:i:s', strtotime($start));
+    $valid_until = gmdate('Y-m-d H:i:s', strtotime($end));
+
+    $kc_data = [
+        'keychain_id' => (int) $keychain_id,
+        'name'        => $booking_fk ? sprintf('Booking %d', $booking_fk) : sprintf('Keychain %d', (int) $keychain_id),
+        'valid_from'  => $valid_from,
+        'valid_until' => $valid_until,
+    ];
+
+    if ($booking_fk) {
+        $kc_data['booking_id'] = $booking_fk;
+    }
+
+    if (!is_null($unit_fk)) {
+        $kc_data['unit_id'] = $unit_fk;
+    }
+
+    $wpdb->insert($kc_table, $kc_data);
+    $saved_kc_id = (int) $wpdb->insert_id;
+
+    $vk_data = [
+        'name'           => $booking_fk ? sprintf('Booking %d Virtual Key', $booking_fk) : sprintf('Virtual Key %s', $virtual_key_id),
+        'virtual_key_id' => sanitize_text_field($virtual_key_id),
         'key_status'     => 'active',
-    ]);
-    $saved_vk_id = $wpdb->insert_id;
+    ];
+
+    if ($booking_fk) {
+        $vk_data['booking_id'] = $booking_fk;
+    }
+
+    $wpdb->insert($vk_table, $vk_data);
+    $saved_vk_id = (int) $wpdb->insert_id;
 
     if ($saved_kc_id && $saved_vk_id) {
         $wpdb->insert($link_table, [
