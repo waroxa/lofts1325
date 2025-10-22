@@ -54,9 +54,10 @@ function wp_loft_booking_stripe_payment_succeeded($order, $event) {
     $checkout   = $meta->checkout ?? '';
     $first_name = $meta->first_name ?? 'Guest';
     $last_name  = $meta->last_name ?? 'Booking';
+    $phone      = $meta->guest_phone ?? '';
     $booking_id = isset($meta->booking_id) ? intval($meta->booking_id) : 0;
 
-    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id);
+    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id, $phone);
 }
 
 function wp_loft_booking_nd_stripe_payment_complete($payload) {
@@ -67,11 +68,12 @@ function wp_loft_booking_nd_stripe_payment_complete($payload) {
     $booking_id = isset($payload['booking_id']) ? intval($payload['booking_id']) : 0;
     $first_name = $payload['first_name']    ?? 'Guest';
     $last_name  = $payload['last_name']     ?? 'Booking';
+    $phone      = $payload['guest_phone']   ?? ($payload['phone'] ?? '');
 
-    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id);
+    wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name, $last_name, $booking_id, $phone);
 }
 
-function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name = 'Guest', $last_name = 'Booking', $booking_id = 0) {
+function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout, $first_name = 'Guest', $last_name = 'Booking', $booking_id = 0, $phone = '') {
     $room_type = strtoupper($room_type);
 
     $loft = find_first_available_loft_unit($room_type);
@@ -85,24 +87,64 @@ function wp_loft_booking_process_booking($email, $room_type, $checkin, $checkout
         return;
     }
 
-    $access_group_id = wp_loft_booking_get_access_group_id($loft->unit_name);
-    if (!$access_group_id) {
-        error_log('❌ Access group not found for ' . $loft->unit_name);
+    $full_name = trim(sprintf('%s %s', $first_name, $last_name));
+    if ('' === $full_name) {
+        $full_name = 'Guest Booking';
+    }
+
+    $timezone_string = get_option('timezone_string');
+    if (empty($timezone_string)) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    try {
+        $checkin_local  = new DateTime($checkin, new DateTimeZone($timezone_string));
+        $checkout_local = new DateTime($checkout, new DateTimeZone($timezone_string));
+    } catch (Exception $e) {
+        error_log('❌ Unable to parse booking dates for ButterflyMX keychain: ' . $e->getMessage());
         return;
     }
 
-    $tenant = [
-        'first_name' => $first_name,
-        'last_name'  => $last_name,
-        'email'      => $email,
-    ];
+    $checkin_local->setTime(15, 0, 0);
+    $checkout_local->setTime(11, 0, 0);
 
-    $start = $checkin . 'T15:00:00Z';
-    $end   = $checkout . 'T11:00:00Z';
+    $checkin_utc  = clone $checkin_local;
+    $checkout_utc = clone $checkout_local;
 
-    $result = wp_loft_booking_create_keychain_with_vk($tenant, $loft->unit_id_api, $access_group_id, $start, $end);
-    if ($result) {
-        wp_loft_booking_save_keychain_data($booking_id, $loft->id, $result['keychain_id'], $result['virtual_key_id'], $start, $end);
+    $checkin_utc->setTimezone(new DateTimeZone('UTC'));
+    $checkout_utc->setTimezone(new DateTimeZone('UTC'));
+
+    $start = $checkin_utc->format('Y-m-d\TH:i:s\Z');
+    $end   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
+
+    $virtual_key_result = wp_loft_booking_generate_virtual_key(
+        (int) $loft->id,
+        $full_name,
+        $email,
+        $phone,
+        $checkin,
+        $checkout
+    );
+
+    if (is_wp_error($virtual_key_result)) {
+        error_log('❌ Failed to create ButterflyMX keychain for booking: ' . $virtual_key_result->get_error_message());
+        return;
+    }
+
+    $keychain_id            = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : 0;
+    $primary_virtual_key_id = $virtual_key_result['virtual_key_ids'][0] ?? null;
+
+    if ($keychain_id > 0) {
+        wp_loft_booking_save_keychain_data(
+            $booking_id,
+            $loft->id,
+            $keychain_id,
+            $primary_virtual_key_id,
+            $start,
+            $end
+        );
+    } else {
+        error_log('⚠️ ButterflyMX keychain created without a valid keychain ID.');
     }
 
     add_booking_to_google_calendar("Booking for $first_name $last_name", $checkin, $checkout);
