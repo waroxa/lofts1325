@@ -730,6 +730,7 @@ function wp_loft_booking_create_visitor_pass_for_unit(
     );
 
     if ( is_wp_error( $resp ) ) {
+        error_log( '❌ ButterflyMX request error: ' . $resp->get_error_message() );
         return new WP_Error( 'http_request_failed', $resp->get_error_message() );
     }
 
@@ -738,6 +739,7 @@ function wp_loft_booking_create_visitor_pass_for_unit(
 
     if ( $status >= 300 ) {
         $message = isset( $data['message'] ) ? trim( $data['message'] ) : 'ButterflyMX API error.';
+        error_log( sprintf( '❌ ButterflyMX API error (%d): %s', $status, $message ) );
         return new WP_Error( 'http_error', $message, array( 'status' => $status ) );
     }
 
