@@ -36,6 +36,27 @@ function keychains_page_function() {
 
     echo '<div class="wrap"><h1>🔑 Keychains</h1>';
 
+    if (isset($_POST['wp_loft_booking_test_keychain'])) {
+        check_admin_referer('wp_loft_booking_test_keychain_action');
+
+        $test_result = wp_loft_booking_run_test_keychain_request();
+
+        if (is_wp_error($test_result)) {
+            $error_message = esc_html($test_result->get_error_message());
+            $error_details = $test_result->get_error_data();
+
+            if (!empty($error_details) && is_array($error_details)) {
+                $error_message .= '<br><code>' . esc_html(wp_json_encode($error_details)) . '</code>';
+            }
+
+            echo "<div class='notice notice-error'><p>❌ Test keychain request failed: {$error_message}</p></div>";
+        } else {
+            $keychain_id = isset($test_result['keychain_id']) ? intval($test_result['keychain_id']) : 0;
+            $status_code = isset($test_result['status']) ? intval($test_result['status']) : 0;
+            echo "<div class='notice notice-success'><p>✅ Test keychain request sent. Status: {$status_code}. Keychain ID: " . esc_html((string) $keychain_id) . '</p></div>';
+        }
+    }
+
     if (isset($_POST['sync_keychains'])) {
         $fetched = wp_loft_booking_sync_keychains_from_api();
 
@@ -131,6 +152,12 @@ function keychains_page_function() {
 
         echo "<div class='updated'><p>✅ Synced $count active keychains.</p></div>";
     }
+
+    echo '<form method="post" style="margin-bottom:12px;">';
+    wp_nonce_field('wp_loft_booking_test_keychain_action');
+    echo '<input type="hidden" name="wp_loft_booking_test_keychain" value="1" />';
+    echo '<input type="submit" class="button" value="🧪 Create Test ButterflyMX Keychain" />';
+    echo '</form>';
 
     echo '<form method="post"><input type="submit" name="sync_keychains" class="button button-primary" value="🔄 Sync Keychains from ButterflyMX" /></form>';
 
@@ -251,6 +278,89 @@ function keychains_page_function() {
 
 
 
+
+
+function wp_loft_booking_run_test_keychain_request() {
+    $environment = wp_loft_booking_get_butterflymx_environment();
+    $base_url    = wp_loft_booking_get_butterflymx_base_url($environment);
+    $token       = get_butterflymx_access_token('v4');
+
+    if (empty($token)) {
+        error_log('❌ Test keychain request failed: Missing ButterflyMX token.');
+        return new WP_Error('no_token', 'ButterflyMX access token missing.');
+    }
+
+    $payload = [
+        'keychain' => [
+            'name'             => 'LOFT 224 - TESTM',
+            'unit_id'          => 1632229,
+            'starts_at'        => '2025-10-21T22:30:00Z',
+            'ends_at'          => '2025-10-22T22:30:00Z',
+            'recipients'       => ['waroxa@gmail.com', '+15145537497'],
+            'access_point_ids' => [23940, 23941, 23942],
+            'device_ids'       => [],
+        ],
+    ];
+
+    $response = wp_remote_post(
+        trailingslashit($base_url) . 'keychains/custom',
+        [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ],
+            'body'    => wp_json_encode($payload, JSON_UNESCAPED_SLASHES),
+            'timeout' => 20,
+        ]
+    );
+
+    if (is_wp_error($response)) {
+        error_log('❌ Test keychain request error: ' . $response->get_error_message());
+        return new WP_Error('http_request_failed', $response->get_error_message());
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $raw_body    = wp_remote_retrieve_body($response);
+    $decoded     = json_decode($raw_body, true);
+
+    if ($status_code >= 300) {
+        $message = 'ButterflyMX API error.';
+
+        if (is_array($decoded)) {
+            if (!empty($decoded['message'])) {
+                $message = $decoded['message'];
+            } elseif (!empty($decoded['errors'][0]['messages'])) {
+                $message = implode(' ', (array) $decoded['errors'][0]['messages']);
+            }
+        } elseif (!empty($raw_body)) {
+            $message = $raw_body;
+        }
+
+        error_log(sprintf('❌ Test keychain request failed (%d): %s', $status_code, $message));
+
+        return new WP_Error(
+            'http_error',
+            $message,
+            [
+                'status' => $status_code,
+                'body'   => is_null($decoded) ? $raw_body : $decoded,
+            ]
+        );
+    }
+
+    $keychain_id = 0;
+    if (isset($decoded['data']['id'])) {
+        $keychain_id = (int) $decoded['data']['id'];
+    }
+
+    error_log(sprintf('✅ Test keychain request succeeded (%d). Keychain ID: %d', $status_code, $keychain_id));
+
+    return [
+        'status'      => $status_code,
+        'body'        => $decoded,
+        'keychain_id' => $keychain_id,
+    ];
+}
 
 if (!function_exists('wp_loft_booking_normalize_loft_label')) {
     function wp_loft_booking_normalize_loft_label($label) {
