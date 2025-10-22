@@ -290,12 +290,25 @@ function wp_loft_booking_run_test_keychain_request() {
         return new WP_Error('no_token', 'ButterflyMX access token missing.');
     }
 
+    try {
+        $utc_timezone   = new DateTimeZone('UTC');
+        $starts_at_dt   = new DateTimeImmutable('now', $utc_timezone);
+        $starts_at_dt   = $starts_at_dt->add(new DateInterval('PT10M'));
+        $ends_at_dt     = $starts_at_dt->add(new DateInterval('PT22H'));
+        $starts_at_iso  = $starts_at_dt->format('Y-m-d\TH:i:s\Z');
+        $ends_at_iso    = $ends_at_dt->format('Y-m-d\TH:i:s\Z');
+    } catch (Exception $e) {
+        error_log('❌ Failed to calculate ButterflyMX test keychain window: ' . $e->getMessage());
+
+        return new WP_Error('date_calculation_failed', 'Unable to calculate keychain validity window.');
+    }
+
     $payload = [
         'keychain' => [
             'name'             => 'LOFT 224 - TESTM',
             'unit_id'          => 1632229,
-            'starts_at'        => '2025-10-21T22:30:00Z',
-            'ends_at'          => '2025-10-22T22:30:00Z',
+            'starts_at'        => $starts_at_iso,
+            'ends_at'          => $ends_at_iso,
             'recipients'       => ['waroxa@gmail.com', '+15145537497'],
             'access_point_ids' => [23940, 23941, 23942],
             'device_ids'       => [],
