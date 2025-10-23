@@ -676,6 +676,14 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
 
                 $name_candidates = array();
 
+                if ( isset( $access_point['name'] ) && is_string( $access_point['name'] ) ) {
+                    $top_level_name = trim( $access_point['name'] );
+
+                    if ( '' !== $top_level_name ) {
+                        $name_candidates[] = $top_level_name;
+                    }
+                }
+
                 foreach ( array( 'name', 'display_name', 'label', 'description' ) as $attribute_key ) {
                     if ( isset( $attributes[ $attribute_key ] ) && is_string( $attributes[ $attribute_key ] ) ) {
                         $candidate = trim( $attributes[ $attribute_key ] );
