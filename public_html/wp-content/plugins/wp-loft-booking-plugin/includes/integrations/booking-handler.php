@@ -305,6 +305,10 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         implode(', ', $result['access_point_ids'])
     ));
 
+    if (function_exists('wp_loft_booking_trigger_unit_sync')) {
+        wp_loft_booking_trigger_unit_sync('virtual_key_created');
+    }
+
     return $result;
 }
 

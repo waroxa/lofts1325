@@ -7,6 +7,7 @@ function wp_loft_booking_admin_menu() {
     add_submenu_page('wp_loft_booking', 'Manage Lofts', '🚪🛋️ Lofts', 'manage_options', 'wp_loft_booking_lofts', 'wp_loft_booking_lofts_page');
     add_submenu_page('wp_loft_booking', 'Manage Bookings', '🛎️ Bookings', 'manage_options', 'wp_loft_booking_bookings', 'wp_loft_booking_bookings_page');
     add_submenu_page('wp_loft_booking', 'ButterflyMX Settings', 'ButterflyMX Settings', 'manage_options', 'wp_loft_booking_butterflymx_settings', 'wp_loft_booking_butterflymx_settings_page');
+    add_submenu_page('wp_loft_booking', 'ButterflyMX Access Points', '🔐 Access Points', 'manage_options', 'wp_loft_booking_access_points', 'wp_loft_booking_access_points_page');
     add_submenu_page('wp_loft_booking', 'Tenants', '👨 Tenants', 'manage_options', 'tenants', 'tenants_page_function');
     add_submenu_page('wp_loft_booking', 'Keychains', '🔑🗝️ Keychains', 'manage_options', 'wp_loft_booking_keychains', 'keychains_page_function');
     add_menu_page('Loft Types', 'Loft Types', 'manage_options', 'wp_loft_booking_loft_types', '', '', 7);
