@@ -20,6 +20,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/admin/lofts.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/bookings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/loft-types.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/butterflymx-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/access-points.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/payment-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/tenants.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/butterflymx.php';
@@ -55,6 +56,47 @@ function wp_loft_booking_noop_die_handler() {
 }
 
 function wp_loft_booking_noop_die( $message = '', $title = '', $args = array() ) {}
+
+/**
+ * Trigger a unit sync either asynchronously or immediately.
+ *
+ * @param string $reason Optional context for logging.
+ */
+function wp_loft_booking_trigger_unit_sync( $reason = '' ) {
+    if ( ! function_exists( 'wp_loft_booking_sync_units' ) ) {
+        return;
+    }
+
+    $reason      = trim( (string) $reason );
+    $log_suffix  = '' !== $reason ? ' [' . $reason . ']' : '';
+    $sync_planned = false;
+
+    if ( function_exists( 'wp_schedule_single_event' ) ) {
+        $base_timestamp = time() + 5;
+
+        for ( $attempt = 0; $attempt < 3; $attempt++ ) {
+            $timestamp = $base_timestamp + $attempt;
+
+            if ( wp_schedule_single_event( $timestamp, 'wp_loft_booking_sync_units' ) ) {
+                error_log( sprintf( '🗓️ Scheduled unit sync%s for %s.', $log_suffix, gmdate( 'c', $timestamp ) ) );
+                $sync_planned = true;
+                break;
+            }
+        }
+    }
+
+    if ( $sync_planned ) {
+        return;
+    }
+
+    if ( function_exists( 'wp_loft_booking_run_safely' ) ) {
+        wp_loft_booking_run_safely( 'wp_loft_booking_sync_units' );
+    } else {
+        wp_loft_booking_sync_units();
+    }
+
+    error_log( sprintf( '♻️ Triggered immediate unit sync%s.', $log_suffix ) );
+}
 
 /**
  * Sync tenants, keychains and units in sequence without exiting.
