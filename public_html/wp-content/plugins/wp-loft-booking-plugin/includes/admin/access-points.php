@@ -132,6 +132,21 @@ function wp_loft_booking_access_points_page() {
         $attributes = isset($access_point['attributes']) && is_array($access_point['attributes'])
             ? $access_point['attributes']
             : [];
+        $door       = isset($access_point['door']) && is_array($access_point['door'])
+            ? $access_point['door']
+            : [];
+        $door_name  = isset($door['name']) ? (string) $door['name'] : '';
+        $door_attr  = isset($door['attributes']) && is_array($door['attributes'])
+            ? $door['attributes']
+            : [];
+
+        if ('' === $name && '' !== $door_name) {
+            $name = $door_name;
+        }
+
+        if ('' === $name && $id > 0) {
+            $name = sprintf(__('Access Point #%d', 'wp-loft-booking'), $id);
+        }
 
         $type = '';
 
@@ -155,6 +170,51 @@ function wp_loft_booking_access_points_page() {
 
         if (!empty($attributes['description'])) {
             $details[] = sprintf(__('Description: %s', 'wp-loft-booking'), $attributes['description']);
+        }
+
+        $normalize_for_compare = static function ($value) {
+            if (!is_string($value) || '' === $value) {
+                return '';
+            }
+
+            return function_exists('mb_strtolower')
+                ? mb_strtolower($value, 'UTF-8')
+                : strtolower($value);
+        };
+
+        if ('' !== $door_name && $normalize_for_compare($door_name) !== $normalize_for_compare($name)) {
+            $details[] = sprintf(__('Door: %s', 'wp-loft-booking'), $door_name);
+        }
+
+        if (!empty($door_attr)) {
+            $door_detail_map = [
+                'floor'             => __('Floor: %s', 'wp-loft-booking'),
+                'device_status'     => __('Device status: %s', 'wp-loft-booking'),
+                'device_state'      => __('Device state: %s', 'wp-loft-booking'),
+                'device_name'       => __('Device name: %s', 'wp-loft-booking'),
+                'device_identifier' => __('Device identifier: %s', 'wp-loft-booking'),
+                'location'          => __('Location: %s', 'wp-loft-booking'),
+            ];
+
+            foreach ($door_detail_map as $field => $format) {
+                if (!isset($door_attr[$field])) {
+                    continue;
+                }
+
+                $value = $door_attr[$field];
+
+                if (!is_scalar($value)) {
+                    continue;
+                }
+
+                $value = (string) $value;
+
+                if ('' === trim($value)) {
+                    continue;
+                }
+
+                $details[] = sprintf($format, $value);
+            }
         }
 
         if (empty($details)) {

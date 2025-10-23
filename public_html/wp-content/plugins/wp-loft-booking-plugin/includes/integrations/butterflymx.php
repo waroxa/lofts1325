@@ -540,6 +540,7 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
     $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
     $ap_ids   = array();
     $ap_map   = array();
+    $door_map = array();
     $page     = 1;
     $url      = add_query_arg(
         array(
@@ -601,6 +602,49 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
             );
         }
 
+        if ( $with_details && isset( $body['included'] ) && is_array( $body['included'] ) ) {
+            foreach ( $body['included'] as $included ) {
+                if ( ! isset( $included['type'], $included['id'] ) ) {
+                    continue;
+                }
+
+                if ( 'doors' !== $included['type'] ) {
+                    continue;
+                }
+
+                $door_id = (string) $included['id'];
+
+                if ( '' === $door_id ) {
+                    continue;
+                }
+
+                $door_attributes = array();
+
+                if ( isset( $included['attributes'] ) && is_array( $included['attributes'] ) ) {
+                    $door_attributes = $included['attributes'];
+                }
+
+                $door_name = '';
+
+                foreach ( array( 'name', 'display_name', 'label', 'description' ) as $door_name_field ) {
+                    if ( isset( $door_attributes[ $door_name_field ] ) && is_string( $door_attributes[ $door_name_field ] ) ) {
+                        $candidate = trim( $door_attributes[ $door_name_field ] );
+
+                        if ( '' !== $candidate ) {
+                            $door_name = $candidate;
+                            break;
+                        }
+                    }
+                }
+
+                $door_map[ $door_id ] = array(
+                    'id'         => is_numeric( $door_id ) ? (int) $door_id : $door_id,
+                    'name'       => $door_name,
+                    'attributes' => $door_attributes,
+                );
+            }
+        }
+
         foreach ( $body['data'] ?? array() as $access_point ) {
             if ( ! isset( $access_point['id'] ) ) {
                 continue;
@@ -615,22 +659,79 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
             $ap_ids[] = $id;
 
             if ( $with_details ) {
-                $attributes = array();
+                $attributes    = array();
+                $relationships = array();
 
                 if ( isset( $access_point['attributes'] ) && is_array( $access_point['attributes'] ) ) {
                     $attributes = $access_point['attributes'];
                 }
 
+                if ( isset( $access_point['relationships'] ) && is_array( $access_point['relationships'] ) ) {
+                    $relationships = $access_point['relationships'];
+                }
+
+                $name_candidates = array();
+
+                foreach ( array( 'name', 'display_name', 'label', 'description' ) as $attribute_key ) {
+                    if ( isset( $attributes[ $attribute_key ] ) && is_string( $attributes[ $attribute_key ] ) ) {
+                        $candidate = trim( $attributes[ $attribute_key ] );
+
+                        if ( '' !== $candidate ) {
+                            $name_candidates[] = $candidate;
+                        }
+                    }
+                }
+
+                $door_details = array();
+                $door_id      = '';
+
+                if ( isset( $relationships['door']['data']['id'] ) ) {
+                    $door_id = (string) $relationships['door']['data']['id'];
+                }
+
+                if ( '' !== $door_id && isset( $door_map[ $door_id ] ) ) {
+                    $door_details = $door_map[ $door_id ];
+
+                    if ( isset( $door_details['name'] ) && is_string( $door_details['name'] ) ) {
+                        $door_name = trim( $door_details['name'] );
+
+                        if ( '' !== $door_name ) {
+                            $name_candidates[] = $door_name;
+                        }
+                    }
+
+                    if ( isset( $door_details['attributes'] ) && is_array( $door_details['attributes'] ) ) {
+                        foreach ( array( 'name', 'display_name', 'label', 'description' ) as $door_attribute_key ) {
+                            if ( isset( $door_details['attributes'][ $door_attribute_key ] ) && is_string( $door_details['attributes'][ $door_attribute_key ] ) ) {
+                                $candidate = trim( $door_details['attributes'][ $door_attribute_key ] );
+
+                                if ( '' !== $candidate ) {
+                                    $name_candidates[] = $candidate;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $name_candidates = array_values( array_unique( $name_candidates ) );
+
                 $name = '';
 
-                if ( isset( $attributes['name'] ) ) {
-                    $name = (string) $attributes['name'];
+                if ( ! empty( $name_candidates ) ) {
+                    $name = (string) $name_candidates[0];
+                }
+
+                if ( '' === $name ) {
+                    /* translators: %d: access point id */
+                    $name = sprintf( __( 'Access Point #%d', 'wp-loft-booking' ), $id );
                 }
 
                 $ap_map[ $id ] = array(
-                    'id'         => $id,
-                    'name'       => $name,
-                    'attributes' => $attributes,
+                    'id'            => $id,
+                    'name'          => $name,
+                    'attributes'    => $attributes,
+                    'door'          => $door_details,
+                    'relationships' => $relationships,
                 );
             }
         }
