@@ -579,6 +579,10 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
         $status = wp_remote_retrieve_response_code( $response );
         $body   = json_decode( wp_remote_retrieve_body( $response ), true );
 
+        if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+            error_log( '[ButterflyMX] Access points response: ' . wp_json_encode( $body ) );
+        }
+
         if ( $status >= 300 ) {
             $message = '';
 
