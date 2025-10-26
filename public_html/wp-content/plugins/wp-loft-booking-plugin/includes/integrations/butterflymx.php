@@ -1021,6 +1021,8 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
 
     $details           = $access_point_cache[ $cache_key ];
     $normalized_label  = strtolower( remove_accents( (string) $unit_label ) );
+    $normalized_unit_label = wp_loft_booking_normalize_access_point_label( $unit_label );
+    $normalized_unit_label_compact = str_replace( ' ', '', $normalized_unit_label );
     $loft_number_match = array();
 
     $loft_number = '';
@@ -1029,12 +1031,15 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         $loft_number = $loft_number_match[1];
     }
 
+    $always_include_ids = array( 46963, 39547, 39548 );
+
     $targets = array(
         'loft'     => null,
         '105'      => null,
         '106'      => null,
         '111'      => null,
         'intercom' => null,
+        'always'   => array(),
     );
 
     $keyword_matches = array(
@@ -1043,6 +1048,7 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         '106'      => array(),
         '111'      => array(),
         'intercom' => array(),
+        'always'   => array(),
     );
 
     $target_phrases = array(
@@ -1088,10 +1094,16 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
 
         $normalized_raw     = strtolower( remove_accents( $name ) );
         $normalized_name    = wp_loft_booking_normalize_access_point_label( $name );
+        $normalized_compact = str_replace( ' ', '', $normalized_name );
         $int_id             = (int) $id;
 
         if ( '' === $normalized_name ) {
             continue;
+        }
+
+        if ( in_array( $int_id, $always_include_ids, true ) ) {
+            $targets['always'][]        = $int_id;
+            $keyword_matches['always'][] = $int_id;
         }
 
         foreach ( $target_phrases as $key => $phrases ) {
@@ -1111,8 +1123,16 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
             }
         }
 
-        if ( $loft_number && false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_raw, $loft_number ) ) {
-            if ( null === $targets['loft'] ) {
+        $matched_loft_label = false;
+
+        if ( '' !== $normalized_unit_label && false !== strpos( $normalized_name, $normalized_unit_label ) ) {
+            $matched_loft_label = true;
+        } elseif ( '' !== $normalized_unit_label_compact && false !== strpos( $normalized_compact, $normalized_unit_label_compact ) ) {
+            $matched_loft_label = true;
+        }
+
+        if ( $matched_loft_label || ( $loft_number && false !== strpos( $normalized_name, 'loft' ) && wp_loft_booking_access_point_name_has_number( $normalized_raw, $loft_number ) ) ) {
+            if ( null === $targets['loft'] || $matched_loft_label ) {
                 $targets['loft'] = $int_id;
             }
 
@@ -1154,6 +1174,11 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
 
     $priority_order = array( 'loft', '105', '106', '111', 'intercom' );
 
+    $available_ids = array_map( 'intval', array_keys( (array) $details ) );
+    $always_include_ids = array_values(
+        array_intersect( $always_include_ids, $available_ids )
+    );
+
     $preferred_ids = array();
 
     foreach ( $priority_order as $key ) {
@@ -1173,6 +1198,7 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         );
     }
 
+    $preferred_ids = array_merge( $preferred_ids, $always_include_ids );
     $preferred_ids = array_values( array_unique( $preferred_ids ) );
 
     if ( ! empty( $preferred_ids ) ) {
@@ -1194,13 +1220,16 @@ function wp_loft_booking_select_preferred_access_points( $building_id, $environm
         }
     }
 
+    $fallback_ids = array_merge( $fallback_ids, $always_include_ids );
     $fallback_ids = array_values( array_unique( $fallback_ids ) );
 
     if ( ! empty( $fallback_ids ) ) {
         return $fallback_ids;
     }
 
-    return $candidate_ids;
+    $candidate_ids = array_merge( $candidate_ids, $always_include_ids );
+
+    return array_values( array_unique( $candidate_ids ) );
 }
 
 /**
