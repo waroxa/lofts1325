@@ -890,16 +890,53 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
 
         if ( ! empty( $body['links']['next'] ) ) {
             $next_url = $body['links']['next'];
+        } elseif ( isset( $body['page_info'] ) && is_array( $body['page_info'] ) ) {
+            $page_info     = $body['page_info'];
+            $current_page  = isset( $page_info['current_page'] ) ? (int) $page_info['current_page'] : $page;
+            $next_page_val = $page_info['next_page'] ?? null;
+
+            if ( null !== $next_page_val ) {
+                $next_page_int = (int) $next_page_val;
+
+                if ( $next_page_int > $current_page ) {
+                    $next_url = add_query_arg(
+                        array(
+                            'q[building_id_eq]' => $building_id,
+                            'per_page'          => 100,
+                            'page'              => $next_page_int,
+                        ),
+                        $base_url . '/access_points'
+                    );
+                    $page = $next_page_int;
+                }
+            }
+
+            if ( '' === $next_url && isset( $page_info['total_pages'] ) ) {
+                $total_pages = (int) $page_info['total_pages'];
+
+                if ( $current_page < $total_pages ) {
+                    $page     = $current_page + 1;
+                    $next_url = add_query_arg(
+                        array(
+                            'q[building_id_eq]' => $building_id,
+                            'per_page'          => 100,
+                            'page'              => $page,
+                        ),
+                        $base_url . '/access_points'
+                    );
+                }
+            }
         } elseif ( isset( $body['meta']['current_page'], $body['meta']['total_pages'] ) ) {
             $current_page = (int) $body['meta']['current_page'];
             $total_pages  = (int) $body['meta']['total_pages'];
 
             if ( $current_page < $total_pages ) {
+                $page     = $current_page + 1;
                 $next_url = add_query_arg(
                     array(
                         'q[building_id_eq]' => $building_id,
                         'per_page'          => 100,
-                        'page'              => $current_page + 1,
+                        'page'              => $page,
                     ),
                     $base_url . '/access_points'
                 );
@@ -1572,8 +1609,71 @@ function wp_loft_booking_create_visitor_pass_for_unit(
     $data     = json_decode( $raw_body, true );
 
     if ( $status >= 300 ) {
-        $message = isset( $data['message'] ) ? trim( $data['message'] ) : 'ButterflyMX API error.';
+        $message          = '';
+        $detailed_parts   = array();
+        $detailed_summary = '';
+
+        if ( isset( $data['message'] ) && '' !== trim( (string) $data['message'] ) ) {
+            $message = trim( (string) $data['message'] );
+        }
+
+        if ( isset( $data['errors'] ) && is_array( $data['errors'] ) ) {
+            foreach ( $data['errors'] as $error_item ) {
+                if ( ! is_array( $error_item ) ) {
+                    continue;
+                }
+
+                $field = '';
+                if ( isset( $error_item['field'] ) ) {
+                    $field = trim( (string) $error_item['field'] );
+                }
+
+                $detail_message = '';
+                foreach ( array( 'message', 'detail', 'title' ) as $detail_key ) {
+                    if ( isset( $error_item[ $detail_key ] ) && '' !== trim( (string) $error_item[ $detail_key ] ) ) {
+                        $detail_message = trim( (string) $error_item[ $detail_key ] );
+                        break;
+                    }
+                }
+
+                if ( '' === $detail_message && isset( $error_item['code'] ) ) {
+                    $detail_message = trim( (string) $error_item['code'] );
+                }
+
+                if ( '' === $detail_message ) {
+                    continue;
+                }
+
+                if ( '' !== $field ) {
+                    $detailed_parts[] = sprintf( '%s: %s', $field, $detail_message );
+                } else {
+                    $detailed_parts[] = $detail_message;
+                }
+            }
+        }
+
+        if ( ! empty( $detailed_parts ) ) {
+            $detailed_summary = implode( ' | ', $detailed_parts );
+        }
+
+        if ( '' === $message && '' !== $detailed_summary ) {
+            $message = $detailed_summary;
+        }
+
+        if ( '' === $message && is_string( $raw_body ) && '' !== trim( $raw_body ) ) {
+            $message = trim( $raw_body );
+        }
+
+        if ( '' === $message ) {
+            $message = 'ButterflyMX API error.';
+        }
+
         error_log( sprintf( '❌ ButterflyMX API error (%d): %s', $status, $message ) );
+
+        if ( '' !== $detailed_summary && false === strpos( $message, $detailed_summary ) ) {
+            $message .= ' (' . $detailed_summary . ')';
+        }
+
         return new WP_Error(
             'http_error',
             $message,
