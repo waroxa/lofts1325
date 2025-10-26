@@ -48,9 +48,24 @@ function wp_loft_booking_sync_units_only() {
         return strtoupper(preg_replace('/[^A-Z0-9]/', '', $label));
     };
 
-    $token = get_option('butterflymx_access_token_v4');
-    $environment = get_option('butterflymx_environment', 'sandbox');
-    $api_base_url = ($environment === 'production') ? "https://api.butterflymx.com/v4" : "https://api.na.sandbox.butterflymx.com/v4";
+    $token        = get_butterflymx_access_token('v4');
+    $environment  = function_exists('wp_loft_booking_get_butterflymx_environment')
+        ? wp_loft_booking_get_butterflymx_environment()
+        : get_option('butterflymx_environment', 'production');
+    $api_base_url = function_exists('wp_loft_booking_get_butterflymx_base_url')
+        ? wp_loft_booking_get_butterflymx_base_url($environment)
+        : (($environment === 'production')
+            ? 'https://api.butterflymx.com/v4'
+            : 'https://api.na.sandbox.butterflymx.com/v4');
+
+    if (empty($token)) {
+        error_log('❌ Unable to sync loft units: missing ButterflyMX v4 access token.');
+
+        return new WP_Error(
+            'butterflymx_missing_token',
+            __('Missing ButterflyMX access token. Please reconnect the integration in the settings screen.', 'wp-loft-booking')
+        );
+    }
 
     error_log("🔄 Starting sync with token: $token");
     error_log("🌐 Using API base URL: $api_base_url");
