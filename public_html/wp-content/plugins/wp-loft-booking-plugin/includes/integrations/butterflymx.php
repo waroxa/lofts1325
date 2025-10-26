@@ -538,9 +538,10 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
     }
 
     $base_url = wp_loft_booking_get_butterflymx_base_url( $environment );
-    $ap_ids   = array();
-    $ap_map   = array();
-    $door_map = array();
+    $ap_ids     = array();
+    $ap_map     = array();
+    $door_map   = array();
+    $device_map = array();
     $page     = 1;
     $url      = add_query_arg(
         array(
@@ -612,39 +613,98 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
                     continue;
                 }
 
-                if ( 'doors' !== $included['type'] ) {
+                $included_type = (string) $included['type'];
+                $included_id   = (string) $included['id'];
+
+                if ( '' === $included_id ) {
                     continue;
                 }
 
-                $door_id = (string) $included['id'];
-
-                if ( '' === $door_id ) {
-                    continue;
-                }
-
-                $door_attributes = array();
+                $included_attributes = array();
 
                 if ( isset( $included['attributes'] ) && is_array( $included['attributes'] ) ) {
-                    $door_attributes = $included['attributes'];
+                    $included_attributes = $included['attributes'];
                 }
 
-                $door_name = '';
+                if ( 'doors' === $included_type ) {
+                    $door_name = '';
 
-                foreach ( array( 'name', 'display_name', 'label', 'description' ) as $door_name_field ) {
-                    if ( isset( $door_attributes[ $door_name_field ] ) && is_string( $door_attributes[ $door_name_field ] ) ) {
-                        $candidate = trim( $door_attributes[ $door_name_field ] );
+                    foreach ( array( 'name', 'display_name', 'label', 'description' ) as $door_name_field ) {
+                        if ( isset( $included_attributes[ $door_name_field ] ) && is_string( $included_attributes[ $door_name_field ] ) ) {
+                            $candidate = trim( $included_attributes[ $door_name_field ] );
+
+                            if ( '' !== $candidate ) {
+                                $door_name = $candidate;
+                                break;
+                            }
+                        }
+                    }
+
+                    $door_map[ $included_id ] = array(
+                        'id'         => is_numeric( $included_id ) ? (int) $included_id : $included_id,
+                        'name'       => $door_name,
+                        'attributes' => $included_attributes,
+                    );
+
+                    continue;
+                }
+
+                $device_types = array( 'devices', 'door_devices', 'hardware_devices', 'access_devices' );
+
+                if ( ! in_array( $included_type, $device_types, true ) ) {
+                    continue;
+                }
+
+                $device_name = '';
+
+                foreach ( array( 'name', 'display_name', 'label', 'description' ) as $device_name_field ) {
+                    if ( isset( $included_attributes[ $device_name_field ] ) && is_string( $included_attributes[ $device_name_field ] ) ) {
+                        $candidate = trim( $included_attributes[ $device_name_field ] );
 
                         if ( '' !== $candidate ) {
-                            $door_name = $candidate;
+                            $device_name = $candidate;
                             break;
                         }
                     }
                 }
 
-                $door_map[ $door_id ] = array(
-                    'id'         => is_numeric( $door_id ) ? (int) $door_id : $door_id,
-                    'name'       => $door_name,
-                    'attributes' => $door_attributes,
+                $normalized_device_meta = array();
+
+                if ( isset( $included_attributes['device_status'] ) && '' !== trim( (string) $included_attributes['device_status'] ) ) {
+                    $normalized_device_meta['device_status'] = (string) $included_attributes['device_status'];
+                } elseif ( isset( $included_attributes['status'] ) && '' !== trim( (string) $included_attributes['status'] ) ) {
+                    $normalized_device_meta['device_status'] = (string) $included_attributes['status'];
+                }
+
+                if ( isset( $included_attributes['device_state'] ) && '' !== trim( (string) $included_attributes['device_state'] ) ) {
+                    $normalized_device_meta['device_state'] = (string) $included_attributes['device_state'];
+                } elseif ( isset( $included_attributes['state'] ) && '' !== trim( (string) $included_attributes['state'] ) ) {
+                    $normalized_device_meta['device_state'] = (string) $included_attributes['state'];
+                }
+
+                if ( '' !== $device_name ) {
+                    $normalized_device_meta['device_name'] = $device_name;
+                }
+
+                if ( isset( $included_attributes['device_identifier'] ) && '' !== trim( (string) $included_attributes['device_identifier'] ) ) {
+                    $normalized_device_meta['device_identifier'] = (string) $included_attributes['device_identifier'];
+                } elseif ( isset( $included_attributes['identifier'] ) && '' !== trim( (string) $included_attributes['identifier'] ) ) {
+                    $normalized_device_meta['device_identifier'] = (string) $included_attributes['identifier'];
+                }
+
+                foreach ( array( 'location', 'location_description', 'location_name' ) as $location_field ) {
+                    if ( isset( $included_attributes[ $location_field ] ) && '' !== trim( (string) $included_attributes[ $location_field ] ) ) {
+                        $normalized_device_meta['location'] = (string) $included_attributes[ $location_field ];
+                        break;
+                    }
+                }
+
+                $device_map[ $included_id ] = array(
+                    'id'         => is_numeric( $included_id ) ? (int) $included_id : $included_id,
+                    'name'       => $device_name,
+                    'attributes' => $included_attributes,
+                    'meta'       => $normalized_device_meta,
+                    'type'       => $included_type,
                 );
             }
         }
@@ -672,6 +732,83 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
 
                 if ( isset( $access_point['relationships'] ) && is_array( $access_point['relationships'] ) ) {
                     $relationships = $access_point['relationships'];
+                }
+
+                $device_ids = array();
+
+                foreach ( array( 'device', 'devices', 'hardware_devices', 'access_devices' ) as $relationship_key ) {
+                    if ( ! isset( $relationships[ $relationship_key ] ) ) {
+                        continue;
+                    }
+
+                    $relationship_data = $relationships[ $relationship_key ]['data'] ?? null;
+
+                    if ( empty( $relationship_data ) ) {
+                        continue;
+                    }
+
+                    if ( isset( $relationship_data['id'] ) ) {
+                        $device_ids[] = (string) $relationship_data['id'];
+                        continue;
+                    }
+
+                    if ( is_array( $relationship_data ) ) {
+                        foreach ( $relationship_data as $device_rel ) {
+                            if ( isset( $device_rel['id'] ) ) {
+                                $device_ids[] = (string) $device_rel['id'];
+                            }
+                        }
+                    }
+                }
+
+                $device_ids = array_values(
+                    array_filter(
+                        array_unique( $device_ids ),
+                        static function ( $device_id ) {
+                            return '' !== trim( (string) $device_id );
+                        }
+                    )
+                );
+
+                $devices     = array();
+                $device_meta = array();
+
+                foreach ( $device_ids as $device_id ) {
+                    if ( ! isset( $device_map[ $device_id ] ) ) {
+                        continue;
+                    }
+
+                    $device_details = $device_map[ $device_id ];
+
+                    $devices[] = $device_details;
+
+                    if ( isset( $device_details['meta'] ) && is_array( $device_details['meta'] ) ) {
+                        foreach ( $device_details['meta'] as $meta_key => $meta_value ) {
+                            if ( '' === trim( (string) $meta_value ) ) {
+                                continue;
+                            }
+
+                            if ( ! isset( $device_meta[ $meta_key ] ) || '' === trim( (string) $device_meta[ $meta_key ] ) ) {
+                                $device_meta[ $meta_key ] = (string) $meta_value;
+                            }
+                        }
+                    }
+
+                    if ( ! isset( $device_meta['device_name'] ) && ! empty( $device_details['name'] ) ) {
+                        $device_meta['device_name'] = (string) $device_details['name'];
+                    }
+                }
+
+                if ( ! empty( $device_meta ) ) {
+                    foreach ( $device_meta as $meta_key => $meta_value ) {
+                        if ( '' === trim( (string) $meta_value ) ) {
+                            continue;
+                        }
+
+                        if ( ! isset( $attributes[ $meta_key ] ) || '' === trim( (string) $attributes[ $meta_key ] ) ) {
+                            $attributes[ $meta_key ] = (string) $meta_value;
+                        }
+                    }
                 }
 
                 $name_candidates = array();
@@ -743,6 +880,7 @@ function wp_loft_booking_fetch_building_access_points( $building_id, $environmen
                     'name'          => $name,
                     'attributes'    => $attributes,
                     'door'          => $door_details,
+                    'devices'       => $devices,
                     'relationships' => $relationships,
                 );
             }

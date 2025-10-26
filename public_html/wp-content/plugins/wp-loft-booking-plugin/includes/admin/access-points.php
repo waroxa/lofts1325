@@ -139,6 +139,9 @@ function wp_loft_booking_access_points_page() {
         $door_attr  = isset($door['attributes']) && is_array($door['attributes'])
             ? $door['attributes']
             : [];
+        $devices    = isset($access_point['devices']) && is_array($access_point['devices'])
+            ? $access_point['devices']
+            : [];
 
         if ('' === $name && '' !== $door_name) {
             $name = $door_name;
@@ -186,17 +189,123 @@ function wp_loft_booking_access_points_page() {
             $details[] = sprintf(__('Door: %s', 'wp-loft-booking'), $door_name);
         }
 
-        if (!empty($door_attr)) {
-            $door_detail_map = [
-                'floor'             => __('Floor: %s', 'wp-loft-booking'),
-                'device_status'     => __('Device status: %s', 'wp-loft-booking'),
-                'device_state'      => __('Device state: %s', 'wp-loft-booking'),
-                'device_name'       => __('Device name: %s', 'wp-loft-booking'),
-                'device_identifier' => __('Device identifier: %s', 'wp-loft-booking'),
-                'location'          => __('Location: %s', 'wp-loft-booking'),
-            ];
+        $door_detail_map = [
+            'floor'             => __('Floor: %s', 'wp-loft-booking'),
+            'device_status'     => __('Device status: %s', 'wp-loft-booking'),
+            'device_state'      => __('Device state: %s', 'wp-loft-booking'),
+            'device_name'       => __('Device name: %s', 'wp-loft-booking'),
+            'device_identifier' => __('Device identifier: %s', 'wp-loft-booking'),
+            'location'          => __('Location: %s', 'wp-loft-booking'),
+        ];
 
+        $extract_scalar = static function ($source, $keys) {
+            if (!is_array($source)) {
+                return '';
+            }
+
+            foreach ((array) $keys as $key) {
+                if (!array_key_exists($key, $source)) {
+                    continue;
+                }
+
+                $value = $source[$key];
+
+                if (!is_scalar($value)) {
+                    continue;
+                }
+
+                $value = (string) $value;
+
+                if ('' === trim($value)) {
+                    continue;
+                }
+
+                return $value;
+            }
+
+            return '';
+        };
+
+        $device_meta = [];
+
+        foreach ([
+            'device_status'     => ['device_status', 'status'],
+            'device_state'      => ['device_state', 'state'],
+            'device_identifier' => ['device_identifier', 'identifier'],
+            'location'          => ['location'],
+        ] as $meta_key => $keys) {
+            $value = $extract_scalar($attributes, $keys);
+
+            if ('' !== $value) {
+                $device_meta[$meta_key] = $value;
+            }
+        }
+
+        $device_name_value = $extract_scalar($attributes, ['device_name', 'name']);
+
+        if ('' !== $device_name_value) {
+            $device_meta['device_name'] = $device_name_value;
+        }
+
+        foreach ($devices as $device) {
+            if (!is_array($device)) {
+                continue;
+            }
+
+            if (empty($device_meta['device_name'])) {
+                $device_name_candidate = '';
+
+                if (isset($device['name']) && is_string($device['name'])) {
+                    $device_name_candidate = trim($device['name']);
+                }
+
+                if ('' === $device_name_candidate) {
+                    $device_name_candidate = $extract_scalar($device['attributes'] ?? [], ['name', 'display_name', 'label', 'description']);
+                }
+
+                if ('' !== $device_name_candidate) {
+                    $device_meta['device_name'] = $device_name_candidate;
+                }
+            }
+
+            $device_attributes = isset($device['attributes']) && is_array($device['attributes'])
+                ? $device['attributes']
+                : [];
+
+            foreach ([
+                'device_status'     => ['device_status', 'status'],
+                'device_state'      => ['device_state', 'state'],
+                'device_identifier' => ['device_identifier', 'identifier'],
+                'location'          => ['location', 'location_description', 'location_name'],
+            ] as $meta_key => $keys) {
+                if (!empty($device_meta[$meta_key])) {
+                    continue;
+                }
+
+                $value = $extract_scalar($device_attributes, $keys);
+
+                if ('' !== $value) {
+                    $device_meta[$meta_key] = $value;
+                }
+            }
+        }
+
+        if (!empty($device_meta)) {
             foreach ($door_detail_map as $field => $format) {
+                if (empty($device_meta[$field])) {
+                    continue;
+                }
+
+                $details[] = sprintf($format, $device_meta[$field]);
+            }
+        }
+
+        if (!empty($door_attr)) {
+            foreach ($door_detail_map as $field => $format) {
+                if (isset($device_meta[$field]) && '' !== $device_meta[$field]) {
+                    continue;
+                }
+
                 if (!isset($door_attr[$field])) {
                     continue;
                 }
