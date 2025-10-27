@@ -66,8 +66,7 @@ function tenants_page_function() {
  */
 function wp_loft_booking_fetch_and_save_tenants() {
     global $wpdb;
-    $tenant_table   = $wpdb->prefix . 'loft_tenants';
-    $keychain_table = $wpdb->prefix . 'loft_keychains';
+    $tenant_table = $wpdb->prefix . 'loft_tenants';
 
     // ButterflyMX setup
     $token       = get_option( 'butterflymx_access_token_v4' );
@@ -82,7 +81,6 @@ function wp_loft_booking_fetch_and_save_tenants() {
     }
 
     $synced_tenants = 0;
-    $synced_keys    = 0;
 
     // 1) Fetch tenants
     $response = wp_remote_get( "{$base_url}/tenants", [
@@ -166,54 +164,21 @@ function wp_loft_booking_fetch_and_save_tenants() {
             continue;
         }
 
-        // 2) Fetch tenant's virtual keys
-        $key_response = wp_remote_get( "{$base_url}/tenants/{$tenant_id}/virtual_keys", [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type'  => 'application/json',
-            ],
-            'timeout' => 30,
-        ] );
-
-        if ( is_wp_error( $key_response ) ) {
-            error_log( "⚠️ Failed to fetch keys for tenant {$tenant_id}: " . $key_response->get_error_message() );
-            continue;
-        }
-
-        $key_data = json_decode( wp_remote_retrieve_body( $key_response ), true );
-        if ( isset( $key_data['data'] ) && is_array( $key_data['data'] ) ) {
-            foreach ( $key_data['data'] as $key ) {
-                $key_id      = intval( $key['id'] );
-                $valid_from  = sanitize_text_field( $key['valid_from'] );
-                $valid_until = sanitize_text_field( $key['valid_until'] );
-
-                $wpdb->replace(
-                    $keychain_table,
-                    [
-                        'tenant_id'   => $tenant_id,
-                        'key_id'      => $key_id,
-                        'valid_from'  => $valid_from,
-                        'valid_until' => $valid_until,
-                    ],
-                    [ '%d', '%d', '%s', '%s' ]
-                );
-
-                if ( $wpdb->last_error ) {
-                    error_log( '❌ DB Error (keychain): ' . $wpdb->last_error );
-                }
-                else {
-                    $synced_keys++;
-                }
-            }
-        }
+        // Virtual key details are synced separately via the keychain sync that
+        // runs immediately after this tenant sync.  The previous implementation
+        // fetched each tenant's virtual keys one HTTP request at a time, which
+        // caused very long execution times (and AJAX timeouts) for sites with a
+        // healthy number of tenants.  By avoiding the per-tenant requests here
+        // we keep the tenant sync lean and let the dedicated keychain sync
+        // populate the related tables instead.
     }
     wp_loft_booking_fetch_and_save_visitor_passes();
 
     return [
-        'success'       => true,
-        'message'       => '🎉 Tenants and keys synced successfully.',
-        'tenants_synced'=> $synced_tenants,
-        'keys_synced'   => $synced_keys,
+        'success'        => true,
+        'message'        => '🎉 Tenants synced successfully. Keychains will refresh next.',
+        'tenants_synced' => $synced_tenants,
+        'keys_synced'    => 0,
     ];
 }
 
