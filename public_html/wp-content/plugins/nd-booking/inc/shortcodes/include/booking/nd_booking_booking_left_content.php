@@ -78,7 +78,7 @@ $nd_booking_check_out_label = date_i18n( 'D, M j, Y', $nd_booking_check_out_date
 
 ob_start();
 ?>
-<aside class="ndb-booking-summary" aria-label="<?php echo esc_attr__( 'Booking summary', 'nd-booking' ); ?>">
+<aside class="ndb-booking-summary" aria-label="<?php echo esc_attr__( 'Résumé de réservation', 'nd-booking' ); ?>">
     <div class="ndb-booking-summary__card">
         <?php if ( $nd_booking_image_src ) : ?>
             <div class="ndb-booking-summary__media">
@@ -107,58 +107,58 @@ ob_start();
                 <div class="ndb-booking-summary__excerpt"><?php echo $nd_booking_room_excerpt; ?></div>
             <?php endif; ?>
 
-            <ul class="ndb-booking-summary__meta" aria-label="<?php echo esc_attr__( 'Room features', 'nd-booking' ); ?>">
+            <ul class="ndb-booking-summary__meta" aria-label="<?php echo esc_attr__( 'Caractéristiques de la suite', 'nd-booking' ); ?>">
                 <?php if ( $nd_booking_meta_box_max_people ) : ?>
-                    <li><?php echo esc_html( sprintf( _n( '%d Guest', '%d Guests', $nd_booking_meta_box_max_people, 'nd-booking' ), $nd_booking_meta_box_max_people ) ); ?></li>
+                    <li><?php echo esc_html( sprintf( _n( '%d invité', '%d invités', $nd_booking_meta_box_max_people, 'nd-booking' ), $nd_booking_meta_box_max_people ) ); ?></li>
                 <?php endif; ?>
                 <?php if ( $nd_booking_meta_box_room_size ) : ?>
                     <li><?php echo esc_html( $nd_booking_meta_box_room_size . ' ' . nd_booking_get_units_of_measure() ); ?></li>
                 <?php endif; ?>
-                <li><?php echo esc_html( sprintf( _n( '%d night', '%d nights', $nd_booking_nights, 'nd-booking' ), $nd_booking_nights ) ); ?></li>
+                <li><?php echo esc_html( sprintf( _n( '%d nuit', '%d nuits', $nd_booking_nights, 'nd-booking' ), $nd_booking_nights ) ); ?></li>
             </ul>
         </div>
     </div>
 
-    <section class="ndb-booking-summary__details" aria-label="<?php echo esc_attr__( 'Stay details', 'nd-booking' ); ?>">
+    <section class="ndb-booking-summary__details" aria-label="<?php echo esc_attr__( 'Détails du séjour', 'nd-booking' ); ?>">
         <ul class="ndb-booking-summary__list">
             <li>
-                <span class="label"><?php esc_html_e( 'Check-in', 'nd-booking' ); ?></span>
+                <span class="label"><?php esc_html_e( 'Arrivée', 'nd-booking' ); ?></span>
                 <span class="value"><?php echo esc_html( $nd_booking_check_in_label ); ?></span>
             </li>
             <li>
-                <span class="label"><?php esc_html_e( 'Check-out', 'nd-booking' ); ?></span>
+                <span class="label"><?php esc_html_e( 'Départ', 'nd-booking' ); ?></span>
                 <span class="value"><?php echo esc_html( $nd_booking_check_out_label ); ?></span>
             </li>
             <li>
-                <span class="label"><?php esc_html_e( 'Guests', 'nd-booking' ); ?></span>
+                <span class="label"><?php esc_html_e( 'Invités', 'nd-booking' ); ?></span>
                 <span class="value"><?php echo esc_html( max( 1, absint( $nd_booking_form_booking_guests ) ) ); ?></span>
             </li>
             <li>
-                <span class="label"><?php esc_html_e( 'Nightly rate', 'nd-booking' ); ?></span>
+                <span class="label"><?php esc_html_e( 'Tarif par nuit', 'nd-booking' ); ?></span>
                 <span class="value"><?php echo esc_html( nd_booking_format_decimal( $nd_booking_nightly_rate ) ); ?> <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span></span>
             </li>
         </ul>
 
         <div class="ndb-booking-summary__total" role="presentation">
-            <p class="summary-label"><?php esc_html_e( 'Pay today', 'nd-booking' ); ?></p>
+            <p class="summary-label"><?php esc_html_e( 'À payer aujourd’hui', 'nd-booking' ); ?></p>
             <div class="summary-amount">
                 <span class="amount"><?php echo esc_html( $nd_booking_initial_total_formatted ); ?></span>
                 <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span>
             </div>
-            <p class="summary-note"><?php esc_html_e( 'This rate is charged immediately and is non-refundable.', 'nd-booking' ); ?></p>
+            <p class="summary-note"><?php esc_html_e( 'Ce tarif est débité immédiatement et n’est pas remboursable.', 'nd-booking' ); ?></p>
         </div>
 
-        <div class="ndb-booking-summary__breakdown" aria-label="<?php echo esc_attr__( 'Price breakdown', 'nd-booking' ); ?>">
-            <div class="breakdown-row"><span class="label"><?php esc_html_e( 'Subtotal', 'nd-booking' ); ?></span><span class="value"><?php echo esc_html( $nd_booking_initial_subtotal_formatted ); ?> <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span></span></div>
-            <div class="breakdown-row"><span class="label"><?php esc_html_e( 'Taxes & fees', 'nd-booking' ); ?></span><span class="value"><?php echo esc_html( $nd_booking_initial_tax_total_formatted ); ?> <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span></span></div>
+        <div class="ndb-booking-summary__breakdown" aria-label="<?php echo esc_attr__( 'Détail des tarifs', 'nd-booking' ); ?>">
+            <div class="breakdown-row"><span class="label"><?php esc_html_e( 'Sous-total', 'nd-booking' ); ?></span><span class="value"><?php echo esc_html( $nd_booking_initial_subtotal_formatted ); ?> <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span></span></div>
+            <div class="breakdown-row"><span class="label"><?php esc_html_e( 'Taxes et frais', 'nd-booking' ); ?></span><span class="value"><?php echo esc_html( $nd_booking_initial_tax_total_formatted ); ?> <span class="currency"><?php echo esc_html( $nd_booking_currency ); ?></span></span></div>
         </div>
 
         <?php if ( $nd_booking_total_tax_rate_text ) : ?>
-            <p class="ndb-booking-summary__taxes"><?php echo esc_html( $nd_booking_total_tax_rate_text ); ?> · <?php esc_html_e( 'Taxes are included in the total.', 'nd-booking' ); ?></p>
+            <p class="ndb-booking-summary__taxes"><?php echo esc_html( $nd_booking_total_tax_rate_text ); ?> · <?php esc_html_e( 'Les taxes sont incluses dans le total.', 'nd-booking' ); ?></p>
         <?php endif; ?>
 
         <div class="ndb-booking-summary__support">
-            <span class="support-label"><?php esc_html_e( 'Need assistance?', 'nd-booking' ); ?></span>
+            <span class="support-label"><?php esc_html_e( 'Besoin d’assistance?', 'nd-booking' ); ?></span>
             <a class="support-link" href="tel:+18333111785">(833) 311-1785</a>
         </div>
     </section>

@@ -39,8 +39,8 @@ $nd_booking_shortcode_right_content .= '
                     <input type="hidden" id="nd_booking_checkout_form_term" name="nd_booking_checkout_form_term" value="' . esc_attr( $nd_booking_booking_form_term ) . '">
                     <input type="hidden" id="nd_booking_booking_form_services" name="nd_booking_booking_form_services" value="' . esc_attr( $nd_booking_booking_form_services ) . '">
                     <input type="hidden" id="nd_booking_booking_form_action_type" name="nd_booking_booking_form_action_type" value="stripe">
-                    <input type="hidden" id="nd_booking_booking_form_payment_status" name="nd_booking_booking_form_payment_status" value="Pending Payment">
-                    <button type="submit" class="button-primary">' . esc_html__( 'SUBMIT PAYMENT', 'nd-booking' ) . '</button>
+                    <input type="hidden" id="nd_booking_booking_form_payment_status" name="nd_booking_booking_form_payment_status" value="Paiement en attente">
+                    <button type="submit" class="button-primary">' . esc_html__( 'Confirmer la réservation', 'nd-booking' ) . '</button>
                 </form>
                 <script type="text/javascript">
                     (function($) {
