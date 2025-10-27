@@ -136,58 +136,68 @@ add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
  * @return bool
  */
 function marina_child_post_contains_search_shortcode( WP_Post $post ) {
-    if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $post->ID, '_elementor_data', true ) ) ) {
-        return true;
-    }
-
-    if ( false !== stripos( (string) $post->post_content, 'nd_booking_search_results' ) ) {
-        return true;
-    }
-
-    if ( ! has_shortcode( $post->post_content, 'elementor-template' ) ) {
-        return false;
-    }
-
-    preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post->post_content, $matches );
-
-    if ( empty( $matches[1] ) ) {
-        return false;
-    }
-
-    foreach ( $matches[1] as $template_id ) {
-        $template_id = absint( $template_id );
-
-        if ( ! $template_id ) {
-            continue;
-        }
-
-        $template_post = get_post( $template_id );
-
-        if ( ! $template_post instanceof WP_Post ) {
-            continue;
-        }
-
-        if ( false !== stripos( (string) $template_post->post_content, 'nd_booking_search_results' ) ) {
-            return true;
-        }
-
-        if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $template_post->ID, '_elementor_data', true ) ) ) {
-            return true;
-        }
-    }
-
-    return false;
+    return marina_child_post_contains_shortcode( $post, 'nd_booking_search_results' );
 }
 
 /**
- * Inspect Elementor JSON data for the ND Booking search results shortcode reference.
+ * Enqueue checkout-specific enhancements when the ND Booking checkout shortcode is present.
+ */
+function marina_child_enqueue_checkout_assets() {
+    if ( is_admin() || ! is_page() ) {
+        return;
+    }
+
+    $page = get_post();
+
+    if ( ! $page instanceof WP_Post ) {
+        return;
+    }
+
+    if ( ! marina_child_post_contains_shortcode( $page, 'nd_booking_checkout' ) ) {
+        return;
+    }
+
+    $style_path = get_stylesheet_directory() . '/css/checkout-form.css';
+
+    if ( file_exists( $style_path ) && is_readable( $style_path ) ) {
+        $style_version = (string) filemtime( $style_path );
+
+        wp_enqueue_style(
+            'marina-child-checkout',
+            get_stylesheet_directory_uri() . '/css/checkout-form.css',
+            array( 'marina-child-header-fixes' ),
+            $style_version
+        );
+    }
+
+    $script_path = get_stylesheet_directory() . '/js/checkout-enhancements.js';
+
+    if ( file_exists( $script_path ) && is_readable( $script_path ) ) {
+        $script_version = (string) filemtime( $script_path );
+
+        wp_enqueue_script(
+            'marina-child-checkout',
+            get_stylesheet_directory_uri() . '/js/checkout-enhancements.js',
+            array( 'jquery' ),
+            $script_version,
+            true
+        );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_checkout_assets', 30 );
+
+/**
+ * Determine whether Elementor JSON data references the supplied shortcode.
  *
- * @param mixed $elementor_data Elementor post meta value.
+ * @param mixed  $elementor_data Elementor post meta value.
+ * @param string $shortcode      Shortcode tag to search for.
  *
  * @return bool
  */
-function marina_child_elementor_data_contains_search_shortcode( $elementor_data ) {
-    if ( empty( $elementor_data ) ) {
+function marina_child_elementor_data_contains_shortcode( $elementor_data, $shortcode ) {
+    $shortcode = trim( (string) $shortcode );
+
+    if ( '' === $shortcode || empty( $elementor_data ) ) {
         return false;
     }
 
@@ -199,7 +209,81 @@ function marina_child_elementor_data_contains_search_shortcode( $elementor_data 
         return false;
     }
 
-    return false !== stripos( $elementor_data, 'nd_booking_search_results' );
+    return false !== stripos( $elementor_data, $shortcode );
+}
+
+/**
+ * Inspect Elementor JSON data for the ND Booking search results shortcode reference.
+ *
+ * @param mixed $elementor_data Elementor post meta value.
+ *
+ * @return bool
+ */
+function marina_child_elementor_data_contains_search_shortcode( $elementor_data ) {
+    return marina_child_elementor_data_contains_shortcode( $elementor_data, 'nd_booking_search_results' );
+}
+
+/**
+ * Determine whether the supplied post (or any referenced Elementor template) contains a target shortcode.
+ *
+ * @param WP_Post $post      The post object under evaluation.
+ * @param string  $shortcode Shortcode tag to search for.
+ * @param array   $visited   Internal recursion guard to avoid repeated scans.
+ *
+ * @return bool
+ */
+function marina_child_post_contains_shortcode( WP_Post $post, $shortcode, array &$visited = array() ) {
+    $shortcode = trim( (string) $shortcode );
+
+    if ( '' === $shortcode ) {
+        return false;
+    }
+
+    if ( isset( $visited[ $post->ID ] ) ) {
+        return false;
+    }
+
+    $visited[ $post->ID ] = true;
+
+    $post_content = (string) $post->post_content;
+
+    if ( has_shortcode( $post_content, $shortcode ) || false !== stripos( $post_content, '[' . $shortcode ) ) {
+        return true;
+    }
+
+    if ( marina_child_elementor_data_contains_shortcode( get_post_meta( $post->ID, '_elementor_data', true ), $shortcode ) ) {
+        return true;
+    }
+
+    if ( ! has_shortcode( $post_content, 'elementor-template' ) ) {
+        return false;
+    }
+
+    preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post_content, $matches );
+
+    if ( empty( $matches[1] ) ) {
+        return false;
+    }
+
+    foreach ( $matches[1] as $template_id ) {
+        $template_id = absint( $template_id );
+
+        if ( ! $template_id || isset( $visited[ $template_id ] ) ) {
+            continue;
+        }
+
+        $template_post = get_post( $template_id );
+
+        if ( ! $template_post instanceof WP_Post ) {
+            continue;
+        }
+
+        if ( marina_child_post_contains_shortcode( $template_post, $shortcode, $visited ) ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -456,13 +540,39 @@ update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e
 //     error_log("✅ Booking automation completed for $email");
 // }
 
+/**
+ * Elevate the wording of checkout submission buttons to match the brand voice.
+ *
+ * @param string $translation The translated text.
+ * @param string $text        The original text.
+ * @param string $domain      Text domain associated with the string.
+ *
+ * @return string
+ */
+function marina_child_checkout_cta_gettext( $translation, $text, $domain ) {
+    $eligible_domains = array( 'woocommerce', 'nd-booking', 'default' );
 
+    if ( ! in_array( $domain, $eligible_domains, true ) ) {
+        return $translation;
+    }
 
+    $targets = array(
+        'Finaliser la commande',
+        'Finalisez la commande',
+        'Finaliser la réservation',
+        'Finalisez la réservation',
+        'Passer la commande',
+        'Compléter la commande',
+        'Valider la commande',
+    );
 
+    if ( in_array( $translation, $targets, true ) || in_array( $text, $targets, true ) ) {
+        return 'Confirmer ma réservation';
+    }
 
-
-
-
+    return $translation;
+}
+add_filter( 'gettext', 'marina_child_checkout_cta_gettext', 10, 3 );
 
 add_action( 'wp_head', function() {
     $child_style = get_stylesheet_directory_uri() . '/style.css';
