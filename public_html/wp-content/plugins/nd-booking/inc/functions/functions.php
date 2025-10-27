@@ -754,6 +754,48 @@ function nd_booking_booking_page() {
 
 }
 
+function nd_booking_inject_core_page_shortcodes( $content ) {
+
+  if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+    return $content;
+  }
+
+  if ( ! in_the_loop() || ! is_main_query() || ! is_singular() ) {
+    return $content;
+  }
+
+  $current_page_id = get_the_ID();
+
+  if ( ! $current_page_id ) {
+    return $content;
+  }
+
+  $shortcode_pages = array(
+    intval( get_option( 'nd_booking_booking_page' ) )  => 'nd_booking_booking',
+    intval( get_option( 'nd_booking_checkout_page' ) ) => 'nd_booking_checkout',
+  );
+
+  foreach ( $shortcode_pages as $page_id => $shortcode_tag ) {
+    if ( $page_id && $current_page_id === $page_id ) {
+      if ( has_shortcode( $content, $shortcode_tag ) ) {
+        return $content;
+      }
+
+      $shortcode_output = do_shortcode( '[' . $shortcode_tag . ']' );
+
+      if ( '' === trim( $shortcode_output ) ) {
+        return $content;
+      }
+
+      return $shortcode_output . $content;
+    }
+  }
+
+  return $content;
+
+}
+add_filter( 'the_content', 'nd_booking_inject_core_page_shortcodes', 5 );
+
 function nd_booking_checkout_page() {
 
   $nd_booking_checkout_page = get_option('nd_booking_checkout_page');
