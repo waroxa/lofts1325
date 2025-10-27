@@ -1,101 +1,177 @@
 <?php
-// Additional services section
-if ( get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional_services', true ) != '' ) {
 
-    $nd_booking_additional_services  = '';
-    $nd_booking_additional_services .= '<section class="loft-form-section loft-section-addons">';
-    $nd_booking_additional_services .= '  <h2><span aria-hidden="true">✨</span> ' . esc_html__( 'Ajoutez des services supplémentaires', 'nd-booking' ) . '</h2>';
-    $nd_booking_additional_services .= '  <p class="loft-help-text">' . esc_html__( 'Sélectionnez les attentions que vous souhaitez que nous préparions pour votre séjour.', 'nd-booking' ) . '</p>';
-    $nd_booking_additional_services .= '  <div class="loft-addon-grid">';
 
-    $nd_booking_meta_box_additional_services_array = explode( ',', get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional_services', true ) );
 
-    for ( $nd_booking_meta_box_additional_services_array_i = 0; $nd_booking_meta_box_additional_services_array_i < count( $nd_booking_meta_box_additional_services_array ) - 1; $nd_booking_meta_box_additional_services_array_i++ ) {
+//START additional services
+if ( get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional_services', true ) != '' ) { 
 
-        $nd_booking_page_by_path = get_page_by_path( $nd_booking_meta_box_additional_services_array[ $nd_booking_meta_box_additional_services_array_i ], OBJECT, 'nd_booking_cpt_2' );
-        if ( ! $nd_booking_page_by_path instanceof WP_Post ) {
-            continue;
-        }
+    $nd_booking_additional_services = '
+    <div class="nd_booking_section nd_booking_margin_top_50_responsive">
+      <h1>'.__('Add Extra Services','nd-booking').' :</h1>
+      <div class="nd_booking_section nd_booking_height_30"></div>
+    ';
 
-        $nd_booking_service_id      = $nd_booking_page_by_path->ID;
-        $nd_booking_service_name    = get_the_title( $nd_booking_service_id );
-        $nd_booking_service_content = get_post_field( 'post_content', $nd_booking_service_id );
+    $nd_booking_meta_box_additional_services_array = explode(',', get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional_services', true ) );
+    for ($nd_booking_meta_box_additional_services_array_i = 0; $nd_booking_meta_box_additional_services_array_i < count($nd_booking_meta_box_additional_services_array)-1; $nd_booking_meta_box_additional_services_array_i++) {
+        
+        $nd_booking_page_by_path = get_page_by_path($nd_booking_meta_box_additional_services_array[$nd_booking_meta_box_additional_services_array_i],OBJECT,'nd_booking_cpt_2');
+        
+        //info service
+        $nd_booking_service_id = $nd_booking_page_by_path->ID;
+        $nd_booking_service_name = get_the_title($nd_booking_service_id);
+        $nd_booking_service_content = get_post_field('post_content', $nd_booking_service_id);
+        $nd_booking_service_permalink = get_permalink($nd_booking_service_id);
 
+        //metabox
         $nd_booking_meta_box_cpt_2_service_type = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_service_type', true );
-        if ( '' === $nd_booking_meta_box_cpt_2_service_type ) {
-            $nd_booking_meta_box_cpt_2_service_type = 'nd_booking_normal_service';
-        }
-
-        $nd_booking_meta_box_cpt_2_price       = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_price', true );
+        if ( $nd_booking_meta_box_cpt_2_service_type == '' ) { $nd_booking_meta_box_cpt_2_service_type = 'nd_booking_normal_service'; }
+        $nd_booking_meta_box_cpt_2_icon = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_icon', true );
+        $nd_booking_meta_box_cpt_2_color = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_color', true );
+        $nd_booking_meta_box_cpt_2_text_preview = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_text_preview', true );
+        $nd_booking_meta_box_cpt_2_price = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_price', true );
         $nd_booking_meta_box_cpt_2_price_type_1 = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_price_type_1', true );
-        if ( '' === $nd_booking_meta_box_cpt_2_price_type_1 ) {
-            $nd_booking_meta_box_cpt_2_price_type_1 = 'nd_booking_price_type_person';
-        }
+        if ( $nd_booking_meta_box_cpt_2_price_type_1 == '' ) { $nd_booking_meta_box_cpt_2_price_type_1 = 'nd_booking_price_type_person'; }
         $nd_booking_meta_box_cpt_2_price_type_2 = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_price_type_2', true );
-        if ( '' === $nd_booking_meta_box_cpt_2_price_type_2 ) {
-            $nd_booking_meta_box_cpt_2_price_type_2 = 'nd_booking_price_type_day';
+        if ( $nd_booking_meta_box_cpt_2_price_type_2 == '' ) { $nd_booking_meta_box_cpt_2_price_type_2 = 'nd_booking_price_type_day'; }
+        
+        //mandatory
+        $nd_booking_meta_box_cpt_2_mandatory = '';
+        $nd_booking_meta_box_cpt_2_mandatory_result = '';
+        $nd_booking_mandatory_style = '';
+        $nd_booking_mandatory_style_service = '';
+        $nd_booking_meta_box_cpt_2_mandatory = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_mandatory', true );
+        if ( $nd_booking_meta_box_cpt_2_mandatory == "nd_booking_price_type_mandatory_yes" ) { 
+            $nd_booking_meta_box_cpt_2_mandatory_result = "checked disabled";  
+            $nd_booking_customizer_color_3 = get_option( 'nd_booking_customizer_color_3', '#d34949' );
+            $nd_booking_mandatory_style = 'background-color: '.$nd_booking_customizer_color_3.'; padding: 7px 2px 5px 0px; margin-right: 5px;';
+            $nd_booking_mandatory_style_service = 'color: #fff';
+        }
+        if ( $nd_booking_meta_box_cpt_2_mandatory == "nd_booking_price_type_mandatory_yes_edit" ) { 
+            $nd_booking_meta_box_cpt_2_mandatory_result = "checked";  
         }
 
-        $nd_booking_meta_box_cpt_2_mandatory          = get_post_meta( $nd_booking_service_id, 'nd_booking_meta_box_cpt_2_mandatory', true );
-        $nd_booking_meta_box_cpt_2_mandatory_result   = '';
-        $nd_booking_mandatory_chip_markup             = '';
-        $nd_booking_mandatory_chip_style              = '';
-        $nd_booking_mandatory_chip_service_text_style = '';
-
-        if ( 'nd_booking_price_type_mandatory_yes' === $nd_booking_meta_box_cpt_2_mandatory ) {
-            $nd_booking_meta_box_cpt_2_mandatory_result = 'checked disabled';
-            $nd_booking_customizer_color_3              = get_option( 'nd_booking_customizer_color_3', '#d34949' );
-            $nd_booking_mandatory_chip_style            = 'background-color: ' . esc_attr( $nd_booking_customizer_color_3 ) . ';';
-        } elseif ( 'nd_booking_price_type_mandatory_yes_edit' === $nd_booking_meta_box_cpt_2_mandatory ) {
-            $nd_booking_meta_box_cpt_2_mandatory_result = 'checked';
-        }
-
-        if ( $nd_booking_meta_box_cpt_2_mandatory_result ) {
-            $nd_booking_mandatory_chip_markup = '<span class="loft-addon-mandatory" style="' . $nd_booking_mandatory_chip_style . '">' . esc_html__( 'Obligatoire', 'nd-booking' ) . '</span>';
-        }
-
-        if ( 'nd_booking_price_type_person' === $nd_booking_meta_box_cpt_2_price_type_1 ) {
+        //operator
+        if ( $nd_booking_meta_box_cpt_2_price_type_1 == 'nd_booking_price_type_person' ) {
             $nd_booking_operator_1 = $nd_booking_form_booking_guests;
-            $nd_booking_word_1     = __( 'Invité', 'nd-booking' );
-        } else {
-            $nd_booking_operator_1 = 1;
-            $nd_booking_word_1     = __( 'Suite', 'nd-booking' );
+            $nd_booking_word_1 = __('Guest','nd-booking'); 
+        }else{
+            $nd_booking_operator_1 = 1; 
+            $nd_booking_word_1 = __('Room','nd-booking');  
         }
-
-        if ( 'nd_booking_price_type_day' === $nd_booking_meta_box_cpt_2_price_type_2 ) {
-            $nd_booking_operator_2 = nd_booking_get_number_night( $nd_booking_date_from, $nd_booking_date_to );
-            $nd_booking_word_2     = __( 'Nuit', 'nd-booking' );
-        } else {
-            $nd_booking_operator_2 = 1;
-            $nd_booking_word_2     = __( 'Séjour', 'nd-booking' );
+        if ( $nd_booking_meta_box_cpt_2_price_type_2 == 'nd_booking_price_type_day' ) {
+            $nd_booking_operator_2 = nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to);
+            $nd_booking_word_2 = __('Night','nd-booking'); 
+        }else{
+            $nd_booking_operator_2 = 1; 
+            $nd_booking_word_2 = __('Trip','nd-booking');   
         }
+        
+        $nd_booking_additional_service_total_price = $nd_booking_meta_box_cpt_2_price*$nd_booking_operator_1*$nd_booking_operator_2;
 
-        $nd_booking_additional_service_total_price = floatval( $nd_booking_meta_box_cpt_2_price ) * $nd_booking_operator_1 * $nd_booking_operator_2;
+        $nd_booking_additional_services .= '
+            <p class="nd_booking_width_50_percentage nd_booking_width_100_percentage_all_iphone nd_booking_float_left">
 
-        $nd_booking_additional_services .= '<label class="loft-addon-item">';
-        $nd_booking_additional_services .= '  <span class="loft-addon-item__header">';
-        $nd_booking_additional_services .= '      <input ' . $nd_booking_meta_box_cpt_2_mandatory_result . ' data-id="' . esc_attr( $nd_booking_service_id . ',' ) . '" class="nd_booking_booking_checkbox_service" type="checkbox" value="' . esc_attr( $nd_booking_additional_service_total_price . ',' ) . '">';
-        $nd_booking_additional_services .= '      <span class="loft-addon-item__title" style="' . $nd_booking_mandatory_chip_service_text_style . '">' . esc_html( $nd_booking_service_name ) . '</span>';
-        $nd_booking_additional_services .=        $nd_booking_mandatory_chip_markup;
-        $nd_booking_additional_services .= '  </span>';
+                <span style="'.$nd_booking_mandatory_style.'">   
+                    <input '.$nd_booking_meta_box_cpt_2_mandatory_result.' data-id="'.$nd_booking_service_id.'," class="nd_booking_width_30 nd_booking_float_left_all_iphone nd_booking_margin_0 nd_booking_padding_0 nd_booking_margin_top_8 nd_booking_booking_checkbox_service" type="checkbox" value="'.$nd_booking_additional_service_total_price.'," >
+                    <span style="'.$nd_booking_mandatory_style_service.'" class="nd_options_color_greydark nd_booking_font_weight_bolder nd_booking_float_left_all_iphone">'.$nd_booking_service_name.' :</span> 
+                </span>
 
-        if ( '' !== $nd_booking_service_content ) {
-            $nd_booking_additional_services .= '  <span class="loft-addon-item__description">' . wp_kses_post( wp_trim_words( $nd_booking_service_content, 30 ) ) . '</span>';
+                <span class="nd_booking_float_left_all_iphone nd_booking_margin_bottom_20_all_iphone">'.$nd_booking_meta_box_cpt_2_price.' '.nd_booking_get_currency().' ( '.$nd_booking_word_1.' / '.$nd_booking_word_2.' ) = '.$nd_booking_meta_box_cpt_2_price*$nd_booking_operator_1*$nd_booking_operator_2.' '.nd_booking_get_currency().'</span>
+            </p>
+        ';
+
+
+        //add on the hidden field nd_booking_booking_checkbox_services the price value
+        if ( $nd_booking_meta_box_cpt_2_mandatory == "nd_booking_price_type_mandatory_yes" OR $nd_booking_meta_box_cpt_2_mandatory == "nd_booking_price_type_mandatory_yes_edit" ) { 
+            
+            $nd_booking_additional_services .= '
+
+                <script type="text/javascript">
+                  //<![CDATA[
+                  jQuery(document).ready(function() {
+
+                    jQuery( function ( $ ) {
+
+                        var nd_booking_service_value = "'.$nd_booking_additional_service_total_price.',";
+                        var nd_booking_service_previous_value = $("#nd_booking_booking_checkbox_services").val();
+                        $( "#nd_booking_booking_checkbox_services" ).val( nd_booking_service_value+nd_booking_service_previous_value );
+
+                        var nd_booking_booking_service_id = "'.$nd_booking_service_id.',";
+                        var nd_booking_service_previous_value_id = $("#nd_booking_booking_checkbox_services_id").val();
+                        $( "#nd_booking_booking_checkbox_services_id" ).val( nd_booking_booking_service_id+nd_booking_service_previous_value_id );
+
+                    });
+
+                  });
+                  //]]>
+                </script>
+
+            ';
+
         }
+        //end mandatory
 
-        $nd_booking_additional_services .= '  <span class="loft-addon-item__price">' . esc_html( $nd_booking_meta_box_cpt_2_price ) . ' ' . esc_html( nd_booking_get_currency() ) . ' · ' . esc_html( $nd_booking_word_1 ) . ' / ' . esc_html( $nd_booking_word_2 ) . '</span>';
-        $nd_booking_additional_services .= '  <span class="loft-addon-item__total">' . esc_html( nd_booking_format_decimal( $nd_booking_additional_service_total_price ) ) . ' ' . esc_html( nd_booking_get_currency() ) . '</span>';
-        $nd_booking_additional_services .= '</label>';
 
-        if ( 'nd_booking_price_type_mandatory_yes' === $nd_booking_meta_box_cpt_2_mandatory || 'nd_booking_price_type_mandatory_yes_edit' === $nd_booking_meta_box_cpt_2_mandatory ) {
-            $nd_booking_additional_services .= '<script type="text/javascript">jQuery(function($){var value="' . esc_js( $nd_booking_additional_service_total_price . ',' ) . '";var previous=$("#nd_booking_booking_checkbox_services").val();$("#nd_booking_booking_checkbox_services").val(value+previous);var idValue="' . esc_js( $nd_booking_service_id . ',' ) . '";var idPrevious=$("#nd_booking_booking_checkbox_services_id").val();$("#nd_booking_booking_checkbox_services_id").val(idValue+idPrevious);});</script>';
-        }
+
+
     }
+    
+    $nd_booking_additional_services .= '
 
-    $nd_booking_additional_services .= '  </div>';
-    $nd_booking_additional_services .= '  <input type="hidden" id="nd_booking_booking_checkbox_services" name="nd_booking_booking_checkbox_services" readonly value="">';
-    $nd_booking_additional_services .= '</section>';
+        <input type="hidden" id="nd_booking_booking_checkbox_services" name="nd_booking_booking_checkbox_services" readonly value="">
 
-    $nd_booking_additional_services .= '<script type="text/javascript">jQuery(function($){nd_booking_final_price();$(".nd_booking_booking_checkbox_service").on("change",function(){var value=$(this).val();var current=$("#nd_booking_booking_checkbox_services").val();var idValue=$(this).data("id");var currentIds=$("#nd_booking_booking_checkbox_services_id").val();if($(this).is(":checked")){ $("#nd_booking_booking_checkbox_services").val(value+current); $("#nd_booking_booking_checkbox_services_id").val(idValue+currentIds); }else{ $("#nd_booking_booking_checkbox_services").val(current.replace(value,"")); $("#nd_booking_booking_checkbox_services_id").val(currentIds.replace(idValue+"","")); } nd_booking_final_price();});});</script>';
+        <script type="text/javascript">
+          //<![CDATA[
+          jQuery(document).ready(function() {
+
+            jQuery( function ( $ ) {
+
+                nd_booking_final_price();
+
+                $( ".nd_booking_booking_checkbox_service" ).change(function() {
+
+                    if ( $( this ).is( ":checked" ) ) {
+
+                        var nd_booking_service_value = $( this ).val();
+                        var nd_booking_service_previous_value = $("#nd_booking_booking_checkbox_services").val();
+                        $( "#nd_booking_booking_checkbox_services" ).val( nd_booking_service_value+nd_booking_service_previous_value );
+
+                        var nd_booking_booking_service_id = $(this).attr("data-id");
+                        var nd_booking_service_previous_value_id = $("#nd_booking_booking_checkbox_services_id").val();
+                        $( "#nd_booking_booking_checkbox_services_id" ).val( nd_booking_booking_service_id+nd_booking_service_previous_value_id );
+
+                        nd_booking_final_price();
+
+                    }else{
+
+                        var nd_booking_service_value = $( this ).val();
+                        var nd_booking_service_previous_value = $("#nd_booking_booking_checkbox_services").val();
+                        var nd_booking_booking_checkbox_services = nd_booking_service_previous_value.replace(nd_booking_service_value, "");
+                        $( "#nd_booking_booking_checkbox_services" ).val( nd_booking_booking_checkbox_services );
+
+                        var nd_booking_booking_service_id = $(this).attr("data-id");
+                        var nd_booking_service_previous_value_id = $("#nd_booking_booking_checkbox_services_id").val();
+                        var nd_booking_booking_checkbox_services_id = nd_booking_service_previous_value_id.replace(nd_booking_booking_service_id, "");
+                        $( "#nd_booking_booking_checkbox_services_id" ).val( nd_booking_booking_checkbox_services_id );
+
+                        nd_booking_final_price();
+                       
+                    }
+
+                    
+                });
+
+            });
+
+          });
+          //]]>
+        </script>
+
+
+        <div class="nd_booking_section nd_booking_height_40"></div>
+        </div>
+
+    ';
+
 }
-
+//END additional services
