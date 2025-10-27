@@ -140,53 +140,6 @@ function marina_child_post_contains_search_shortcode( WP_Post $post ) {
 }
 
 /**
- * Enqueue checkout-specific enhancements when the ND Booking checkout shortcode is present.
- */
-function marina_child_enqueue_checkout_assets() {
-    if ( is_admin() || ! is_page() ) {
-        return;
-    }
-
-    $page = get_post();
-
-    if ( ! $page instanceof WP_Post ) {
-        return;
-    }
-
-    if ( ! marina_child_post_contains_shortcode( $page, 'nd_booking_checkout' ) ) {
-        return;
-    }
-
-    $style_path = get_stylesheet_directory() . '/css/checkout-form.css';
-
-    if ( file_exists( $style_path ) && is_readable( $style_path ) ) {
-        $style_version = (string) filemtime( $style_path );
-
-        wp_enqueue_style(
-            'marina-child-checkout',
-            get_stylesheet_directory_uri() . '/css/checkout-form.css',
-            array( 'marina-child-header-fixes' ),
-            $style_version
-        );
-    }
-
-    $script_path = get_stylesheet_directory() . '/js/checkout-enhancements.js';
-
-    if ( file_exists( $script_path ) && is_readable( $script_path ) ) {
-        $script_version = (string) filemtime( $script_path );
-
-        wp_enqueue_script(
-            'marina-child-checkout',
-            get_stylesheet_directory_uri() . '/js/checkout-enhancements.js',
-            array( 'jquery' ),
-            $script_version,
-            true
-        );
-    }
-}
-add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_checkout_assets', 30 );
-
-/**
  * Determine whether Elementor JSON data references the supplied shortcode.
  *
  * @param mixed  $elementor_data Elementor post meta value.
@@ -539,40 +492,6 @@ update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e
 
 //     error_log("✅ Booking automation completed for $email");
 // }
-
-/**
- * Elevate the wording of checkout submission buttons to match the brand voice.
- *
- * @param string $translation The translated text.
- * @param string $text        The original text.
- * @param string $domain      Text domain associated with the string.
- *
- * @return string
- */
-function marina_child_checkout_cta_gettext( $translation, $text, $domain ) {
-    $eligible_domains = array( 'woocommerce', 'nd-booking', 'default' );
-
-    if ( ! in_array( $domain, $eligible_domains, true ) ) {
-        return $translation;
-    }
-
-    $targets = array(
-        'Finaliser la commande',
-        'Finalisez la commande',
-        'Finaliser la réservation',
-        'Finalisez la réservation',
-        'Passer la commande',
-        'Compléter la commande',
-        'Valider la commande',
-    );
-
-    if ( in_array( $translation, $targets, true ) || in_array( $text, $targets, true ) ) {
-        return 'Confirmer ma réservation';
-    }
-
-    return $translation;
-}
-add_filter( 'gettext', 'marina_child_checkout_cta_gettext', 10, 3 );
 
 add_action( 'wp_head', function() {
     $child_style = get_stylesheet_directory_uri() . '/style.css';

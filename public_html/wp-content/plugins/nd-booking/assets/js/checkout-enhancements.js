@@ -1,7 +1,8 @@
 (function ($) {
   'use strict';
 
-  var CTA_LABEL = 'Confirmer ma réservation';
+  var settings = window.ndBookingCheckoutEnhancements || {};
+  var CTA_LABEL = settings.ctaLabel || 'Confirmer ma réservation de luxe';
 
   function normalizeField($field) {
     if (!$field.length || $field.hasClass('loft-checkout-form__field')) {
@@ -24,7 +25,9 @@
   }
 
   function updateCta($form) {
-    var $submit = $form.find('button[type="submit"], input[type="submit"], .button-primary[type="submit"], button.button-primary').first();
+    var $submit = $form
+      .find('button[type="submit"], input[type="submit"], .button-primary[type="submit"], button.button-primary')
+      .first();
 
     if (!$submit.length) {
       return;
