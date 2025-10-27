@@ -4,8 +4,8 @@ if ( get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional
 
     $nd_booking_additional_services  = '';
     $nd_booking_additional_services .= '<section class="loft-form-section loft-section-addons">';
-    $nd_booking_additional_services .= '  <h2><span aria-hidden="true">✨</span> ' . esc_html__( 'Add extra services', 'nd-booking' ) . '</h2>';
-    $nd_booking_additional_services .= '  <p class="loft-help-text">' . esc_html__( 'Select the extras you would like us to arrange for your stay.', 'nd-booking' ) . '</p>';
+    $nd_booking_additional_services .= '  <h2><span aria-hidden="true">✨</span> ' . esc_html__( 'Ajoutez des services supplémentaires', 'nd-booking' ) . '</h2>';
+    $nd_booking_additional_services .= '  <p class="loft-help-text">' . esc_html__( 'Sélectionnez les attentions que vous souhaitez que nous préparions pour votre séjour.', 'nd-booking' ) . '</p>';
     $nd_booking_additional_services .= '  <div class="loft-addon-grid">';
 
     $nd_booking_meta_box_additional_services_array = explode( ',', get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional_services', true ) );
@@ -51,23 +51,23 @@ if ( get_post_meta( $nd_booking_form_booking_id, 'nd_booking_meta_box_additional
         }
 
         if ( $nd_booking_meta_box_cpt_2_mandatory_result ) {
-            $nd_booking_mandatory_chip_markup = '<span class="loft-addon-mandatory" style="' . $nd_booking_mandatory_chip_style . '">' . esc_html__( 'Required', 'nd-booking' ) . '</span>';
+            $nd_booking_mandatory_chip_markup = '<span class="loft-addon-mandatory" style="' . $nd_booking_mandatory_chip_style . '">' . esc_html__( 'Obligatoire', 'nd-booking' ) . '</span>';
         }
 
         if ( 'nd_booking_price_type_person' === $nd_booking_meta_box_cpt_2_price_type_1 ) {
             $nd_booking_operator_1 = $nd_booking_form_booking_guests;
-            $nd_booking_word_1     = __( 'Guest', 'nd-booking' );
+            $nd_booking_word_1     = __( 'Invité', 'nd-booking' );
         } else {
             $nd_booking_operator_1 = 1;
-            $nd_booking_word_1     = __( 'Room', 'nd-booking' );
+            $nd_booking_word_1     = __( 'Suite', 'nd-booking' );
         }
 
         if ( 'nd_booking_price_type_day' === $nd_booking_meta_box_cpt_2_price_type_2 ) {
             $nd_booking_operator_2 = nd_booking_get_number_night( $nd_booking_date_from, $nd_booking_date_to );
-            $nd_booking_word_2     = __( 'Night', 'nd-booking' );
+            $nd_booking_word_2     = __( 'Nuit', 'nd-booking' );
         } else {
             $nd_booking_operator_2 = 1;
-            $nd_booking_word_2     = __( 'Trip', 'nd-booking' );
+            $nd_booking_word_2     = __( 'Séjour', 'nd-booking' );
         }
 
         $nd_booking_additional_service_total_price = floatval( $nd_booking_meta_box_cpt_2_price ) * $nd_booking_operator_1 * $nd_booking_operator_2;

@@ -24,23 +24,23 @@ if ( ! empty( $nd_booking_date_to ) ) {
 }
 
 $nd_booking_nights_count = max( 1, nd_booking_get_number_night( $nd_booking_date_from, $nd_booking_date_to ) );
-$nd_booking_night_label  = sprintf( _n( '%d night', '%d nights', $nd_booking_nights_count, 'nd-booking' ), $nd_booking_nights_count );
+$nd_booking_night_label  = sprintf( _n( '%d nuit', '%d nuits', $nd_booking_nights_count, 'nd-booking' ), $nd_booking_nights_count );
 
 $nd_booking_guest_total = absint( $nd_booking_form_booking_guests );
 if ( $nd_booking_guest_total > 0 ) {
-    $nd_booking_guest_label = sprintf( _n( '%d guest', '%d guests', $nd_booking_guest_total, 'nd-booking' ), $nd_booking_guest_total );
+    $nd_booking_guest_label = sprintf( _n( '%d invité', '%d invités', $nd_booking_guest_total, 'nd-booking' ), $nd_booking_guest_total );
 }
 
-$nd_booking_urgency_headline = esc_html__( 'Popular choice! Complete your details to secure this stay.', 'nd-booking' );
+$nd_booking_urgency_headline = esc_html__( 'Un choix populaire! Remplissez vos renseignements pour sécuriser ce séjour.', 'nd-booking' );
 if ( $nd_booking_check_in_display ) {
     $nd_booking_urgency_headline = sprintf(
-        esc_html__( 'Popular choice for arrivals on %s — secure it now.', 'nd-booking' ),
+        esc_html__( 'Un choix très prisé pour les arrivées le %s — réservez-le dès maintenant.', 'nd-booking' ),
         esc_html( $nd_booking_check_in_display )
     );
 }
 
 $nd_booking_rate_hold_text = sprintf(
-    esc_html__( "We're holding %1$s %2$s for %3$d minutes while you add guest details.", 'nd-booking' ),
+    esc_html__( 'Nous réservons %1$s %2$s pendant %3$d minutes le temps que vous ajoutiez les renseignements des invités.', 'nd-booking' ),
     esc_html( $nd_booking_initial_total_formatted ),
     esc_html( $nd_booking_currency_symbol ),
     absint( $nd_booking_hold_minutes )
@@ -51,7 +51,7 @@ if ( $nd_booking_check_in_display || $nd_booking_check_out_display || $nd_bookin
     $nd_booking_urgency_list_markup .= '              <ul class="loft-urgency-banner__list">';
 
     if ( $nd_booking_check_in_display || $nd_booking_check_out_display ) {
-        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Stay', 'nd-booking' ) . '</span><span class="value">';
+        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Séjour', 'nd-booking' ) . '</span><span class="value">';
 
         if ( $nd_booking_check_in_display && $nd_booking_check_out_display ) {
             $nd_booking_urgency_list_markup .= esc_html( $nd_booking_check_in_display ) . ' → ' . esc_html( $nd_booking_check_out_display );
@@ -65,11 +65,11 @@ if ( $nd_booking_check_in_display || $nd_booking_check_out_display || $nd_bookin
     }
 
     if ( $nd_booking_night_label ) {
-        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Nights', 'nd-booking' ) . '</span><span class="value">' . esc_html( $nd_booking_night_label ) . '</span></li>';
+        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Nuits', 'nd-booking' ) . '</span><span class="value">' . esc_html( $nd_booking_night_label ) . '</span></li>';
     }
 
     if ( $nd_booking_guest_label ) {
-        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Guests', 'nd-booking' ) . '</span><span class="value">' . esc_html( $nd_booking_guest_label ) . '</span></li>';
+        $nd_booking_urgency_list_markup .= '                  <li><span class="label">' . esc_html__( 'Invités', 'nd-booking' ) . '</span><span class="value">' . esc_html( $nd_booking_guest_label ) . '</span></li>';
     }
 
     $nd_booking_urgency_list_markup .= '              </ul>';
@@ -453,9 +453,9 @@ if ( ! defined( 'ND_BOOKING_LOFT_BOOKING_FORM_STYLES' ) ) {
     </style>';
 }
 $nd_booking_shortcode_right_content .= '<div class="loft-booking-form">';
-$nd_booking_shortcode_right_content .= '  <div class="loft-progress-indicator">' . esc_html__( 'Step 1 of 3', 'nd-booking' ) . '</div>';
-$nd_booking_shortcode_right_content .= '  <h1 class="loft-booking-form__title">' . esc_html__( 'Confirm your booking', 'nd-booking' ) . '</h1>';
-$nd_booking_shortcode_right_content .= '  <p class="loft-booking-form__subtitle">' . esc_html__( 'Tell us who is staying so we can finalize your reservation.', 'nd-booking' ) . '</p>';
+$nd_booking_shortcode_right_content .= '  <div class="loft-progress-indicator">' . esc_html__( 'Étape 1 sur 3', 'nd-booking' ) . '</div>';
+$nd_booking_shortcode_right_content .= '  <h1 class="loft-booking-form__title">' . esc_html__( 'Confirmez votre réservation', 'nd-booking' ) . '</h1>';
+$nd_booking_shortcode_right_content .= '  <p class="loft-booking-form__subtitle">' . esc_html__( 'Indiquez-nous qui séjournera afin que nous finalisions votre réservation.', 'nd-booking' ) . '</p>';
 
 $nd_booking_shortcode_right_content .= '  <form class="loft-booking-form__form" method="post" enctype="multipart/form-data" action="' . esc_url( nd_booking_checkout_page() ) . '">';
 $nd_booking_shortcode_right_content .= '      <input type="hidden" id="nd_booking_form_booking_arrive" name="nd_booking_form_booking_arrive" value="1">';
@@ -482,101 +482,101 @@ if ( '' !== $nd_booking_urgency_list_markup ) {
 }
 $nd_booking_shortcode_right_content .= '              <div class="loft-urgency-banner__timer">';
 $nd_booking_shortcode_right_content .= '                  <span class="loft-urgency-banner__timer-bar" aria-hidden="true"></span>';
-$nd_booking_shortcode_right_content .= '                  <span class="loft-urgency-banner__timer-label">' . esc_html( sprintf( __( 'Complete in %d minutes to keep this price', 'nd-booking' ), $nd_booking_hold_minutes ) ) . '</span>';
+        $nd_booking_shortcode_right_content .= '                  <span class="loft-urgency-banner__timer-label">' . esc_html( sprintf( __( 'Terminez en %d minutes pour conserver ce tarif', 'nd-booking' ), $nd_booking_hold_minutes ) ) . '</span>';
 $nd_booking_shortcode_right_content .= '              </div>';
-$nd_booking_shortcode_right_content .= '              <p class="loft-urgency-banner__footnote">' . esc_html__( 'Rooms like this are booking quickly today—finish this step to lock yours in.', 'nd-booking' ) . '</p>';
+            $nd_booking_shortcode_right_content .= '              <p class="loft-urgency-banner__footnote">' . esc_html__( 'Des suites comme celle-ci se réservent rapidement aujourd’hui — terminez cette étape pour la garantir.', 'nd-booking' ) . '</p>';
 $nd_booking_shortcode_right_content .= '          </div>';
 $nd_booking_shortcode_right_content .= '      </div>';
 
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-contact">';
-$nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🧍</span> ' . esc_html__( 'Guest information', 'nd-booking' ) . '</h2>';
+        $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🧍</span> ' . esc_html__( 'Renseignements sur les invités', 'nd-booking' ) . '</h2>';
 $nd_booking_shortcode_right_content .= '          <div class="loft-form-grid">';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_name_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_name">' . esc_html__( 'First name', 'nd-booking' ) . ' *</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_name">' . esc_html__( 'Prénom', 'nd-booking' ) . ' *</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_name" name="nd_booking_booking_form_name" type="text" autocomplete="given-name">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_surname_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_surname">' . esc_html__( 'Last name', 'nd-booking' ) . ' *</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_surname">' . esc_html__( 'Nom de famille', 'nd-booking' ) . ' *</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_surname" name="nd_booking_booking_form_surname" type="text" autocomplete="family-name">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_email_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_email">' . esc_html__( 'Email address', 'nd-booking' ) . ' *</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_email">' . esc_html__( 'Adresse courriel', 'nd-booking' ) . ' *</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_email" name="nd_booking_booking_form_email" type="email" autocomplete="email">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_phone_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_phone">' . esc_html__( 'Mobile phone', 'nd-booking' ) . ' *</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_phone">' . esc_html__( 'Téléphone mobile', 'nd-booking' ) . ' *</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_phone" name="nd_booking_booking_form_phone" type="tel" autocomplete="tel">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '          </div>';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-address">';
-$nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🏠</span> ' . esc_html__( 'Billing address', 'nd-booking' ) . '</h2>';
+        $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🏠</span> ' . esc_html__( 'Adresse de facturation', 'nd-booking' ) . '</h2>';
 $nd_booking_shortcode_right_content .= '          <div class="loft-form-grid">';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_address_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_address">' . esc_html__( 'Street address', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_address">' . esc_html__( 'Adresse', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_address" name="nd_booking_booking_form_address" type="text" autocomplete="address-line1">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_city_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_city">' . esc_html__( 'City', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_city">' . esc_html__( 'Ville', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_city" name="nd_booking_booking_form_city" type="text" autocomplete="address-level2">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_country_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_country">' . esc_html__( 'Country', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_country">' . esc_html__( 'Pays', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_country" name="nd_booking_booking_form_country" type="text" autocomplete="country-name">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field" id="nd_booking_booking_form_zip_container">';
-$nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_zip">' . esc_html__( 'Postal code', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="nd_booking_booking_form_zip">' . esc_html__( 'Code postal', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="nd_booking_booking_form_zip" name="nd_booking_booking_form_zip" type="text" autocomplete="postal-code">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '          </div>';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-identification">';
-$nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🪪</span> ' . esc_html__( 'Identification', 'nd-booking' ) . '</h2>';
+        $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🪪</span> ' . esc_html__( 'Pièce d’identité', 'nd-booking' ) . '</h2>';
 $nd_booking_shortcode_right_content .= '          <div class="loft-form-grid">';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field">';
-$nd_booking_shortcode_right_content .= '                  <label for="guest_id_number">' . esc_html__( 'ID number', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="guest_id_number">' . esc_html__( 'Numéro d’identification', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" id="guest_id_number" name="guest_id_number" type="text">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field">';
-$nd_booking_shortcode_right_content .= '                  <label for="guest_id_type">' . esc_html__( 'ID type', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="guest_id_type">' . esc_html__( 'Type de pièce d’identité', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <select class="loft-input" id="guest_id_type" name="guest_id_type">';
-$nd_booking_shortcode_right_content .= '                      <option value="driver_license">' . esc_html__( "Driver's License", 'nd-booking' ) . '</option>';
-$nd_booking_shortcode_right_content .= '                      <option value="passport">' . esc_html__( 'Passport', 'nd-booking' ) . '</option>';
+        $nd_booking_shortcode_right_content .= '                      <option value="driver_license">' . esc_html__( 'Permis de conduire', 'nd-booking' ) . '</option>';
+        $nd_booking_shortcode_right_content .= '                      <option value="passport">' . esc_html__( 'Passeport', 'nd-booking' ) . '</option>';
 $nd_booking_shortcode_right_content .= '                  </select>';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field loft-form-field--file">';
-$nd_booking_shortcode_right_content .= '                  <label for="guest_id_front">' . esc_html__( 'Guest ID (front)', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="guest_id_front">' . esc_html__( 'Pièce d’identité (recto)', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" type="file" id="guest_id_front" name="guest_id_front" accept="image/*">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '              <div class="loft-form-field loft-form-field--file">';
-$nd_booking_shortcode_right_content .= '                  <label for="guest_id_back">' . esc_html__( 'Guest ID (back)', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '                  <label for="guest_id_back">' . esc_html__( 'Pièce d’identité (verso)', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '                  <input class="loft-input" type="file" id="guest_id_back" name="guest_id_back" accept="image/*">';
 $nd_booking_shortcode_right_content .= '              </div>';
 $nd_booking_shortcode_right_content .= '          </div>';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-requests">';
-$nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">💬</span> ' . esc_html__( 'Special requests', 'nd-booking' ) . '</h2>';
+        $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">💬</span> ' . esc_html__( 'Demandes particulières', 'nd-booking' ) . '</h2>';
 $nd_booking_shortcode_right_content .= '          <div class="loft-form-field" id="nd_booking_booking_form_requests_container">';
-$nd_booking_shortcode_right_content .= '              <label for="nd_booking_booking_form_requests">' . esc_html__( 'Let us know if you have any preferences or arrival notes.', 'nd-booking' ) . '</label>';
+        $nd_booking_shortcode_right_content .= '              <label for="nd_booking_booking_form_requests">' . esc_html__( 'Faites-nous part de vos préférences ou de vos remarques pour l’arrivée.', 'nd-booking' ) . '</label>';
 $nd_booking_shortcode_right_content .= '              <textarea class="loft-input" id="nd_booking_booking_form_requests" name="nd_booking_booking_form_requests" rows="5"></textarea>';
 $nd_booking_shortcode_right_content .= '          </div>';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-arrival">';
-$nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🕓</span> ' . esc_html__( 'Arrival details', 'nd-booking' ) . '</h2>';
-$nd_booking_shortcode_right_content .= '          <p class="loft-help-text">' . esc_html__( 'Check-in starts at 4 PM; checkout is at 12 PM.', 'nd-booking' ) . '</p>';
-$nd_booking_shortcode_right_content .= '          <input type="hidden" class="loft-input" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival" value="4:00 - 5:00 ' . esc_attr__( 'pm', 'nd-booking' ) . '">';
+        $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🕓</span> ' . esc_html__( 'Détails d’arrivée', 'nd-booking' ) . '</h2>';
+        $nd_booking_shortcode_right_content .= '          <p class="loft-help-text">' . esc_html__( 'L’enregistrement débute à 16 h et le départ est à 12 h.', 'nd-booking' ) . '</p>';
+        $nd_booking_shortcode_right_content .= '          <input type="hidden" class="loft-input" name="nd_booking_booking_form_arrival" id="nd_booking_booking_form_arrival" value="16 h - 17 h">';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_coupon_class = nd_booking_get_coupon_enable_class();
 if ( '' === $nd_booking_coupon_class ) {
     $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-coupon" id="nd_booking_booking_form_coupon_container">';
-    $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🏷️</span> ' . esc_html__( 'Promo code', 'nd-booking' ) . '</h2>';
+    $nd_booking_shortcode_right_content .= '          <h2><span aria-hidden="true">🏷️</span> ' . esc_html__( 'Code promotionnel', 'nd-booking' ) . '</h2>';
     $nd_booking_shortcode_right_content .= '          <div class="loft-form-field">';
-    $nd_booking_shortcode_right_content .= '              <label for="nd_booking_booking_form_coupon">' . esc_html__( 'Enter your coupon', 'nd-booking' ) . '</label>';
+    $nd_booking_shortcode_right_content .= '              <label for="nd_booking_booking_form_coupon">' . esc_html__( 'Entrez votre coupon', 'nd-booking' ) . '</label>';
     $nd_booking_shortcode_right_content .= '              <input class="loft-input" id="nd_booking_booking_form_coupon" name="nd_booking_booking_form_coupon" type="text">';
     $nd_booking_shortcode_right_content .= '          </div>';
     $nd_booking_shortcode_right_content .= '      </section>';
@@ -585,13 +585,13 @@ if ( '' === $nd_booking_coupon_class ) {
 $nd_booking_shortcode_right_content .= '      <section class="loft-form-section loft-section-terms" id="nd_booking_booking_form_term_container">';
 $nd_booking_shortcode_right_content .= '          <label class="loft-checkbox">';
 $nd_booking_shortcode_right_content .= '              <input class="loft-checkbox__input" id="nd_booking_booking_form_term" name="nd_booking_booking_form_term" type="checkbox" value="1" checked>';
-$nd_booking_shortcode_right_content .= '              <span class="loft-checkbox__label">' . sprintf( esc_html__( 'I agree to the %s', 'nd-booking' ), '<a target="_blank" href="' . esc_url( nd_booking_terms_page() ) . '">' . esc_html__( 'terms and conditions', 'nd-booking' ) . '</a>' ) . '</span>';
+    $nd_booking_shortcode_right_content .= '              <span class="loft-checkbox__label">' . sprintf( esc_html__( 'J’accepte les %s', 'nd-booking' ), '<a target="_blank" href="' . esc_url( nd_booking_terms_page() ) . '">' . esc_html__( 'conditions générales', 'nd-booking' ) . '</a>' ) . '</span>';
 $nd_booking_shortcode_right_content .= '          </label>';
 $nd_booking_shortcode_right_content .= '      </section>';
 
 $nd_booking_shortcode_right_content .= '      <div class="loft-form-actions">';
-$nd_booking_shortcode_right_content .= '          <button type="button" class="loft-button" onclick="nd_booking_validate_fields()">' . esc_html__( 'Proceed to checkout', 'nd-booking' ) . '</button>';
-$nd_booking_shortcode_right_content .= '          <input id="nd_booking_submit_go_to_checkout" class="loft-button loft-button--hidden" type="submit" value="' . esc_attr__( 'Proceed to checkout', 'nd-booking' ) . '">';
+$nd_booking_shortcode_right_content .= '          <button type="button" class="loft-button" onclick="nd_booking_validate_fields()">' . esc_html__( 'Passer au paiement', 'nd-booking' ) . '</button>';
+$nd_booking_shortcode_right_content .= '          <input id="nd_booking_submit_go_to_checkout" class="loft-button loft-button--hidden" type="submit" value="' . esc_attr__( 'Passer au paiement', 'nd-booking' ) . '">';
 $nd_booking_shortcode_right_content .= '      </div>';
 
 $nd_booking_shortcode_right_content .= '  </form>';
