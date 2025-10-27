@@ -136,58 +136,21 @@ add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_search_styles', 25 );
  * @return bool
  */
 function marina_child_post_contains_search_shortcode( WP_Post $post ) {
-    if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $post->ID, '_elementor_data', true ) ) ) {
-        return true;
-    }
-
-    if ( false !== stripos( (string) $post->post_content, 'nd_booking_search_results' ) ) {
-        return true;
-    }
-
-    if ( ! has_shortcode( $post->post_content, 'elementor-template' ) ) {
-        return false;
-    }
-
-    preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post->post_content, $matches );
-
-    if ( empty( $matches[1] ) ) {
-        return false;
-    }
-
-    foreach ( $matches[1] as $template_id ) {
-        $template_id = absint( $template_id );
-
-        if ( ! $template_id ) {
-            continue;
-        }
-
-        $template_post = get_post( $template_id );
-
-        if ( ! $template_post instanceof WP_Post ) {
-            continue;
-        }
-
-        if ( false !== stripos( (string) $template_post->post_content, 'nd_booking_search_results' ) ) {
-            return true;
-        }
-
-        if ( marina_child_elementor_data_contains_search_shortcode( get_post_meta( $template_post->ID, '_elementor_data', true ) ) ) {
-            return true;
-        }
-    }
-
-    return false;
+    return marina_child_post_contains_shortcode( $post, 'nd_booking_search_results' );
 }
 
 /**
- * Inspect Elementor JSON data for the ND Booking search results shortcode reference.
+ * Determine whether Elementor JSON data references the supplied shortcode.
  *
- * @param mixed $elementor_data Elementor post meta value.
+ * @param mixed  $elementor_data Elementor post meta value.
+ * @param string $shortcode      Shortcode tag to search for.
  *
  * @return bool
  */
-function marina_child_elementor_data_contains_search_shortcode( $elementor_data ) {
-    if ( empty( $elementor_data ) ) {
+function marina_child_elementor_data_contains_shortcode( $elementor_data, $shortcode ) {
+    $shortcode = trim( (string) $shortcode );
+
+    if ( '' === $shortcode || empty( $elementor_data ) ) {
         return false;
     }
 
@@ -199,7 +162,81 @@ function marina_child_elementor_data_contains_search_shortcode( $elementor_data 
         return false;
     }
 
-    return false !== stripos( $elementor_data, 'nd_booking_search_results' );
+    return false !== stripos( $elementor_data, $shortcode );
+}
+
+/**
+ * Inspect Elementor JSON data for the ND Booking search results shortcode reference.
+ *
+ * @param mixed $elementor_data Elementor post meta value.
+ *
+ * @return bool
+ */
+function marina_child_elementor_data_contains_search_shortcode( $elementor_data ) {
+    return marina_child_elementor_data_contains_shortcode( $elementor_data, 'nd_booking_search_results' );
+}
+
+/**
+ * Determine whether the supplied post (or any referenced Elementor template) contains a target shortcode.
+ *
+ * @param WP_Post $post      The post object under evaluation.
+ * @param string  $shortcode Shortcode tag to search for.
+ * @param array   $visited   Internal recursion guard to avoid repeated scans.
+ *
+ * @return bool
+ */
+function marina_child_post_contains_shortcode( WP_Post $post, $shortcode, array &$visited = array() ) {
+    $shortcode = trim( (string) $shortcode );
+
+    if ( '' === $shortcode ) {
+        return false;
+    }
+
+    if ( isset( $visited[ $post->ID ] ) ) {
+        return false;
+    }
+
+    $visited[ $post->ID ] = true;
+
+    $post_content = (string) $post->post_content;
+
+    if ( has_shortcode( $post_content, $shortcode ) || false !== stripos( $post_content, '[' . $shortcode ) ) {
+        return true;
+    }
+
+    if ( marina_child_elementor_data_contains_shortcode( get_post_meta( $post->ID, '_elementor_data', true ), $shortcode ) ) {
+        return true;
+    }
+
+    if ( ! has_shortcode( $post_content, 'elementor-template' ) ) {
+        return false;
+    }
+
+    preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post_content, $matches );
+
+    if ( empty( $matches[1] ) ) {
+        return false;
+    }
+
+    foreach ( $matches[1] as $template_id ) {
+        $template_id = absint( $template_id );
+
+        if ( ! $template_id || isset( $visited[ $template_id ] ) ) {
+            continue;
+        }
+
+        $template_post = get_post( $template_id );
+
+        if ( ! $template_post instanceof WP_Post ) {
+            continue;
+        }
+
+        if ( marina_child_post_contains_shortcode( $template_post, $shortcode, $visited ) ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -455,14 +492,6 @@ update_option('loft_booking_calendar_id', 'a752f27cffee8c22988adb29fdc933c93184e
 
 //     error_log("✅ Booking automation completed for $email");
 // }
-
-
-
-
-
-
-
-
 
 add_action( 'wp_head', function() {
     $child_style = get_stylesheet_directory_uri() . '/style.css';

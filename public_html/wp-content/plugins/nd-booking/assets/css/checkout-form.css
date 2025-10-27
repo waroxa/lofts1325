@@ -1,0 +1,931 @@
+/*
+ * Checkout styling refinements for the ND Booking flow.
+ */
+
+.loft-checkout-wrapper .checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.loft-checkout-wrapper .checkout-form form,
+.loft-checkout-wrapper .checkout-form form.loft-checkout-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.loft-checkout-form__field,
+.loft-checkout-wrapper .checkout-form form .form-row,
+.loft-checkout-wrapper .checkout-form form .nd_booking_form_row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  width: 100%;
+}
+
+.loft-checkout-form__field--split,
+.loft-checkout-wrapper .checkout-form form .form-row-first,
+.loft-checkout-wrapper .checkout-form form .form-row-last,
+.loft-checkout-wrapper .checkout-form form .nd_booking_form_half {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .loft-checkout-form__field--split,
+  .loft-checkout-wrapper .checkout-form form .form-row-first,
+  .loft-checkout-wrapper .checkout-form form .form-row-last,
+  .loft-checkout-wrapper .checkout-form form .nd_booking_form_half {
+    width: calc(50% - 12px);
+  }
+}
+
+.loft-checkout-wrapper .checkout-form form label,
+.loft-checkout-wrapper .checkout-form form .woocommerce-form__label > span {
+  font-weight: 600;
+  font-size: 15px;
+  color: #111827;
+  letter-spacing: 0.01em;
+}
+
+.loft-checkout-wrapper .checkout-form form input[type="text"],
+.loft-checkout-wrapper .checkout-form form input[type="email"],
+.loft-checkout-wrapper .checkout-form form input[type="tel"],
+.loft-checkout-wrapper .checkout-form form input[type="number"],
+.loft-checkout-wrapper .checkout-form form input[type="date"],
+.loft-checkout-wrapper .checkout-form form input[type="password"],
+.loft-checkout-wrapper .checkout-form form input[type="search"],
+.loft-checkout-wrapper .checkout-form form select,
+.loft-checkout-wrapper .checkout-form form textarea {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #111827;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.loft-checkout-wrapper .checkout-form form textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.loft-checkout-wrapper .checkout-form form input:focus,
+.loft-checkout-wrapper .checkout-form form select:focus,
+.loft-checkout-wrapper .checkout-form form textarea:focus {
+  border-color: #f4b942;
+  background: #fffdf5;
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.2);
+  outline: none;
+}
+
+.loft-checkout-form__field--file input[type="file"],
+.loft-checkout-wrapper .checkout-form form .form-row input[type="file"] {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(244, 185, 66, 0.7);
+  background: linear-gradient(135deg, #fff8db 0%, #ffffff 100%);
+  color: #1f2937;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-checkout-form__field--file input[type="file"]::file-selector-button,
+.loft-checkout-wrapper .checkout-form form input[type="file"]::file-selector-button {
+  margin-right: 16px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+  color: #1f2937;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-checkout-form__field--file input[type="file"]:hover,
+.loft-checkout-wrapper .checkout-form form .form-row input[type="file"]:hover {
+  border-color: #facc15;
+  box-shadow: 0 10px 28px rgba(244, 185, 66, 0.22);
+}
+
+.loft-checkout-form__field--file input[type="file"]::file-selector-button:hover,
+.loft-checkout-wrapper .checkout-form form input[type="file"]::file-selector-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(244, 185, 66, 0.35);
+}
+
+.loft-checkout-wrapper .checkout-form form select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(17, 24, 39, 0.8) 50%),
+    linear-gradient(135deg, rgba(17, 24, 39, 0.8) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(1em + 2px), calc(100% - 15px) calc(1em + 2px);
+  background-size: 7px 7px, 7px 7px;
+  background-repeat: no-repeat;
+}
+
+.loft-checkout-wrapper .checkout-form form select:focus {
+  background-image: linear-gradient(45deg, transparent 50%, #f4b942 50%),
+    linear-gradient(135deg, #f4b942 50%, transparent 50%);
+}
+
+.loft-checkout-wrapper .checkout-form form .woocommerce-billing-fields__field-wrapper {
+  display: contents;
+}
+
+.loft-checkout-wrapper .checkout-form form .woocommerce-input-wrapper {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form form .woocommerce-billing-fields__field-wrapper .form-row {
+  margin-bottom: 0;
+}
+
+.loft-checkout-wrapper .checkout-form form .form-row .optional,
+.loft-checkout-wrapper .checkout-form form .form-row .required {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-privacy-policy-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(17, 24, 39, 0.82);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-privacy-policy-text a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-privacy-policy-text a:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-privacy-policy-text a:focus {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 38px rgba(15, 23, 42, 0.12);
+  border: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table thead th {
+  background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+  color: #1f2937;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot td,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot th {
+  border: 0;
+  font-size: 15px;
+  color: #111827;
+  padding: 18px 24px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody tr:nth-child(even) td {
+  background: rgba(248, 250, 252, 0.65);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment {
+  border-radius: 18px;
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods {
+  padding: 0;
+  margin: 0 0 24px;
+  border: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li {
+  list-style: none;
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li:focus-within {
+  border-color: #f4b942;
+  box-shadow: 0 16px 42px rgba(244, 185, 66, 0.18);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li input[type="radio"] {
+  margin-right: 12px;
+  accent-color: #f4b942;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment div.payment_box {
+  background: rgba(248, 250, 252, 0.75);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 14px 0 0;
+  color: rgba(17, 24, 39, 0.82);
+  font-size: 14px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment div.payment_box::before {
+  border-bottom-color: rgba(248, 250, 252, 0.75);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .form-row.place-order {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper {
+  margin-top: 16px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  padding: 16px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #f9fafb;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-privacy-policy-text {
+  margin-top: 16px;
+}
+
+.loft-checkout-wrapper .checkout-form .form-row .woocommerce-input-wrapper .description {
+  font-size: 13px;
+  color: rgba(55, 65, 81, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.12) 0%, rgba(255, 255, 255, 0.9) 100%);
+  box-shadow: 0 10px 32px rgba(244, 185, 66, 0.22);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon p,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login p {
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row-first,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row-first,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row-last,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row-last {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row-first,
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row-first,
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row-last,
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row-last {
+    width: calc(50% - 12px);
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-button.button,
+.loft-checkout-wrapper .checkout-form button.button,
+.loft-checkout-wrapper .checkout-form input.button,
+.loft-checkout-wrapper .checkout-form button[type="submit"],
+.loft-checkout-wrapper .checkout-form input[type="submit"],
+.loft-checkout-wrapper .checkout-form .button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+  color: #1f2937;
+  border: 0;
+  box-shadow: 0 16px 32px rgba(244, 185, 66, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-button.button:hover,
+.loft-checkout-wrapper .checkout-form button.button:hover,
+.loft-checkout-wrapper .checkout-form input.button:hover,
+.loft-checkout-wrapper .checkout-form button[type="submit"]:hover,
+.loft-checkout-wrapper .checkout-form input[type="submit"]:hover,
+.loft-checkout-wrapper .checkout-form .button-primary:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-button.button:focus,
+.loft-checkout-wrapper .checkout-form button.button:focus,
+.loft-checkout-wrapper .checkout-form input.button:focus,
+.loft-checkout-wrapper .checkout-form button[type="submit"]:focus,
+.loft-checkout-wrapper .checkout-form input[type="submit"]:focus,
+.loft-checkout-wrapper .checkout-form .button-primary:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 44px rgba(244, 185, 66, 0.45);
+  outline: none;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-NoticeGroup-checkout,
+.loft-checkout-wrapper .checkout-form .woocommerce-message,
+.loft-checkout-wrapper .checkout-form .woocommerce-error,
+.loft-checkout-wrapper .checkout-form .woocommerce-info {
+  border-radius: 14px;
+  padding: 18px 20px;
+  font-size: 14px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-error {
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(254, 226, 226, 0.75);
+  color: #991b1b;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-message,
+.loft-checkout-wrapper .checkout-form .woocommerce-info {
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(219, 234, 254, 0.75);
+  color: #1e3a8a;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle {
+  margin-bottom: 18px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-form-login-toggle__text,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-form-coupon-toggle__text {
+  font-size: 15px;
+  color: rgba(17, 24, 39, 0.86);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper {
+  margin-bottom: 14px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-input {
+  accent-color: #f4b942;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-input:focus {
+  outline: 2px solid rgba(244, 185, 66, 0.45);
+  outline-offset: 3px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .terms label {
+  font-size: 14px;
+  color: rgba(17, 24, 39, 0.82);
+  cursor: pointer;
+}
+
+.loft-checkout-form__submit {
+  min-width: 260px;
+}
+
+.loft-checkout-form--enhanced .form-row-wide,
+.loft-checkout-form--enhanced .form-row-first,
+.loft-checkout-form--enhanced .form-row-last {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper label a {
+  color: #2563eb;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper label a:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper label a:focus {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.loft-checkout-wrapper .checkout-form form .form-row .woocommerce-input-wrapper .woocommerce-input-wrapper {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li input[type="radio"]:focus-visible {
+  outline: 2px solid rgba(244, 185, 66, 0.45);
+  outline-offset: 2px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-Button {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-Button {
+    width: auto;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .button {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .button {
+    width: auto;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .button {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .button {
+    width: auto;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method.payment_method_stripe {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box {
+  padding: 18px 18px 20px;
+  border-radius: 14px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row {
+  margin-bottom: 12px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box label {
+  font-weight: 500;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-number,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-expiry,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-cvc {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  padding: 14px 16px;
+  background: #f8fafc;
+  color: #111827;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-number:focus,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-expiry:focus,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-cvc:focus {
+  border-color: #f4b942;
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.2);
+  outline: none;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form span {
+  display: block;
+  font-size: 12px;
+  color: rgba(55, 65, 81, 0.75);
+  margin-top: 6px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .input-text::placeholder {
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot tr.order-total th,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot tr.order-total td {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot tr.order-total td {
+  color: #0f172a;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .lost_password {
+  text-align: right;
+  font-size: 13px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .lost_password a {
+  color: #1d4ed8;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .lost_password a:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .lost_password a:focus {
+  color: #1e40af;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login input[type="checkbox"] {
+  accent-color: #f4b942;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login label.inline {
+  margin-left: 0;
+  font-size: 14px;
+  color: rgba(17, 24, 39, 0.82);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-privacy-policy-text p {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info {
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(219, 234, 254, 0.6);
+  padding: 16px 18px;
+  color: #1e3a8a;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info a,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info a:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info a:focus {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-form-login__rememberme {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-form-login__rememberme input[type="checkbox"] {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form-card-number,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form-card-expiry,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form-card-cvc {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form .form-row-last,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form .form-row-first {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form .form-row-first,
+  .loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .payment_box .wc-credit-card-form .form-row-last {
+    width: calc(50% - 12px);
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-cvc,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry {
+  margin-top: 8px;
+}
+
+@media (min-width: 640px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry {
+    margin-top: 0;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row.form-row-first .input-text,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row.form-row-first .input-text,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row.form-row-last .input-text,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row.form-row-last .input-text {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-name {
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td .wc-item-meta {
+  margin-top: 6px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td .wc-item-meta li {
+  font-size: 13px;
+  color: rgba(55, 65, 81, 0.82);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(31, 41, 55, 0.85);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-form-login__rememberme label {
+  font-size: 14px;
+  color: rgba(17, 24, 39, 0.82);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__submit {
+  margin-top: 10px;
+}
+
+@media (min-width: 768px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__submit {
+    margin-top: 0;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-number::-webkit-inner-spin-button,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry::-webkit-inner-spin-button,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-cvc::-webkit-inner-spin-button {
+  display: none;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-number::-webkit-outer-spin-button,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry::-webkit-outer-spin-button,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-cvc::-webkit-outer-spin-button {
+  display: none;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-total,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot td {
+  text-align: right;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot tr.order-total td {
+  color: #1f2937;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row.form-row-last .button,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row.form-row-last .button {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row.form-row-last .button,
+  .loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row.form-row-last .button {
+    width: auto;
+  }
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-Button {
+  background: linear-gradient(135deg, #facc15 0%, #f4b942 100%);
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-Button:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-Button:focus {
+  box-shadow: 0 20px 38px rgba(244, 185, 66, 0.4);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row .input-text:focus,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .input-text:focus {
+  border-color: #f4b942;
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.18);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login p.form-row {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row {
+  margin: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot th {
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.82);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .form-row.place-order .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions {
+  background: #ffffff;
+  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-number,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-expiry,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-cvc {
+  font-size: 15px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-number::-moz-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-expiry::-moz-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-cvc::-moz-placeholder {
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-number:-ms-input-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-expiry:-ms-input-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-cvc:-ms-input-placeholder {
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-number::-ms-input-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-expiry::-ms-input-placeholder,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .wc-credit-card-form-card-cvc::-ms-input-placeholder {
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info::before,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info::before {
+  display: none;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) rgba(248, 250, 252, 0.9);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions::-webkit-scrollbar {
+  width: 10px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions::-webkit-scrollbar-track {
+  background: rgba(248, 250, 252, 0.9);
+  border-radius: 10px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.6);
+  border-radius: 10px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.75);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info .showlogin,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info .showcoupon {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info .showlogin:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login-toggle .woocommerce-info .showlogin:focus,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info .showcoupon:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon-toggle .woocommerce-info .showcoupon:focus {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-input-wrapper input[type="password"] {
+  letter-spacing: 0.05em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-input-wrapper input[type="password"]:focus {
+  border-color: #f4b942;
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.18);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-input-wrapper input[type="password"]::placeholder {
+  letter-spacing: 0.02em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-name .wc-item-meta li {
+  margin-bottom: 4px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-name .wc-item-meta li:last-child {
+  margin-bottom: 0;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .form-row .input-text {
+  background: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(148, 163, 184, 0.25);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .button .woocommerce-terms-and-conditions-wrapper {
+  width: 100%;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-cvc {
+  font-size: 15px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-number {
+  letter-spacing: 0.08em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-cvc {
+  letter-spacing: 0.1em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .wc-credit-card-form-card-expiry {
+  letter-spacing: 0.04em;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-total,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tfoot td.product-total {
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .woocommerce-Button::after,
+.loft-checkout-wrapper .checkout-form .woocommerce-form-coupon .button::after,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .button::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  border-radius: 50%;
+  margin-left: 10px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .button {
+  font-size: 17px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row label {
+  font-size: 14px;
+  color: rgba(17, 24, 39, 0.8);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-number,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-expiry,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .wc-credit-card-form-card-cvc {
+  background: #ffffff;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .input-text.error {
+  border-color: rgba(248, 113, 113, 0.8);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.35);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .input-text.error:focus {
+  border-color: rgba(248, 113, 113, 0.9);
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.45);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__rememberme label {
+  cursor: pointer;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__rememberme input[type="checkbox"]:focus {
+  outline: 2px solid rgba(244, 185, 66, 0.45);
+  outline-offset: 2px;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions a {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions a:hover,
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment .place-order .woocommerce-terms-and-conditions-wrapper .woocommerce-terms-and-conditions a:focus {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li.wc_payment_method_stripe .payment_box .form-row .input-text {
+  background: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(148, 163, 184, 0.2);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__rememberme input[type="checkbox"] {
+  accent-color: #f4b942;
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-form-login .form-row .woocommerce-input-wrapper .woocommerce-form-login__rememberme input[type="checkbox"]:checked {
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.2);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-payment ul.payment_methods li .payment_box .form-row .input-text:focus {
+  border-color: #f4b942;
+  box-shadow: 0 0 0 4px rgba(244, 185, 66, 0.2);
+}
+
+.loft-checkout-wrapper .checkout-form .woocommerce-checkout-review-order-table tbody td.product-total .woocommerce-Price-amount {
+  font-weight: 600;
+}

@@ -93,19 +93,257 @@ add_action( 'plugins_loaded', 'nd_booking_maybe_upgrade_booking_db' );
 
 //add custom css
 function nd_booking_scripts() {
-  
+
   //basic css plugin
   wp_enqueue_style( 'nd_booking_style', esc_url(plugins_url('assets/css/style.css', __FILE__ )) );
 
   wp_enqueue_script('jquery');
-  
+
 }
 add_action( 'wp_enqueue_scripts', 'nd_booking_scripts' );
 
 
+if ( ! function_exists( 'nd_booking_elementor_data_contains_shortcode' ) ) {
+    /**
+     * Determine whether Elementor JSON data references a shortcode.
+     *
+     * @param mixed  $elementor_data Elementor post meta value.
+     * @param string $shortcode      Shortcode tag to search for.
+     *
+     * @return bool
+     */
+    function nd_booking_elementor_data_contains_shortcode( $elementor_data, $shortcode ) {
+        $shortcode = trim( (string) $shortcode );
+
+        if ( '' === $shortcode || empty( $elementor_data ) ) {
+            return false;
+        }
+
+        if ( is_array( $elementor_data ) ) {
+            $elementor_data = wp_json_encode( $elementor_data );
+        }
+
+        if ( ! is_string( $elementor_data ) ) {
+            return false;
+        }
+
+        return false !== stripos( $elementor_data, $shortcode );
+    }
+}
+
+if ( ! function_exists( 'nd_booking_post_contains_shortcode' ) ) {
+    /**
+     * Inspect a post (and any referenced Elementor templates) for a shortcode.
+     *
+     * @param WP_Post $post      Post object under evaluation.
+     * @param string  $shortcode Shortcode tag to search for.
+     * @param array   $visited   Recursion guard to avoid repeated scans.
+     *
+     * @return bool
+     */
+    function nd_booking_post_contains_shortcode( WP_Post $post, $shortcode, array &$visited = array() ) {
+        $shortcode = trim( (string) $shortcode );
+
+        if ( '' === $shortcode ) {
+            return false;
+        }
+
+        if ( isset( $visited[ $post->ID ] ) ) {
+            return false;
+        }
+
+        $visited[ $post->ID ] = true;
+
+        $post_content = (string) $post->post_content;
+
+        if ( has_shortcode( $post_content, $shortcode ) || false !== stripos( $post_content, '[' . $shortcode ) ) {
+            return true;
+        }
+
+        if ( nd_booking_elementor_data_contains_shortcode( get_post_meta( $post->ID, '_elementor_data', true ), $shortcode ) ) {
+            return true;
+        }
+
+        if ( ! has_shortcode( $post_content, 'elementor-template' ) ) {
+            return false;
+        }
+
+        preg_match_all( '/\[elementor-template[^\]]*id="?(\d+)"?[^\]]*\]/i', $post_content, $matches );
+
+        if ( empty( $matches[1] ) ) {
+            return false;
+        }
+
+        foreach ( $matches[1] as $template_id ) {
+            $template_id = absint( $template_id );
+
+            if ( ! $template_id || isset( $visited[ $template_id ] ) ) {
+                continue;
+            }
+
+            $template_post = get_post( $template_id );
+
+            if ( ! $template_post instanceof WP_Post ) {
+                continue;
+            }
+
+            if ( nd_booking_post_contains_shortcode( $template_post, $shortcode, $visited ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if ( ! function_exists( 'nd_booking_is_checkout_screen' ) ) {
+    /**
+     * Determine whether the current request renders the ND Booking checkout experience.
+     *
+     * @return bool
+     */
+    function nd_booking_is_checkout_screen() {
+        static $is_checkout = null;
+
+        if ( null !== $is_checkout ) {
+            return $is_checkout;
+        }
+
+        if ( is_admin() || ! is_page() ) {
+            $is_checkout = false;
+
+            return $is_checkout;
+        }
+
+        $page = get_post();
+
+        if ( ! $page instanceof WP_Post ) {
+            $is_checkout = false;
+
+            return $is_checkout;
+        }
+
+        $visited = array();
+
+        if ( nd_booking_post_contains_shortcode( $page, 'nd_booking_checkout', $visited ) ) {
+            $is_checkout = true;
+
+            return $is_checkout;
+        }
+
+        $checkout_page_id = absint( get_option( 'nd_booking_checkout_page' ) );
+
+        if ( $checkout_page_id && $page->ID === $checkout_page_id ) {
+            $is_checkout = true;
+
+            return $is_checkout;
+        }
+
+        $is_checkout = false;
+
+        return $is_checkout;
+    }
+}
+
+if ( ! function_exists( 'nd_booking_enqueue_checkout_enhancements' ) ) {
+    /**
+     * Load the refined checkout experience assets when the checkout shortcode is present.
+     */
+    function nd_booking_enqueue_checkout_enhancements() {
+        if ( ! nd_booking_is_checkout_screen() ) {
+            return;
+        }
+
+        $style_relative_path = 'assets/css/checkout-form.css';
+        $style_path          = plugin_dir_path( __FILE__ ) . $style_relative_path;
+
+        if ( file_exists( $style_path ) && is_readable( $style_path ) ) {
+            $style_version = (string) filemtime( $style_path );
+
+            wp_enqueue_style(
+                'nd-booking-checkout',
+                plugins_url( $style_relative_path, __FILE__ ),
+                array( 'nd_booking_style' ),
+                $style_version
+            );
+        }
+
+        $script_relative_path = 'assets/js/checkout-enhancements.js';
+        $script_path          = plugin_dir_path( __FILE__ ) . $script_relative_path;
+
+        if ( file_exists( $script_path ) && is_readable( $script_path ) ) {
+            $script_version = (string) filemtime( $script_path );
+
+            wp_enqueue_script(
+                'nd-booking-checkout',
+                plugins_url( $script_relative_path, __FILE__ ),
+                array( 'jquery' ),
+                $script_version,
+                true
+            );
+
+            wp_localize_script(
+                'nd-booking-checkout',
+                'ndBookingCheckoutEnhancements',
+                array(
+                    'ctaLabel' => apply_filters(
+                        'nd_booking_checkout_cta_label',
+                        __( 'Confirmer ma réservation de luxe', 'nd-booking' )
+                    ),
+                )
+            );
+        }
+    }
+}
+add_action( 'wp_enqueue_scripts', 'nd_booking_enqueue_checkout_enhancements', 30 );
+
+if ( ! function_exists( 'nd_booking_checkout_cta_gettext' ) ) {
+    /**
+     * Elevate checkout submission copy to align with the five-star brand voice.
+     *
+     * @param string $translation Translated text.
+     * @param string $text        Original text.
+     * @param string $domain      Translation domain.
+     *
+     * @return string
+     */
+    function nd_booking_checkout_cta_gettext( $translation, $text, $domain ) {
+        if ( is_admin() || ! nd_booking_is_checkout_screen() ) {
+            return $translation;
+        }
+
+        $eligible_domains = array( 'woocommerce', 'nd-booking', 'default' );
+
+        if ( ! in_array( $domain, $eligible_domains, true ) ) {
+            return $translation;
+        }
+
+        $targets = array(
+            'Finaliser la commande',
+            'Finalisez la commande',
+            'Finaliser la réservation',
+            'Finalisez la réservation',
+            'Passer la commande',
+            'Compléter la commande',
+            'Valider la commande',
+        );
+
+        if ( in_array( $translation, $targets, true ) || in_array( $text, $targets, true ) ) {
+            return apply_filters(
+                'nd_booking_checkout_cta_label',
+                __( 'Confirmer ma réservation de luxe', 'nd-booking' )
+            );
+        }
+
+        return $translation;
+    }
+}
+add_filter( 'gettext', 'nd_booking_checkout_cta_gettext', 10, 3 );
+
+
 //START add admin custom css
 function nd_booking_admin_style() {
-  
+
   wp_enqueue_style( 'nd_booking_admin_style', esc_url(plugins_url('assets/css/admin-style.css', __FILE__ )), array(), false, false );
   
 }
