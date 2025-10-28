@@ -1,0 +1,441 @@
+.grace-space-page {
+    --gs-primary: #4a7a88;
+    --gs-primary-dark: #2f555f;
+    --gs-accent: #c7a469;
+    --gs-cream: #f8f4ed;
+    --gs-light: #f2f6f7;
+    --gs-body: #25313c;
+    --gs-muted: #5c6a73;
+    --gs-border: #d8e0e2;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--gs-body);
+    background-color: #ffffff;
+    gap: 0;
+}
+
+.grace-space-page p {
+    line-height: 1.75;
+    font-size: 1.05rem;
+    color: var(--gs-body);
+}
+
+.grace-space-page h1,
+.grace-space-page h2,
+.grace-space-page h3,
+.grace-space-page h4 {
+    font-family: 'Playfair Display', 'Times New Roman', serif;
+    color: var(--gs-primary-dark);
+}
+
+.grace-space-page h1 {
+    font-size: clamp(2.5rem, 4vw, 3.4rem);
+    margin-bottom: 1.25rem;
+}
+
+.grace-space-page h2 {
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    margin-bottom: 1.25rem;
+}
+
+.grace-space-page h3 {
+    font-size: 1.45rem;
+    margin-bottom: 0.75rem;
+}
+
+.grace-space-page > .grace-space-announcement,
+.grace-space-page > .grace-space-header,
+.grace-space-page > section,
+.grace-space-page > .grace-space-footer {
+    width: min(1120px, 100%);
+    margin-inline: auto;
+}
+
+.grace-space-announcement {
+    background: var(--gs-primary);
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 0 18px 18px;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    gap: 1rem;
+}
+
+.grace-space-announcement p {
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.grace-space-announcement__actions .wp-block-button__link {
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.85);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 0.4rem 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+
+.grace-space-announcement__actions .wp-block-button__link:hover,
+.grace-space-announcement__actions .wp-block-button__link:focus {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.grace-space-header {
+    text-align: center;
+    padding: 1.5rem 1rem 0.5rem;
+}
+
+.grace-space-logo {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    text-transform: uppercase;
+    letter-spacing: 0.45em;
+    font-weight: 500;
+    color: var(--gs-primary-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.grace-space-logo span {
+    letter-spacing: 0.3em;
+}
+
+.grace-space-logo__icon {
+    font-size: 1.75rem;
+    color: var(--gs-accent);
+}
+
+.grace-space-nav {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--gs-border);
+    border-bottom: 1px solid var(--gs-border);
+    padding-block: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+}
+
+.grace-space-nav .wp-block-navigation__container {
+    gap: 1.5rem;
+}
+
+.grace-space-nav a {
+    color: var(--gs-muted);
+    text-decoration: none;
+}
+
+.grace-space-nav a:hover,
+.grace-space-nav a:focus {
+    color: var(--gs-primary);
+}
+
+.grace-space-section {
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+}
+
+.grace-space-hero {
+    background: linear-gradient(135deg, rgba(248, 244, 237, 0.9), rgba(229, 238, 241, 0.95));
+    border-radius: 32px;
+    box-shadow: 0 24px 60px rgba(46, 79, 88, 0.12);
+    margin-top: 2rem;
+}
+
+.grace-space-hero__description {
+    font-size: 1.2rem;
+    color: var(--gs-muted);
+    max-width: 34rem;
+}
+
+.grace-space-hero__buttons .wp-block-button__link {
+    background-color: var(--gs-primary);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 0.85rem 2.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    box-shadow: 0 12px 24px rgba(74, 122, 136, 0.25);
+}
+
+.grace-space-hero__buttons .wp-block-button__link:hover,
+.grace-space-hero__buttons .wp-block-button__link:focus {
+    background-color: var(--gs-primary-dark);
+}
+
+.grace-space-separator {
+    width: 90px;
+    border: none;
+    height: 2px;
+    background: var(--gs-accent);
+    margin: 2rem 0 1.5rem;
+}
+
+.grace-space-benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.grace-space-benefits li {
+    position: relative;
+    padding-left: 2rem;
+    font-weight: 600;
+    color: var(--gs-muted);
+}
+
+.grace-space-benefits li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 1.15rem;
+    color: var(--gs-accent);
+}
+
+.grace-space-image-frame img {
+    border-radius: 24px;
+    box-shadow: 0 20px 45px rgba(37, 49, 60, 0.18);
+    object-fit: cover;
+}
+
+.grace-space-image-portrait img {
+    border-radius: 32px 32px 32px 0;
+    box-shadow: 0 26px 55px rgba(47, 85, 95, 0.18);
+}
+
+.grace-space-image-polaroid {
+    padding: 1.25rem;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 26px 55px rgba(37, 49, 60, 0.12);
+    transform: rotate(-2.5deg);
+}
+
+.grace-space-image-polaroid img {
+    border-radius: 12px;
+}
+
+.grace-space-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--gs-accent);
+}
+
+.grace-space-intro {
+    background-color: var(--gs-cream);
+    border-radius: 32px;
+    box-shadow: inset 0 0 0 1px rgba(199, 164, 105, 0.2);
+}
+
+.grace-space-journey {
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 24px 60px rgba(37, 49, 60, 0.08);
+}
+
+.grace-space-highlight {
+    background: var(--gs-light);
+    border-radius: 32px;
+    text-align: center;
+}
+
+.grace-space-resource-cards {
+    gap: 1.75rem;
+}
+
+.grace-space-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2.25rem;
+    box-shadow: 0 18px 45px rgba(37, 49, 60, 0.08);
+    height: 100%;
+    text-align: left;
+}
+
+.grace-space-card p {
+    color: var(--gs-muted);
+}
+
+.grace-space-button .wp-block-button__link {
+    border-radius: 999px;
+    padding: 0.75rem 2.5rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+.grace-space-button.is-style-outline .wp-block-button__link {
+    background: transparent;
+    color: var(--gs-primary);
+    border: 2px solid var(--gs-primary);
+}
+
+.grace-space-button.is-style-outline .wp-block-button__link:hover,
+.grace-space-button.is-style-outline .wp-block-button__link:focus {
+    background: var(--gs-primary);
+    color: #ffffff;
+}
+
+.grace-space-button:not(.is-style-outline) .wp-block-button__link {
+    background: var(--gs-primary);
+    color: #ffffff;
+    border: 2px solid var(--gs-primary);
+}
+
+.grace-space-button:not(.is-style-outline) .wp-block-button__link:hover,
+.grace-space-button:not(.is-style-outline) .wp-block-button__link:focus {
+    background: var(--gs-primary-dark);
+    border-color: var(--gs-primary-dark);
+}
+
+.grace-space-cta {
+    text-align: center;
+    background: linear-gradient(120deg, rgba(74, 122, 136, 0.12), rgba(199, 164, 105, 0.12));
+    border-radius: 32px;
+}
+
+.grace-space-newsletter {
+    text-align: center;
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 20px 45px rgba(37, 49, 60, 0.08);
+}
+
+.grace-space-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.grace-space-form input[type="email"] {
+    padding: 0.85rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--gs-border);
+    min-width: min(320px, 90vw);
+    font-size: 1rem;
+}
+
+.grace-space-form button {
+    background: var(--gs-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.85rem 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+.grace-space-form button:hover,
+.grace-space-form button:focus {
+    background: var(--gs-primary-dark);
+}
+
+.grace-space-logos {
+    text-align: center;
+    border-top: 1px solid var(--gs-border);
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    color: var(--gs-muted);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.grace-space-footer {
+    text-align: center;
+    padding: 2rem 1.5rem 3rem;
+    color: var(--gs-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--gs-border);
+}
+
+.grace-space-footer a {
+    color: var(--gs-primary);
+    text-decoration: none;
+}
+
+.grace-space-footer a:hover,
+.grace-space-footer a:focus {
+    text-decoration: underline;
+}
+
+@media (max-width: 960px) {
+    .grace-space-nav {
+        letter-spacing: 0.1em;
+        font-size: 0.85rem;
+    }
+
+    .grace-space-section {
+        padding-inline: 1.25rem;
+    }
+
+    .grace-space-card {
+        padding: 1.75rem;
+    }
+}
+
+@media (max-width: 782px) {
+    .grace-space-announcement {
+        border-radius: 0 0 12px 12px;
+    }
+
+    .grace-space-logo {
+        letter-spacing: 0.3em;
+    }
+
+    .grace-space-nav {
+        border-radius: 16px;
+    }
+
+    .grace-space-nav .wp-block-navigation__container {
+        gap: 1rem;
+    }
+
+    .grace-space-hero,
+    .grace-space-intro,
+    .grace-space-journey,
+    .grace-space-highlight,
+    .grace-space-cta,
+    .grace-space-newsletter {
+        border-radius: 24px;
+    }
+
+    .grace-space-hero__buttons .wp-block-button__link,
+    .grace-space-button .wp-block-button__link {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .grace-space-announcement {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .grace-space-logo {
+        font-size: 1.5rem;
+    }
+
+    .grace-space-nav {
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+    }
+
+    .grace-space-form input[type="email"] {
+        min-width: 100%;
+    }
+}
