@@ -3,6 +3,37 @@ defined('ABSPATH') || exit;
 
 add_action('nd_booking_reservation_added_in_db', 'wp_loft_booking_handle_booking', 10, 23);
 
+if (!function_exists('wp_loft_booking_format_unit_label')) {
+    /**
+     * Normalize a unit label so it can be displayed without duplicated wording.
+     *
+     * @param string $label Raw unit label coming from the booking engine.
+     * @return string Normalized label.
+     */
+    function wp_loft_booking_format_unit_label($label)
+    {
+        $label = trim((string) $label);
+
+        if ('' === $label) {
+            return '';
+        }
+
+        $label = preg_replace('/\s+/', ' ', $label);
+
+        if (preg_match('/^(.+)\s+\1$/ui', $label, $matches)) {
+            $label = $matches[1];
+        }
+
+        if (preg_match('/^lofts?\s*-*\s*([0-9]+[A-Z0-9]*)$/i', $label, $matches)) {
+            $label = sprintf('Loft %s', strtoupper($matches[1]));
+        } elseif (preg_match('/^ph\s*-*\s*([0-9]+[A-Z0-9]*)$/i', $label, $matches)) {
+            $label = sprintf('PH %s', strtoupper($matches[1]));
+        }
+
+        return trim($label);
+    }
+}
+
 function wp_loft_booking_handle_booking(
     $id_post,
     $title_post,
@@ -183,6 +214,11 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         return new WP_Error('missing_unit_api', 'Missing ButterflyMX unit ID.');
     }
 
+    $unit_label = wp_loft_booking_format_unit_label($unit->unit_name ?? '');
+    if ('' === $unit_label) {
+        $unit_label = $unit->unit_name;
+    }
+
     $environment = wp_loft_booking_get_butterflymx_environment();
 
     $building_id = (int) ($unit->building_id ?? 0);
@@ -283,7 +319,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         $environment,
         $access_point_ids,
         $device_ids,
-        $unit->unit_name
+        $unit_label
     );
 
     if (is_wp_error($result)) {
@@ -336,7 +372,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $guest_name = __('Invité', 'wp-loft-booking');
     }
 
-    $room_name = !empty($booking['room_name']) ? $booking['room_name'] : __('Votre loft', 'wp-loft-booking');
+    $room_name_raw = !empty($booking['room_name']) ? $booking['room_name'] : '';
+    $room_name = wp_loft_booking_format_unit_label($room_name_raw);
+    if ('' === $room_name) {
+        $room_name = __('Votre loft', 'wp-loft-booking');
+    }
 
     $checkin  = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
     $checkout = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
@@ -345,6 +385,26 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : __('N/D', 'wp-loft-booking');
 
     $total = isset($booking['total']) && $booking['total'] !== '' ? sprintf('$%s', number_format((float) $booking['total'], 2)) : __('Non disponible', 'wp-loft-booking');
+
+    $guest_count = isset($booking['guests']) ? (int) $booking['guests'] : 0;
+    if ($guest_count > 0) {
+        $guest_count_display_fr = $guest_count . ' ' . (1 === $guest_count ? 'invité' : 'invités');
+        $guest_count_display_en = $guest_count . ' ' . (1 === $guest_count ? 'guest' : 'guests');
+    } else {
+        $guest_count_display_fr = 'Non précisé';
+        $guest_count_display_en = 'Not specified';
+    }
+
+    $total_display_fr = $total;
+    $total_display_en = $total;
+    if ($total !== __('Non disponible', 'wp-loft-booking')) {
+        $total_display_fr = sprintf('%s CAD', $total);
+        $total_display_en = sprintf('%s CAD', $total);
+    }
+
+    $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
+    $website_url      = 'https://loft1325.com';
+    $property_address = '1325 3e Avenue, Val-d’Or, QC, Canada';
 
     $virtual_key_success = !is_wp_error($virtual_key_result);
     $virtual_key_message_fr = $virtual_key_success
@@ -370,54 +430,107 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 
     ob_start();
     ?>
-    <div style="margin:0;padding:0;background-color:#f4f5f7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f4f5f7;padding:30px 0;">
+    <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f3f4f6;padding:36px 0;">
             <tr>
-                <td align="center">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
+                <td align="center" style="padding:0 16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(15,23,42,0.12);">
                         <tr>
-                            <td style="padding:30px 40px;background:linear-gradient(135deg,#0f172a,#1f2937);color:#ffffff;">
-                                <h1 style="margin:0;font-size:24px;font-weight:700;">Loft 1325</h1>
-                                <p style="margin:8px 0 0;font-size:16px;letter-spacing:0.03em;text-transform:uppercase;">Expérience d’hospitalité cinq étoiles</p>
+                            <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
+                                <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
+                                <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Expérience de séjour signature &middot; Signature Stay Experience</p>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:30px 40px;">
-                                <h2 style="margin-top:0;font-size:20px;font-weight:700;color:#111827;">Bonjour <?php echo esc_html($guest_name); ?>,</h2>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 16px;color:#374151;">Merci d’avoir choisi <strong>Loft 1325</strong> pour votre séjour. Nous avons le plaisir de confirmer votre réservation dans <strong><?php echo esc_html($room_name); ?></strong>.</p>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Dates&nbsp;: <strong><?php echo esc_html($checkin_fr); ?></strong> au <strong><?php echo esc_html($checkout_fr); ?></strong><br>Total du séjour&nbsp;: <strong><?php echo esc_html($total); ?></strong></p>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;"><?php echo esc_html($virtual_key_message_fr); ?></p>
-                                <div style="margin:24px 0;padding:24px;background-color:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
-                                    <h3 style="margin-top:0;margin-bottom:12px;font-size:16px;font-weight:700;color:#111827;">Informations importantes</h3>
-                                    <ul style="margin:0;padding-left:20px;color:#4b5563;font-size:14px;line-height:1.7;">
-                                        <li>Arrivée à partir de 15&nbsp;h (Heure de l’Est)</li>
-                                        <li>Départ au plus tard à 11&nbsp;h (Heure de l’Est)</li>
-                                        <li>Veuillez avoir une pièce d’identité valide lors de votre arrivée</li>
-                                    </ul>
+                            <td style="padding:40px 40px 28px;">
+                                <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#111827;">Bonjour <?php echo esc_html($guest_name); ?>,</p>
+                                <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#374151;">Merci d’avoir choisi <strong>Loft 1325</strong> pour votre passage à Val-d’Or. Nous confirmons votre réservation dans <strong><?php echo esc_html($room_name); ?></strong>.</p>
+                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 24px;border-collapse:separate;border-spacing:0;background-color:#f9fafb;border-radius:18px;overflow:hidden;">
+                                    <tr>
+                                        <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb;">Résumé de votre séjour</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Loft</td>
+                                        <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;"><?php echo esc_html($room_name); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($checkin_fr); ?> &ndash; <?php echo esc_html($checkout_fr); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Invités</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($guest_count_display_fr); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Montant total</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_fr); ?></td>
+                                    </tr>
+                                </table>
+                                <div style="margin:28px 0;padding:24px;border-radius:18px;background:linear-gradient(135deg,#111827,#1f2937);color:#f9fafb;box-shadow:0 20px 40px rgba(15,23,42,0.18);">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Accès et clé numérique</h3>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#e5e7eb;"><?php echo esc_html($virtual_key_message_fr); ?></p>
                                 </div>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Pour toute demande spéciale ou pour obtenir de l’aide, écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Préparez votre arrivée</h3>
+                                <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
+                                    <li>Arrivée à partir de 15&nbsp;h (heure de l’Est)</li>
+                                    <li>Départ au plus tard à 11&nbsp;h (heure de l’Est)</li>
+                                    <li>Présentez une pièce d’identité valide à l’enregistrement</li>
+                                </ul>
+                                <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Coordonnées</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                </div>
+                                <p style="margin:0 0 28px;font-size:14px;line-height:1.7;color:#4b5563;">Nous avons hâte de vous accueillir pour une expérience tout confort signée Loft 1325.</p>
                                 <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;">
-                                <h2 style="font-size:20px;font-weight:700;color:#111827;margin-bottom:12px;">Hello <?php echo esc_html($guest_name); ?>,</h2>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 16px;color:#374151;">Thank you for choosing <strong>Loft 1325</strong> for your stay. We are delighted to confirm your reservation in <strong><?php echo esc_html($room_name); ?></strong>.</p>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;">Dates: <strong><?php echo esc_html($checkin); ?></strong> to <strong><?php echo esc_html($checkout); ?></strong><br>Total stay: <strong><?php echo esc_html($total); ?></strong></p>
-                                <p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:#374151;"><?php echo esc_html($virtual_key_message_en); ?></p>
-                                <div style="margin:24px 0;padding:24px;background-color:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
-                                    <h3 style="margin-top:0;margin-bottom:12px;font-size:16px;font-weight:700;color:#111827;">Important information</h3>
-                                    <ul style="margin:0;padding-left:20px;color:#4b5563;font-size:14px;line-height:1.7;">
-                                        <li>Check-in from 3:00&nbsp;PM (Eastern Time)</li>
-                                        <li>Check-out by 11:00&nbsp;AM (Eastern Time)</li>
-                                        <li>Please have a valid photo ID ready upon arrival</li>
-                                    </ul>
+                                <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#111827;">Hello <?php echo esc_html($guest_name); ?>,</p>
+                                <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#374151;">Thank you for selecting <strong>Loft 1325</strong> for your upcoming stay in Val-d’Or. Your reservation in <strong><?php echo esc_html($room_name); ?></strong> is confirmed.</p>
+                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 24px;border-collapse:separate;border-spacing:0;background-color:#f9fafb;border-radius:18px;overflow:hidden;">
+                                    <tr>
+                                        <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb;">Stay highlights</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Loft</td>
+                                        <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;"><?php echo esc_html($room_name); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($checkin); ?> &ndash; <?php echo esc_html($checkout); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Guests</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($guest_count_display_en); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Total amount</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_en); ?></td>
+                                    </tr>
+                                </table>
+                                <div style="margin:28px 0;padding:24px;border-radius:18px;background-color:#111827;color:#f9fafb;box-shadow:0 20px 40px rgba(15,23,42,0.18);">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Digital key &amp; access</h3>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#e5e7eb;"><?php echo esc_html($virtual_key_message_en); ?></p>
                                 </div>
-                                <p style="font-size:15px;line-height:1.7;margin:0;color:#374151;">If you need anything before your arrival, reach out to us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Before you arrive</h3>
+                                <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
+                                    <li>Check-in available from 3:00&nbsp;PM (Eastern Time)</li>
+                                    <li>Check-out by 11:00&nbsp;AM (Eastern Time)</li>
+                                    <li>Please have a valid photo ID ready at arrival</li>
+                                </ul>
+                                <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Contact</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Address</strong><br><?php echo esc_html($property_address); ?></p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#1d4ed8;text-decoration:none;">loft1325.com</a>.</p>
+                                </div>
+                                <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">We can’t wait to welcome you to your private retreat at Loft 1325.</p>
                                 <?php if ($is_manual) : ?>
-                                    <p style="font-size:13px;line-height:1.7;margin:24px 0 0;color:#6b7280;">Cette confirmation a été générée depuis le portail administrateur de Loft 1325. / This confirmation was issued from the Loft 1325 admin portal.</p>
+                                    <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:#9ca3af;">Cette confirmation a été générée depuis le portail administrateur de Loft 1325. / This confirmation was issued from the Loft 1325 admin portal.</p>
                                 <?php endif; ?>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:20px 40px;background-color:#0f172a;color:#9ca3af;font-size:12px;text-align:center;">
-                                &copy; <?php echo esc_html(wp_date('Y')); ?> Loft 1325 &middot; 1325 3e Avenue, Val-d’Or, QC
+                            <td style="padding:24px 40px;background-color:#0f172a;color:#9ca3af;font-size:12px;line-height:1.6;text-align:center;">
+                                &copy; <?php echo esc_html(wp_date('Y')); ?> Loft 1325 &middot; <?php echo esc_html($property_address); ?>
                             </td>
                         </tr>
                     </table>
