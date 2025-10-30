@@ -11,27 +11,61 @@ function nd_booking_woo_php() {
 
     check_ajax_referer( 'nd_booking_woo_nonce', 'nd_booking_woo_security' );
 
-    //get datas
-    $nd_booking_trip_price = sanitize_text_field($_GET['nd_booking_trip_price']);
-    $nd_booking_rid = sanitize_text_field($_GET['nd_booking_rid']);
-    $nd_booking_meta_box_room_woo_product = get_post_meta( $nd_booking_rid, 'nd_booking_meta_box_room_woo_product', true );
+    if ( ! function_exists( 'WC' ) ) {
+        wp_send_json_error( __( 'WooCommerce n\'est pas disponible pour le moment.', 'nd-booking' ) );
+    }
 
-    //clear cart
+    $trip_price_raw = isset( $_POST['nd_booking_trip_price'] ) ? wp_unslash( $_POST['nd_booking_trip_price'] ) : '';
+    $room_id_raw    = isset( $_POST['nd_booking_rid'] ) ? wp_unslash( $_POST['nd_booking_rid'] ) : '';
+
+    $nd_booking_trip_price = is_numeric( $trip_price_raw ) ? (float) $trip_price_raw : 0;
+    $nd_booking_rid        = absint( $room_id_raw );
+
+    if ( $nd_booking_rid <= 0 ) {
+        wp_send_json_error( __( 'Requête de réservation invalide.', 'nd-booking' ), 400 );
+    }
+
+    $nd_booking_meta_box_room_woo_product = (int) get_post_meta( $nd_booking_rid, 'nd_booking_meta_box_room_woo_product', true );
+
+    if ( $nd_booking_meta_box_room_woo_product <= 0 ) {
+        wp_send_json_error( __( 'Aucun produit WooCommerce n\'est associé à ce loft.', 'nd-booking' ), 400 );
+    }
+
+    if ( null === WC()->cart && function_exists( 'wc_load_cart' ) ) {
+        wc_load_cart();
+    }
+
+    if ( null === WC()->cart ) {
+        wp_send_json_error( __( 'Impossible de préparer le panier WooCommerce.', 'nd-booking' ) );
+    }
+
     WC()->cart->empty_cart();
 
-    //add to cart the product
-    WC()->cart->add_to_cart($nd_booking_meta_box_room_woo_product);
-    
-    //set the price
-    $product = wc_get_product($nd_booking_meta_box_room_woo_product);
-    $product->set_regular_price($nd_booking_trip_price);
-    $product->set_price($nd_booking_trip_price);
-    $product->save();
+    $added_to_cart = WC()->cart->add_to_cart( $nd_booking_meta_box_room_woo_product );
 
-    $nd_booking_book_room_woo_id = 'nd_booking_book_room_'.$nd_booking_rid;
-    echo esc_attr($nd_booking_book_room_woo_id);
+    if ( false === $added_to_cart ) {
+        wp_send_json_error( __( 'Impossible d\'ajouter ce loft au panier.', 'nd-booking' ) );
+    }
 
-    die();
+    $product = wc_get_product( $nd_booking_meta_box_room_woo_product );
+
+    if ( ! $product || ! is_object( $product ) ) {
+        wp_send_json_error( __( 'Produit WooCommerce introuvable pour ce loft.', 'nd-booking' ) );
+    }
+
+    if ( $nd_booking_trip_price > 0 ) {
+        $product->set_regular_price( $nd_booking_trip_price );
+        $product->set_price( $nd_booking_trip_price );
+        $product->save();
+    }
+
+    $nd_booking_book_room_woo_id = 'nd_booking_book_room_' . $nd_booking_rid;
+
+    wp_send_json_success(
+        array(
+            'formId' => $nd_booking_book_room_woo_id,
+        )
+    );
 
 }
 add_action( 'wp_ajax_nd_booking_woo_php', 'nd_booking_woo_php' );
@@ -330,8 +364,9 @@ function nd_booking_shortcode_search_results() {
 
     //ajax results woo
     $nd_booking_woo_params = array(
-        'nd_booking_ajaxurl_woo' => admin_url('admin-ajax.php'),
+        'nd_booking_ajaxurl_woo'   => admin_url('admin-ajax.php'),
         'nd_booking_ajaxnonce_woo' => wp_create_nonce('nd_booking_woo_nonce'),
+        'error_message'            => esc_html__( 'Nous n\'avons pas pu lancer la réservation. Veuillez actualiser la page et réessayer.', 'marina-child' ),
     );
 
     wp_enqueue_script( 'nd_booking_search_woo', esc_url( plugins_url( 'woo.js', __FILE__ ) ), array( 'jquery' ) ); 
