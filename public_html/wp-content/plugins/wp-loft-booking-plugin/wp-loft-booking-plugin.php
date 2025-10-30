@@ -30,6 +30,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/booking-form.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/search-form.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/display-results.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/loft-types-display.php';
+require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/virtual-key-manager.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax/ajax-handlers.php';
 require_once plugin_dir_path(__FILE__) . 'includes/cron/cron-jobs.php';
 require_once plugin_dir_path(__FILE__) . 'includes/calendar/google-calendar.php';
