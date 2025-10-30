@@ -498,3 +498,16 @@ add_action( 'wp_head', function() {
 
     echo '<link rel="stylesheet" id="marina-child-style" href="' . esc_url( $child_style ) . '?v=' . filemtime( get_stylesheet_directory() . '/style.css' ) . '" type="text/css" media="all" />';
 }, 999 );
+
+function marina_child_log_child_stylesheet_status() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    if ( wp_style_is( 'marina-child-style-forced', 'enqueued' ) ) {
+        echo "<script>console.log('✅ marina-child/style.css is loading');</script>";
+    } else {
+        echo "<script>console.warn('❌ marina-child/style.css is NOT loading');</script>";
+    }
+}
+add_action( 'wp_footer', 'marina_child_log_child_stylesheet_status', 1000 );
