@@ -1,0 +1,112 @@
+.listar-tenants {
+    margin-top: 1.5rem;
+}
+
+.listar-tenants__button {
+    margin-bottom: 1rem;
+}
+
+.listar-tenants__results {
+    background-color: #ffffff;
+    border: 1px solid rgba(10, 58, 90, 0.12);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 12px 32px rgba(15, 46, 76, 0.1);
+}
+
+.listar-tenants__table-wrapper {
+    overflow-x: auto;
+}
+
+.listar-tenants__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.listar-tenants__table th,
+.listar-tenants__table td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid rgba(10, 58, 90, 0.08);
+    text-align: left;
+    vertical-align: top;
+}
+
+.listar-tenants__table th {
+    background: #f4f7fb;
+    font-weight: 600;
+    color: #0a3a5a;
+}
+
+.listar-tenants__table tr:last-child td {
+    border-bottom: none;
+}
+
+.listar-tenants__spinner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: #0a3a5a;
+}
+
+.listar-tenants__spinner::before {
+    content: '';
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    border: 3px solid rgba(10, 58, 90, 0.25);
+    border-top-color: #0a3a5a;
+    animation: listarTenantsSpinner 1s linear infinite;
+}
+
+@keyframes listarTenantsSpinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.listar-tenants__error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fff4f4;
+    border: 1px solid #f4c7c7;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    color: #8c1d1d;
+}
+
+.listar-tenants__retry.button {
+    margin-left: auto;
+}
+
+.listar-tenants__empty {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #0a3a5a;
+}
+
+.listar-tenants__raw {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    background: #0a3a5a;
+    color: #ffffff;
+    border-radius: 6px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    .listar-tenants__results {
+        padding: 0.85rem 1rem;
+    }
+
+    .listar-tenants__table th,
+    .listar-tenants__table td {
+        padding: 0.5rem 0.6rem;
+    }
+}

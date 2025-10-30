@@ -399,15 +399,103 @@ add_action( 'wp_head', 'loft1325_output_global_meta_keywords', 1 );
 
 //function BUTTERFLYMX
 function encolar_scripts_listar_tenants() {
-    wp_enqueue_script('listar-tenants-js', get_stylesheet_directory_uri() . '/js/listar-tenants.js', array('jquery'), '1.0', true);
-    wp_localize_script('listar-tenants-js', 'ajaxurl', array('ajax_url' => admin_url('admin-ajax.php')));
-}
-add_action('wp_enqueue_scripts', 'encolar_scripts_listar_tenants');
+    if ( ! is_singular() ) {
+        return;
+    }
 
-function boton_listar_tenants() {
-    return '<button id="listarTenantsBtn">Listar Tenants</button><div id="resultadoTenants"></div>';
+    $post = get_post();
+
+    if ( ! ( $post instanceof WP_Post ) ) {
+        return;
+    }
+
+    if ( ! marina_child_post_contains_shortcode( $post, 'boton_listar_tenants' ) ) {
+        return;
+    }
+
+    $script_handle  = 'listar-tenants-js';
+    $script_path    = get_stylesheet_directory() . '/js/listar-tenants.js';
+    $script_version = file_exists( $script_path ) ? (string) filemtime( $script_path ) : wp_get_theme()->get( 'Version' );
+
+    wp_enqueue_script(
+        $script_handle,
+        get_stylesheet_directory_uri() . '/js/listar-tenants.js',
+        array( 'jquery' ),
+        $script_version,
+        true
+    );
+
+    $localization = array(
+        'ajaxUrl'             => admin_url( 'admin-ajax.php' ),
+        'defaultBuildingId'   => apply_filters( 'marina_child_default_building_id', 60892 ),
+        'i18n'                => array(
+            'loading' => __( 'Loading tenants…', 'marina-child' ),
+            'error'   => __( 'We could not load the tenant list. Please try again.', 'marina-child' ),
+            'empty'   => __( 'No tenants were returned for this building.', 'marina-child' ),
+            'retry'   => __( 'Retry', 'marina-child' ),
+            'columns' => array(
+                'full_name'   => __( 'Name', 'marina-child' ),
+                'email'       => __( 'Email', 'marina-child' ),
+                'phone'       => __( 'Phone', 'marina-child' ),
+                'unit_label'  => __( 'Unit', 'marina-child' ),
+                'lease_start' => __( 'Lease start', 'marina-child' ),
+                'lease_end'   => __( 'Lease end', 'marina-child' ),
+            ),
+        ),
+    );
+
+    wp_localize_script( $script_handle, 'listarTenantsSettings', $localization );
+
+    $style_path = get_stylesheet_directory() . '/css/admin-hub.css';
+
+    if ( file_exists( $style_path ) ) {
+        $style_version = (string) filemtime( $style_path );
+
+        wp_enqueue_style(
+            'marina-child-admin-hub',
+            get_stylesheet_directory_uri() . '/css/admin-hub.css',
+            array( 'marina-child-header-fixes' ),
+            $style_version
+        );
+    }
 }
-add_shortcode('boton_listar_tenants', 'boton_listar_tenants');
+add_action( 'wp_enqueue_scripts', 'encolar_scripts_listar_tenants' );
+
+function boton_listar_tenants( $atts = array(), $content = '' ) {
+    $atts = shortcode_atts(
+        array(
+            'building_id' => apply_filters( 'marina_child_default_building_id', 60892 ),
+            'autoload'    => 'true',
+        ),
+        $atts,
+        'boton_listar_tenants'
+    );
+
+    $building_id      = is_numeric( $atts['building_id'] ) ? (int) $atts['building_id'] : '';
+    $should_autoload  = filter_var( $atts['autoload'], FILTER_VALIDATE_BOOLEAN );
+    $unique_id        = wp_unique_id( 'listar-tenants-' );
+    $button_id        = $unique_id . '-button';
+    $results_id       = $unique_id . '-results';
+    $building_attr    = '' !== $building_id ? sprintf( ' data-building-id="%s"', esc_attr( $building_id ) ) : '';
+    $autoload_attr    = $should_autoload ? 'true' : 'false';
+
+    $output  = '<div class="listar-tenants"' . $building_attr . ' data-autoload="' . esc_attr( $autoload_attr ) . '">';
+    $output .= sprintf(
+        '<button type="button" id="%1$s" class="listar-tenants__button button button-primary" data-building-id="%2$s" data-autoload="%3$s">%4$s</button>',
+        esc_attr( $button_id ),
+        esc_attr( $building_id ),
+        esc_attr( $autoload_attr ),
+        esc_html__( 'List tenants', 'marina-child' )
+    );
+    $output .= sprintf(
+        '<div id="%1$s" class="listar-tenants__results" role="region" aria-live="polite"></div>',
+        esc_attr( $results_id )
+    );
+    $output .= '</div>';
+
+    return $output;
+}
+add_shortcode( 'boton_listar_tenants', 'boton_listar_tenants' );
 
 function listar_tenants_building() {
     $plugin_instance = new IntegracionButterflyMX();
