@@ -438,45 +438,76 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 }
 
 function wp_loft_booking_create_google_event($booking) {
-    $client = wp_loft_get_google_client();
-    if (!$client) {
-        error_log('⚠️ Google Client unavailable. Skipping calendar event creation.');
+    $access_token = loft_booking_get_valid_access_token();
+
+    if (!$access_token) {
+        error_log('⚠️ Google access token unavailable. Skipping calendar event creation.');
         return;
     }
 
-    if (!class_exists('Google_Service_Calendar') || !class_exists('Google_Service_Calendar_Event')) {
-        error_log('⚠️ Google Calendar PHP client library unavailable. Skipping event creation.');
+    $calendar_id = get_option('loft_booking_calendar_id');
+    if (empty($calendar_id)) {
+        $calendar_id = 'primary';
+    }
+
+    $checkin_date  = $booking['date_from'] ?? '';
+    $checkout_date = $booking['date_to'] ?? '';
+
+    if (empty($checkin_date) || empty($checkout_date)) {
+        error_log('⚠️ Booking dates missing. Skipping Google Calendar event creation.');
         return;
     }
 
-    try {
-        $service = new Google_Service_Calendar($client);
+    $event_payload = [
+        'summary'     => 'Reserva de Loft - ' . ($booking['name'] ?? ''),
+        'location'    => $booking['country'] ?? '',
+        'description' => sprintf(
+            "Cliente: %s %s\nCorreo: %s",
+            $booking['name'] ?? '',
+            $booking['surname'] ?? '',
+            $booking['email'] ?? ''
+        ),
+        'start' => [
+            'date'     => $checkin_date,
+            'timeZone' => 'America/Toronto',
+        ],
+        'end' => [
+            'date'     => $checkout_date,
+            'timeZone' => 'America/Toronto',
+        ],
+    ];
 
-        $event = new Google_Service_Calendar_Event([
-            'summary'     => 'Reserva de Loft - ' . $booking['name'],
-            'location'    => $booking['country'],
-            'description' => 'Cliente: ' . $booking['name'] . ' ' . $booking['surname'] . "\nCorreo: " . $booking['email'],
-            'start' => [
-                'date' => $booking['date_from'],
-                'timeZone' => 'America/Toronto',
+    $response = wp_remote_post(
+        sprintf('https://www.googleapis.com/calendar/v3/calendars/%s/events', rawurlencode($calendar_id)),
+        [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $access_token,
+                'Content-Type'  => 'application/json',
             ],
-            'end' => [
-                'date' => $booking['date_to'],
-                'timeZone' => 'America/Toronto',
-            ],
-        ]);
-    } catch (Throwable $e) {
-        error_log('❌ Unable to prepare Google Calendar event payload: ' . $e->getMessage());
+            'timeout' => 15,
+            'body'    => wp_json_encode($event_payload),
+        ]
+    );
+
+    if (is_wp_error($response)) {
+        error_log('❌ Error al crear evento de Google Calendar: ' . $response->get_error_message());
         return;
     }
 
-    try {
-        $calendarId = 'primary'; // Cambia si usas uno distinto
-        $service->events->insert($calendarId, $event);
-        error_log("📅 Evento de reserva creado en Google Calendar");
-    } catch (Throwable $e) {
-        error_log("❌ Error al crear evento de Google Calendar: " . $e->getMessage());
+    $status_code = wp_remote_retrieve_response_code($response);
+    if ($status_code >= 200 && $status_code < 300) {
+        error_log('📅 Evento de reserva creado en Google Calendar');
+        return;
     }
+
+    $body = wp_remote_retrieve_body($response);
+    error_log(
+        sprintf(
+            '❌ Error al crear evento de Google Calendar: HTTP %d - %s',
+            $status_code,
+            $body
+        )
+    );
 }
 
 
