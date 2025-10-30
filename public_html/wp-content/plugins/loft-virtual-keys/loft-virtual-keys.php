@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'init', 'loft_vk_register_block' );
 add_action( 'rest_api_init', 'loft_vk_register_rest_routes' );
 add_shortcode( 'loft_virtual_keys', 'loft_vk_render_block' );
+add_filter( 'the_content', 'loft_vk_force_shortcode_rendering', 9 );
 add_action( 'login_enqueue_scripts', 'loft_vk_customize_login_logo' );
 
 /**
@@ -192,6 +193,37 @@ function loft_vk_rest_create_key() {
     update_option( 'loft_vk_keys', $keys, false );
 
     return rest_ensure_response( array( 'key' => $new_key, 'keys' => $keys ) );
+}
+
+/**
+ * Ensure the [loft_virtual_keys] shortcode is rendered even if do_shortcode()
+ * has been removed from "the_content" filter stack by another plugin/theme.
+ *
+ * @param string $content The current post content.
+ *
+ * @return string
+ */
+function loft_vk_force_shortcode_rendering( $content ) {
+    if ( false === strpos( $content, '[loft_virtual_keys' ) ) {
+        return $content;
+    }
+
+    $content = str_replace( '[/loft_virtual_keys]', '', $content );
+
+    return preg_replace_callback(
+        '/\[loft_virtual_keys(?:\s[^\]]*)?\]/',
+        'loft_vk_render_shortcode_markup',
+        $content
+    );
+}
+
+/**
+ * Helper callback used when forcing shortcode rendering via preg_replace_callback().
+ *
+ * @return string
+ */
+function loft_vk_render_shortcode_markup() {
+    return loft_vk_render_block();
 }
 
 /**
