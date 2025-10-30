@@ -498,3 +498,24 @@ add_action( 'wp_head', function() {
 
     echo '<link rel="stylesheet" id="marina-child-style" href="' . esc_url( $child_style ) . '?v=' . filemtime( get_stylesheet_directory() . '/style.css' ) . '" type="text/css" media="all" />';
 }, 999 );
+
+/**
+ * Force specific ND Booking availability alerts to display in fr-CA by default.
+ */
+function marina_child_translate_booking_alerts( $translation, $text, $domain ) {
+    if ( 'nd-booking' !== $domain ) {
+        return $translation;
+    }
+
+    switch ( $text ) {
+        case 'THIS IS THE LAST ROOM AT THIS PRICE':
+            return 'DERNIÈRE CHAMBRE DISPONIBLE À CE PRIX';
+        case 'ONLY':
+            return 'PLUS QUE';
+        case 'ROOM LEFT AT THIS PRICE':
+            return 'CHAMBRES À CE PRIX';
+    }
+
+    return $translation;
+}
+add_filter( 'gettext', 'marina_child_translate_booking_alerts', 10, 3 );

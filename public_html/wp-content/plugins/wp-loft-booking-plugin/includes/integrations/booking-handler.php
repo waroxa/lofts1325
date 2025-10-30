@@ -28,119 +28,130 @@ function wp_loft_booking_handle_booking(
     $paypal_tx,
     $action_type
 ) {
-    global $wpdb;
+    try {
+        global $wpdb;
 
-    $booking = [
-        'room_id'        => $id_post,
-        'name'           => $user_first_name,
-        'surname'        => $user_last_name,
-        'email'          => $paypal_email,
-        'phone'          => $user_phone,
-        'country'        => $user_country,
-        'date_from'      => $date_from,
-        'date_to'        => $date_to,
-        'room_name'      => $title_post,
-        'total'          => $final_trip_price,
-        'extra_services' => $extra_services,
-        'guests'         => $guests,
-    ];
+        $booking = [
+            'room_id'        => $id_post,
+            'name'           => $user_first_name,
+            'surname'        => $user_last_name,
+            'email'          => $paypal_email,
+            'phone'          => $user_phone,
+            'country'        => $user_country,
+            'date_from'      => $date_from,
+            'date_to'        => $date_to,
+            'room_name'      => $title_post,
+            'total'          => $final_trip_price,
+            'extra_services' => $extra_services,
+            'guests'         => $guests,
+        ];
 
-    $units_table    = $wpdb->prefix . 'loft_units';
-    $bookings_table = $wpdb->prefix . 'loft_bookings';
+        $units_table    = $wpdb->prefix . 'loft_units';
+        $bookings_table = $wpdb->prefix . 'loft_bookings';
 
-    $has_valid_unit = !empty($booking['room_id']) && $wpdb->get_var(
-        $wpdb->prepare("SELECT id FROM {$units_table} WHERE id = %d", $booking['room_id'])
-    );
-
-    if (!$has_valid_unit) {
-        $available_unit = $wpdb->get_var(
-            "SELECT id FROM {$units_table} WHERE status = 'available' ORDER BY unit_name ASC LIMIT 1"
+        $has_valid_unit = !empty($booking['room_id']) && $wpdb->get_var(
+            $wpdb->prepare("SELECT id FROM {$units_table} WHERE id = %d", $booking['room_id'])
         );
 
-        if ($available_unit) {
-            $booking['room_id'] = intval($available_unit);
-
-            $wpdb->update(
-                $bookings_table,
-                ['unit_id' => $booking['room_id']],
-                ['id' => $id_post],
-                ['%d'],
-                ['%d']
+        if (!$has_valid_unit) {
+            $available_unit = $wpdb->get_var(
+                "SELECT id FROM {$units_table} WHERE status = 'available' ORDER BY unit_name ASC LIMIT 1"
             );
-        }
-    }
 
-    $timezone_string = get_option('timezone_string');
-    if (empty($timezone_string)) {
-        $timezone_string = 'America/Toronto';
-    }
+            if ($available_unit) {
+                $booking['room_id'] = intval($available_unit);
 
-    $starts_at = null;
-    $ends_at   = null;
-    $availability_until = null;
-
-    try {
-        $site_timezone   = new DateTimeZone($timezone_string);
-        $checkin_local   = new DateTime($booking['date_from'], $site_timezone);
-        $checkout_local  = new DateTime($booking['date_to'], $site_timezone);
-        $checkin_local->setTime(15, 0, 0);
-        $checkout_local->setTime(11, 0, 0);
-
-        $checkin_utc  = clone $checkin_local;
-        $checkout_utc = clone $checkout_local;
-        $checkin_utc->setTimezone(new DateTimeZone('UTC'));
-        $checkout_utc->setTimezone(new DateTimeZone('UTC'));
-
-        $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
-        $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
-        $availability_until = $checkout_local->format('Y-m-d H:i:s');
-    } catch (Exception $e) {
-        error_log('⚠️ Unable to prepare booking window for ButterflyMX storage: ' . $e->getMessage());
-    }
-
-    // 🔐 Generar llave virtual con ButterflyMX
-    $virtual_key_result = wp_loft_booking_generate_virtual_key(
-        $booking['room_id'],
-        $booking['name'],
-        $booking['email'],
-        $booking['phone'],
-        $booking['date_from'],
-        $booking['date_to']
-    );
-
-    // 🗓️ Crear evento en Google Calendar
-    wp_loft_booking_create_google_event($booking);
-
-    // 📧 Enviar correo de confirmación al huésped
-    wp_loft_booking_send_confirmation_email($booking, $virtual_key_result);
-
-    if (!is_wp_error($virtual_key_result)) {
-        $keychain_id = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : 0;
-        $primary_virtual_key_id = $virtual_key_result['virtual_key_ids'][0] ?? null;
-
-        if ($keychain_id > 0 && $starts_at && $ends_at) {
-            wp_loft_booking_save_keychain_data(
-                $id_post,
-                $booking['room_id'],
-                $keychain_id,
-                $primary_virtual_key_id,
-                $starts_at,
-                $ends_at
-            );
+                $wpdb->update(
+                    $bookings_table,
+                    ['unit_id' => $booking['room_id']],
+                    ['id' => $id_post],
+                    ['%d'],
+                    ['%d']
+                );
+            }
         }
 
-        if (!empty($booking['room_id']) && $availability_until) {
-            $wpdb->update(
-                $units_table,
-                [
-                    'status'             => 'occupied',
-                    'availability_until' => $availability_until,
-                ],
-                ['id' => (int) $booking['room_id']],
-                ['%s', '%s'],
-                ['%d']
-            );
+        $timezone_string = get_option('timezone_string');
+        if (empty($timezone_string)) {
+            $timezone_string = 'America/Toronto';
         }
+
+        $starts_at = null;
+        $ends_at   = null;
+        $availability_until = null;
+
+        try {
+            $site_timezone  = new DateTimeZone($timezone_string);
+            $checkin_local  = new DateTime($booking['date_from'], $site_timezone);
+            $checkout_local = new DateTime($booking['date_to'], $site_timezone);
+            $checkin_local->setTime(15, 0, 0);
+            $checkout_local->setTime(11, 0, 0);
+
+            $checkin_utc  = clone $checkin_local;
+            $checkout_utc = clone $checkout_local;
+            $checkin_utc->setTimezone(new DateTimeZone('UTC'));
+            $checkout_utc->setTimezone(new DateTimeZone('UTC'));
+
+            $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
+            $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
+            $availability_until = $checkout_local->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            error_log('⚠️ Unable to prepare booking window for ButterflyMX storage: ' . $e->getMessage());
+        }
+
+        // 🔐 Generar llave virtual con ButterflyMX
+        $virtual_key_result = wp_loft_booking_generate_virtual_key(
+            $booking['room_id'],
+            $booking['name'],
+            $booking['email'],
+            $booking['phone'],
+            $booking['date_from'],
+            $booking['date_to']
+        );
+
+        // 🗓️ Crear evento en Google Calendar
+        wp_loft_booking_create_google_event($booking);
+
+        // 📧 Enviar correo de confirmación al huésped
+        wp_loft_booking_send_confirmation_email($booking, $virtual_key_result);
+
+        if (!is_wp_error($virtual_key_result)) {
+            $keychain_id = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : 0;
+            $primary_virtual_key_id = $virtual_key_result['virtual_key_ids'][0] ?? null;
+
+            if ($keychain_id > 0 && $starts_at && $ends_at) {
+                wp_loft_booking_save_keychain_data(
+                    $id_post,
+                    $booking['room_id'],
+                    $keychain_id,
+                    $primary_virtual_key_id,
+                    $starts_at,
+                    $ends_at
+                );
+            }
+
+            if (!empty($booking['room_id']) && $availability_until) {
+                $wpdb->update(
+                    $units_table,
+                    [
+                        'status'             => 'occupied',
+                        'availability_until' => $availability_until,
+                    ],
+                    ['id' => (int) $booking['room_id']],
+                    ['%s', '%s'],
+                    ['%d']
+                );
+            }
+        }
+    } catch (Throwable $e) {
+        error_log(
+            sprintf(
+                '❌ WP Loft booking automation failed: %s in %s:%d',
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            )
+        );
     }
 }
 
@@ -433,27 +444,37 @@ function wp_loft_booking_create_google_event($booking) {
         return;
     }
 
-    $service = new Google_Service_Calendar($client);
+    if (!class_exists('Google_Service_Calendar') || !class_exists('Google_Service_Calendar_Event')) {
+        error_log('⚠️ Google Calendar PHP client library unavailable. Skipping event creation.');
+        return;
+    }
 
-    $event = new Google_Service_Calendar_Event([
-        'summary'     => 'Reserva de Loft - ' . $booking['name'],
-        'location'    => $booking['country'],
-        'description' => 'Cliente: ' . $booking['name'] . ' ' . $booking['surname'] . "\nCorreo: " . $booking['email'],
-        'start' => [
-            'date' => $booking['date_from'],
-            'timeZone' => 'America/Toronto',
-        ],
-        'end' => [
-            'date' => $booking['date_to'],
-            'timeZone' => 'America/Toronto',
-        ],
-    ]);
+    try {
+        $service = new Google_Service_Calendar($client);
+
+        $event = new Google_Service_Calendar_Event([
+            'summary'     => 'Reserva de Loft - ' . $booking['name'],
+            'location'    => $booking['country'],
+            'description' => 'Cliente: ' . $booking['name'] . ' ' . $booking['surname'] . "\nCorreo: " . $booking['email'],
+            'start' => [
+                'date' => $booking['date_from'],
+                'timeZone' => 'America/Toronto',
+            ],
+            'end' => [
+                'date' => $booking['date_to'],
+                'timeZone' => 'America/Toronto',
+            ],
+        ]);
+    } catch (Throwable $e) {
+        error_log('❌ Unable to prepare Google Calendar event payload: ' . $e->getMessage());
+        return;
+    }
 
     try {
         $calendarId = 'primary'; // Cambia si usas uno distinto
         $service->events->insert($calendarId, $event);
         error_log("📅 Evento de reserva creado en Google Calendar");
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("❌ Error al crear evento de Google Calendar: " . $e->getMessage());
     }
 }
