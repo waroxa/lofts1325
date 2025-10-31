@@ -95,12 +95,14 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
     wp_enqueue_script( 'loft-vk-frontend' );
     wp_enqueue_style( 'loft-vk-frontend' );
 
-    $nonce       = wp_create_nonce( 'wp_rest' );
-    $rest_url    = esc_url_raw( rest_url( 'loft/v1/keychains' ) );
-    $lofts_url   = esc_url_raw( rest_url( 'loft/v1/lofts-without-access' ) );
-    $instance_id = uniqid( 'loftvk_', false );
-    $keys_tab_id = $instance_id . '_tab_keys';
-    $lofts_tab_id = $instance_id . '_tab_lofts';
+    $nonce         = wp_create_nonce( 'wp_rest' );
+    $rest_url      = esc_url_raw( rest_url( 'loft/v1/keychains' ) );
+    $lofts_base    = rest_url( 'loft/v1/lofts' );
+    $lofts_url     = esc_url_raw( $lofts_base );
+    $generate_base = esc_url_raw( trailingslashit( $lofts_base ) );
+    $instance_id   = uniqid( 'loftvk_', false );
+    $keys_tab_id   = $instance_id . '_tab_keys';
+    $lofts_tab_id  = $instance_id . '_tab_lofts';
     $keys_panel_id = $instance_id . '_panel_keys';
     $lofts_panel_id = $instance_id . '_panel_lofts';
 
@@ -111,6 +113,7 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
         data-rest-url="<?php echo esc_attr( $rest_url ); ?>"
         data-lofts-url="<?php echo esc_attr( $lofts_url ); ?>"
         data-rest-nonce="<?php echo esc_attr( $nonce ); ?>"
+        data-generate-url="<?php echo esc_attr( $generate_base ); ?>"
     >
         <div class="loft-vk__header">
             <h2><?php esc_html_e( 'Virtual Keys Manager', 'loft-virtual-keys' ); ?></h2>
@@ -182,13 +185,14 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
                     <tr>
                         <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
                         <th><?php esc_html_e( 'ButterflyMX Unit ID', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Unit Access Points', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Building Access Points', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Status', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Available Until', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Actions', 'loft-virtual-keys' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="loft-vk__loading">
-                        <td colspan="4"><?php esc_html_e( 'Select the Lofts tab to load data.', 'loft-virtual-keys' ); ?></td>
+                        <td colspan="5"><?php esc_html_e( 'Select the Lofts tab to load data.', 'loft-virtual-keys' ); ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -243,12 +247,30 @@ function loft_vk_register_rest_routes() {
 
     register_rest_route(
         'loft/v1',
-        '/lofts-without-access',
+        '/lofts',
         array(
             array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => 'loft_vk_rest_get_lofts_without_access',
+                'callback'            => 'loft_vk_rest_get_lofts',
                 'permission_callback' => 'loft_vk_rest_permissions_check',
+            ),
+        )
+    );
+
+    register_rest_route(
+        'loft/v1',
+        '/lofts/(?P<unit_id>\d+)/generate-key',
+        array(
+            array(
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => 'loft_vk_rest_generate_key_for_loft',
+                'permission_callback' => 'loft_vk_rest_permissions_check',
+                'args'                => array(
+                    'unit_id' => array(
+                        'required'          => true,
+                        'sanitize_callback' => 'absint',
+                    ),
+                ),
             ),
         )
     );
@@ -407,118 +429,394 @@ function loft_vk_rest_get_keychains( WP_REST_Request $request ) {
     );
 }
 
+
+
+
+
 /**
- * Retrieve lofts that do not have access points configured.
+ * Normalize a loft label so it matches the naming used in the admin tools.
+ *
+ * @param string $label Raw loft/unit label.
+ *
+ * @return string
+ */
+function loft_vk_normalize_unit_label( $label ) {
+    $label = strtoupper( trim( (string) $label ) );
+
+    if ( preg_match( '/LOFTS?\s*-*\s*([0-9]+)/i', $label, $matches ) ) {
+        return 'LOFT' . $matches[1];
+    }
+
+    return preg_replace( '/[^A-Z0-9]/', '', $label );
+}
+
+/**
+ * Build lookup maps for active keys and tenants.
+ *
+ * @return array
+ */
+function loft_vk_collect_loft_context() {
+    global $wpdb;
+
+    $keychains_table = $wpdb->prefix . 'loft_keychains';
+    $tenant_table    = $wpdb->prefix . 'loft_tenants';
+
+    $now       = current_time( 'mysql' );
+    $keys_map  = array();
+    $tenants   = array();
+    $timestamp = time();
+
+    $active_keys = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT name, valid_until FROM {$keychains_table} WHERE valid_from <= %s AND valid_until >= %s",
+            $now,
+            $now
+        ),
+        ARRAY_A
+    );
+
+    foreach ( $active_keys as $row ) {
+        $label = loft_vk_normalize_unit_label( $row['name'] ?? '' );
+
+        if ( '' === $label ) {
+            continue;
+        }
+
+        $keys_map[ $label ] = $row['valid_until'];
+    }
+
+    $active_tenants = $wpdb->get_results(
+        "SELECT unit_label, lease_start, lease_end FROM {$tenant_table}",
+        ARRAY_A
+    );
+
+    foreach ( $active_tenants as $row ) {
+        $label = loft_vk_normalize_unit_label( $row['unit_label'] ?? '' );
+
+        if ( '' === $label ) {
+            continue;
+        }
+
+        $lease_start = ! empty( $row['lease_start'] ) ? strtotime( $row['lease_start'] ) : false;
+        $lease_end   = ! empty( $row['lease_end'] ) ? strtotime( $row['lease_end'] ) : false;
+
+        if ( ! $lease_start || ! $lease_end ) {
+            continue;
+        }
+
+        if ( $lease_start <= $timestamp && $lease_end >= $timestamp ) {
+            if ( empty( $tenants[ $label ] ) || $lease_end < strtotime( $tenants[ $label ] ) ) {
+                $tenants[ $label ] = $row['lease_end'];
+            }
+        }
+    }
+
+    return array(
+        'keys'    => $keys_map,
+        'tenants' => $tenants,
+    );
+}
+
+/**
+ * Prepare a loft response entry and keep the database in sync with the admin page.
+ *
+ * @param object $unit    Unit row from the database.
+ * @param array  $context Lookup context from loft_vk_collect_loft_context().
+ *
+ * @return array
+ */
+function loft_vk_prepare_loft_response( $unit, $context ) {
+    global $wpdb;
+
+    $units_table = $wpdb->prefix . 'loft_units';
+
+    $status = strtolower( (string) $unit->status );
+    $label  = loft_vk_normalize_unit_label( $unit->unit_name );
+
+    $has_key    = '' !== $label && isset( $context['keys'][ $label ] );
+    $has_tenant = '' !== $label && isset( $context['tenants'][ $label ] );
+    $occupied   = $has_key || $has_tenant;
+
+    $availability_timestamp = false;
+
+    if ( $has_key ) {
+        $availability_timestamp = strtotime( $context['keys'][ $label ] );
+    } elseif ( $has_tenant ) {
+        $availability_timestamp = strtotime( $context['tenants'][ $label ] );
+    }
+
+    $availability_for_db = null;
+
+    if ( false !== $availability_timestamp ) {
+        $availability_for_db = wp_date( 'Y-m-d H:i', $availability_timestamp );
+    }
+
+    if ( 'unavailable' !== $status ) {
+        $status = $occupied ? 'occupied' : 'available';
+        $wpdb->update(
+            $units_table,
+            array(
+                'status'             => $status,
+                'availability_until' => $availability_for_db,
+            ),
+            array( 'id' => $unit->id ),
+            array( '%s', '%s' ),
+            array( '%d' )
+        );
+    } else {
+        $wpdb->update(
+            $units_table,
+            array( 'availability_until' => $availability_for_db ),
+            array( 'id' => $unit->id ),
+            array( '%s' ),
+            array( '%d' )
+        );
+    }
+
+    $availability_value = $availability_for_db ? $availability_for_db : '';
+
+    switch ( $status ) {
+        case 'available':
+            $status_label = __( 'Available', 'loft-virtual-keys' );
+            break;
+        case 'occupied':
+            $status_label = __( 'Occupied', 'loft-virtual-keys' );
+            break;
+        default:
+            $status_label = ucfirst( $status );
+            break;
+    }
+
+    return array(
+        'id'                  => (int) $unit->id,
+        'unit'                => sanitize_text_field( $unit->unit_name ),
+        'butterflymx_unit_id' => ! empty( $unit->unit_id_api ) ? (string) (int) $unit->unit_id_api : '',
+        'building_id'         => ! empty( $unit->branch_building_id ) ? sanitize_text_field( (string) $unit->branch_building_id ) : '',
+        'status'              => $status,
+        'status_label'        => $status_label,
+        'availability_until'  => $availability_value,
+        'can_generate'        => ( 'available' === $status ),
+    );
+}
+
+/**
+ * Retrieve lofts with their availability and status information.
  *
  * @return WP_REST_Response
  */
-function loft_vk_rest_get_lofts_without_access( WP_REST_Request $request ) {
+function loft_vk_rest_get_lofts( WP_REST_Request $request ) {
     global $wpdb;
 
     $units_table    = $wpdb->prefix . 'loft_units';
     $branches_table = $wpdb->prefix . 'loft_branches';
 
     $units = $wpdb->get_results(
-        "SELECT u.*, b.building_id AS branch_building_id
-           FROM {$units_table} u
-      LEFT JOIN {$branches_table} b ON u.branch_id = b.id
-          WHERE u.unit_name LIKE '%LOFT%'
-       ORDER BY u.unit_name ASC"
+        "SELECT u.*, b.building_id AS branch_building_id"
+            . " FROM {$units_table} u"
+            . " LEFT JOIN {$branches_table} b ON u.branch_id = b.id"
+            . " WHERE u.unit_name LIKE '%LOFT%'"
+            . " ORDER BY u.unit_name ASC"
     );
 
     if ( empty( $units ) ) {
         return rest_ensure_response( array( 'lofts' => array() ) );
     }
 
-    $lofts        = array();
-    $environment  = function_exists( 'wp_loft_booking_get_butterflymx_environment' )
-        ? wp_loft_booking_get_butterflymx_environment()
-        : 'production';
-    $normalize_ids = static function( $ids ) {
-        $normalized = array();
-
-        foreach ( (array) $ids as $id ) {
-            $id = (int) $id;
-
-            if ( $id > 0 ) {
-                $normalized[] = (string) $id;
-            }
-        }
-
-        return array_values( array_unique( $normalized ) );
-    };
+    $context = loft_vk_collect_loft_context();
+    $lofts   = array();
 
     foreach ( $units as $unit ) {
-        $unit_id_api = isset( $unit->unit_id_api ) ? (int) $unit->unit_id_api : 0;
+        $lofts[] = loft_vk_prepare_loft_response( $unit, $context );
+    }
 
-        $unit_access_points     = array();
-        $unit_error             = '';
-        $building_access_points = array();
-        $building_error         = '';
-        $building_id_for_api    = isset( $unit->branch_building_id ) ? (int) $unit->branch_building_id : 0;
+    return rest_ensure_response( array( 'lofts' => $lofts ) );
+}
 
-        if ( $unit_id_api > 0 ) {
-            if ( function_exists( 'wp_loft_booking_fetch_unit_profile' ) ) {
-                $profile = wp_loft_booking_fetch_unit_profile( $unit_id_api, $environment );
+/**
+ * Generate a virtual key for a specific loft.
+ *
+ * @param WP_REST_Request $request Request instance.
+ *
+ * @return WP_REST_Response|WP_Error
+ */
+function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
+    global $wpdb;
 
-                if ( is_wp_error( $profile ) ) {
-                    $unit_error = sanitize_text_field( $profile->get_error_message() );
-                } else {
-                    $unit_access_points = $normalize_ids( $profile['access_point_ids'] ?? array() );
+    $unit_id = (int) $request->get_param( 'unit_id' );
 
-                    if ( ! empty( $profile['building_id'] ) ) {
-                        $building_id_for_api = (int) $profile['building_id'];
-                    }
-                }
-            } else {
-                $unit_error = __( 'ButterflyMX integration unavailable.', 'loft-virtual-keys' );
-            }
-        }
+    if ( $unit_id <= 0 ) {
+        return new WP_Error( 'loft_vk_invalid_unit', __( 'Invalid loft selection.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
 
-        if ( $building_id_for_api > 0 ) {
-            if ( function_exists( 'wp_loft_booking_fetch_building_access_points' ) ) {
-                $building_points = wp_loft_booking_fetch_building_access_points( $building_id_for_api, $environment );
+    $guest_name   = sanitize_text_field( (string) $request->get_param( 'guest_name' ) );
+    $guest_email  = sanitize_email( (string) $request->get_param( 'guest_email' ) );
+    $guest_phone  = sanitize_text_field( (string) $request->get_param( 'guest_phone' ) );
+    $checkin      = sanitize_text_field( (string) $request->get_param( 'checkin_date' ) );
+    $checkout     = sanitize_text_field( (string) $request->get_param( 'checkout_date' ) );
 
-                if ( is_wp_error( $building_points ) ) {
-                    if ( 'no_access_points' === $building_points->get_error_code() ) {
-                        $building_access_points = array();
-                    } else {
-                        $building_error = sanitize_text_field( $building_points->get_error_message() );
-                    }
-                } else {
-                    $building_access_points = $normalize_ids( $building_points );
-                }
-            } else {
-                $building_error = __( 'ButterflyMX integration unavailable.', 'loft-virtual-keys' );
-            }
-        }
+    if ( '' === $guest_name || '' === $guest_email || '' === $checkin || '' === $checkout ) {
+        return new WP_Error( 'loft_vk_missing_fields', __( 'Guest name, email, and dates are required.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
 
-        $missing_unit     = empty( $unit_access_points ) || '' !== $unit_error;
-        $missing_building = empty( $building_access_points ) || '' !== $building_error;
+    if ( ! is_email( $guest_email ) ) {
+        return new WP_Error( 'loft_vk_invalid_email', __( 'The guest email address is not valid.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
 
-        if ( ! $missing_unit && ! $missing_building ) {
-            continue;
-        }
+    $timezone_string = get_option( 'timezone_string' );
 
-        $lofts[] = array(
-            'id'                     => (int) $unit->id,
-            'unit'                   => sanitize_text_field( $unit->unit_name ),
-            'butterflymx_unit_id'    => $unit_id_api > 0 ? (string) $unit_id_api : '',
-            'building_id'            => $building_id_for_api > 0 ? (string) $building_id_for_api : '',
-            'unit_access_points'     => $unit_access_points,
-            'building_access_points' => $building_access_points,
-            'unit_error'             => $unit_error,
-            'building_error'         => $building_error,
+    if ( empty( $timezone_string ) ) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    try {
+        $site_timezone = new DateTimeZone( $timezone_string );
+    } catch ( Exception $e ) {
+        $site_timezone = new DateTimeZone( 'America/Toronto' );
+    }
+
+    $utc_timezone = new DateTimeZone( 'UTC' );
+
+    $checkin_dt  = DateTime::createFromFormat( 'Y-m-d', $checkin, $site_timezone );
+    $checkout_dt = DateTime::createFromFormat( 'Y-m-d', $checkout, $site_timezone );
+
+    if ( ! $checkin_dt || $checkin_dt->format( 'Y-m-d' ) !== $checkin ) {
+        return new WP_Error( 'loft_vk_invalid_checkin', __( 'The check-in date format must be YYYY-MM-DD.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
+
+    if ( ! $checkout_dt || $checkout_dt->format( 'Y-m-d' ) !== $checkout ) {
+        return new WP_Error( 'loft_vk_invalid_checkout', __( 'The check-out date format must be YYYY-MM-DD.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
+
+    if ( $checkout_dt <= $checkin_dt ) {
+        return new WP_Error( 'loft_vk_checkout_before_checkin', __( 'The check-out date must be after the check-in date.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
+
+    $units_table    = $wpdb->prefix . 'loft_units';
+    $branches_table = $wpdb->prefix . 'loft_branches';
+
+    $unit = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT u.*, b.building_id AS branch_building_id"
+                . " FROM {$units_table} u"
+                . " LEFT JOIN {$branches_table} b ON u.branch_id = b.id"
+                . " WHERE u.id = %d",
+            $unit_id
+        )
+    );
+
+    if ( ! $unit ) {
+        return new WP_Error( 'loft_vk_unit_not_found', __( 'Selected loft could not be found.', 'loft-virtual-keys' ), array( 'status' => 404 ) );
+    }
+
+    if ( 'available' !== strtolower( (string) $unit->status ) ) {
+        return new WP_Error( 'loft_vk_unit_unavailable', __( 'This loft is not currently available for key generation.', 'loft-virtual-keys' ), array( 'status' => 400 ) );
+    }
+
+    $checkin_local  = clone $checkin_dt;
+    $checkout_local = clone $checkout_dt;
+
+    $checkin_local->setTime( 15, 0, 0 );
+    $checkout_local->setTime( 11, 0, 0 );
+
+    $checkin_utc  = clone $checkin_local;
+    $checkout_utc = clone $checkout_local;
+
+    $checkin_utc->setTimezone( $utc_timezone );
+    $checkout_utc->setTimezone( $utc_timezone );
+
+    if ( ! function_exists( 'wp_loft_booking_generate_virtual_key' ) ) {
+        return new WP_Error( 'loft_vk_missing_dependency', __( 'Virtual key generation is currently unavailable.', 'loft-virtual-keys' ), array( 'status' => 500 ) );
+    }
+
+    $result = wp_loft_booking_generate_virtual_key(
+        $unit_id,
+        $guest_name,
+        $guest_email,
+        $guest_phone,
+        $checkin_dt->format( 'Y-m-d' ),
+        $checkout_dt->format( 'Y-m-d' )
+    );
+
+    if ( is_wp_error( $result ) ) {
+        return new WP_Error( 'loft_vk_generation_failed', $result->get_error_message(), array( 'status' => 500 ) );
+    }
+
+    $starts_at = $checkin_utc->format( 'Y-m-d\TH:i:s\Z' );
+    $ends_at   = $checkout_utc->format( 'Y-m-d\TH:i:s\Z' );
+
+    $availability_until = $checkout_local->format( 'Y-m-d H:i:s' );
+
+    $keychain_id            = isset( $result['keychain_id'] ) ? (int) $result['keychain_id'] : 0;
+    $primary_virtual_key_id = isset( $result['virtual_key_ids'][0] ) ? $result['virtual_key_ids'][0] : null;
+
+    if ( $keychain_id > 0 && function_exists( 'wp_loft_booking_save_keychain_data' ) ) {
+        wp_loft_booking_save_keychain_data(
+            null,
+            $unit_id,
+            $keychain_id,
+            $primary_virtual_key_id,
+            $starts_at,
+            $ends_at
         );
     }
 
+    $wpdb->update(
+        $units_table,
+        array(
+            'status'             => 'occupied',
+            'availability_until' => $availability_until,
+        ),
+        array( 'id' => $unit_id ),
+        array( '%s', '%s' ),
+        array( '%d' )
+    );
+
+    if ( function_exists( 'wp_loft_booking_send_confirmation_email' ) ) {
+        $booking_payload = array(
+            'room_id'        => $unit_id,
+            'name'           => $guest_name,
+            'surname'        => '',
+            'email'          => $guest_email,
+            'phone'          => $guest_phone,
+            'country'        => '',
+            'date_from'      => $checkin_dt->format( 'Y-m-d' ),
+            'date_to'        => $checkout_dt->format( 'Y-m-d' ),
+            'room_name'      => $unit->unit_name,
+            'total'          => '',
+            'extra_services' => '',
+            'guests'         => '',
+        );
+
+        wp_loft_booking_send_confirmation_email( $booking_payload, $result, true );
+    }
+
+    $message = sprintf(
+        /* translators: %s: loft/unit name */
+        __( 'Virtual key created for %s. A confirmation email has been sent to the guest.', 'loft-virtual-keys' ),
+        sanitize_text_field( $unit->unit_name )
+    );
+
+    $context = loft_vk_collect_loft_context();
+
+    $updated_unit = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT u.*, b.building_id AS branch_building_id"
+                . " FROM {$units_table} u"
+                . " LEFT JOIN {$branches_table} b ON u.branch_id = b.id"
+                . " WHERE u.id = %d",
+            $unit_id
+        )
+    );
+
+    $loft = $updated_unit ? loft_vk_prepare_loft_response( $updated_unit, $context ) : null;
+
     return rest_ensure_response(
         array(
-            'lofts' => $lofts,
+            'message' => $message,
+            'loft'    => $loft,
         )
     );
 }
-
 /**
  * Generate a new virtual key and store it.
  *
