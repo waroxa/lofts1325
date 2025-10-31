@@ -2,8 +2,12 @@
     background: #fff;
     border: 1px solid #dcdcde;
     padding: 24px;
-    border-radius: 6px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
 }
 
 .loft-vk__header {
@@ -45,6 +49,7 @@
     min-height: 24px;
     margin-bottom: 12px;
     color: #135e96;
+    font-weight: 600;
 }
 
 .loft-vk__status--error {
@@ -122,8 +127,23 @@
 
 .loft-vk__table td,
 .loft-vk__table th {
+    padding: 14px 16px;
     vertical-align: top;
     word-break: break-word;
+}
+
+.loft-vk__table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #334155;
+    background: #f8fafc;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.loft-vk__table td {
+    font-size: 0.95rem;
+    color: #0f172a;
 }
 
 .loft-vk__table details {
@@ -145,6 +165,27 @@
 
 .loft-vk__panel[hidden] {
     display: none;
+}
+
+.loft-vk__table-wrapper {
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.8), rgba(255, 255, 255, 0.8));
+}
+
+.loft-vk__table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.loft-vk__table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 999px;
+}
+
+.loft-vk__table {
+    min-width: 100%;
 }
 
 .loft-vk__table code {
@@ -248,6 +289,223 @@
 .loft-vk__pagination .button[disabled] {
     opacity: 0.5;
     cursor: default;
+}
+
+.loft-vk__dialog {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.loft-vk__dialog--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.loft-vk__dialog-backdrop {
+    position: absolute;
+    inset: 0;
+}
+
+.loft-vk__dialog-content {
+    position: relative;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px;
+    width: min(480px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.35);
+    animation: loft-vk-dialog-in 0.25s ease;
+}
+
+.loft-vk__dialog-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(15, 23, 42, 0.06);
+    color: #0f172a;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.loft-vk__dialog-close:hover,
+.loft-vk__dialog-close:focus-visible {
+    background: rgba(15, 23, 42, 0.1);
+    transform: scale(1.05);
+}
+
+.loft-vk__dialog-title {
+    margin-top: 0;
+    margin-bottom: 6px;
+    font-size: 1.5rem;
+}
+
+.loft-vk__dialog-subtitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.loft-vk__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.loft-vk__form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.loft-vk__form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.loft-vk__form-label {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.loft-vk__form-input {
+    border: 1px solid #cbd5f5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loft-vk__form-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.loft-vk__form-input--error {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.loft-vk__form-error {
+    color: #b91c1c;
+    font-weight: 600;
+    min-height: 20px;
+    margin: 0;
+}
+
+.loft-vk__form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.loft-vk__form-submit {
+    padding: 10px 24px;
+    font-size: 1rem;
+}
+
+.loft-vk__form-cancel {
+    padding: 10px 24px;
+}
+
+body.loft-vk-dialog-open {
+    overflow: hidden;
+}
+
+.loft-vk--dialog-open .loft-vk__toast-container {
+    pointer-events: none;
+}
+
+@keyframes loft-vk-dialog-in {
+    from {
+        transform: translateY(12px) scale(0.98);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 960px) {
+    .loft-vk {
+        padding: 20px;
+    }
+
+    .loft-vk__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .loft-vk__table td,
+    .loft-vk__table th {
+        padding: 12px 14px;
+    }
+
+    .loft-vk__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loft-vk__actions .button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .loft-vk {
+        padding: 18px 16px;
+    }
+
+    .loft-vk__tabs {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .loft-vk__tab {
+        width: 100%;
+    }
+
+    .loft-vk__table {
+        min-width: 620px;
+    }
+
+    .loft-vk__toast-container {
+        right: 12px;
+        left: 12px;
+        align-items: stretch;
+    }
+
+    .loft-vk__toast {
+        width: 100%;
+    }
+
+    .loft-vk__form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .loft-vk__dialog-content {
+        padding: 24px;
+    }
 }
 
 .loft-vk-login-prompt {
