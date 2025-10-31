@@ -18,6 +18,29 @@
     margin: 0;
 }
 
+.loft-vk__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.loft-vk__tab {
+    cursor: pointer;
+}
+
+.loft-vk__tab.loft-vk__tab--active {
+    background-color: #2271b1;
+    border-color: #1d5c99;
+    color: #fff;
+    box-shadow: none;
+}
+
+.loft-vk__tab:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 1px;
+}
+
 .loft-vk__status {
     min-height: 24px;
     margin-bottom: 12px;
@@ -43,12 +66,46 @@
     font-weight: 600;
 }
 
+.loft-vk__panel {
+    margin: 0;
+}
+
+.loft-vk__panel--active {
+    display: block;
+}
+
+.loft-vk__panel[hidden] {
+    display: none;
+}
+
+.loft-vk__badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #fce5d8;
+    color: #7a2e0e;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.loft-vk__access {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
 .loft-vk__table code {
     background: #f6f7f7;
     border-radius: 3px;
     padding: 2px 4px;
     display: inline-block;
     margin-top: 4px;
+}
+
+.loft-vk__access code {
+    margin-top: 0;
 }
 
 .loft-vk__list {
@@ -62,6 +119,11 @@
 
 .loft-vk__muted {
     color: #646970;
+}
+
+.loft-vk__error {
+    color: #b91c1c;
+    font-weight: 600;
 }
 
 .loft-vk__link {
