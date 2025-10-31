@@ -610,6 +610,119 @@
             open: open
         };
     }
+    function createGenerateButton(container, loft) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'button button-secondary loft-vk__generate';
+        button.textContent = 'Generate Virtual Key';
+        button.disabled = !loft.can_generate;
+
+        if (!loft.can_generate) {
+            button.title = 'This loft is not available for key generation.';
+        }
+
+        button.addEventListener('click', function() {
+            handleGenerateClick(container, button, loft);
+        });
+
+        return button;
+    }
+
+    function renderLoftCardsLoading(cardsContainer, message) {
+        if (!cardsContainer) {
+            return;
+        }
+
+        cardsContainer.innerHTML = '';
+
+        var loadingCard = document.createElement('div');
+        loadingCard.className = 'loft-vk__card loft-vk__card--loading';
+        loadingCard.setAttribute('role', 'listitem');
+        loadingCard.textContent = message || 'Loading lofts…';
+        cardsContainer.appendChild(loadingCard);
+    }
+
+    function renderLoftCards(cardsContainer, lofts, emptyMessage, container) {
+        if (!cardsContainer) {
+            return;
+        }
+
+        cardsContainer.innerHTML = '';
+
+        if (!lofts || !lofts.length) {
+            var emptyCard = document.createElement('div');
+            emptyCard.className = 'loft-vk__card loft-vk__card--empty';
+            emptyCard.setAttribute('role', 'listitem');
+            emptyCard.textContent = emptyMessage || 'No lofts available.';
+            cardsContainer.appendChild(emptyCard);
+            return;
+        }
+
+        lofts.forEach(function(loft) {
+            var card = document.createElement('article');
+            card.className = 'loft-vk__card';
+            card.setAttribute('role', 'listitem');
+
+            if (loft.id != null) {
+                card.dataset.loftId = String(loft.id);
+            }
+
+            var header = document.createElement('div');
+            header.className = 'loft-vk__card-header';
+
+            var title = document.createElement('h3');
+            title.className = 'loft-vk__card-title';
+            title.textContent = loft.unit || '';
+            header.appendChild(title);
+
+            var statusWrap = document.createElement('div');
+            statusWrap.className = 'loft-vk__card-status';
+            statusWrap.appendChild(buildStatusLabel(loft.status || '', loft.status_label || loft.status || ''));
+            header.appendChild(statusWrap);
+
+            card.appendChild(header);
+
+            if (loft.building_id) {
+                var building = document.createElement('p');
+                building.className = 'loft-vk__card-building';
+                building.textContent = 'Building ' + loft.building_id;
+                card.appendChild(building);
+            }
+
+            var details = document.createElement('dl');
+            details.className = 'loft-vk__card-details';
+
+            var idRow = document.createElement('div');
+            idRow.className = 'loft-vk__card-detail';
+            var idTerm = document.createElement('dt');
+            idTerm.textContent = 'ButterflyMX ID';
+            var idValue = document.createElement('dd');
+            idValue.textContent = loft.butterflymx_unit_id || '—';
+            idRow.appendChild(idTerm);
+            idRow.appendChild(idValue);
+            details.appendChild(idRow);
+
+            var availabilityRow = document.createElement('div');
+            availabilityRow.className = 'loft-vk__card-detail';
+            var availabilityTerm = document.createElement('dt');
+            availabilityTerm.textContent = 'Available Until';
+            var availabilityValue = document.createElement('dd');
+            availabilityValue.textContent = formatDate(loft.availability_until) || '—';
+            availabilityRow.appendChild(availabilityTerm);
+            availabilityRow.appendChild(availabilityValue);
+            details.appendChild(availabilityRow);
+
+            card.appendChild(details);
+
+            var actions = document.createElement('div');
+            actions.className = 'loft-vk__card-actions';
+            actions.appendChild(createGenerateButton(container, loft));
+            card.appendChild(actions);
+
+            cardsContainer.appendChild(card);
+        });
+    }
+
     function renderLoftsTable(container, lofts, emptyMessage) {
         var panel = getPanel(container, 'lofts');
         if (!panel) {
@@ -617,7 +730,10 @@
         }
 
         var tbody = panel.querySelector('tbody');
+        var cardsContainer = panel.querySelector('.loft-vk__cards');
+
         if (!tbody) {
+            renderLoftCards(cardsContainer, lofts, emptyMessage, container);
             return;
         }
 
@@ -626,11 +742,16 @@
         if (!lofts || !lofts.length) {
             var message = emptyMessage || 'No lofts available.';
             tbody.appendChild(createEmptyRow(message, LOFT_COLUMN_COUNT));
+            renderLoftCards(cardsContainer, [], message, container);
             return;
         }
 
         lofts.forEach(function(loft) {
             var row = document.createElement('tr');
+
+            if (loft.id != null) {
+                row.dataset.loftId = String(loft.id);
+            }
 
             var unitCell = document.createElement('td');
             var nameEl = document.createElement('strong');
@@ -661,22 +782,13 @@
 
             var actionsCell = document.createElement('td');
             actionsCell.className = 'loft-vk__actions';
-            var button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'button button-secondary loft-vk__generate';
-            button.textContent = 'Generate Virtual Key';
-            button.disabled = !loft.can_generate;
-            button.addEventListener('click', function() {
-                handleGenerateClick(container, button, loft);
-            });
-            if (!loft.can_generate) {
-                button.title = 'This loft is not available for key generation.';
-            }
-            actionsCell.appendChild(button);
+            actionsCell.appendChild(createGenerateButton(container, loft));
             row.appendChild(actionsCell);
 
             tbody.appendChild(row);
         });
+
+        renderLoftCards(cardsContainer, lofts, emptyMessage, container);
     }
 
     function handleGenerateClick(container, button, loft) {
@@ -723,7 +835,7 @@
             var statusMessage = 'Création de la clé virtuelle pour ' + (loft.unit || 'cette unité') + '… / Generating virtual key…';
             renderStatus(container, statusMessage);
 
-            fetch(url, {
+            var request = fetch(url, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
@@ -735,8 +847,18 @@
                 .then(handleFetchResponse)
                 .then(function(data) {
                     var message = (data && data.message) ? data.message : 'Virtual key created.';
-                    renderStatus(container, message);
+                    var refreshPlanned = !!(data && data.refresh_scheduled);
+                    var successStatus = refreshPlanned
+                        ? message + ' ButterflyMX keychains will refresh shortly to update availability.'
+                        : message;
+
+                    renderStatus(container, successStatus);
                     showToast(container, message);
+
+                    if (refreshPlanned) {
+                        showToast(container, 'ButterflyMX keychains will refresh shortly to update availability.');
+                    }
+
                     return Promise.all([
                         fetchKeychains(container, 1, { showStatus: false }),
                         fetchLofts(container, { showStatus: false })
@@ -745,14 +867,20 @@
                         return data;
                     });
                 })
-                .then(function() {
-                    resetButtonState();
-                })
                 .catch(function(error) {
                     console.error(error);
                     renderStatus(container, error.message || 'Unable to generate virtual key.', true);
+                    throw error;
+                });
+
+            if (request && typeof request.finally === 'function') {
+                request.finally(function() {
                     resetButtonState();
                 });
+            } else {
+                // Fallback for older browsers without Promise.prototype.finally
+                request.then(resetButtonState, resetButtonState);
+            }
         }).catch(function(error) {
             if (error) {
                 console.error(error);
@@ -841,6 +969,7 @@
         var nonce = container.getAttribute('data-rest-nonce');
         var panel = getPanel(container, 'lofts');
         var tbody = panel ? panel.querySelector('tbody') : null;
+        var cardsContainer = panel ? panel.querySelector('.loft-vk__cards') : null;
 
         if (!loftsUrl || !nonce) {
             if (showStatus) {
@@ -853,6 +982,11 @@
             tbody.innerHTML = '';
             var loadingMessage = showStatus ? 'Loading lofts…' : 'Updating lofts…';
             tbody.appendChild(createEmptyRow(loadingMessage, LOFT_COLUMN_COUNT));
+        }
+
+        if (cardsContainer) {
+            var loadingCardMessage = showStatus ? 'Loading lofts…' : 'Updating lofts…';
+            renderLoftCardsLoading(cardsContainer, loadingCardMessage);
         }
 
         if (showStatus) {

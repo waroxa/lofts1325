@@ -202,6 +202,9 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
                     </tbody>
                 </table>
             </div>
+            <div class="loft-vk__cards" role="list" aria-label="<?php esc_attr_e( 'Loft availability', 'loft-virtual-keys' ); ?>">
+                <div class="loft-vk__card loft-vk__card--loading" role="listitem"><?php esc_html_e( 'Loading lofts…', 'loft-virtual-keys' ); ?></div>
+            </div>
         </div>
         <div
             class="loft-vk__dialog"
@@ -513,28 +516,63 @@ function loft_vk_collect_loft_context() {
     $keychains_table = $wpdb->prefix . 'loft_keychains';
     $tenant_table    = $wpdb->prefix . 'loft_tenants';
 
-    $now       = current_time( 'mysql' );
-    $keys_map  = array();
-    $tenants   = array();
-    $timestamp = time();
+    $now_mysql  = current_time( 'mysql' );
+    $now_ts     = current_time( 'timestamp' );
+    $threshold  = $now_ts + DAY_IN_SECONDS;
+    $keys_map   = array();
+    $tenants    = array();
 
-    $active_keys = $wpdb->get_results(
+    $key_rows = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT name, valid_until FROM {$keychains_table} WHERE valid_from <= %s AND valid_until >= %s",
-            $now,
-            $now
+            "SELECT name, valid_from, valid_until FROM {$keychains_table} WHERE valid_until >= %s",
+            $now_mysql
         ),
         ARRAY_A
     );
 
-    foreach ( $active_keys as $row ) {
+    foreach ( $key_rows as $row ) {
         $label = loft_vk_normalize_unit_label( $row['name'] ?? '' );
 
         if ( '' === $label ) {
             continue;
         }
 
-        $keys_map[ $label ] = $row['valid_until'];
+        $valid_from  = ! empty( $row['valid_from'] ) ? strtotime( $row['valid_from'] ) : false;
+        $valid_until = ! empty( $row['valid_until'] ) ? strtotime( $row['valid_until'] ) : false;
+
+        if ( false === $valid_until ) {
+            continue;
+        }
+
+        $status = '';
+
+        if ( $valid_from && $valid_from <= $now_ts ) {
+            $status = 'occupied';
+        } elseif ( $valid_from && $valid_from <= $threshold ) {
+            $status = 'reserved';
+        } else {
+            continue;
+        }
+
+        $existing_status = isset( $keys_map[ $label ]['status'] ) ? $keys_map[ $label ]['status'] : '';
+
+        if ( 'occupied' === $existing_status && 'occupied' !== $status ) {
+            continue;
+        }
+
+        if ( 'reserved' === $existing_status && 'reserved' === $status ) {
+            $current_from = isset( $keys_map[ $label ]['valid_from'] ) ? strtotime( $keys_map[ $label ]['valid_from'] ) : false;
+
+            if ( $current_from && $valid_from && $current_from <= $valid_from ) {
+                continue;
+            }
+        }
+
+        $keys_map[ $label ] = array(
+            'status'      => $status,
+            'valid_from'  => $row['valid_from'] ?? '',
+            'valid_until' => $row['valid_until'] ?? '',
+        );
     }
 
     $active_tenants = $wpdb->get_results(
@@ -556,7 +594,7 @@ function loft_vk_collect_loft_context() {
             continue;
         }
 
-        if ( $lease_start <= $timestamp && $lease_end >= $timestamp ) {
+        if ( $lease_start <= $now_ts && $lease_end >= $now_ts ) {
             if ( empty( $tenants[ $label ] ) || $lease_end < strtotime( $tenants[ $label ] ) ) {
                 $tenants[ $label ] = $row['lease_end'];
             }
@@ -585,16 +623,21 @@ function loft_vk_prepare_loft_response( $unit, $context ) {
     $status = strtolower( (string) $unit->status );
     $label  = loft_vk_normalize_unit_label( $unit->unit_name );
 
-    $has_key    = '' !== $label && isset( $context['keys'][ $label ] );
-    $has_tenant = '' !== $label && isset( $context['tenants'][ $label ] );
-    $occupied   = $has_key || $has_tenant;
+    $key_info    = ( '' !== $label && isset( $context['keys'][ $label ] ) ) ? $context['keys'][ $label ] : null;
+    $tenant_info = ( '' !== $label && isset( $context['tenants'][ $label ] ) ) ? $context['tenants'][ $label ] : null;
+
+    $key_status        = is_array( $key_info ) && ! empty( $key_info['status'] ) ? $key_info['status'] : '';
+    $has_active_key    = 'occupied' === $key_status;
+    $has_reserved_key  = 'reserved' === $key_status;
+    $reserved_by_key   = $has_reserved_key;
+    $has_tenant        = null !== $tenant_info;
 
     $availability_timestamp = false;
 
-    if ( $has_key ) {
-        $availability_timestamp = strtotime( $context['keys'][ $label ] );
+    if ( $key_info && ! empty( $key_info['valid_until'] ) ) {
+        $availability_timestamp = strtotime( $key_info['valid_until'] );
     } elseif ( $has_tenant ) {
-        $availability_timestamp = strtotime( $context['tenants'][ $label ] );
+        $availability_timestamp = strtotime( $tenant_info );
     }
 
     $availability_for_db = null;
@@ -604,7 +647,14 @@ function loft_vk_prepare_loft_response( $unit, $context ) {
     }
 
     if ( 'unavailable' !== $status ) {
-        $status = $occupied ? 'occupied' : 'available';
+        if ( $has_active_key || $has_tenant ) {
+            $status = 'occupied';
+        } elseif ( $has_reserved_key ) {
+            $status = 'unavailable';
+        } else {
+            $status = 'available';
+        }
+
         $wpdb->update(
             $units_table,
             array(
@@ -635,7 +685,7 @@ function loft_vk_prepare_loft_response( $unit, $context ) {
             $status_label = __( 'Occupied', 'loft-virtual-keys' );
             break;
         case 'unavailable':
-            $status_label = __( 'Unavailable', 'loft-virtual-keys' );
+            $status_label = $reserved_by_key ? __( 'Reserved', 'loft-virtual-keys' ) : __( 'Unavailable', 'loft-virtual-keys' );
             break;
         default:
             $status_label = ucfirst( $status );
@@ -869,10 +919,13 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
         wp_loft_booking_trigger_unit_sync( 'virtual_key_created' );
     }
 
+    $refresh_scheduled = loft_vk_schedule_keychain_refresh();
+
     return rest_ensure_response(
         array(
-            'message' => $message,
-            'loft'    => $loft,
+            'message'            => $message,
+            'loft'               => $loft,
+            'refresh_scheduled'  => $refresh_scheduled,
         )
     );
 }
@@ -931,6 +984,60 @@ function loft_vk_force_shortcode_rendering( $content ) {
 function loft_vk_render_shortcode_markup() {
     return loft_vk_render_block();
 }
+
+/**
+ * Schedule a background refresh of ButterflyMX keychains.
+ *
+ * @param int $delay Delay in seconds before the sync should run.
+ *
+ * @return bool True if the refresh was scheduled, false if it ran immediately or could not be scheduled.
+ */
+function loft_vk_schedule_keychain_refresh( $delay = 45 ) {
+    if ( ! function_exists( 'wp_loft_booking_sync_keychains_from_api' ) ) {
+        return false;
+    }
+
+    $delay     = max( 5, (int) $delay );
+    $timestamp = time() + $delay;
+
+    if ( function_exists( 'wp_schedule_single_event' ) && function_exists( 'wp_next_scheduled' ) ) {
+        $next = wp_next_scheduled( 'loft_vk_refresh_keychains' );
+
+        if ( $next && $next <= $timestamp ) {
+            return true;
+        }
+
+        if ( wp_schedule_single_event( $timestamp, 'loft_vk_refresh_keychains' ) ) {
+            return true;
+        }
+    }
+
+    loft_vk_run_keychain_refresh();
+
+    return false;
+}
+
+/**
+ * Perform a keychain refresh immediately.
+ */
+function loft_vk_run_keychain_refresh() {
+    if ( ! function_exists( 'wp_loft_booking_sync_keychains_from_api' ) ) {
+        return;
+    }
+
+    $result = wp_loft_booking_sync_keychains_from_api();
+
+    if ( is_wp_error( $result ) ) {
+        error_log( '[Loft VK] Keychain refresh failed: ' . $result->get_error_message() );
+        return;
+    }
+
+    if ( function_exists( 'wp_loft_booking_trigger_unit_sync' ) ) {
+        wp_loft_booking_trigger_unit_sync( 'keychain_refresh' );
+    }
+}
+
+add_action( 'loft_vk_refresh_keychains', 'loft_vk_run_keychain_refresh' );
 
 /**
  * Swap the login logo with the Loft 1325 image.
