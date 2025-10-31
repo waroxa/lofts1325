@@ -2,6 +2,8 @@
     var KEYCHAIN_COLUMN_COUNT = 8;
     var LOFT_COLUMN_COUNT = 5;
 
+    var guestFormManagers = new WeakMap();
+
     function renderStatus(container, message, isError) {
         var statusEl = container.querySelector('.loft-vk__status');
         if (!statusEl) {
@@ -320,63 +322,294 @@
         return span;
     }
 
-    function promptForGuestInfo(container, loft) {
-        var guestName = window.prompt('Nom du client / Guest name');
-        if (guestName === null) {
-            return null;
-        }
-        guestName = guestName.trim();
-        if (!guestName) {
-            renderStatus(container, 'Le nom du client est requis. / Guest name is required.', true);
+    function ensureGuestForm(container) {
+        if (!container) {
             return null;
         }
 
-        var guestEmail = window.prompt('Courriel du client / Guest email');
-        if (guestEmail === null) {
-            return null;
+        if (guestFormManagers.has(container)) {
+            return guestFormManagers.get(container);
         }
-        guestEmail = guestEmail.trim();
-        if (!guestEmail) {
-            renderStatus(container, 'Le courriel du client est requis. / Guest email is required.', true);
+
+        var manager = setupGuestForm(container);
+
+        if (manager) {
+            guestFormManagers.set(container, manager);
+        }
+
+        return manager;
+    }
+
+    function formatDateForInputValue(date) {
+        if (!date || typeof date.getFullYear !== 'function') {
+            return '';
+        }
+
+        var month = (date.getMonth() + 1).toString().padStart(2, '0');
+        var day = date.getDate().toString().padStart(2, '0');
+
+        return date.getFullYear() + '-' + month + '-' + day;
+    }
+
+    function setupGuestForm(container) {
+        var dialog = container.querySelector('.loft-vk__dialog');
+        var form = dialog ? dialog.querySelector('.loft-vk__form') : null;
+
+        if (!dialog || !form) {
             return null;
         }
 
-        var guestPhonePrompt = window.prompt('Téléphone du client / Guest phone (optionnel)');
-        if (guestPhonePrompt === null) {
-            return null;
-        }
-        var guestPhone = guestPhonePrompt.trim();
+        var loftLabel = dialog.querySelector('.loft-vk__dialog-loft');
+        var errorEl = form.querySelector('.loft-vk__form-error');
+        var nameInput = form.querySelector('input[name="guest_name"]');
+        var emailInput = form.querySelector('input[name="guest_email"]');
+        var phoneInput = form.querySelector('input[name="guest_phone"]');
+        var checkinInput = form.querySelector('input[name="checkin_date"]');
+        var checkoutInput = form.querySelector('input[name="checkout_date"]');
+        var cancelButtons = dialog.querySelectorAll('[data-dialog-cancel]');
+        var backdrop = dialog.querySelector('.loft-vk__dialog-backdrop');
+        var activeLoft = null;
+        var resolver = null;
+        var isOpen = false;
+        var previouslyFocused = null;
 
-        var checkin = window.prompt('Date d\'arrivée (YYYY-MM-DD) / Check-in date');
-        if (checkin === null) {
-            return null;
-        }
-        checkin = checkin.trim();
-        if (!checkin) {
-            renderStatus(container, 'La date d\'arrivée est requise. / Check-in date is required.', true);
-            return null;
+        function clearErrors() {
+            if (errorEl) {
+                errorEl.textContent = '';
+            }
+
+            [nameInput, emailInput, checkinInput, checkoutInput].forEach(function(input) {
+                if (!input) {
+                    return;
+                }
+                input.classList.remove('loft-vk__form-input--error');
+                input.setAttribute('aria-invalid', 'false');
+            });
         }
 
-        var checkout = window.prompt('Date de départ (YYYY-MM-DD) / Check-out date');
-        if (checkout === null) {
-            return null;
+        function setError(message, inputs) {
+            if (errorEl) {
+                errorEl.textContent = message || '';
+            }
+
+            (inputs || []).forEach(function(input) {
+                if (!input) {
+                    return;
+                }
+
+                input.classList.add('loft-vk__form-input--error');
+                input.setAttribute('aria-invalid', 'true');
+            });
         }
-        checkout = checkout.trim();
-        if (!checkout) {
-            renderStatus(container, 'La date de départ est requise. / Check-out date is required.', true);
-            return null;
+
+        function close(result) {
+            if (!isOpen) {
+                return;
+            }
+
+            isOpen = false;
+            activeLoft = null;
+            dialog.classList.remove('loft-vk__dialog--visible');
+            window.setTimeout(function() {
+                dialog.setAttribute('hidden', '');
+            }, 200);
+            container.classList.remove('loft-vk--dialog-open');
+            if (document.body) {
+                document.body.classList.remove('loft-vk-dialog-open');
+            }
+            document.removeEventListener('keydown', onKeyDown);
+
+            if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+                previouslyFocused.focus();
+            }
+
+            previouslyFocused = null;
+
+            if (resolver) {
+                var resolveFn = resolver;
+                resolver = null;
+                resolveFn(result || null);
+            }
+        }
+
+        function cancel() {
+            close(null);
+        }
+
+        function onKeyDown(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                event.preventDefault();
+                cancel();
+            }
+        }
+
+        cancelButtons.forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                cancel();
+            });
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener('click', function(event) {
+                event.preventDefault();
+                cancel();
+            });
+        }
+
+        [nameInput, emailInput, phoneInput, checkinInput, checkoutInput].forEach(function(input) {
+            if (!input) {
+                return;
+            }
+
+            input.addEventListener('input', function() {
+                input.classList.remove('loft-vk__form-input--error');
+                input.setAttribute('aria-invalid', 'false');
+                if (errorEl) {
+                    errorEl.textContent = '';
+                }
+            });
+        });
+
+        if (checkinInput && checkoutInput) {
+            checkinInput.addEventListener('change', function() {
+                if (!checkinInput.value) {
+                    return;
+                }
+
+                checkoutInput.min = checkinInput.value;
+                if (checkoutInput.value && checkoutInput.value < checkinInput.value) {
+                    checkoutInput.value = checkinInput.value;
+                }
+            });
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            clearErrors();
+
+            var guestName = nameInput ? nameInput.value.trim() : '';
+            var guestEmail = emailInput ? emailInput.value.trim() : '';
+            var guestPhone = phoneInput ? phoneInput.value.trim() : '';
+            var checkinValue = checkinInput ? checkinInput.value : '';
+            var checkoutValue = checkoutInput ? checkoutInput.value : '';
+            var invalidInputs = [];
+            var errorMessage = '';
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            var datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+            if (!guestName) {
+                invalidInputs.push(nameInput);
+                errorMessage = errorMessage || 'Le nom du client est requis. / Guest name is required.';
+            }
+
+            if (!guestEmail) {
+                invalidInputs.push(emailInput);
+                errorMessage = errorMessage || 'Le courriel du client est requis. / Guest email is required.';
+            } else if (!emailPattern.test(guestEmail)) {
+                invalidInputs.push(emailInput);
+                errorMessage = errorMessage || 'Veuillez saisir un courriel valide. / Please enter a valid email address.';
+            }
+
+            if (!datePattern.test(checkinValue)) {
+                invalidInputs.push(checkinInput);
+                errorMessage = errorMessage || 'Veuillez sélectionner une date d\'arrivée valide. / Please select a valid check-in date.';
+            }
+
+            if (!datePattern.test(checkoutValue)) {
+                invalidInputs.push(checkoutInput);
+                errorMessage = errorMessage || 'Veuillez sélectionner une date de départ valide. / Please select a valid check-out date.';
+            }
+
+            if (!invalidInputs.includes(checkinInput) && !invalidInputs.includes(checkoutInput)) {
+                var checkinDate = new Date(checkinValue + 'T00:00:00');
+                var checkoutDate = new Date(checkoutValue + 'T00:00:00');
+
+                if (!(checkoutDate > checkinDate)) {
+                    invalidInputs.push(checkoutInput);
+                    errorMessage = 'La date de départ doit être après l\'arrivée. / The check-out date must be after check-in.';
+                }
+            }
+
+            if (invalidInputs.length) {
+                setError(errorMessage || 'Veuillez vérifier les informations saisies. / Please review the highlighted fields.', invalidInputs);
+                return;
+            }
+
+            var payload = {
+                unit_id: activeLoft && activeLoft.id ? activeLoft.id : null,
+                guest_name: guestName,
+                guest_email: guestEmail,
+                guest_phone: guestPhone,
+                checkin_date: checkinValue,
+                checkout_date: checkoutValue
+            };
+
+            close(payload);
+        });
+
+        function open(loft) {
+            clearErrors();
+
+            activeLoft = loft || null;
+            previouslyFocused = document.activeElement;
+
+            var today = new Date();
+            var tomorrow = new Date();
+            tomorrow.setDate(today.getDate() + 1);
+
+            var checkinDefault = formatDateForInputValue(today);
+            var checkoutDefault = formatDateForInputValue(tomorrow);
+
+            form.reset();
+            form.dataset.unitId = activeLoft && activeLoft.id ? String(activeLoft.id) : '';
+
+            if (loftLabel) {
+                loftLabel.textContent = loft && loft.unit ? loft.unit : '';
+            }
+
+            if (checkinInput) {
+                checkinInput.value = checkinDefault;
+                checkinInput.min = checkinDefault;
+            }
+
+            if (checkoutInput) {
+                checkoutInput.value = checkoutDefault;
+                checkoutInput.min = checkinDefault;
+            }
+
+            if (dialog.hasAttribute('hidden')) {
+                dialog.removeAttribute('hidden');
+            }
+
+            document.addEventListener('keydown', onKeyDown);
+            if (document.body) {
+                document.body.classList.add('loft-vk-dialog-open');
+            }
+            container.classList.add('loft-vk--dialog-open');
+
+            window.requestAnimationFrame(function() {
+                dialog.classList.add('loft-vk__dialog--visible');
+            });
+
+            window.setTimeout(function() {
+                if (nameInput) {
+                    nameInput.focus();
+                }
+            }, 120);
+
+            isOpen = true;
+
+            return new Promise(function(resolve) {
+                resolver = resolve;
+            });
         }
 
         return {
-            unit_id: loft && loft.id ? loft.id : null,
-            guest_name: guestName,
-            guest_email: guestEmail,
-            guest_phone: guestPhone,
-            checkin_date: checkin,
-            checkout_date: checkout
+            open: open
         };
     }
-
     function renderLoftsTable(container, lofts, emptyMessage) {
         var panel = getPanel(container, 'lofts');
         if (!panel) {
@@ -448,72 +681,85 @@
 
     function handleGenerateClick(container, button, loft) {
         if (!loft || !loft.id) {
+            renderStatus(container, "Impossible de déterminer le loft sélectionné. / Unable to determine the selected loft.", true);
             return;
         }
 
-        var payload = promptForGuestInfo(container, loft);
-        if (!payload) {
+        var formManager = ensureGuestForm(container);
+
+        if (!formManager || typeof formManager.open !== 'function') {
+            renderStatus(container, 'Le formulaire invité est indisponible. Veuillez rafraîchir la page. / Guest form unavailable. Please refresh the page.', true);
             return;
         }
 
-        var originalText = button.textContent;
-        var resetButtonState = function() {
-            button.disabled = false;
-            button.classList.remove('loft-vk__generate--loading');
-            button.removeAttribute('aria-busy');
-            button.textContent = originalText;
-        };
+        formManager.open(loft).then(function(payload) {
+            if (!payload) {
+                return;
+            }
 
-        var nonce = container.getAttribute('data-rest-nonce');
-        var base = container.getAttribute('data-generate-url');
+            var originalText = button.textContent;
+            var resetButtonState = function() {
+                button.disabled = false;
+                button.classList.remove('loft-vk__generate--loading');
+                button.removeAttribute('aria-busy');
+                button.textContent = originalText;
+            };
 
-        if (!nonce || !base) {
-            renderStatus(container, 'Missing generation endpoint configuration.', true);
-            return;
-        }
+            var nonce = container.getAttribute('data-rest-nonce');
+            var base = container.getAttribute('data-generate-url');
 
-        var baseUrl = base.replace(/\/$/, '');
-        var url = baseUrl + '/' + loft.id + '/generate-key';
+            if (!nonce || !base) {
+                renderStatus(container, 'Missing generation endpoint configuration.', true);
+                return;
+            }
 
-        button.disabled = true;
-        button.classList.add('loft-vk__generate--loading');
-        button.setAttribute('aria-busy', 'true');
-        button.textContent = 'Création… / Generating…';
-        var statusMessage = 'Création de la clé virtuelle pour ' + (loft.unit || 'cette unité') + '… / Generating virtual key…';
-        renderStatus(container, statusMessage);
+            var baseUrl = base.replace(/\/$/, '');
+            var url = baseUrl + '/' + loft.id + '/generate-key';
 
-        fetch(url, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'X-WP-Nonce': nonce,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-            .then(handleFetchResponse)
-            .then(function(data) {
-                var message = (data && data.message) ? data.message : 'Virtual key created.';
-                renderStatus(container, message);
-                showToast(container, message);
-                return Promise.all([
-                    fetchKeychains(container, 1, { showStatus: false }),
-                    fetchLofts(container, { showStatus: false })
-                ]).then(function() {
-                    triggerSyncUnitsButton();
-                    return data;
+            button.disabled = true;
+            button.classList.add('loft-vk__generate--loading');
+            button.setAttribute('aria-busy', 'true');
+            button.textContent = 'Création… / Generating…';
+            var statusMessage = 'Création de la clé virtuelle pour ' + (loft.unit || 'cette unité') + '… / Generating virtual key…';
+            renderStatus(container, statusMessage);
+
+            fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-WP-Nonce': nonce,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(handleFetchResponse)
+                .then(function(data) {
+                    var message = (data && data.message) ? data.message : 'Virtual key created.';
+                    renderStatus(container, message);
+                    showToast(container, message);
+                    return Promise.all([
+                        fetchKeychains(container, 1, { showStatus: false }),
+                        fetchLofts(container, { showStatus: false })
+                    ]).then(function() {
+                        triggerSyncUnitsButton();
+                        return data;
+                    });
+                })
+                .then(function() {
+                    resetButtonState();
+                })
+                .catch(function(error) {
+                    console.error(error);
+                    renderStatus(container, error.message || 'Unable to generate virtual key.', true);
+                    resetButtonState();
                 });
-            })
-            .then(function() {
-                resetButtonState();
-            })
-            .catch(function(error) {
+        }).catch(function(error) {
+            if (error) {
                 console.error(error);
-                renderStatus(container, error.message || 'Unable to generate virtual key.', true);
-                resetButtonState();
-            });
+                renderStatus(container, error.message || 'Unable to open the guest form.', true);
+            }
+        });
     }
-
     function triggerSyncUnitsButton() {
         var syncButton = document.getElementById('sync-units-button');
         if (syncButton) {
@@ -687,6 +933,7 @@
             });
         });
 
+        ensureGuestForm(container);
         activateTab(container, 'lofts');
     }
 

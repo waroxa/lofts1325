@@ -154,25 +154,27 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
             data-panel="keys"
             hidden
         >
-            <table class="widefat fixed striped loft-vk__table loft-vk__keychains-table">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e( 'ID', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Name', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Tenant', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'People', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Valid From', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Valid Until', 'loft-virtual-keys' ); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="loft-vk__loading">
-                        <td colspan="8"><?php esc_html_e( 'Select the Virtual Keys tab to load data.', 'loft-virtual-keys' ); ?></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="loft-vk__table-wrapper" role="group" aria-label="<?php esc_attr_e( 'Active keychains', 'loft-virtual-keys' ); ?>">
+                <table class="widefat fixed striped loft-vk__table loft-vk__keychains-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'ID', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Name', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Tenant', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'People', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Valid From', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Valid Until', 'loft-virtual-keys' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="loft-vk__loading">
+                            <td colspan="8"><?php esc_html_e( 'Select the Virtual Keys tab to load data.', 'loft-virtual-keys' ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <nav class="loft-vk__pagination" aria-label="<?php esc_attr_e( 'Keychain pagination', 'loft-virtual-keys' ); ?>" hidden></nav>
         </div>
         <div
@@ -182,22 +184,70 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
             aria-labelledby="<?php echo esc_attr( $lofts_tab_id ); ?>"
             data-panel="lofts"
         >
-            <table class="widefat fixed striped loft-vk__table loft-vk__lofts-table">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'ButterflyMX Unit ID', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Status', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Available Until', 'loft-virtual-keys' ); ?></th>
-                        <th><?php esc_html_e( 'Actions', 'loft-virtual-keys' ); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="loft-vk__loading">
-                        <td colspan="5"><?php esc_html_e( 'Loading lofts…', 'loft-virtual-keys' ); ?></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="loft-vk__table-wrapper" role="group" aria-label="<?php esc_attr_e( 'Loft availability', 'loft-virtual-keys' ); ?>">
+                <table class="widefat fixed striped loft-vk__table loft-vk__lofts-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'ButterflyMX Unit ID', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Status', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Available Until', 'loft-virtual-keys' ); ?></th>
+                            <th><?php esc_html_e( 'Actions', 'loft-virtual-keys' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="loft-vk__loading">
+                            <td colspan="5"><?php esc_html_e( 'Loading lofts…', 'loft-virtual-keys' ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div
+            class="loft-vk__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="<?php echo esc_attr( $instance_id ); ?>_dialog_title"
+            hidden
+        >
+            <div class="loft-vk__dialog-backdrop" data-dialog-cancel></div>
+            <div class="loft-vk__dialog-content" role="document">
+                <button type="button" class="loft-vk__dialog-close" data-dialog-cancel aria-label="<?php esc_attr_e( 'Close', 'loft-virtual-keys' ); ?>">&times;</button>
+                <h3 class="loft-vk__dialog-title" id="<?php echo esc_attr( $instance_id ); ?>_dialog_title"><?php esc_html_e( 'Generate a virtual key', 'loft-virtual-keys' ); ?></h3>
+                <p class="loft-vk__dialog-subtitle">
+                    <?php esc_html_e( 'Selected loft / Loft sélectionné', 'loft-virtual-keys' ); ?>:
+                    <strong class="loft-vk__dialog-loft"></strong>
+                </p>
+                <form class="loft-vk__form" novalidate>
+                    <div class="loft-vk__form-field">
+                        <label class="loft-vk__form-label" for="<?php echo esc_attr( $instance_id ); ?>_guest_name"><?php esc_html_e( 'Guest name / Nom du client', 'loft-virtual-keys' ); ?></label>
+                        <input class="loft-vk__form-input" type="text" id="<?php echo esc_attr( $instance_id ); ?>_guest_name" name="guest_name" autocomplete="name" required />
+                    </div>
+                    <div class="loft-vk__form-field">
+                        <label class="loft-vk__form-label" for="<?php echo esc_attr( $instance_id ); ?>_guest_email"><?php esc_html_e( 'Guest email / Courriel du client', 'loft-virtual-keys' ); ?></label>
+                        <input class="loft-vk__form-input" type="email" id="<?php echo esc_attr( $instance_id ); ?>_guest_email" name="guest_email" autocomplete="email" required />
+                    </div>
+                    <div class="loft-vk__form-field">
+                        <label class="loft-vk__form-label" for="<?php echo esc_attr( $instance_id ); ?>_guest_phone"><?php esc_html_e( 'Guest phone (optional) / Téléphone du client (optionnel)', 'loft-virtual-keys' ); ?></label>
+                        <input class="loft-vk__form-input" type="tel" id="<?php echo esc_attr( $instance_id ); ?>_guest_phone" name="guest_phone" autocomplete="tel" />
+                    </div>
+                    <div class="loft-vk__form-grid">
+                        <div class="loft-vk__form-field">
+                            <label class="loft-vk__form-label" for="<?php echo esc_attr( $instance_id ); ?>_checkin"><?php esc_html_e( 'Check-in date / Date d’arrivée', 'loft-virtual-keys' ); ?></label>
+                            <input class="loft-vk__form-input" type="date" id="<?php echo esc_attr( $instance_id ); ?>_checkin" name="checkin_date" required />
+                        </div>
+                        <div class="loft-vk__form-field">
+                            <label class="loft-vk__form-label" for="<?php echo esc_attr( $instance_id ); ?>_checkout"><?php esc_html_e( 'Check-out date / Date de départ', 'loft-virtual-keys' ); ?></label>
+                            <input class="loft-vk__form-input" type="date" id="<?php echo esc_attr( $instance_id ); ?>_checkout" name="checkout_date" required />
+                        </div>
+                    </div>
+                    <p class="loft-vk__form-error" role="alert" aria-live="assertive"></p>
+                    <div class="loft-vk__form-actions">
+                        <button type="submit" class="button button-primary loft-vk__form-submit"><?php esc_html_e( 'Generate key / Générer la clé', 'loft-virtual-keys' ); ?></button>
+                        <button type="button" class="button loft-vk__form-cancel" data-dialog-cancel><?php esc_html_e( 'Cancel', 'loft-virtual-keys' ); ?></button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     <?php
@@ -584,6 +634,9 @@ function loft_vk_prepare_loft_response( $unit, $context ) {
         case 'occupied':
             $status_label = __( 'Occupied', 'loft-virtual-keys' );
             break;
+        case 'unavailable':
+            $status_label = __( 'Unavailable', 'loft-virtual-keys' );
+            break;
         default:
             $status_label = ucfirst( $status );
             break;
@@ -765,7 +818,7 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
     $wpdb->update(
         $units_table,
         array(
-            'status'             => 'occupied',
+            'status'             => 'unavailable',
             'availability_until' => $availability_until,
         ),
         array( 'id' => $unit_id ),
