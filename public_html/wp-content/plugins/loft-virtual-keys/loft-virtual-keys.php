@@ -95,36 +95,104 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
     wp_enqueue_script( 'loft-vk-frontend' );
     wp_enqueue_style( 'loft-vk-frontend' );
 
-    $nonce    = wp_create_nonce( 'wp_rest' );
-    $rest_url = esc_url_raw( rest_url( 'loft/v1/keychains' ) );
+    $nonce       = wp_create_nonce( 'wp_rest' );
+    $rest_url    = esc_url_raw( rest_url( 'loft/v1/keychains' ) );
+    $lofts_url   = esc_url_raw( rest_url( 'loft/v1/lofts-without-access' ) );
+    $instance_id = uniqid( 'loftvk_', false );
+    $keys_tab_id = $instance_id . '_tab_keys';
+    $lofts_tab_id = $instance_id . '_tab_lofts';
+    $keys_panel_id = $instance_id . '_panel_keys';
+    $lofts_panel_id = $instance_id . '_panel_lofts';
 
     ob_start();
     ?>
-    <div class="loft-vk" data-rest-url="<?php echo esc_attr( $rest_url ); ?>" data-rest-nonce="<?php echo esc_attr( $nonce ); ?>">
+    <div
+        class="loft-vk"
+        data-rest-url="<?php echo esc_attr( $rest_url ); ?>"
+        data-lofts-url="<?php echo esc_attr( $lofts_url ); ?>"
+        data-rest-nonce="<?php echo esc_attr( $nonce ); ?>"
+    >
         <div class="loft-vk__header">
             <h2><?php esc_html_e( 'Virtual Keys Manager', 'loft-virtual-keys' ); ?></h2>
         </div>
+        <div class="loft-vk__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Virtual key tools', 'loft-virtual-keys' ); ?>">
+            <button
+                type="button"
+                class="button button-secondary loft-vk__tab loft-vk__tab--active"
+                id="<?php echo esc_attr( $keys_tab_id ); ?>"
+                role="tab"
+                aria-selected="true"
+                aria-controls="<?php echo esc_attr( $keys_panel_id ); ?>"
+                data-tab="keys"
+            >
+                <?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?>
+            </button>
+            <button
+                type="button"
+                class="button button-secondary loft-vk__tab"
+                id="<?php echo esc_attr( $lofts_tab_id ); ?>"
+                role="tab"
+                aria-selected="false"
+                aria-controls="<?php echo esc_attr( $lofts_panel_id ); ?>"
+                data-tab="lofts"
+                tabindex="-1"
+            >
+                <?php esc_html_e( 'Lofts', 'loft-virtual-keys' ); ?>
+            </button>
+        </div>
         <div class="loft-vk__status" aria-live="polite"></div>
-        <table class="widefat fixed striped loft-vk__table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e( 'ID', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Name', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Tenant', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'People', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Valid From', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Valid Until', 'loft-virtual-keys' ); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="loft-vk__loading">
-                    <td colspan="8"><?php esc_html_e( 'Loading keychains…', 'loft-virtual-keys' ); ?></td>
-                </tr>
-            </tbody>
-        </table>
-        <nav class="loft-vk__pagination" aria-label="<?php esc_attr_e( 'Keychain pagination', 'loft-virtual-keys' ); ?>" hidden></nav>
+        <div
+            class="loft-vk__panel loft-vk__panel--active"
+            id="<?php echo esc_attr( $keys_panel_id ); ?>"
+            role="tabpanel"
+            aria-labelledby="<?php echo esc_attr( $keys_tab_id ); ?>"
+            data-panel="keys"
+        >
+            <table class="widefat fixed striped loft-vk__table loft-vk__keychains-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'ID', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Name', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Tenant', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'People', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Valid From', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Valid Until', 'loft-virtual-keys' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="loft-vk__loading">
+                        <td colspan="8"><?php esc_html_e( 'Loading keychains…', 'loft-virtual-keys' ); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            <nav class="loft-vk__pagination" aria-label="<?php esc_attr_e( 'Keychain pagination', 'loft-virtual-keys' ); ?>" hidden></nav>
+        </div>
+        <div
+            class="loft-vk__panel"
+            id="<?php echo esc_attr( $lofts_panel_id ); ?>"
+            role="tabpanel"
+            aria-labelledby="<?php echo esc_attr( $lofts_tab_id ); ?>"
+            data-panel="lofts"
+            hidden
+        >
+            <table class="widefat fixed striped loft-vk__table loft-vk__lofts-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'ButterflyMX Unit ID', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Unit Access Points', 'loft-virtual-keys' ); ?></th>
+                        <th><?php esc_html_e( 'Building Access Points', 'loft-virtual-keys' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="loft-vk__loading">
+                        <td colspan="4"><?php esc_html_e( 'Select the Lofts tab to load data.', 'loft-virtual-keys' ); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <?php
     return ob_get_clean();
@@ -169,6 +237,18 @@ function loft_vk_register_rest_routes() {
                         'sanitize_callback' => 'absint',
                     ),
                 ),
+            ),
+        )
+    );
+
+    register_rest_route(
+        'loft/v1',
+        '/lofts-without-access',
+        array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => 'loft_vk_rest_get_lofts_without_access',
+                'permission_callback' => 'loft_vk_rest_permissions_check',
             ),
         )
     );
@@ -306,7 +386,7 @@ function loft_vk_rest_get_keychains( WP_REST_Request $request ) {
             'id'           => (int) $kc->id,
             'name'         => sanitize_text_field( $kc->name ),
             'tenant'       => $tenant_name,
-            'unit'         => '' !== $unit_name ? $unit_name : '❌ None',
+            'unit'         => '' !== $unit_name ? $unit_name : __( 'None', 'loft-virtual-keys' ),
             'people'       => $people,
             'virtual_keys' => $virtual_keys,
             'valid_from'   => sanitize_text_field( $kc->valid_from ),
@@ -323,6 +403,118 @@ function loft_vk_rest_get_keychains( WP_REST_Request $request ) {
                 'page'        => $page,
                 'total_pages' => (int) max( 1, ceil( $total / $per_page ) ),
             ),
+        )
+    );
+}
+
+/**
+ * Retrieve lofts that do not have access points configured.
+ *
+ * @return WP_REST_Response
+ */
+function loft_vk_rest_get_lofts_without_access( WP_REST_Request $request ) {
+    global $wpdb;
+
+    $units_table    = $wpdb->prefix . 'loft_units';
+    $branches_table = $wpdb->prefix . 'loft_branches';
+
+    $units = $wpdb->get_results(
+        "SELECT u.*, b.building_id AS branch_building_id
+           FROM {$units_table} u
+      LEFT JOIN {$branches_table} b ON u.branch_id = b.id
+          WHERE u.unit_name LIKE '%LOFT%'
+       ORDER BY u.unit_name ASC"
+    );
+
+    if ( empty( $units ) ) {
+        return rest_ensure_response( array( 'lofts' => array() ) );
+    }
+
+    $lofts        = array();
+    $environment  = function_exists( 'wp_loft_booking_get_butterflymx_environment' )
+        ? wp_loft_booking_get_butterflymx_environment()
+        : 'production';
+    $normalize_ids = static function( $ids ) {
+        $normalized = array();
+
+        foreach ( (array) $ids as $id ) {
+            $id = (int) $id;
+
+            if ( $id > 0 ) {
+                $normalized[] = (string) $id;
+            }
+        }
+
+        return array_values( array_unique( $normalized ) );
+    };
+
+    foreach ( $units as $unit ) {
+        $unit_id_api = isset( $unit->unit_id_api ) ? (int) $unit->unit_id_api : 0;
+
+        $unit_access_points     = array();
+        $unit_error             = '';
+        $building_access_points = array();
+        $building_error         = '';
+        $building_id_for_api    = isset( $unit->branch_building_id ) ? (int) $unit->branch_building_id : 0;
+
+        if ( $unit_id_api > 0 ) {
+            if ( function_exists( 'wp_loft_booking_fetch_unit_profile' ) ) {
+                $profile = wp_loft_booking_fetch_unit_profile( $unit_id_api, $environment );
+
+                if ( is_wp_error( $profile ) ) {
+                    $unit_error = sanitize_text_field( $profile->get_error_message() );
+                } else {
+                    $unit_access_points = $normalize_ids( $profile['access_point_ids'] ?? array() );
+
+                    if ( ! empty( $profile['building_id'] ) ) {
+                        $building_id_for_api = (int) $profile['building_id'];
+                    }
+                }
+            } else {
+                $unit_error = __( 'ButterflyMX integration unavailable.', 'loft-virtual-keys' );
+            }
+        }
+
+        if ( $building_id_for_api > 0 ) {
+            if ( function_exists( 'wp_loft_booking_fetch_building_access_points' ) ) {
+                $building_points = wp_loft_booking_fetch_building_access_points( $building_id_for_api, $environment );
+
+                if ( is_wp_error( $building_points ) ) {
+                    if ( 'no_access_points' === $building_points->get_error_code() ) {
+                        $building_access_points = array();
+                    } else {
+                        $building_error = sanitize_text_field( $building_points->get_error_message() );
+                    }
+                } else {
+                    $building_access_points = $normalize_ids( $building_points );
+                }
+            } else {
+                $building_error = __( 'ButterflyMX integration unavailable.', 'loft-virtual-keys' );
+            }
+        }
+
+        $missing_unit     = empty( $unit_access_points ) || '' !== $unit_error;
+        $missing_building = empty( $building_access_points ) || '' !== $building_error;
+
+        if ( ! $missing_unit && ! $missing_building ) {
+            continue;
+        }
+
+        $lofts[] = array(
+            'id'                     => (int) $unit->id,
+            'unit'                   => sanitize_text_field( $unit->unit_name ),
+            'butterflymx_unit_id'    => $unit_id_api > 0 ? (string) $unit_id_api : '',
+            'building_id'            => $building_id_for_api > 0 ? (string) $building_id_for_api : '',
+            'unit_access_points'     => $unit_access_points,
+            'building_access_points' => $building_access_points,
+            'unit_error'             => $unit_error,
+            'building_error'         => $building_error,
+        );
+    }
+
+    return rest_ensure_response(
+        array(
+            'lofts' => $lofts,
         )
     );
 }
