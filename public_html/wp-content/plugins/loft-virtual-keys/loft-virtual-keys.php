@@ -122,35 +122,37 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
         <div class="loft-vk__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Virtual key tools', 'loft-virtual-keys' ); ?>">
             <button
                 type="button"
-                class="button button-secondary loft-vk__tab"
+                class="button button-secondary loft-vk__tab loft-vk__tab--active"
                 id="<?php echo esc_attr( $lofts_tab_id ); ?>"
                 role="tab"
-                aria-selected="false"
+                aria-selected="true"
                 aria-controls="<?php echo esc_attr( $lofts_panel_id ); ?>"
                 data-tab="lofts"
-                tabindex="-1"
+                tabindex="0"
             >
                 <?php esc_html_e( 'Lofts', 'loft-virtual-keys' ); ?>
             </button>
             <button
                 type="button"
-                class="button button-secondary loft-vk__tab loft-vk__tab--active"
+                class="button button-secondary loft-vk__tab"
                 id="<?php echo esc_attr( $keys_tab_id ); ?>"
                 role="tab"
-                aria-selected="true"
+                aria-selected="false"
                 aria-controls="<?php echo esc_attr( $keys_panel_id ); ?>"
                 data-tab="keys"
+                tabindex="-1"
             >
                 <?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?>
             </button>
         </div>
         <div class="loft-vk__status" aria-live="polite"></div>
         <div
-            class="loft-vk__panel loft-vk__panel--active"
+            class="loft-vk__panel"
             id="<?php echo esc_attr( $keys_panel_id ); ?>"
             role="tabpanel"
             aria-labelledby="<?php echo esc_attr( $keys_tab_id ); ?>"
             data-panel="keys"
+            hidden
         >
             <table class="widefat fixed striped loft-vk__table loft-vk__keychains-table">
                 <thead>
@@ -167,19 +169,18 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
                 </thead>
                 <tbody>
                     <tr class="loft-vk__loading">
-                        <td colspan="8"><?php esc_html_e( 'Loading keychains…', 'loft-virtual-keys' ); ?></td>
+                        <td colspan="8"><?php esc_html_e( 'Select the Virtual Keys tab to load data.', 'loft-virtual-keys' ); ?></td>
                     </tr>
                 </tbody>
             </table>
             <nav class="loft-vk__pagination" aria-label="<?php esc_attr_e( 'Keychain pagination', 'loft-virtual-keys' ); ?>" hidden></nav>
         </div>
         <div
-            class="loft-vk__panel"
+            class="loft-vk__panel loft-vk__panel--active"
             id="<?php echo esc_attr( $lofts_panel_id ); ?>"
             role="tabpanel"
             aria-labelledby="<?php echo esc_attr( $lofts_tab_id ); ?>"
             data-panel="lofts"
-            hidden
         >
             <table class="widefat fixed striped loft-vk__table loft-vk__lofts-table">
                 <thead>
@@ -193,7 +194,7 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
                 </thead>
                 <tbody>
                     <tr class="loft-vk__loading">
-                        <td colspan="5"><?php esc_html_e( 'Select the Lofts tab to load data.', 'loft-virtual-keys' ); ?></td>
+                        <td colspan="5"><?php esc_html_e( 'Loading lofts…', 'loft-virtual-keys' ); ?></td>
                     </tr>
                 </tbody>
             </table>

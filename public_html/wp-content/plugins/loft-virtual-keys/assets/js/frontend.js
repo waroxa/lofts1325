@@ -456,6 +456,14 @@
             return;
         }
 
+        var originalText = button.textContent;
+        var resetButtonState = function() {
+            button.disabled = false;
+            button.classList.remove('loft-vk__generate--loading');
+            button.removeAttribute('aria-busy');
+            button.textContent = originalText;
+        };
+
         var nonce = container.getAttribute('data-rest-nonce');
         var base = container.getAttribute('data-generate-url');
 
@@ -468,6 +476,9 @@
         var url = baseUrl + '/' + loft.id + '/generate-key';
 
         button.disabled = true;
+        button.classList.add('loft-vk__generate--loading');
+        button.setAttribute('aria-busy', 'true');
+        button.textContent = 'Création… / Generating…';
         var statusMessage = 'Création de la clé virtuelle pour ' + (loft.unit || 'cette unité') + '… / Generating virtual key…';
         renderStatus(container, statusMessage);
 
@@ -489,17 +500,25 @@
                     fetchKeychains(container, 1, { showStatus: false }),
                     fetchLofts(container, { showStatus: false })
                 ]).then(function() {
+                    triggerSyncUnitsButton();
                     return data;
                 });
             })
             .then(function() {
-                button.disabled = false;
+                resetButtonState();
             })
             .catch(function(error) {
                 console.error(error);
                 renderStatus(container, error.message || 'Unable to generate virtual key.', true);
-                button.disabled = false;
+                resetButtonState();
             });
+    }
+
+    function triggerSyncUnitsButton() {
+        var syncButton = document.getElementById('sync-units-button');
+        if (syncButton) {
+            syncButton.click();
+        }
     }
 
     function handleFetchResponse(response) {
@@ -651,7 +670,7 @@
         var tabs = container.querySelectorAll('.loft-vk__tab');
 
         if (!tabs.length) {
-            fetchKeychains(container, 1);
+            fetchLofts(container);
             return;
         }
 
@@ -668,7 +687,7 @@
             });
         });
 
-        activateTab(container, 'keys');
+        activateTab(container, 'lofts');
     }
 
     document.addEventListener('DOMContentLoaded', function() {

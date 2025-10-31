@@ -181,6 +181,36 @@
     cursor: default;
 }
 
+.loft-vk__generate--loading {
+    position: relative;
+    pointer-events: none;
+    padding-right: 36px;
+}
+
+.loft-vk__generate--loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.6);
+    animation: loft-vk-spin 0.75s linear infinite;
+}
+
+@keyframes loft-vk-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .loft-vk__list {
     margin: 8px 0 0;
     padding-left: 20px;
