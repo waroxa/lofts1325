@@ -1,6 +1,6 @@
 (function() {
     var KEYCHAIN_COLUMN_COUNT = 8;
-    var LOFT_COLUMN_COUNT = 4;
+    var LOFT_COLUMN_COUNT = 5;
 
     function renderStatus(container, message, isError) {
         var statusEl = container.querySelector('.loft-vk__status');
@@ -238,32 +238,72 @@
         paginationEl.appendChild(nextButton);
     }
 
-    function buildAccessCell(points, error) {
-        var wrapper = document.createElement('div');
-        wrapper.className = 'loft-vk__access';
+    function buildStatusLabel(status, label) {
+        var span = document.createElement('span');
+        span.className = 'loft-vk__status-label';
+        var normalized = (status || '').toLowerCase();
+        if (normalized) {
+            span.className += ' loft-vk__status-label--' + normalized;
+        }
+        span.textContent = label || status || '';
+        return span;
+    }
 
-        if (error) {
-            var errorSpan = document.createElement('span');
-            errorSpan.className = 'loft-vk__error';
-            errorSpan.textContent = error;
-            wrapper.appendChild(errorSpan);
-            return wrapper;
+    function promptForGuestInfo(container, loft) {
+        var guestName = window.prompt('Nom du client / Guest name');
+        if (guestName === null) {
+            return null;
+        }
+        guestName = guestName.trim();
+        if (!guestName) {
+            renderStatus(container, 'Le nom du client est requis. / Guest name is required.', true);
+            return null;
         }
 
-        if (points && points.length) {
-            points.forEach(function(point) {
-                var code = document.createElement('code');
-                code.textContent = point;
-                wrapper.appendChild(code);
-            });
-            return wrapper;
+        var guestEmail = window.prompt('Courriel du client / Guest email');
+        if (guestEmail === null) {
+            return null;
+        }
+        guestEmail = guestEmail.trim();
+        if (!guestEmail) {
+            renderStatus(container, 'Le courriel du client est requis. / Guest email is required.', true);
+            return null;
         }
 
-        var empty = document.createElement('span');
-        empty.className = 'loft-vk__muted';
-        empty.textContent = 'None';
-        wrapper.appendChild(empty);
-        return wrapper;
+        var guestPhonePrompt = window.prompt('Téléphone du client / Guest phone (optionnel)');
+        if (guestPhonePrompt === null) {
+            return null;
+        }
+        var guestPhone = guestPhonePrompt.trim();
+
+        var checkin = window.prompt('Date d\'arrivée (YYYY-MM-DD) / Check-in date');
+        if (checkin === null) {
+            return null;
+        }
+        checkin = checkin.trim();
+        if (!checkin) {
+            renderStatus(container, 'La date d\'arrivée est requise. / Check-in date is required.', true);
+            return null;
+        }
+
+        var checkout = window.prompt('Date de départ (YYYY-MM-DD) / Check-out date');
+        if (checkout === null) {
+            return null;
+        }
+        checkout = checkout.trim();
+        if (!checkout) {
+            renderStatus(container, 'La date de départ est requise. / Check-out date is required.', true);
+            return null;
+        }
+
+        return {
+            unit_id: loft && loft.id ? loft.id : null,
+            guest_name: guestName,
+            guest_email: guestEmail,
+            guest_phone: guestPhone,
+            checkin_date: checkin,
+            checkout_date: checkout
+        };
     }
 
     function renderLoftsTable(container, lofts, emptyMessage) {
@@ -280,7 +320,7 @@
         tbody.innerHTML = '';
 
         if (!lofts || !lofts.length) {
-            var message = emptyMessage || 'All lofts have access points assigned.';
+            var message = emptyMessage || 'No lofts available.';
             tbody.appendChild(createEmptyRow(message, LOFT_COLUMN_COUNT));
             return;
         }
@@ -300,42 +340,89 @@
                 unitCell.appendChild(buildingMeta);
             }
 
-            var missing = [];
-            if (!loft.unit_access_points || !loft.unit_access_points.length || loft.unit_error) {
-                missing.push('Unit');
-            }
-            if (!loft.building_access_points || !loft.building_access_points.length || loft.building_error) {
-                missing.push('Building');
-            }
-            if (missing.length) {
-                var badge = document.createElement('span');
-                badge.className = 'loft-vk__badge';
-                badge.textContent = missing.join(' & ') + ' missing';
-                unitCell.appendChild(badge);
-            }
             row.appendChild(unitCell);
 
             var idCell = document.createElement('td');
-            if (loft.butterflymx_unit_id) {
-                idCell.textContent = loft.butterflymx_unit_id;
-            } else {
-                var placeholder = document.createElement('span');
-                placeholder.className = 'loft-vk__muted';
-                placeholder.textContent = '—';
-                idCell.appendChild(placeholder);
-            }
+            idCell.textContent = loft.butterflymx_unit_id || '—';
             row.appendChild(idCell);
 
-            var unitAccessCell = document.createElement('td');
-            unitAccessCell.appendChild(buildAccessCell(loft.unit_access_points, loft.unit_error));
-            row.appendChild(unitAccessCell);
+            var statusCell = document.createElement('td');
+            statusCell.appendChild(buildStatusLabel(loft.status || '', loft.status_label || loft.status || ''));
+            row.appendChild(statusCell);
 
-            var buildingAccessCell = document.createElement('td');
-            buildingAccessCell.appendChild(buildAccessCell(loft.building_access_points, loft.building_error));
-            row.appendChild(buildingAccessCell);
+            var availabilityCell = document.createElement('td');
+            var availability = formatDate(loft.availability_until);
+            availabilityCell.textContent = availability || '—';
+            row.appendChild(availabilityCell);
+
+            var actionsCell = document.createElement('td');
+            actionsCell.className = 'loft-vk__actions';
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'button button-secondary loft-vk__generate';
+            button.textContent = 'Generate Virtual Key';
+            button.disabled = !loft.can_generate;
+            button.addEventListener('click', function() {
+                handleGenerateClick(container, button, loft);
+            });
+            if (!loft.can_generate) {
+                button.title = 'This loft is not available for key generation.';
+            }
+            actionsCell.appendChild(button);
+            row.appendChild(actionsCell);
 
             tbody.appendChild(row);
         });
+    }
+
+    function handleGenerateClick(container, button, loft) {
+        if (!loft || !loft.id) {
+            return;
+        }
+
+        var payload = promptForGuestInfo(container, loft);
+        if (!payload) {
+            return;
+        }
+
+        var nonce = container.getAttribute('data-rest-nonce');
+        var base = container.getAttribute('data-generate-url');
+
+        if (!nonce || !base) {
+            renderStatus(container, 'Missing generation endpoint configuration.', true);
+            return;
+        }
+
+        var baseUrl = base.replace(/\/$/, '');
+        var url = baseUrl + '/' + loft.id + '/generate-key';
+
+        button.disabled = true;
+        var statusMessage = 'Création de la clé virtuelle pour ' + (loft.unit || 'cette unité') + '… / Generating virtual key…';
+        renderStatus(container, statusMessage);
+
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'X-WP-Nonce': nonce,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(handleFetchResponse)
+            .then(function(data) {
+                var message = (data && data.message) ? data.message : 'Virtual key created.';
+                renderStatus(container, message);
+                return Promise.all([
+                    fetchKeychains(container, 1, { showStatus: false }),
+                    fetchLofts(container, { showStatus: false })
+                ]);
+            })
+            .catch(function(error) {
+                console.error(error);
+                renderStatus(container, error.message || 'Unable to generate virtual key.', true);
+                button.disabled = false;
+            });
     }
 
     function handleFetchResponse(response) {
@@ -349,20 +436,26 @@
         return response.json();
     }
 
-    function fetchKeychains(container, page) {
+    function fetchKeychains(container, page, options) {
+        options = options || {};
+        var showStatus = options.showStatus !== false;
+
         var restUrl = container.getAttribute('data-rest-url');
         var nonce = container.getAttribute('data-rest-nonce');
         var panel = getPanel(container, 'keys');
         var tbody = panel ? panel.querySelector('tbody') : null;
 
         if (!restUrl || !nonce) {
-            renderStatus(container, 'Missing REST endpoint configuration.', true);
-            return;
+            if (showStatus) {
+                renderStatus(container, 'Missing REST endpoint configuration.', true);
+            }
+            return Promise.resolve();
         }
 
         if (tbody) {
             tbody.innerHTML = '';
-            tbody.appendChild(createEmptyRow('Loading keychains…', KEYCHAIN_COLUMN_COUNT));
+            var loadingMessage = showStatus ? 'Loading keychains…' : 'Updating keychains…';
+            tbody.appendChild(createEmptyRow(loadingMessage, KEYCHAIN_COLUMN_COUNT));
         }
 
         var url = restUrl;
@@ -370,9 +463,11 @@
             url += (restUrl.indexOf('?') === -1 ? '?' : '&') + 'page=' + page;
         }
 
-        renderStatus(container, 'Loading keychains…');
+        if (showStatus) {
+            renderStatus(container, 'Loading keychains…');
+        }
 
-        fetch(url, {
+        return fetch(url, {
             credentials: 'same-origin',
             headers: {
                 'X-WP-Nonce': nonce
@@ -380,37 +475,49 @@
         })
             .then(handleFetchResponse)
             .then(function(data) {
-                renderStatus(container, '');
+                if (showStatus) {
+                    renderStatus(container, '');
+                }
                 renderKeychainsTable(container, data.keychains || []);
                 renderPagination(container, data.pagination || {});
+                return data;
             })
             .catch(function(error) {
                 console.error(error);
                 renderStatus(container, 'Unable to load keychains. Please refresh and try again.', true);
                 renderKeychainsTable(container, []);
                 renderPagination(container, null);
+                throw error;
             });
     }
 
-    function fetchLofts(container) {
+    function fetchLofts(container, options) {
+        options = options || {};
+        var showStatus = options.showStatus !== false;
+
         var loftsUrl = container.getAttribute('data-lofts-url');
         var nonce = container.getAttribute('data-rest-nonce');
         var panel = getPanel(container, 'lofts');
         var tbody = panel ? panel.querySelector('tbody') : null;
 
         if (!loftsUrl || !nonce) {
-            renderStatus(container, 'Missing lofts endpoint configuration.', true);
-            return;
+            if (showStatus) {
+                renderStatus(container, 'Missing lofts endpoint configuration.', true);
+            }
+            return Promise.resolve();
         }
 
         if (tbody) {
             tbody.innerHTML = '';
-            tbody.appendChild(createEmptyRow('Loading lofts…', LOFT_COLUMN_COUNT));
+            var loadingMessage = showStatus ? 'Loading lofts…' : 'Updating lofts…';
+            tbody.appendChild(createEmptyRow(loadingMessage, LOFT_COLUMN_COUNT));
         }
 
-        renderStatus(container, 'Loading lofts…');
+        if (showStatus) {
+            renderStatus(container, 'Loading lofts…');
+        }
 
-        fetch(loftsUrl, {
+        return fetch(loftsUrl, {
             credentials: 'same-origin',
             headers: {
                 'X-WP-Nonce': nonce
@@ -418,13 +525,17 @@
         })
             .then(handleFetchResponse)
             .then(function(data) {
-                renderStatus(container, '');
+                if (showStatus) {
+                    renderStatus(container, '');
+                }
                 renderLoftsTable(container, data.lofts || []);
+                return data;
             })
             .catch(function(error) {
                 console.error(error);
                 renderStatus(container, 'Unable to load lofts. Please refresh and try again.', true);
                 renderLoftsTable(container, [], 'Unable to load lofts.');
+                throw error;
             });
     }
 

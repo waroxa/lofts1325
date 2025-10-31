@@ -78,24 +78,6 @@
     display: none;
 }
 
-.loft-vk__badge {
-    display: inline-block;
-    margin-top: 6px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: #fce5d8;
-    color: #7a2e0e;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.loft-vk__access {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-}
-
 .loft-vk__table code {
     background: #f6f7f7;
     border-radius: 3px;
@@ -104,8 +86,30 @@
     margin-top: 4px;
 }
 
-.loft-vk__access code {
-    margin-top: 0;
+.loft-vk__status-label {
+    display: inline-block;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.loft-vk__status-label--available {
+    color: #047857;
+}
+
+.loft-vk__status-label--occupied,
+.loft-vk__status-label--unavailable {
+    color: #b91c1c;
+}
+
+.loft-vk__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loft-vk__actions .loft-vk__generate[disabled] {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .loft-vk__list {
