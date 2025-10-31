@@ -96,29 +96,35 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
     wp_enqueue_style( 'loft-vk-frontend' );
 
     $nonce    = wp_create_nonce( 'wp_rest' );
-    $rest_url = esc_url_raw( rest_url( 'loft/v1/virtual-keys' ) );
+    $rest_url = esc_url_raw( rest_url( 'loft/v1/keychains' ) );
 
     ob_start();
     ?>
     <div class="loft-vk" data-rest-url="<?php echo esc_attr( $rest_url ); ?>" data-rest-nonce="<?php echo esc_attr( $nonce ); ?>">
         <div class="loft-vk__header">
             <h2><?php esc_html_e( 'Virtual Keys Manager', 'loft-virtual-keys' ); ?></h2>
-            <button type="button" class="button button-primary loft-vk__generate"><?php esc_html_e( 'Generate Virtual Key', 'loft-virtual-keys' ); ?></button>
         </div>
         <div class="loft-vk__status" aria-live="polite"></div>
         <table class="widefat fixed striped loft-vk__table">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Key', 'loft-virtual-keys' ); ?></th>
-                    <th><?php esc_html_e( 'Created', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'ID', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Name', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Tenant', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Unit', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'People', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Valid From', 'loft-virtual-keys' ); ?></th>
+                    <th><?php esc_html_e( 'Valid Until', 'loft-virtual-keys' ); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="loft-vk__loading">
-                    <td colspan="2"><?php esc_html_e( 'Loading keys…', 'loft-virtual-keys' ); ?></td>
+                    <td colspan="8"><?php esc_html_e( 'Loading keychains…', 'loft-virtual-keys' ); ?></td>
                 </tr>
             </tbody>
         </table>
+        <nav class="loft-vk__pagination" aria-label="<?php esc_attr_e( 'Keychain pagination', 'loft-virtual-keys' ); ?>" hidden></nav>
     </div>
     <?php
     return ob_get_clean();
@@ -141,6 +147,28 @@ function loft_vk_register_rest_routes() {
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => 'loft_vk_rest_create_key',
                 'permission_callback' => 'loft_vk_rest_permissions_check',
+            ),
+        )
+    );
+
+    register_rest_route(
+        'loft/v1',
+        '/keychains',
+        array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => 'loft_vk_rest_get_keychains',
+                'permission_callback' => 'loft_vk_rest_permissions_check',
+                'args'                => array(
+                    'page'     => array(
+                        'default'           => 1,
+                        'sanitize_callback' => 'absint',
+                    ),
+                    'per_page' => array(
+                        'default'           => 15,
+                        'sanitize_callback' => 'absint',
+                    ),
+                ),
             ),
         )
     );
@@ -168,6 +196,135 @@ function loft_vk_rest_get_keys() {
     }
 
     return rest_ensure_response( array( 'keys' => array_values( $keys ) ) );
+}
+
+/**
+ * Retrieve active keychains in a format that mirrors the WordPress admin table.
+ *
+ * @param WP_REST_Request $request Request instance.
+ *
+ * @return WP_REST_Response
+ */
+function loft_vk_rest_get_keychains( WP_REST_Request $request ) {
+    global $wpdb;
+
+    $page     = max( 1, (int) $request->get_param( 'page' ) );
+    $per_page = min( 50, max( 1, (int) $request->get_param( 'per_page' ) ) );
+    $offset   = ( $page - 1 ) * $per_page;
+
+    $now           = current_time( 'mysql' );
+    $kc_table      = $wpdb->prefix . 'loft_keychains';
+    $vk_table      = $wpdb->prefix . 'loft_virtual_keys';
+    $kc_vk_table   = $wpdb->prefix . 'loft_keychain_virtual_keys';
+    $units_table   = $wpdb->prefix . 'loft_units';
+    $tenants_table = $wpdb->prefix . 'loft_tenants';
+
+    $total = (int) $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$kc_table} WHERE valid_from <= %s AND valid_until >= %s",
+            $now,
+            $now
+        )
+    );
+
+    $rows = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT kc.*, t.first_name, t.last_name, u.unit_name
+            FROM {$kc_table} kc
+            LEFT JOIN {$tenants_table} t ON kc.tenant_id = t.id
+            LEFT JOIN {$units_table} u ON kc.unit_id = u.id
+            WHERE kc.valid_from <= %s AND kc.valid_until >= %s
+            ORDER BY kc.valid_until DESC
+            LIMIT %d OFFSET %d",
+            $now,
+            $now,
+            $per_page,
+            $offset
+        )
+    );
+
+    $keychains = array();
+
+    foreach ( $rows as $kc ) {
+        $vk_rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT vk.name, vk.key_type, vk.key_status, vk.virtual_key_id
+                FROM {$kc_vk_table} kvk
+                INNER JOIN {$vk_table} vk ON kvk.key_id = vk.id
+                WHERE kvk.keychain_id = %d
+                ORDER BY vk.name ASC",
+                $kc->id
+            )
+        );
+
+        $virtual_keys = array();
+
+        foreach ( $vk_rows as $vk ) {
+            $virtual_keys[] = array(
+                'name'   => sanitize_text_field( $vk->name ),
+                'type'   => sanitize_text_field( $vk->key_type ),
+                'status' => sanitize_text_field( $vk->key_status ),
+                'id'     => sanitize_text_field( $vk->virtual_key_id ),
+            );
+        }
+
+        $people = array();
+
+        if ( ! empty( $kc->people_json ) ) {
+            $decoded_people = json_decode( $kc->people_json, true );
+
+            if ( is_array( $decoded_people ) ) {
+                foreach ( $decoded_people as $person ) {
+                    if ( ! is_array( $person ) ) {
+                        continue;
+                    }
+
+                    $first = isset( $person['first_name'] ) ? sanitize_text_field( $person['first_name'] ) : '';
+                    $last  = isset( $person['last_name'] ) ? sanitize_text_field( $person['last_name'] ) : '';
+                    $name  = trim( $first . ' ' . $last );
+
+                    if ( '' === $name && empty( $person['email'] ) ) {
+                        continue;
+                    }
+
+                    $people[] = array(
+                        'name'  => $name,
+                        'type'  => isset( $person['type'] ) ? sanitize_text_field( $person['type'] ) : '',
+                        'email' => isset( $person['email'] ) ? sanitize_email( $person['email'] ) : '',
+                    );
+                }
+            }
+        }
+
+        $tenant_first = isset( $kc->first_name ) ? sanitize_text_field( $kc->first_name ) : '';
+        $tenant_last  = isset( $kc->last_name ) ? sanitize_text_field( $kc->last_name ) : '';
+        $tenant_name  = trim( $tenant_first . ' ' . $tenant_last );
+
+        $unit_name = isset( $kc->unit_name ) ? sanitize_text_field( $kc->unit_name ) : '';
+
+        $keychains[] = array(
+            'id'           => (int) $kc->id,
+            'name'         => sanitize_text_field( $kc->name ),
+            'tenant'       => $tenant_name,
+            'unit'         => '' !== $unit_name ? $unit_name : '❌ None',
+            'people'       => $people,
+            'virtual_keys' => $virtual_keys,
+            'valid_from'   => sanitize_text_field( $kc->valid_from ),
+            'valid_until'  => sanitize_text_field( $kc->valid_until ),
+        );
+    }
+
+    return rest_ensure_response(
+        array(
+            'keychains'  => $keychains,
+            'pagination' => array(
+                'total'       => $total,
+                'per_page'    => $per_page,
+                'page'        => $page,
+                'total_pages' => (int) max( 1, ceil( $total / $per_page ) ),
+            ),
+        )
+    );
 }
 
 /**

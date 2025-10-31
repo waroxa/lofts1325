@@ -1,4 +1,6 @@
 (function() {
+    var COLUMN_COUNT = 8;
+
     function renderStatus(container, message, isError) {
         var statusEl = container.querySelector('.loft-vk__status');
         if (!statusEl) {
@@ -13,7 +15,120 @@
         }
     }
 
-    function renderKeys(container, keys) {
+    function createEmptyRow(message) {
+        var row = document.createElement('tr');
+        var cell = document.createElement('td');
+        cell.colSpan = COLUMN_COUNT;
+        cell.className = 'loft-vk__muted';
+        cell.textContent = message;
+        row.appendChild(cell);
+        return row;
+    }
+
+    function formatDate(value) {
+        if (!value) {
+            return '';
+        }
+
+        var normalized = value.replace(' ', 'T');
+        var parsed = new Date(normalized);
+
+        if (isNaN(parsed.getTime())) {
+            return value;
+        }
+
+        return parsed.toLocaleString();
+    }
+
+    function buildDetails(summary, items) {
+        var details = document.createElement('details');
+        var summaryEl = document.createElement('summary');
+        summaryEl.textContent = summary;
+        details.appendChild(summaryEl);
+
+        var list = document.createElement('ul');
+        list.className = 'loft-vk__list';
+        items.forEach(function(item) {
+            list.appendChild(item);
+        });
+
+        details.appendChild(list);
+        return details;
+    }
+
+    function buildPeopleCell(people) {
+        if (!people || !people.length) {
+            var empty = document.createElement('span');
+            empty.className = 'loft-vk__muted';
+            empty.textContent = 'None';
+            return empty;
+        }
+
+        var items = people.map(function(person) {
+            var li = document.createElement('li');
+            var name = person.name || 'Unnamed';
+            li.textContent = name;
+
+            if (person.type) {
+                var type = document.createElement('span');
+                type.className = 'loft-vk__muted';
+                type.textContent = ' — ' + person.type;
+                li.appendChild(type);
+            }
+
+            if (person.email) {
+                var emailLink = document.createElement('a');
+                emailLink.href = 'mailto:' + person.email;
+                emailLink.textContent = person.email;
+                emailLink.className = 'loft-vk__link';
+                li.appendChild(document.createElement('br'));
+                li.appendChild(emailLink);
+            }
+
+            return li;
+        });
+
+        return buildDetails(people.length + ' people', items);
+    }
+
+    function buildVirtualKeysCell(keys) {
+        if (!keys || !keys.length) {
+            var empty = document.createElement('span');
+            empty.className = 'loft-vk__muted';
+            empty.textContent = 'None';
+            return empty;
+        }
+
+        var items = keys.map(function(key) {
+            var li = document.createElement('li');
+
+            var labelParts = [];
+            if (key.name) {
+                labelParts.push(key.name);
+            }
+            if (key.type) {
+                labelParts.push('(' + key.type + ')');
+            }
+            if (key.status) {
+                labelParts.push('[' + key.status + ']');
+            }
+
+            li.textContent = labelParts.join(' ');
+
+            if (key.id) {
+                var code = document.createElement('code');
+                code.textContent = key.id;
+                li.appendChild(document.createElement('br'));
+                li.appendChild(code);
+            }
+
+            return li;
+        });
+
+        return buildDetails(keys.length + ' keys', items);
+    }
+
+    function renderTable(container, keychains) {
         var tbody = container.querySelector('.loft-vk__table tbody');
         if (!tbody) {
             return;
@@ -21,104 +136,96 @@
 
         tbody.innerHTML = '';
 
-        if (!keys || !keys.length) {
-            var emptyRow = document.createElement('tr');
-            var emptyCell = document.createElement('td');
-            emptyCell.colSpan = 2;
-            emptyCell.textContent = 'No virtual keys have been generated yet.';
-            emptyRow.appendChild(emptyCell);
-            tbody.appendChild(emptyRow);
+        if (!keychains || !keychains.length) {
+            tbody.appendChild(createEmptyRow('No active keychains found.'));
             return;
         }
 
-        keys.forEach(function(item) {
+        keychains.forEach(function(item) {
             var row = document.createElement('tr');
-            var keyCell = document.createElement('td');
-            var createdCell = document.createElement('td');
-            var keyText = document.createElement('code');
-            var copyButton = document.createElement('button');
 
-            keyText.textContent = item.key;
-            copyButton.type = 'button';
-            copyButton.className = 'button button-secondary loft-vk__copy';
-            copyButton.textContent = 'Copy';
-            copyButton.addEventListener('click', function() {
-                navigator.clipboard.writeText(item.key).then(function() {
-                    renderStatus(container, 'Key copied to clipboard.', false);
-                }).catch(function() {
-                    renderStatus(container, 'Unable to copy the key automatically. Please copy it manually.', true);
-                });
-            });
+            var idCell = document.createElement('td');
+            idCell.textContent = item.id != null ? item.id : '';
+            row.appendChild(idCell);
 
-            keyCell.appendChild(keyText);
-            keyCell.appendChild(document.createTextNode(' '));
-            keyCell.appendChild(copyButton);
+            var nameCell = document.createElement('td');
+            nameCell.textContent = item.name || '';
+            row.appendChild(nameCell);
 
-            createdCell.textContent = item.created_at ? new Date(item.created_at.replace(' ', 'T')).toLocaleString() : '';
+            var tenantCell = document.createElement('td');
+            tenantCell.textContent = item.tenant || '';
+            row.appendChild(tenantCell);
 
-            row.appendChild(keyCell);
-            row.appendChild(createdCell);
+            var unitCell = document.createElement('td');
+            unitCell.textContent = item.unit || '';
+            row.appendChild(unitCell);
+
+            var peopleCell = document.createElement('td');
+            peopleCell.appendChild(buildPeopleCell(item.people));
+            row.appendChild(peopleCell);
+
+            var keysCell = document.createElement('td');
+            keysCell.appendChild(buildVirtualKeysCell(item.virtual_keys));
+            row.appendChild(keysCell);
+
+            var validFromCell = document.createElement('td');
+            validFromCell.textContent = formatDate(item.valid_from);
+            row.appendChild(validFromCell);
+
+            var validUntilCell = document.createElement('td');
+            validUntilCell.textContent = formatDate(item.valid_until);
+            row.appendChild(validUntilCell);
+
             tbody.appendChild(row);
         });
     }
 
-    function fetchKeys(container) {
-        var restUrl = container.getAttribute('data-rest-url');
-        var nonce = container.getAttribute('data-rest-nonce');
-
-        if (!restUrl || !nonce) {
-            renderStatus(container, 'Missing REST endpoint configuration.', true);
+    function renderPagination(container, pagination) {
+        var paginationEl = container.querySelector('.loft-vk__pagination');
+        if (!paginationEl) {
             return;
         }
 
-        renderStatus(container, 'Loading keys…');
+        paginationEl.innerHTML = '';
 
-        fetch(restUrl, {
-            credentials: 'same-origin',
-            headers: {
-                'X-WP-Nonce': nonce
+        if (!pagination || pagination.total_pages <= 1) {
+            paginationEl.hidden = true;
+            return;
+        }
+
+        paginationEl.hidden = false;
+
+        var currentPage = pagination.page || 1;
+        var totalPages = pagination.total_pages || 1;
+
+        var prevButton = document.createElement('button');
+        prevButton.type = 'button';
+        prevButton.className = 'button loft-vk__page';
+        prevButton.textContent = '« Prev';
+        prevButton.disabled = currentPage <= 1;
+        prevButton.addEventListener('click', function() {
+            if (currentPage > 1) {
+                fetchKeychains(container, currentPage - 1);
             }
-        })
-            .then(handleFetchResponse)
-            .then(function(data) {
-                renderStatus(container, '');
-                renderKeys(container, data.keys || []);
-            })
-            .catch(function(error) {
-                console.error(error);
-                renderStatus(container, 'Unable to load keys. Please refresh and try again.', true);
-            });
-    }
+        });
+        paginationEl.appendChild(prevButton);
 
-    function generateKey(container) {
-        var restUrl = container.getAttribute('data-rest-url');
-        var nonce = container.getAttribute('data-rest-nonce');
+        var pageInfo = document.createElement('span');
+        pageInfo.className = 'loft-vk__page-info';
+        pageInfo.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+        paginationEl.appendChild(pageInfo);
 
-        if (!restUrl || !nonce) {
-            renderStatus(container, 'Missing REST endpoint configuration.', true);
-            return;
-        }
-
-        renderStatus(container, 'Generating key…');
-
-        fetch(restUrl, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': nonce
-            },
-            body: JSON.stringify({})
-        })
-            .then(handleFetchResponse)
-            .then(function(data) {
-                renderStatus(container, 'New key generated successfully.');
-                renderKeys(container, data.keys || []);
-            })
-            .catch(function(error) {
-                console.error(error);
-                renderStatus(container, 'Unable to generate a key. Please try again.', true);
-            });
+        var nextButton = document.createElement('button');
+        nextButton.type = 'button';
+        nextButton.className = 'button loft-vk__page';
+        nextButton.textContent = 'Next »';
+        nextButton.disabled = currentPage >= totalPages;
+        nextButton.addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                fetchKeychains(container, currentPage + 1);
+            }
+        });
+        paginationEl.appendChild(nextButton);
     }
 
     function handleFetchResponse(response) {
@@ -132,21 +239,46 @@
         return response.json();
     }
 
-    function init(container) {
-        var generateButton = container.querySelector('.loft-vk__generate');
-        if (generateButton) {
-            generateButton.addEventListener('click', function() {
-                generateKey(container);
-            });
+    function fetchKeychains(container, page) {
+        var restUrl = container.getAttribute('data-rest-url');
+        var nonce = container.getAttribute('data-rest-nonce');
+
+        if (!restUrl || !nonce) {
+            renderStatus(container, 'Missing REST endpoint configuration.', true);
+            return;
         }
 
-        fetchKeys(container);
+        var url = restUrl;
+        if (page && page > 1) {
+            url += (restUrl.indexOf('?') === -1 ? '?' : '&') + 'page=' + page;
+        }
+
+        renderStatus(container, 'Loading keychains…');
+
+        fetch(url, {
+            credentials: 'same-origin',
+            headers: {
+                'X-WP-Nonce': nonce
+            }
+        })
+            .then(handleFetchResponse)
+            .then(function(data) {
+                renderStatus(container, '');
+                renderTable(container, data.keychains || []);
+                renderPagination(container, data.pagination || {});
+            })
+            .catch(function(error) {
+                console.error(error);
+                renderStatus(container, 'Unable to load keychains. Please refresh and try again.', true);
+                renderTable(container, []);
+                renderPagination(container, null);
+            });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
         var containers = document.querySelectorAll('.loft-vk');
         containers.forEach(function(container) {
-            init(container);
+            fetchKeychains(container, 1);
         });
     });
 })();

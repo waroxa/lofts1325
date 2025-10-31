@@ -30,7 +30,59 @@
 
 .loft-vk__table td,
 .loft-vk__table th {
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.loft-vk__table details {
+    margin: 0;
+}
+
+.loft-vk__table summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.loft-vk__table code {
+    background: #f6f7f7;
+    border-radius: 3px;
+    padding: 2px 4px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.loft-vk__list {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.loft-vk__list li {
+    margin-bottom: 6px;
+}
+
+.loft-vk__muted {
+    color: #646970;
+}
+
+.loft-vk__link {
     word-break: break-all;
+}
+
+.loft-vk__pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.loft-vk__page-info {
+    font-weight: 600;
+}
+
+.loft-vk__pagination .button[disabled] {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .loft-vk-login-prompt {
