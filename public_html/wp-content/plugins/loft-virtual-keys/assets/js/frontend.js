@@ -41,6 +41,77 @@
         return parsed.toLocaleString();
     }
 
+    function removeToast(toast) {
+        if (!toast) {
+            return;
+        }
+
+        toast.classList.remove('loft-vk__toast--visible');
+
+        window.setTimeout(function() {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+
+    function showToast(container, message) {
+        if (!container || !message) {
+            return;
+        }
+
+        var toastContainer = container.querySelector('.loft-vk__toast-container');
+
+        if (!toastContainer) {
+            return;
+        }
+
+        var toast = document.createElement('div');
+        toast.className = 'loft-vk__toast';
+        toast.setAttribute('role', 'alert');
+
+        var icon = document.createElement('span');
+        icon.className = 'loft-vk__toast-icon';
+        icon.textContent = '✨';
+
+        var text = document.createElement('span');
+        text.className = 'loft-vk__toast-message';
+        text.textContent = message;
+
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'loft-vk__toast-close';
+        close.setAttribute('aria-label', 'Dismiss notification');
+        close.innerHTML = '×';
+        close.addEventListener('click', function() {
+            removeToast(toast);
+        });
+
+        toast.appendChild(icon);
+        toast.appendChild(text);
+        toast.appendChild(close);
+
+        toastContainer.appendChild(toast);
+
+        window.requestAnimationFrame(function() {
+            toast.classList.add('loft-vk__toast--visible');
+        });
+
+        var timeoutId = window.setTimeout(function() {
+            removeToast(toast);
+        }, 6000);
+
+        toast.addEventListener('mouseenter', function() {
+            window.clearTimeout(timeoutId);
+        });
+
+        toast.addEventListener('mouseleave', function() {
+            timeoutId = window.setTimeout(function() {
+                removeToast(toast);
+            }, 2500);
+        });
+    }
+
     function buildDetails(summary, items) {
         var details = document.createElement('details');
         var summaryEl = document.createElement('summary');
@@ -413,10 +484,16 @@
             .then(function(data) {
                 var message = (data && data.message) ? data.message : 'Virtual key created.';
                 renderStatus(container, message);
+                showToast(container, message);
                 return Promise.all([
                     fetchKeychains(container, 1, { showStatus: false }),
                     fetchLofts(container, { showStatus: false })
-                ]);
+                ]).then(function() {
+                    return data;
+                });
+            })
+            .then(function() {
+                button.disabled = false;
             })
             .catch(function(error) {
                 console.error(error);

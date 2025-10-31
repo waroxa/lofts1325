@@ -118,18 +118,8 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
         <div class="loft-vk__header">
             <h2><?php esc_html_e( 'Virtual Keys Manager', 'loft-virtual-keys' ); ?></h2>
         </div>
+        <div class="loft-vk__toast-container" aria-live="polite" aria-atomic="true"></div>
         <div class="loft-vk__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Virtual key tools', 'loft-virtual-keys' ); ?>">
-            <button
-                type="button"
-                class="button button-secondary loft-vk__tab loft-vk__tab--active"
-                id="<?php echo esc_attr( $keys_tab_id ); ?>"
-                role="tab"
-                aria-selected="true"
-                aria-controls="<?php echo esc_attr( $keys_panel_id ); ?>"
-                data-tab="keys"
-            >
-                <?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?>
-            </button>
             <button
                 type="button"
                 class="button button-secondary loft-vk__tab"
@@ -141,6 +131,17 @@ function loft_vk_render_block( $attributes = array(), $content = '' ) {
                 tabindex="-1"
             >
                 <?php esc_html_e( 'Lofts', 'loft-virtual-keys' ); ?>
+            </button>
+            <button
+                type="button"
+                class="button button-secondary loft-vk__tab loft-vk__tab--active"
+                id="<?php echo esc_attr( $keys_tab_id ); ?>"
+                role="tab"
+                aria-selected="true"
+                aria-controls="<?php echo esc_attr( $keys_panel_id ); ?>"
+                data-tab="keys"
+            >
+                <?php esc_html_e( 'Virtual Keys', 'loft-virtual-keys' ); ?>
             </button>
         </div>
         <div class="loft-vk__status" aria-live="polite"></div>
@@ -809,6 +810,10 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
     );
 
     $loft = $updated_unit ? loft_vk_prepare_loft_response( $updated_unit, $context ) : null;
+
+    if ( function_exists( 'wp_loft_booking_trigger_unit_sync' ) ) {
+        wp_loft_booking_trigger_unit_sync( 'virtual_key_created' );
+    }
 
     return rest_ensure_response(
         array(
