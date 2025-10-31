@@ -196,6 +196,94 @@
     margin-top: 4px;
 }
 
+.loft-vk__cards {
+    display: none;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.loft-vk__card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 18px 32px rgba(15, 23, 42, 0.08);
+    min-height: 0;
+}
+
+.loft-vk__card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.loft-vk__card-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.loft-vk__card-status {
+    flex-shrink: 0;
+}
+
+.loft-vk__card-building {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.loft-vk__card-details {
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.loft-vk__card-detail {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.loft-vk__card-detail dt {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.loft-vk__card-detail dd {
+    margin: 0;
+    font-weight: 600;
+    color: #0f172a;
+    text-align: right;
+}
+
+.loft-vk__card-actions {
+    display: flex;
+}
+
+.loft-vk__card-actions .button {
+    width: 100%;
+}
+
+.loft-vk__card--loading,
+.loft-vk__card--empty {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #475569;
+    font-weight: 600;
+    min-height: 120px;
+}
+
 .loft-vk__status-label {
     display: inline-block;
     font-weight: 600;
@@ -469,6 +557,21 @@ body.loft-vk-dialog-open {
     .loft-vk__actions .button {
         width: 100%;
     }
+
+    .loft-vk__cards {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .loft-vk__table-wrapper {
+        display: none;
+    }
+
+    .loft-vk__cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
 }
 
 @media (max-width: 640px) {
@@ -495,7 +598,7 @@ body.loft-vk-dialog-open {
         align-items: stretch;
     }
 
-    .loft-vk__toast {
+    .loft-vk__toast {   
         width: 100%;
     }
 
@@ -505,6 +608,14 @@ body.loft-vk-dialog-open {
 
     .loft-vk__dialog-content {
         padding: 24px;
+    }
+
+    .loft-vk__cards {
+        grid-template-columns: 1fr;
+    }
+
+    .loft-vk__card {
+        padding: 16px;
     }
 }
 
