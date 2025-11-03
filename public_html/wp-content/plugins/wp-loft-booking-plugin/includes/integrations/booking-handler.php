@@ -34,6 +34,49 @@ if (!function_exists('wp_loft_booking_format_unit_label')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_apply_virtual_key_lead_time')) {
+    /**
+     * Ensure the virtual key check-in time respects the minimum lead time.
+     *
+     * @param DateTime     $checkin_local  Proposed local check-in.
+     * @param DateTime     $checkout_local Local check-out.
+     * @param DateTimeZone $timezone       Property timezone.
+     *
+     * @return DateTime|WP_Error Adjusted check-in on success, WP_Error otherwise.
+     */
+    function wp_loft_booking_apply_virtual_key_lead_time($checkin_local, $checkout_local, $timezone)
+    {
+        $lead_time_minutes = (int) apply_filters('wp_loft_booking_virtual_key_lead_time_minutes', 5);
+
+        if ($lead_time_minutes < 0) {
+            $lead_time_minutes = 0;
+        }
+
+        try {
+            $minimum_start = new DateTime('now', $timezone);
+        } catch (Exception $e) {
+            return new WP_Error('loft_virtual_key_time_error', $e->getMessage());
+        }
+
+        if ($lead_time_minutes > 0) {
+            $minimum_start->modify(sprintf('+%d minutes', $lead_time_minutes));
+        }
+
+        if ($checkin_local <= $minimum_start) {
+            $checkin_local = clone $minimum_start;
+        }
+
+        if ($checkin_local >= $checkout_local) {
+            return new WP_Error(
+                'loft_virtual_key_window_invalid',
+                __('La période du séjour doit dépasser l\'heure d\'arrivée. / The stay window must extend beyond the arrival time.', 'wp-loft-booking')
+            );
+        }
+
+        return $checkin_local;
+    }
+}
+
 function wp_loft_booking_handle_booking(
     $id_post,
     $title_post,
@@ -117,6 +160,14 @@ function wp_loft_booking_handle_booking(
             $checkout_local = new DateTime($booking['date_to'], $site_timezone);
             $checkin_local->setTime(15, 0, 0);
             $checkout_local->setTime(11, 0, 0);
+
+            $adjusted_checkin = wp_loft_booking_apply_virtual_key_lead_time($checkin_local, $checkout_local, $site_timezone);
+
+            if (is_wp_error($adjusted_checkin)) {
+                throw new Exception($adjusted_checkin->get_error_message());
+            }
+
+            $checkin_local = $adjusted_checkin;
 
             $checkin_utc  = clone $checkin_local;
             $checkout_utc = clone $checkout_local;
@@ -277,8 +328,9 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
     }
 
     try {
-        $checkin_local  = new DateTime($date_from, new DateTimeZone($timezone_string));
-        $checkout_local = new DateTime($date_to, new DateTimeZone($timezone_string));
+        $site_timezone  = new DateTimeZone($timezone_string);
+        $checkin_local  = new DateTime($date_from, $site_timezone);
+        $checkout_local = new DateTime($date_to, $site_timezone);
     } catch (Exception $e) {
         error_log('❌ Unable to parse booking dates for ButterflyMX keychain: ' . $e->getMessage());
         return new WP_Error('invalid_dates', 'Invalid booking dates.');
@@ -286,6 +338,14 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 
     $checkin_local->setTime(15, 0, 0);
     $checkout_local->setTime(11, 0, 0);
+
+    $adjusted_checkin = wp_loft_booking_apply_virtual_key_lead_time($checkin_local, $checkout_local, $site_timezone);
+
+    if (is_wp_error($adjusted_checkin)) {
+        return $adjusted_checkin;
+    }
+
+    $checkin_local = $adjusted_checkin;
 
     $checkin_utc  = clone $checkin_local;
     $checkout_utc = clone $checkout_local;
