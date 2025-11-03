@@ -705,6 +705,26 @@ function loft_vk_prepare_loft_response( $unit, $context ) {
 }
 
 /**
+ * Sanitize a phone number while preserving international prefixes and spacing.
+ *
+ * @param string $phone Raw phone input.
+ *
+ * @return string Sanitized phone string.
+ */
+function loft_vk_sanitize_phone_input( $phone ) {
+    $phone = trim( (string) $phone );
+
+    if ( '' === $phone ) {
+        return '';
+    }
+
+    $phone = preg_replace( '/[^0-9+\s().-]/', '', $phone );
+    $phone = preg_replace( '/\s+/', ' ', $phone );
+
+    return trim( $phone );
+}
+
+/**
  * Retrieve lofts with their availability and status information.
  *
  * @return WP_REST_Response
@@ -755,7 +775,7 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
 
     $guest_name   = sanitize_text_field( (string) $request->get_param( 'guest_name' ) );
     $guest_email  = sanitize_email( (string) $request->get_param( 'guest_email' ) );
-    $guest_phone  = sanitize_text_field( (string) $request->get_param( 'guest_phone' ) );
+    $guest_phone  = loft_vk_sanitize_phone_input( (string) $request->get_param( 'guest_phone' ) );
     $checkin      = sanitize_text_field( (string) $request->get_param( 'checkin_date' ) );
     $checkout     = sanitize_text_field( (string) $request->get_param( 'checkout_date' ) );
 
@@ -822,6 +842,44 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
 
     $checkin_local->setTime( 15, 0, 0 );
     $checkout_local->setTime( 11, 0, 0 );
+
+    if ( function_exists( 'wp_loft_booking_apply_virtual_key_lead_time' ) ) {
+        $adjusted_checkin = wp_loft_booking_apply_virtual_key_lead_time( $checkin_local, $checkout_local, $site_timezone );
+
+        if ( is_wp_error( $adjusted_checkin ) ) {
+            return new WP_Error( 'loft_vk_invalid_window', $adjusted_checkin->get_error_message(), array( 'status' => 400 ) );
+        }
+
+        $checkin_local = $adjusted_checkin;
+    } else {
+        try {
+            $lead_time_minutes = (int) apply_filters( 'wp_loft_booking_virtual_key_lead_time_minutes', 5 );
+
+            if ( $lead_time_minutes < 0 ) {
+                $lead_time_minutes = 0;
+            }
+
+            $minimum_start = new DateTime( 'now', $site_timezone );
+
+            if ( $lead_time_minutes > 0 ) {
+                $minimum_start->modify( sprintf( '+%d minutes', $lead_time_minutes ) );
+            }
+
+            if ( $checkin_local <= $minimum_start ) {
+                $checkin_local = clone $minimum_start;
+
+                if ( $checkin_local >= $checkout_local ) {
+                    return new WP_Error(
+                        'loft_vk_invalid_window',
+                        __( 'La période du séjour doit dépasser l\'heure d\'arrivée. / The stay window must extend beyond the arrival time.', 'loft-virtual-keys' ),
+                        array( 'status' => 400 )
+                    );
+                }
+            }
+        } catch ( Exception $e ) {
+            return new WP_Error( 'loft_vk_time_error', $e->getMessage(), array( 'status' => 500 ) );
+        }
+    }
 
     $checkin_utc  = clone $checkin_local;
     $checkout_utc = clone $checkout_local;
