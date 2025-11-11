@@ -1,0 +1,274 @@
+/**
+ * Mobile-first homepage refresh inspired by the concierge concept layout.
+ */
+
+@media screen and (max-width: 767px) {
+  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 {
+    padding: 3.25rem 1.5rem 2.75rem;
+    background: linear-gradient(180deg, #052a3d 0%, #0d5675 45%, #0a7ca5 100%);
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-container {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-280d8941,
+  body.home .elementor-11055 .elementor-element.elementor-element-280d8941 .elementor-widget-container {
+    text-align: center;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-450e1bd1 .elementor-heading-title {
+    letter-spacing: 0.24em;
+    color: #ccebf6;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-64ccbb2b .elementor-heading-title {
+    color: #ffffff;
+    font-size: 1.85rem;
+    line-height: 1.25;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-732fbb0f .elementor-heading-title {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 22rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3f1fabf4 {
+    display: none;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 {
+    width: 100%;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_search_elem_component_l3 {
+    border-radius: 24px;
+    background: #ffffff;
+    padding: 1.85rem 1.75rem 1.65rem;
+    box-shadow: 0 32px 64px rgba(8, 41, 60, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_width_100_percentage_all_iphone,
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_width_50_percentage,
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_width_33_percentage {
+    width: 100% !important;
+    float: none !important;
+    padding: 0 !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_section.nd_booking_box_sizing_border_box {
+    box-sizing: border-box !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_cursor_pointer {
+    border-radius: 18px;
+    border: 1px solid rgba(13, 85, 117, 0.12);
+    padding: 1rem 1.25rem;
+    background: #ffffff;
+    box-shadow: 0 18px 28px rgba(10, 68, 96, 0.08);
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_font_size_50 {
+    font-size: 2.1rem !important;
+    color: #0d4d6b !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_options_color_grey {
+    color: #52758c !important;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_display_inline_flex {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_section.nd_booking_height_15,
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_section.nd_booking_height_5 {
+    height: 0.35rem !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 input[type="text"],
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 select {
+    width: 100%;
+    border-radius: 16px !important;
+    border: 1px solid #d2e5ee !important;
+    padding: 0.85rem 1rem !important;
+    font-size: 0.95rem !important;
+    background: #f6fbff !important;
+    color: #0d4d6b !important;
+    height: auto !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 input[type="submit"] {
+    width: 100% !important;
+    background: linear-gradient(90deg, #0f6f98 0%, #00a0d2 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.16em;
+    font-size: 1.05rem !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: 18px !important;
+    box-shadow: 0 24px 36px rgba(0, 98, 140, 0.24);
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-64dc553,
+  body.home .elementor-11055 .elementor-element.elementor-element-43b3f8e,
+  body.home .elementor-11055 .elementor-element.elementor-element-cb95837,
+  body.home .elementor-11055 .elementor-element.elementor-element-aa56e14 {
+    display: none;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 {
+    margin-top: 2.75rem;
+    padding: 0 1.25rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 > .e-con-inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-widget-image-box {
+    text-align: center;
+    padding: 1rem 0.5rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-image-box-img {
+    margin: 0 auto 0.75rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-image-box-img img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-image-box-title {
+    font-size: 0.95rem;
+    color: #0d4d6b;
+    margin-bottom: 0.35rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-image-box-description {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: #50708a;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-57a78b25 {
+    padding: 0 1.25rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_masonry_content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_rooms_widget_l1 {
+    width: 100% !important;
+    float: none !important;
+    padding: 0 !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_background_color_fff {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 46px rgba(8, 41, 60, 0.14);
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_position_relative {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_postgrid_rooms_single_room_img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_bg_greydark_alpha_gradient_3 {
+    position: static !important;
+    background: #ffffff;
+    padding: 1.65rem 1.75rem 1.85rem;
+    color: #0a3954;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_bg_greydark_alpha_gradient_3 .nd_booking_position_absolute {
+    position: static !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_bg_greydark_alpha_gradient_3 .nd_options_color_white {
+    color: #0a3954 !important;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_bg_greydark_alpha_gradient_3 .nd_booking_section {
+    text-align: left;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_e_rooms_postgrid_l1_price {
+    background: #0f6f98 !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.18em;
+    font-size: 0.78rem;
+    padding: 0.55rem 1.4rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_e_rooms_postgrid_l1_title {
+    font-size: 1.28rem;
+    margin: 0;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_display_table {
+    display: flex !important;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_display_table img {
+    margin: 0;
+    width: 18px;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_display_table p {
+    color: #50708a !important;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-25ff9730 {
+    width: 100%;
+    margin-top: 2.5rem;
+  }
+
+  body.home .elementor-11055 .elementor-element.elementor-element-25ff9730 .elementor-button {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #0f6f98 0%, #00a0d2 100%);
+    box-shadow: 0 22px 34px rgba(0, 98, 140, 0.24);
+    letter-spacing: 0.16em;
+    font-weight: 700;
+  }
+}
