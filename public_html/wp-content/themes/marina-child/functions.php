@@ -41,6 +41,7 @@ function marina_child_enqueue_custom_assets() {
         $dependencies,
         $header_fixes_version
     );
+
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
 

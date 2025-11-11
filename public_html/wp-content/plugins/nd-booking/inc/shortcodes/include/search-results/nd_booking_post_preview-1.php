@@ -244,7 +244,6 @@ $nd_booking_shortcode_right_content .= '
                 $loft_total_stay_label = '';
                 $loft_nightly_label = '';
                 $loft_button_label = '';
-                $nd_booking_insub_woo_class = '';
 
                 if ( ! empty( $loft_pricing_details['has_cta'] ) ) {
 
@@ -262,38 +261,24 @@ $nd_booking_shortcode_right_content .= '
                         <p class="loft-search-card__rate-amount">'.$loft_total_price_display.'</p>
                         <p class="loft-search-card__rate-sub">'.$loft_total_stay_label.'</p>
                         <p class="loft-search-card__rate-sub">'.$loft_nightly_label.'</p>
-                    </div>
-                    <div class="loft-search-card__actions">';
+                    </div>';
 
-                    if ( $nd_booking_meta_box_room_woo_product != 0 ) {
-                        $nd_booking_shortcode_right_content .= '
+                    $loft_booking_url = $nd_booking_r_permalink;
 
-                        <button type="button" onclick="nd_booking_woo('.$nd_booking_trip_price.','.$nd_booking_id.')" class="loft-search-card__btn loft-search-card__btn--primary">'.$loft_button_label.'</button>';
-                        $nd_booking_insub_woo_class = 'nd_booking_display_none_important';
-
+                    if ( $loft_booking_url === $nd_booking_permalink ) {
+                        $loft_booking_url = add_query_arg(
+                            array(
+                                'nd_booking_archive_form_date_range_from' => $nd_booking_date_from,
+                                'nd_booking_archive_form_date_range_to'   => $nd_booking_date_to,
+                                'nd_booking_archive_form_guests'          => $nd_booking_archive_form_guests,
+                            ),
+                            $loft_booking_url
+                        );
                     }
 
                     $nd_booking_shortcode_right_content .= '
-                    <form class="loft-search-card__form" id="nd_booking_book_room_'.$nd_booking_id.'" method="post" action="';
-
-                    if ( nd_booking_get_room_link($nd_booking_id,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_archive_form_guests) == $nd_booking_permalink ) {
-                        $nd_booking_shortcode_right_content .= nd_booking_booking_page();
-                    }else{
-                        $nd_booking_shortcode_right_content .= nd_booking_get_room_link($nd_booking_id,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_archive_form_guests);
-                    }
-
-                    $nd_booking_shortcode_right_content .= '">
-
-                        <input type="hidden" name="nd_booking_form_booking_id" value="'.$nd_booking_id.'-'.$nd_booking_id_room.'">
-                        <input type="hidden" name="nd_booking_form_booking_date_from" value="'.$nd_booking_date_from.'">
-                        <input type="hidden" name="nd_booking_form_booking_date_to" value="'.$nd_booking_date_to.'">
-                        <input type="hidden" name="nd_booking_form_booking_guests" value="'.$nd_booking_archive_form_guests.'">
-                        <input type="hidden" name="nd_booking_form_booking_arrive_advs" value="1">
-
-                        <input class="loft-search-card__btn '.$nd_booking_insub_woo_class.'" type="submit" value="'.$loft_button_label.'">';
-
-                    $nd_booking_shortcode_right_content .= '
-                    </form>';
+                    <div class="loft-search-card__actions">
+                        <a class="loft-search-card__btn loft-search-card__btn--primary" href="'.esc_url( $loft_booking_url ).'">'.$loft_button_label.'</a>';
 
                     include realpath(dirname( __FILE__ ).'/nd_booking_info_price_hover_btn.php');
 
