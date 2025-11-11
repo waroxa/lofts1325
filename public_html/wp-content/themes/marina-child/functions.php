@@ -41,6 +41,21 @@ function marina_child_enqueue_custom_assets() {
         $dependencies,
         $header_fixes_version
     );
+
+    if ( is_front_page() ) {
+        $mobile_home_path = get_stylesheet_directory() . '/css/mobile-home.css';
+
+        if ( file_exists( $mobile_home_path ) && is_readable( $mobile_home_path ) ) {
+            $mobile_home_version = (string) filemtime( $mobile_home_path );
+
+            wp_enqueue_style(
+                'marina-child-mobile-home',
+                get_stylesheet_directory_uri() . '/css/mobile-home.css',
+                array( 'marina-child-header-fixes' ),
+                $mobile_home_version
+            );
+        }
+    }
 }
 add_action( 'wp_enqueue_scripts', 'marina_child_enqueue_custom_assets', 20 );
 
