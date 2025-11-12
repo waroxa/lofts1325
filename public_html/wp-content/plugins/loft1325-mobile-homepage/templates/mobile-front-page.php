@@ -32,61 +32,108 @@ get_header();
     </header>
 
     <main id="loft1325-mobile-homepage" class="loft1325-mobile-home">
-        <section class="loft1325-mobile-home__hero" style="<?php echo $hero_background ? 'background-image: url(' . esc_url( $hero_background ) . ');' : ''; ?>">
-            <div class="loft1325-mobile-home__hero-overlay"></div>
-            <div class="loft1325-mobile-home__hero-content">
-                <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
-                <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
-                <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
-            </div>
+        <section class="relative isolate overflow-hidden" <?php if ( $hero_background ) : ?>style="background-image: url('<?php echo esc_url( $hero_background ); ?>'); background-size: cover; background-position: center;"<?php endif; ?>>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#0d3c47] via-[#0d3c47] to-[#041f26] opacity-95"></div>
+            <div class="relative z-10 mx-auto flex max-w-md flex-col items-center px-6 pt-10 pb-16 text-white sm:pb-20">
+                <a href="#loft1325-mobile-home-search" class="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-lg backdrop-blur-sm transition hover:bg-white/20">
+                    <?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?>
+                </a>
+                <h1 class="mt-6 text-center text-3xl font-semibold leading-tight sm:text-4xl">
+                    <?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?>
+                </h1>
+                <p class="mt-4 text-center text-base leading-relaxed text-white/80">
+                    <?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?>
+                </p>
 
-            <div class="loft1325-mobile-home__hero-actions">
-                <?php if ( $plugin->get_string( 'hero_primary_label' ) ) : ?>
-                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--primary" href="<?php echo esc_url( $plugin->get_string( 'hero_primary_url' ) ); ?>">
-                        <?php echo esc_html( $plugin->get_string( 'hero_primary_label' ) ); ?>
-                    </a>
-                <?php endif; ?>
-                <?php if ( $plugin->get_string( 'hero_secondary_label' ) ) : ?>
-                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--ghost" href="<?php echo esc_url( $plugin->get_string( 'hero_secondary_url' ) ); ?>">
-                        <?php echo esc_html( $plugin->get_string( 'hero_secondary_label' ) ); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
+                <div id="loft1325-mobile-home-search" class="mt-8 w-full">
+                    <div class="rounded-2xl bg-white p-6 shadow-lg shadow-slate-900/15">
+                        <h2 class="sr-only"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
+                        <form action="<?php echo esc_url( $rooms_archive ); ?>" method="get" class="space-y-5">
+                            <div class="space-y-2">
+                                <label for="loft1325-mobile-location" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                    <?php echo esc_html( $plugin->get_string( 'search_location_label' ) ); ?>
+                                </label>
+                                <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
+                                    <span class="text-[#0d3c47]" aria-hidden="true">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 12.75a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5z" />
+                                            <path d="M18.75 10.5c0 4.5-6.75 10.5-6.75 10.5S5.25 15 5.25 10.5a6.75 6.75 0 1 1 13.5 0z" />
+                                        </svg>
+                                    </span>
+                                    <input id="loft1325-mobile-location" name="location" type="text" value="<?php echo esc_attr__( 'Loft1325, Québec', 'loft1325-mobile-home' ); ?>" readonly class="w-full border-none bg-transparent text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
 
-            <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
-                <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
-                <div class="loft1325-mobile-home__search-location">
-                    <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>
-                    <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
+                            <div class="space-y-2">
+                                <label for="loft1325-mobile-dates" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                    <?php echo esc_html( $plugin->get_string( 'search_date_label' ) ); ?>
+                                </label>
+                                <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
+                                    <span class="text-[#0d3c47]" aria-hidden="true">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M7.5 3v3m9-3v3M4.5 9h15" />
+                                            <rect x="4.5" y="5.25" width="15" height="15.75" rx="2.25" />
+                                            <path d="M9 13.5h.008M12 13.5h.008M15 13.5h.008M9 16.5h.008M12 16.5h.008M15 16.5h.008" />
+                                        </svg>
+                                    </span>
+                                    <input id="loft1325-mobile-dates" name="dates" type="text" value="<?php echo esc_attr__( 'Sélectionner les dates', 'loft1325-mobile-home' ); ?>" readonly class="w-full border-none bg-transparent text-base font-medium text-slate-500 focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="loft1325-mobile-guests" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                    <?php echo esc_html( $plugin->get_string( 'search_guests_label' ) ); ?>
+                                </label>
+                                <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
+                                    <span class="text-[#0d3c47]" aria-hidden="true">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15.75 7.5a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0z" />
+                                            <path d="M4.5 20.25a7.5 7.5 0 1 1 15 0" />
+                                        </svg>
+                                    </span>
+                                    <input id="loft1325-mobile-guests" name="guests" type="text" value="<?php echo esc_attr__( '1 invité', 'loft1325-mobile-home' ); ?>" readonly class="w-full border-none bg-transparent text-base font-medium text-slate-900 focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full rounded-xl bg-[#002b5b] py-3 text-center text-base font-semibold uppercase tracking-wide text-white shadow-lg transition hover:bg-[#01366f] focus:outline-none focus:ring-2 focus:ring-[#0d3c47] focus:ring-offset-2 focus:ring-offset-white">
+                                <?php echo esc_html( $plugin->get_string( 'search_submit_label' ) ); ?>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <div class="loft1325-mobile-home__search-form">
-                    <?php
-                    $search_form_markup = do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' );
 
-                    $search_form_markup = str_replace(
-                        array(
-                            'CHECK-IN',
-                            'CHECK-OUT',
-                            'GUESTS',
-                            'CHECK AVAILABILITY',
-                            'Check In',
-                            'Check Out',
-                            'Guests',
-                        ),
-                        array(
-                            __( 'Arrivée', 'loft1325-mobile-home' ),
-                            __( 'Départ', 'loft1325-mobile-home' ),
-                            __( 'Invités', 'loft1325-mobile-home' ),
-                            $plugin->get_string( 'search_submit_label' ),
-                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                            __( 'Invités', 'loft1325-mobile-home' ),
-                        ),
-                        $search_form_markup
-                    );
-
-                    echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                    ?>
+                <div class="mt-12 flex w-full flex-wrap items-center justify-center gap-8 text-center text-xs font-medium text-slate-200">
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 2.25h6A1.5 1.5 0 0 1 16.5 3.75v16.5a1.5 1.5 0 0 1-1.5 1.5H9a1.5 1.5 0 0 1-1.5-1.5V3.75A1.5 1.5 0 0 1 9 2.25z" />
+                                <path d="M9 18.75h6" />
+                            </svg>
+                        </span>
+                        <span><?php esc_html_e( 'Gestion mobile', 'loft1325-mobile-home' ); ?></span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 6v6l3.5 3.5" />
+                                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+                            </svg>
+                        </span>
+                        <span><?php esc_html_e( 'Check-in 24/7', 'loft1325-mobile-home' ); ?></span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4.5 9.75h15" />
+                                <path d="M8.25 4.5v3" />
+                                <path d="M15.75 4.5v3" />
+                                <path d="M6.75 12.75h3" />
+                                <path d="M14.25 12.75h3" />
+                                <path d="M4.5 7.5h15a1.5 1.5 0 0 1 1.5 1.5v9.75a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V9a1.5 1.5 0 0 1 1.5-1.5z" />
+                            </svg>
+                        </span>
+                        <span><?php esc_html_e( 'Séjour flexible', 'loft1325-mobile-home' ); ?></span>
+                    </div>
                 </div>
             </div>
         </section>

@@ -165,14 +165,26 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
 
             wp_enqueue_style( 'dashicons' );
 
+            wp_enqueue_style(
+                'loft1325-mobile-home-tailwind',
+                'https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css',
+                array(),
+                '3.4.4'
+            );
+
+            $fonts_url = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+            wp_enqueue_style( 'loft1325-mobile-home-fonts', $fonts_url, array(), null );
+
             $style_path = plugin_dir_path( __FILE__ ) . 'assets/css/mobile-home.css';
             $style_uri  = plugin_dir_url( __FILE__ ) . 'assets/css/mobile-home.css';
             $version    = file_exists( $style_path ) ? (string) filemtime( $style_path ) : '1.0.0';
 
-            wp_enqueue_style( 'loft1325-mobile-home', $style_uri, array(), $version );
-
-            $fonts_url = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
-            wp_enqueue_style( 'loft1325-mobile-home-fonts', $fonts_url, array(), null );
+            wp_enqueue_style(
+                'loft1325-mobile-home',
+                $style_uri,
+                array( 'loft1325-mobile-home-tailwind', 'loft1325-mobile-home-fonts' ),
+                $version
+            );
 
             $script_path = plugin_dir_path( __FILE__ ) . 'assets/js/mobile-home.js';
             $script_uri  = plugin_dir_url( __FILE__ ) . 'assets/js/mobile-home.js';
@@ -232,7 +244,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $this->default_strings = array(
                 'hero_tagline'           => __( 'Concierge Virtuel', 'loft1325-mobile-home' ),
                 'hero_title'             => __( 'Expérience Hôtelière 100% Virtuelle', 'loft1325-mobile-home' ),
-                'hero_description'       => __( "Pour le prix d'une chambre d'hôtel, offrez-vous tout le confort d'une maison et une expérience entièrement autonome. Notre concept unique vous permet de gérer votre séjour directement depuis votre mobile, sans réception ni attente. Créez vos propres clés numériques, invitez vos proches et contrôlez vos réservations en quelques clics seulement.", 'loft1325-mobile-home' ),
+                'hero_description'       => __( 'Le confort d’une maison avec l’expérience hôtelière, gérez tout depuis votre mobile.', 'loft1325-mobile-home' ),
                 'hero_primary_label'     => __( 'Réserver un loft', 'loft1325-mobile-home' ),
                 'hero_primary_url'       => '#loft1325-mobile-home-search',
                 'hero_secondary_label'   => __( 'Nous contacter', 'loft1325-mobile-home' ),
