@@ -33,24 +33,26 @@ get_header();
 
     <main id="loft1325-mobile-homepage" class="loft1325-mobile-home">
         <section class="relative isolate overflow-hidden" <?php if ( $hero_background ) : ?>style="background-image: url('<?php echo esc_url( $hero_background ); ?>'); background-size: cover; background-position: center;"<?php endif; ?>>
-            <div class="absolute inset-0 bg-gradient-to-b from-[#0d3c47] via-[#0d3c47] to-[#041f26] opacity-95"></div>
-            <div class="relative z-10 mx-auto flex max-w-md flex-col items-center px-6 pt-10 pb-16 text-white sm:pb-20">
-                <a href="#loft1325-mobile-home-search" class="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-lg backdrop-blur-sm transition hover:bg-white/20">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#0d3c47] via-[#0b2f37] to-[#041f26] opacity-95"></div>
+            <div class="relative z-10 mx-auto flex max-w-sm flex-col items-center px-6 pt-12 pb-16 text-white sm:max-w-md sm:pb-20">
+                <a href="#loft1325-mobile-home-search" class="inline-flex items-center justify-center rounded-full border border-white/50 bg-white/10 px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-white shadow-md shadow-black/30 backdrop-blur-sm transition hover:bg-white/20">
                     <?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?>
                 </a>
-                <h1 class="mt-6 text-center text-3xl font-semibold leading-tight sm:text-4xl">
-                    <?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?>
-                </h1>
-                <p class="mt-4 text-center text-base leading-relaxed text-white/80">
+                <div class="mt-6 w-full rounded-[32px] bg-[#0d3c47] px-6 py-5 text-center shadow-lg shadow-black/40">
+                    <h1 class="text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                        <?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?>
+                    </h1>
+                </div>
+                <p class="mt-4 px-2 text-center text-sm font-medium leading-relaxed text-white/80 sm:text-base">
                     <?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?>
                 </p>
 
                 <div id="loft1325-mobile-home-search" class="mt-8 w-full">
-                    <div class="rounded-2xl bg-white p-6 shadow-lg shadow-slate-900/15">
+                    <div class="rounded-[32px] bg-white p-6 shadow-2xl shadow-slate-900/20">
                         <h2 class="sr-only"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
                         <form action="<?php echo esc_url( $rooms_archive ); ?>" method="get" class="space-y-5">
                             <div class="space-y-2">
-                                <label for="loft1325-mobile-location" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                <label for="loft1325-mobile-location" class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
                                     <?php echo esc_html( $plugin->get_string( 'search_location_label' ) ); ?>
                                 </label>
                                 <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
@@ -65,7 +67,7 @@ get_header();
                             </div>
 
                             <div class="space-y-2">
-                                <label for="loft1325-mobile-dates" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                <label for="loft1325-mobile-dates" class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
                                     <?php echo esc_html( $plugin->get_string( 'search_date_label' ) ); ?>
                                 </label>
                                 <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
@@ -81,7 +83,7 @@ get_header();
                             </div>
 
                             <div class="space-y-2">
-                                <label for="loft1325-mobile-guests" class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                <label for="loft1325-mobile-guests" class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
                                     <?php echo esc_html( $plugin->get_string( 'search_guests_label' ) ); ?>
                                 </label>
                                 <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3 shadow-sm shadow-slate-900/10">
@@ -95,14 +97,14 @@ get_header();
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full rounded-xl bg-[#002b5b] py-3 text-center text-base font-semibold uppercase tracking-wide text-white shadow-lg transition hover:bg-[#01366f] focus:outline-none focus:ring-2 focus:ring-[#0d3c47] focus:ring-offset-2 focus:ring-offset-white">
+                            <button type="submit" class="w-full rounded-2xl bg-[#002b5b] py-3 text-center text-base font-semibold uppercase tracking-wide text-white shadow-lg shadow-slate-900/20 transition hover:bg-[#01366f] focus:outline-none focus:ring-2 focus:ring-[#0d3c47] focus:ring-offset-2 focus:ring-offset-white">
                                 <?php echo esc_html( $plugin->get_string( 'search_submit_label' ) ); ?>
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <div class="mt-12 flex w-full flex-wrap items-center justify-center gap-8 text-center text-xs font-medium text-slate-200">
+                <div class="mt-12 flex w-full flex-wrap items-center justify-center gap-10 text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-200">
                     <div class="flex flex-col items-center gap-2">
                         <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
                             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -110,7 +112,7 @@ get_header();
                                 <path d="M9 18.75h6" />
                             </svg>
                         </span>
-                        <span><?php esc_html_e( 'Gestion mobile', 'loft1325-mobile-home' ); ?></span>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-300"><?php esc_html_e( 'Gestion mobile', 'loft1325-mobile-home' ); ?></span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
                         <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
@@ -119,7 +121,7 @@ get_header();
                                 <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
                             </svg>
                         </span>
-                        <span><?php esc_html_e( 'Check-in 24/7', 'loft1325-mobile-home' ); ?></span>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-300"><?php esc_html_e( 'Check-in 24/7', 'loft1325-mobile-home' ); ?></span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
                         <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-lg">
@@ -132,7 +134,7 @@ get_header();
                                 <path d="M4.5 7.5h15a1.5 1.5 0 0 1 1.5 1.5v9.75a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V9a1.5 1.5 0 0 1 1.5-1.5z" />
                             </svg>
                         </span>
-                        <span><?php esc_html_e( 'Séjour flexible', 'loft1325-mobile-home' ); ?></span>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-300"><?php esc_html_e( 'Séjour flexible', 'loft1325-mobile-home' ); ?></span>
                     </div>
                 </div>
             </div>
