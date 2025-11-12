@@ -40,19 +40,6 @@ get_header();
                 <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
             </div>
 
-            <div class="loft1325-mobile-home__hero-actions">
-                <?php if ( $plugin->get_string( 'hero_primary_label' ) ) : ?>
-                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--primary" href="<?php echo esc_url( $plugin->get_string( 'hero_primary_url' ) ); ?>">
-                        <?php echo esc_html( $plugin->get_string( 'hero_primary_label' ) ); ?>
-                    </a>
-                <?php endif; ?>
-                <?php if ( $plugin->get_string( 'hero_secondary_label' ) ) : ?>
-                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--ghost" href="<?php echo esc_url( $plugin->get_string( 'hero_secondary_url' ) ); ?>">
-                        <?php echo esc_html( $plugin->get_string( 'hero_secondary_label' ) ); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-
             <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
                 <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
                 <div class="loft1325-mobile-home__search-location">
@@ -88,6 +75,19 @@ get_header();
                     echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                     ?>
                 </div>
+            </div>
+
+            <div class="loft1325-mobile-home__hero-actions">
+                <?php if ( $plugin->get_string( 'hero_primary_label' ) ) : ?>
+                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--primary" href="<?php echo esc_url( $plugin->get_string( 'hero_primary_url' ) ); ?>">
+                        <?php echo esc_html( $plugin->get_string( 'hero_primary_label' ) ); ?>
+                    </a>
+                <?php endif; ?>
+                <?php if ( $plugin->get_string( 'hero_secondary_label' ) ) : ?>
+                    <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--ghost" href="<?php echo esc_url( $plugin->get_string( 'hero_secondary_url' ) ); ?>">
+                        <?php echo esc_html( $plugin->get_string( 'hero_secondary_label' ) ); ?>
+                    </a>
+                <?php endif; ?>
             </div>
         </section>
 
