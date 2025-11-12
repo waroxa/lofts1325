@@ -29,29 +29,7 @@ get_header();
                 <span class="loft1325-mobile-home__site-title"><?php bloginfo( 'name' ); ?></span>
             <?php endif; ?>
         </div>
-        <button class="loft1325-mobile-home__nav-toggle" type="button" aria-expanded="false" aria-controls="loft1325-mobile-nav" data-loft1325-mobile-nav-toggle>
-            <span class="loft1325-mobile-home__nav-toggle-bar"></span>
-            <span class="loft1325-mobile-home__nav-toggle-bar"></span>
-            <span class="loft1325-mobile-home__nav-toggle-bar"></span>
-            <span class="screen-reader-text"><?php esc_html_e( 'Afficher la navigation', 'loft1325-mobile-home' ); ?></span>
-        </button>
     </header>
-
-    <div class="loft1325-mobile-home__nav" id="loft1325-mobile-nav" hidden aria-hidden="true">
-        <div class="loft1325-mobile-home__nav-inner">
-            <?php
-            wp_nav_menu(
-                array(
-                    'theme_location' => 'main-menu',
-                    'container'      => false,
-                    'menu_class'     => 'loft1325-mobile-home__nav-list',
-                    'fallback_cb'    => '__return_empty_string',
-                )
-            );
-            ?>
-        </div>
-    </div>
-    <div class="loft1325-mobile-home__nav-overlay" data-loft1325-mobile-nav-overlay hidden></div>
 
     <main id="loft1325-mobile-homepage" class="loft1325-mobile-home">
         <section class="loft1325-mobile-home__hero" style="<?php echo $hero_background ? 'background-image: url(' . esc_url( $hero_background ) . ');' : ''; ?>">
@@ -77,8 +55,38 @@ get_header();
 
             <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
                 <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
+                <div class="loft1325-mobile-home__search-location">
+                    <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>
+                    <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
+                </div>
                 <div class="loft1325-mobile-home__search-form">
-                    <?php echo do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php
+                    $search_form_markup = do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' );
+
+                    $search_form_markup = str_replace(
+                        array(
+                            'CHECK-IN',
+                            'CHECK-OUT',
+                            'GUESTS',
+                            'CHECK AVAILABILITY',
+                            'Check In',
+                            'Check Out',
+                            'Guests',
+                        ),
+                        array(
+                            __( 'Arrivée', 'loft1325-mobile-home' ),
+                            __( 'Départ', 'loft1325-mobile-home' ),
+                            __( 'Invités', 'loft1325-mobile-home' ),
+                            $plugin->get_string( 'search_submit_label' ),
+                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
+                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
+                            __( 'Invités', 'loft1325-mobile-home' ),
+                        ),
+                        $search_form_markup
+                    );
+
+                    echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    ?>
                 </div>
             </div>
         </section>
