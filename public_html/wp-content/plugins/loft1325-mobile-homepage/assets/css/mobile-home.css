@@ -2,6 +2,16 @@ body.loft1325-mobile-home-active {
     font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
     background-color: #f5f7fa;
     color: #0f1b2d;
+    --loft1325-brand: #76B1C4;
+    --loft1325-brand-dark: #0f4c63;
+    --loft1325-brand-darker: #0a3648;
+    --loft1325-brand-light: #9fd0dd;
+    --loft1325-surface: #ffffff;
+    --loft1325-surface-muted: #f5f7fa;
+    --loft1325-text: #0f1b2d;
+    --loft1325-text-soft: rgba(15, 27, 45, 0.68);
+    --loft1325-text-on-dark: rgba(235, 247, 252, 0.94);
+    --loft1325-shadow-soft: 0 24px 42px rgba(12, 55, 72, 0.18);
 }
 
 body.loft1325-mobile-home-active .nicdark_site > .nicdark_section.nicdark_bg_greydark,
@@ -28,7 +38,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__wrapper {
     position: relative;
-    background: #f5f7fa;
+    background: var(--loft1325-surface-muted);
     min-height: 100vh;
 }
 
@@ -37,7 +47,9 @@ body.loft1325-mobile-home-active #nd_booking_search {
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 1.5rem 0.75rem;
-    background: linear-gradient(180deg, rgba(9, 41, 68, 0.95) 0%, rgba(9, 41, 68, 0.82) 100%);
+    background: linear-gradient(180deg, rgba(5, 26, 42, 0.92) 0%, rgba(12, 59, 78, 0.86) 65%, rgba(118, 177, 196, 0.68) 100%);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(118, 177, 196, 0.35);
 }
 
 .loft1325-mobile-home__logo img {
@@ -48,22 +60,24 @@ body.loft1325-mobile-home-active #nd_booking_search {
 .loft1325-mobile-home__site-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--loft1325-text-on-dark);
+    letter-spacing: 0.02em;
 }
 
 .loft1325-mobile-home__nav-toggle {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
     flex-direction: column;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 12px 20px rgba(5, 15, 24, 0.28);
 }
 
 .loft1325-mobile-home__nav-toggle-bar {
@@ -76,8 +90,9 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__nav-toggle:focus,
 .loft1325-mobile-home__nav-toggle:hover {
-    background: rgba(255, 255, 255, 0.24);
-    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
 }
 
 .loft1325-mobile-home__nav {
@@ -87,12 +102,13 @@ body.loft1325-mobile-home-active #nd_booking_search {
     width: 80%;
     max-width: 320px;
     height: 100%;
-    background: #ffffff;
-    box-shadow: -16px 0 32px rgba(0, 0, 0, 0.18);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 251, 253, 0.98) 100%);
+    box-shadow: -16px 0 36px rgba(8, 40, 57, 0.16);
     transition: right 0.28s ease;
     z-index: 1099;
     padding: 4rem 1.5rem 2rem;
     overflow-y: auto;
+    border-left: 1px solid rgba(118, 177, 196, 0.28);
 }
 
 .loft1325-mobile-home__nav[aria-hidden="false"],
@@ -110,15 +126,21 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__nav-inner a {
     font-size: 1rem;
-    font-weight: 500;
-    color: #0f1b2d;
+    font-weight: 600;
+    color: var(--loft1325-brand-darker);
     text-decoration: none;
+    letter-spacing: 0.01em;
+}
+
+.loft1325-mobile-home__nav-inner a:focus,
+.loft1325-mobile-home__nav-inner a:hover {
+    color: var(--loft1325-brand);
 }
 
 .loft1325-mobile-home__nav-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(5, 18, 33, 0.55);
+    background: rgba(5, 26, 42, 0.6);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.28s ease;
@@ -143,16 +165,18 @@ body.loft1325-mobile-home-active #nd_booking_search {
     position: relative;
     padding: 2.9rem 1.5rem 3.75rem;
     color: #ffffff;
-    background: linear-gradient(180deg, #052a3d 0%, #0f4c63 55%, #76B1C4 100%);
+    background: linear-gradient(182deg, rgba(5, 30, 46, 0.98) 0%, rgba(12, 59, 78, 0.92) 55%, rgba(118, 177, 196, 0.85) 100%);
     overflow: hidden;
+    isolation: isolate;
 }
 
 .loft1325-mobile-home__hero::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(198deg, rgba(4, 31, 46, 0.9) 0%, rgba(12, 59, 78, 0.85) 58%, rgba(118, 177, 196, 0.65) 100%);
+    background: linear-gradient(200deg, rgba(5, 18, 33, 0.78) 0%, rgba(12, 59, 78, 0.82) 48%, rgba(118, 177, 196, 0.64) 100%);
     pointer-events: none;
+    z-index: 1;
 }
 
 .loft1325-mobile-home__hero-overlay {
@@ -171,13 +195,14 @@ body.loft1325-mobile-home-active #nd_booking_search {
     align-self: flex-start;
     padding: 0.4rem 1rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(118, 177, 196, 0.6);
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(159, 208, 221, 0.75);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     font-weight: 600;
-    color: #e4f6ff;
+    color: var(--loft1325-text-on-dark);
+    backdrop-filter: blur(4px);
 }
 
 .loft1325-mobile-home__hero-title {
@@ -186,14 +211,15 @@ body.loft1325-mobile-home-active #nd_booking_search {
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.015em;
-    text-shadow: 0 12px 30px rgba(5, 20, 35, 0.45);
+    text-shadow: 0 14px 34px rgba(5, 20, 35, 0.5);
 }
 
 .loft1325-mobile-home__hero-text {
     font-size: 0.98rem;
     line-height: 1.65;
     margin: 0;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(235, 247, 252, 0.92);
+    text-shadow: 0 10px 24px rgba(3, 16, 26, 0.3);
 }
 
 .loft1325-mobile-home__hero-actions {
@@ -202,6 +228,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     display: flex;
     gap: 0.75rem;
     margin-top: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .loft1325-mobile-home__btn {
@@ -216,10 +243,11 @@ body.loft1325-mobile-home-active #nd_booking_search {
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
     border: 1px solid transparent;
     cursor: pointer;
+    letter-spacing: 0.04em;
 }
 
 .loft1325-mobile-home__btn--primary {
-    background: linear-gradient(135deg, #0f5f7b 0%, #76B1C4 100%);
+    background: linear-gradient(135deg, var(--loft1325-brand-dark) 0%, var(--loft1325-brand) 100%);
     color: #ffffff;
     box-shadow: 0 14px 28px rgba(8, 60, 82, 0.32);
 }
@@ -232,9 +260,10 @@ body.loft1325-mobile-home-active #nd_booking_search {
 }
 
 .loft1325-mobile-home__btn--ghost {
-    background: transparent;
-    color: #e6f6ff;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(230, 246, 255, 0.92);
     border-color: rgba(230, 246, 255, 0.55);
+    backdrop-filter: blur(3px);
 }
 
 .loft1325-mobile-home__btn--ghost:hover,
@@ -244,7 +273,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
 }
 
 .loft1325-mobile-home__btn--secondary {
-    background: #0f1b2d;
+    background: var(--loft1325-text);
     color: #ffffff;
     border: none;
     box-shadow: 0 10px 20px rgba(15, 27, 45, 0.25);
@@ -267,15 +296,16 @@ body.loft1325-mobile-home-active #nd_booking_search {
     margin-top: 2.75rem;
     padding: 1.9rem 1.65rem;
     border-radius: 24px;
-    background: linear-gradient(180deg, #ffffff 0%, #f4fbff 100%);
-    box-shadow: 0 32px 60px rgba(8, 41, 60, 0.2);
-    border: 1px solid rgba(118, 177, 196, 0.25);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 251, 255, 0.98) 100%);
+    box-shadow: var(--loft1325-shadow-soft);
+    border: 1px solid rgba(118, 177, 196, 0.3);
+    backdrop-filter: blur(4px);
 }
 
 .loft1325-mobile-home__search-title {
     font-size: 1.12rem;
     font-weight: 600;
-    color: #0d4d6b;
+    color: var(--loft1325-brand-darker);
     margin: 0 0 1rem;
 }
 
@@ -284,18 +314,19 @@ body.loft1325-mobile-home-active #nd_booking_search {
     border: 1px solid rgba(118, 177, 196, 0.35) !important;
     padding: 0.85rem 0.95rem !important;
     box-shadow: 0 12px 24px rgba(13, 77, 107, 0.08) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
 }
 
 .loft1325-mobile-home__search-form .nd_booking_label_search {
     text-transform: none !important;
     letter-spacing: 0 !important;
     font-size: 0.76rem !important;
-    color: rgba(13, 77, 107, 0.62) !important;
+    color: rgba(13, 77, 107, 0.7) !important;
 }
 
 .loft1325-mobile-home__search-form .nd_booking_field_search {
     font-size: 0.96rem !important;
-    color: #0d4d6b !important;
+    color: var(--loft1325-brand-darker) !important;
     font-weight: 500 !important;
 }
 
@@ -303,7 +334,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     width: 100% !important;
     margin-top: 1.35rem !important;
     border-radius: 16px !important;
-    background: linear-gradient(135deg, #0f5f7b 0%, #76B1C4 100%) !important;
+    background: linear-gradient(135deg, var(--loft1325-brand-dark) 0%, var(--loft1325-brand) 100%) !important;
     border: none !important;
     font-weight: 700 !important;
     letter-spacing: 0.12em !important;
@@ -320,7 +351,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__features {
     padding: 3rem 1.5rem 1.25rem;
-    background: #ffffff;
+    background: var(--loft1325-surface);
 }
 
 .loft1325-mobile-home__features-grid {
@@ -340,11 +371,11 @@ body.loft1325-mobile-home-active #nd_booking_search {
     width: 60px;
     height: 60px;
     border-radius: 18px;
-    background: linear-gradient(135deg, #1ec5d7, #38e0f3);
+    background: linear-gradient(135deg, rgba(12, 59, 78, 0.18), rgba(118, 177, 196, 0.35));
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 20px rgba(30, 197, 215, 0.25);
+    box-shadow: 0 12px 22px rgba(12, 55, 72, 0.15);
 }
 
 .loft1325-mobile-home__feature-icon img {
@@ -354,26 +385,26 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__feature-icon .dashicons {
     font-size: 26px;
-    color: #052131;
+    color: var(--loft1325-brand-darker);
 }
 
 .loft1325-mobile-home__feature-title {
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0;
-    color: #0f1b2d;
+    color: var(--loft1325-text);
 }
 
 .loft1325-mobile-home__feature-description {
     font-size: 0.8rem;
     line-height: 1.45;
     margin: 0;
-    color: rgba(15, 27, 45, 0.65);
+    color: var(--loft1325-text-soft);
 }
 
 .loft1325-mobile-home__rooms {
     padding: 2.75rem 1.5rem 3rem;
-    background: #f5f7fa;
+    background: var(--loft1325-surface-muted);
 }
 
 .loft1325-mobile-home__section-heading {
@@ -386,12 +417,13 @@ body.loft1325-mobile-home-active #nd_booking_search {
     font-size: 1.35rem;
     margin: 0;
     font-weight: 700;
-    color: #0f1b2d;
+    color: var(--loft1325-text);
+    letter-spacing: 0.01em;
 }
 
 .loft1325-mobile-home__section-description {
     font-size: 0.92rem;
-    color: rgba(15, 27, 45, 0.7);
+    color: var(--loft1325-text-soft);
     margin: 0;
     line-height: 1.6;
 }
@@ -402,12 +434,13 @@ body.loft1325-mobile-home-active #nd_booking_search {
 }
 
 .loft1325-mobile-home__room-card {
-    background: #ffffff;
+    background: var(--loft1325-surface);
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 20px 32px rgba(15, 27, 45, 0.12);
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(118, 177, 196, 0.22);
 }
 
 .loft1325-mobile-home__room-media img {
@@ -427,8 +460,8 @@ body.loft1325-mobile-home-active #nd_booking_search {
     align-self: flex-start;
     padding: 0.35rem 0.75rem;
     border-radius: 999px;
-    background: rgba(15, 27, 45, 0.08);
-    color: #0f1b2d;
+    background: rgba(118, 177, 196, 0.2);
+    color: var(--loft1325-brand-darker);
     font-weight: 600;
     font-size: 0.85rem;
 }
@@ -437,6 +470,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 .loft1325-mobile-home__room-title a {
@@ -444,25 +478,31 @@ body.loft1325-mobile-home-active #nd_booking_search {
     text-decoration: none;
 }
 
+.loft1325-mobile-home__room-title a:hover,
+.loft1325-mobile-home__room-title a:focus {
+    color: var(--loft1325-brand-darker);
+}
+
 .loft1325-mobile-home__room-text {
     margin: 0;
     font-size: 0.9rem;
-    line-height: 1.55;
-    color: rgba(15, 27, 45, 0.68);
+    line-height: 1.6;
+    color: var(--loft1325-text-soft);
 }
 
 .loft1325-mobile-home__room-price {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    color: #0f1b2d;
+    color: var(--loft1325-brand-darker);
 }
 
 .loft1325-mobile-home__room-price-unit {
     margin-left: 0.25rem;
     font-size: 0.8rem;
-    color: rgba(15, 27, 45, 0.6);
+    color: rgba(12, 59, 78, 0.65);
     text-transform: uppercase;
+    letter-spacing: 0.12em;
 }
 
 .loft1325-mobile-home__room-actions {
@@ -478,16 +518,17 @@ body.loft1325-mobile-home-active #nd_booking_search {
 .loft1325-mobile-home__cta {
     position: relative;
     padding: 3rem 1.5rem 3.65rem;
-    background: linear-gradient(180deg, #052a3d 0%, #0f4c63 55%, #76B1C4 100%);
+    background: radial-gradient(circle at top, rgba(118, 177, 196, 0.86) 0%, rgba(12, 59, 78, 0.92) 45%, rgba(5, 18, 33, 0.92) 100%);
     color: #ffffff;
     overflow: hidden;
+    isolation: isolate;
 }
 
 .loft1325-mobile-home__cta::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(195deg, rgba(4, 31, 46, 0.88) 0%, rgba(12, 59, 78, 0.82) 54%, rgba(118, 177, 196, 0.62) 100%);
+    background: linear-gradient(210deg, rgba(5, 22, 36, 0.78) 0%, rgba(12, 59, 78, 0.82) 50%, rgba(118, 177, 196, 0.55) 100%);
     opacity: 0.96;
     pointer-events: none;
 }
@@ -508,10 +549,11 @@ body.loft1325-mobile-home-active #nd_booking_search {
 
 .loft1325-mobile-home__cta-title {
     margin: 0;
-    font-size: 1.65rem;
+    font-size: 1.7rem;
     font-weight: 700;
     line-height: 1.3;
     text-shadow: 0 10px 28px rgba(5, 22, 36, 0.45);
+    letter-spacing: 0.01em;
 }
 
 .loft1325-mobile-home__cta-text {
@@ -529,10 +571,11 @@ body.loft1325-mobile-home-active #nd_booking_search {
 }
 
 .loft1325-mobile-home__footer {
-    background: #ffffff;
+    background: var(--loft1325-surface);
     padding: 2.5rem 1.5rem 3rem;
     display: grid;
     gap: 2rem;
+    border-top: 1px solid rgba(118, 177, 196, 0.2);
 }
 
 .loft1325-mobile-home__footer-brand {
@@ -550,7 +593,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
 .loft1325-mobile-home__footer-tagline {
     margin: 0;
     font-size: 0.85rem;
-    color: rgba(15, 27, 45, 0.65);
+    color: var(--loft1325-text-soft);
 }
 
 .loft1325-mobile-home__footer-columns {
@@ -562,7 +605,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     font-weight: 600;
     font-size: 0.95rem;
     margin: 0 0 0.75rem;
-    color: #0f1b2d;
+    color: var(--loft1325-text);
 }
 
 .loft1325-mobile-home__footer-menu {
@@ -574,14 +617,15 @@ body.loft1325-mobile-home-active #nd_booking_search {
 }
 
 .loft1325-mobile-home__footer-menu a {
-    color: rgba(15, 27, 45, 0.7);
+    color: var(--loft1325-text-soft);
     text-decoration: none;
     font-size: 0.9rem;
+    letter-spacing: 0.01em;
 }
 
 .loft1325-mobile-home__footer-menu a:hover,
 .loft1325-mobile-home__footer-menu a:focus {
-    color: #0f1b2d;
+    color: var(--loft1325-brand-darker);
 }
 
 .loft1325-mobile-home__footer-copy {
@@ -598,7 +642,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     background: rgba(15, 27, 45, 0.04);
     border-radius: 18px;
     text-align: center;
-    color: rgba(15, 27, 45, 0.7);
+    color: var(--loft1325-text-soft);
 }
 
 @media (min-width: 600px) {
@@ -619,7 +663,7 @@ body.loft1325-mobile-home-active #nd_booking_search {
     }
 
     .loft1325-mobile-home__wrapper {
-        background: #f5f7fa;
+        background: var(--loft1325-surface-muted);
         display: flex;
         flex-direction: column;
         align-items: center;
