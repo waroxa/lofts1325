@@ -55,14 +55,18 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     min-height: 100vh;
 }
 
+
 .loft1325-mobile-home__topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem 0.75rem;
-    background-color: #76B1C4;
-    border-bottom: 1px solid rgba(15, 27, 45, 0.08);
+    padding: 1.1rem 1.5rem 0.9rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid rgba(15, 27, 45, 0.06);
     color: var(--loft1325-text);
+    position: sticky;
+    top: 0;
+    z-index: 5;
 }
 
 .loft1325-mobile-home__logo img {
@@ -80,8 +84,8 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__nav-toggle {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    background-color: #0f4c63;
+    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(15, 27, 45, 0.12);
     display: inline-flex;
     align-items: center;
@@ -89,9 +93,9 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     gap: 5px;
     flex-direction: column;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 12px 20px rgba(15, 27, 45, 0.18);
-    color: #ffffff;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 16px rgba(15, 27, 45, 0.12);
+    color: var(--loft1325-text);
 }
 
 .loft1325-mobile-home__nav-toggle-bar {
@@ -99,14 +103,15 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     width: 18px;
     height: 2px;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--loft1325-text);
 }
 
 .loft1325-mobile-home__nav-toggle:focus,
 .loft1325-mobile-home__nav-toggle:hover {
-    background-color: #135b78;
-    border-color: rgba(15, 27, 45, 0.2);
+    background-color: rgba(15, 27, 45, 0.06);
+    border-color: rgba(15, 27, 45, 0.24);
     transform: translateY(-1px);
+    box-shadow: 0 12px 20px rgba(15, 27, 45, 0.18);
 }
 
 .loft1325-mobile-home__nav {
@@ -178,8 +183,8 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__hero {
     position: relative;
     padding: clamp(2.6rem, 9vw, 3.25rem) 1.5rem clamp(3.1rem, 12vw, 3.9rem);
-    color: var(--loft1325-text);
-    background-color: #76B1C4;
+    color: #f5f8fb;
+    background: linear-gradient(172deg, #0f1b2d 0%, #0a3144 52%, #0d4d6b 100%);
     overflow: hidden;
     isolation: isolate;
 }
@@ -197,6 +202,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     z-index: 2;
     display: grid;
     gap: 1rem;
+    color: inherit;
 }
 
 .loft1325-mobile-home__hero-pill {
@@ -204,13 +210,14 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     align-self: flex-start;
     padding: 0.4rem 1rem;
     border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(15, 27, 45, 0.12);
+    background-color: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     font-weight: 600;
-    color: var(--loft1325-text);
+    color: #ffffff;
+    backdrop-filter: blur(6px);
 }
 
 .loft1325-mobile-home__hero-title {
@@ -226,7 +233,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     font-size: clamp(0.95rem, 4.2vw, 1.08rem);
     line-height: 1.72;
     margin: 0;
-    color: var(--loft1325-text);
+    color: rgba(245, 248, 251, 0.92);
     text-shadow: none;
 }
 
