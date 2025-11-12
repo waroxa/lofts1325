@@ -5,16 +5,11 @@
 @media screen and (max-width: 767px) {
   body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 {
     padding: 3.25rem 1.5rem 2.75rem;
-    background: linear-gradient(180deg, #052a3d 0%, #1b5670 52%, #76B1C4 100%);
+    background: linear-gradient(180deg, #052a3d 0%, #0d5675 45%, #0a7ca5 100%);
     border-bottom-left-radius: 32px;
     border-bottom-right-radius: 32px;
     overflow: hidden;
     position: relative;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-background-overlay {
-    background: linear-gradient(195deg, rgba(4, 32, 46, 0.9) 0%, rgba(10, 68, 96, 0.82) 58%, rgba(118, 177, 196, 0.72) 100%);
-    opacity: 1;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-container {
@@ -28,23 +23,20 @@
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-450e1bd1 .elementor-heading-title {
-    font-size: 0.78rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: #d3edf6;
+    letter-spacing: 0.24em;
+    color: #ccebf6;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-64ccbb2b .elementor-heading-title {
     color: #ffffff;
-    font-size: 1.95rem;
+    font-size: 1.85rem;
     line-height: 1.25;
-    letter-spacing: 0.02em;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-732fbb0f .elementor-heading-title {
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 1.05rem;
-    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.5;
     margin: 0 auto;
     max-width: 22rem;
   }
@@ -81,10 +73,10 @@
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_cursor_pointer {
     border-radius: 18px;
-    border: 1px solid rgba(13, 85, 117, 0.18);
+    border: 1px solid rgba(13, 85, 117, 0.12);
     padding: 1rem 1.25rem;
     background: #ffffff;
-    box-shadow: 0 18px 32px rgba(10, 68, 96, 0.12);
+    box-shadow: 0 18px 28px rgba(10, 68, 96, 0.08);
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_font_size_50 {
@@ -114,9 +106,9 @@
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 select {
     width: 100%;
     border-radius: 16px !important;
-    border: 1px solid rgba(118, 177, 196, 0.55) !important;
+    border: 1px solid #d2e5ee !important;
     padding: 0.85rem 1rem !important;
-    font-size: 0.98rem !important;
+    font-size: 0.95rem !important;
     background: #f6fbff !important;
     color: #0d4d6b !important;
     height: auto !important;
@@ -124,14 +116,14 @@
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 input[type="submit"] {
     width: 100% !important;
-    background: linear-gradient(135deg, #0f5f7b 0%, #76B1C4 100%) !important;
+    background: linear-gradient(90deg, #0f6f98 0%, #00a0d2 100%) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     letter-spacing: 0.16em;
     font-size: 1.05rem !important;
     padding: 1rem 1.25rem !important;
     border-radius: 18px !important;
-    box-shadow: 0 24px 38px rgba(0, 98, 140, 0.28);
+    box-shadow: 0 24px 36px rgba(0, 98, 140, 0.24);
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-64dc553,
@@ -274,98 +266,9 @@
     justify-content: center;
     padding: 1rem 1.25rem;
     border-radius: 18px;
-    background: linear-gradient(135deg, #0f5f7b 0%, #76B1C4 100%);
-    box-shadow: 0 22px 38px rgba(7, 54, 76, 0.28);
+    background: linear-gradient(90deg, #0f6f98 0%, #00a0d2 100%);
+    box-shadow: 0 22px 34px rgba(0, 98, 140, 0.24);
     letter-spacing: 0.16em;
     font-weight: 700;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 {
-    padding: 3.5rem 1.5rem 3.75rem;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 > .elementor-background-overlay {
-    background: linear-gradient(205deg, rgba(4, 32, 46, 0.92) 0%, rgba(15, 73, 96, 0.86) 52%, rgba(118, 177, 196, 0.78) 100%);
-    opacity: 1;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 > .elementor-container {
-    justify-content: center;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-588092fc,
-  body.home .elementor-11055 .elementor-element.elementor-element-45b6a175,
-  body.home .elementor-11055 .elementor-element.elementor-element-3bee40a7 {
-    text-align: center;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-588092fc .elementor-heading-title {
-    font-size: 0.82rem;
-    letter-spacing: 0.28em;
-    line-height: 1.6;
-    text-transform: uppercase;
-    color: rgba(230, 245, 250, 0.92);
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-45b6a175 .elementor-heading-title {
-    font-size: 1.95rem;
-    line-height: 1.28;
-    letter-spacing: 0.02em;
-    color: #ffffff;
-    margin: 0 auto 0.75rem;
-    max-width: 20rem;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-3bee40a7 .elementor-heading-title {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: rgba(232, 244, 248, 0.9);
-    margin: 0 auto 1.75rem;
-    max-width: 24rem;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-78fd5a7f .elementor-heading-title,
-  body.home .elementor-11055 .elementor-element.elementor-element-10879d7e .elementor-heading-title {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    letter-spacing: 0.12em;
-    color: rgba(236, 248, 252, 0.9);
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-2b6709ff .elementor-heading-title {
-    color: rgba(118, 177, 196, 0.9);
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-6ace8514 .elementor-button {
-    width: 100%;
-    justify-content: center;
-    padding: 1rem 1.25rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #0f5f7b 0%, #76B1C4 100%);
-    box-shadow: 0 20px 36px rgba(7, 54, 76, 0.32);
-    letter-spacing: 0.18em;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-6ace8514 .elementor-button:hover,
-  body.home .elementor-11055 .elementor-element.elementor-element-6ace8514 .elementor-button:focus {
-    background: linear-gradient(135deg, #0d4e65 0%, #5fa6bf 100%);
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-42c9287d .elementor-button {
-    width: 100%;
-    justify-content: center;
-    padding: 0.95rem 1.25rem;
-    border-radius: 999px;
-    background: transparent;
-    border: 1px solid rgba(118, 177, 196, 0.7);
-    color: rgba(240, 252, 255, 0.92);
-    letter-spacing: 0.18em;
-  }
-
-  body.home .elementor-11055 .elementor-element.elementor-element-42c9287d .elementor-button:hover,
-  body.home .elementor-11055 .elementor-element.elementor-element-42c9287d .elementor-button:focus {
-    background: rgba(118, 177, 196, 0.18);
-    border-color: rgba(118, 177, 196, 0.92);
-    color: #ffffff;
   }
 }
