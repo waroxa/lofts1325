@@ -34,50 +34,52 @@ get_header();
     <main id="loft1325-mobile-homepage" class="loft1325-mobile-home">
         <section class="loft1325-mobile-home__hero" style="<?php echo $hero_background ? 'background-image: url(' . esc_url( $hero_background ) . ');' : ''; ?>">
             <div class="loft1325-mobile-home__hero-overlay"></div>
-            <div class="loft1325-mobile-home__hero-content">
-                <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
-                <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
+            <div class="loft1325-mobile-home__hero-body">
+                <div class="loft1325-mobile-home__hero-content">
+                    <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
+                    <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
+                </div>
+
+                <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
+                    <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
+                    <div class="loft1325-mobile-home__search-location">
+                        <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>
+                        <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
+                    </div>
+                    <div class="loft1325-mobile-home__search-form">
+                        <?php
+                        $search_form_markup = do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' );
+
+                        $search_form_markup = str_replace(
+                            array(
+                                'CHECK-IN',
+                                'CHECK-OUT',
+                                'GUESTS',
+                                'CHECK AVAILABILITY',
+                                'Check In',
+                                'Check Out',
+                                'Guests',
+                            ),
+                            array(
+                                __( 'Arrivée', 'loft1325-mobile-home' ),
+                                __( 'Départ', 'loft1325-mobile-home' ),
+                                __( 'Invités', 'loft1325-mobile-home' ),
+                                $plugin->get_string( 'search_submit_label' ),
+                                __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
+                                __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
+                                __( 'Invités', 'loft1325-mobile-home' ),
+                            ),
+                            $search_form_markup
+                        );
+
+                        echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        ?>
+                    </div>
+                </div>
+
                 <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
-            </div>
 
-            <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
-                <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
-                <div class="loft1325-mobile-home__search-location">
-                    <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>
-                    <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
-                </div>
-                <div class="loft1325-mobile-home__search-form">
-                    <?php
-                    $search_form_markup = do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' );
-
-                    $search_form_markup = str_replace(
-                        array(
-                            'CHECK-IN',
-                            'CHECK-OUT',
-                            'GUESTS',
-                            'CHECK AVAILABILITY',
-                            'Check In',
-                            'Check Out',
-                            'Guests',
-                        ),
-                        array(
-                            __( 'Arrivée', 'loft1325-mobile-home' ),
-                            __( 'Départ', 'loft1325-mobile-home' ),
-                            __( 'Invités', 'loft1325-mobile-home' ),
-                            $plugin->get_string( 'search_submit_label' ),
-                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                            __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                            __( 'Invités', 'loft1325-mobile-home' ),
-                        ),
-                        $search_form_markup
-                    );
-
-                    echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                    ?>
-                </div>
-            </div>
-
-            <div class="loft1325-mobile-home__hero-actions">
+                <div class="loft1325-mobile-home__hero-actions">
                 <?php if ( $plugin->get_string( 'hero_primary_label' ) ) : ?>
                     <a class="loft1325-mobile-home__btn loft1325-mobile-home__btn--primary" href="<?php echo esc_url( $plugin->get_string( 'hero_primary_url' ) ); ?>">
                         <?php echo esc_html( $plugin->get_string( 'hero_primary_label' ) ); ?>
@@ -88,6 +90,7 @@ get_header();
                         <?php echo esc_html( $plugin->get_string( 'hero_secondary_label' ) ); ?>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         </section>
 
