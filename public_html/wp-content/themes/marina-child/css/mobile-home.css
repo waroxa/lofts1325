@@ -58,13 +58,13 @@
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_search_elem_component_l3 {
-    border-radius: 24px;
+    border-radius: 20px;
     background: #ffffff;
-    padding: 1.85rem 1.75rem 1.65rem;
-    box-shadow: 0 32px 64px rgba(8, 41, 60, 0.18);
+    padding: 1.25rem 1.35rem 1.15rem;
+    box-shadow: 0 24px 48px rgba(8, 41, 60, 0.16);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_width_100_percentage_all_iphone,
@@ -80,15 +80,15 @@
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_cursor_pointer {
-    border-radius: 18px;
+    border-radius: 16px;
     border: 1px solid rgba(13, 85, 117, 0.18);
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1rem;
     background: #ffffff;
-    box-shadow: 0 18px 32px rgba(10, 68, 96, 0.12);
+    box-shadow: 0 14px 28px rgba(10, 68, 96, 0.12);
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_font_size_50 {
-    font-size: 2.1rem !important;
+    font-size: 1.75rem !important;
     color: #0d4d6b !important;
   }
 
@@ -102,7 +102,7 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    gap: 0.65rem;
+    gap: 0.5rem;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_section.nd_booking_height_15,
@@ -113,10 +113,10 @@
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 input[type="text"],
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 select {
     width: 100%;
-    border-radius: 16px !important;
+    border-radius: 14px !important;
     border: 1px solid rgba(118, 177, 196, 0.55) !important;
-    padding: 0.85rem 1rem !important;
-    font-size: 0.98rem !important;
+    padding: 0.65rem 0.9rem !important;
+    font-size: 0.94rem !important;
     background: #f6fbff !important;
     color: #0d4d6b !important;
     height: auto !important;
@@ -128,10 +128,10 @@
     color: #ffffff !important;
     font-weight: 700 !important;
     letter-spacing: 0.16em;
-    font-size: 1.05rem !important;
-    padding: 1rem 1.25rem !important;
-    border-radius: 18px !important;
-    box-shadow: 0 24px 38px rgba(0, 98, 140, 0.28);
+    font-size: 1.02rem !important;
+    padding: 0.85rem 1.1rem !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 34px rgba(0, 98, 140, 0.26);
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-64dc553,
