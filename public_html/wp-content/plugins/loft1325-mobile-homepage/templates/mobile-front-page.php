@@ -55,9 +55,12 @@ get_header();
                     data-nights-plural="<?php echo esc_attr( __( 'nuits', 'loft1325-mobile-home' ) ); ?>"
                 >
                     <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
+                    <?php $location_value = $plugin->get_string( 'search_location_value' ); ?>
                     <div class="loft1325-mobile-home__search-location">
                         <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>
-                        <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
+                        <?php if ( '' !== $location_value ) : ?>
+                            <span class="loft1325-mobile-home__search-location-value"><?php echo esc_html( $location_value ); ?></span>
+                        <?php endif; ?>
                     </div>
                     <div class="loft1325-mobile-home__search-form">
                         <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
