@@ -340,6 +340,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 'hero_secondary_url'     => '/contact',
                 'search_card_title'      => __( 'Concierge Virtuel', 'loft1325-mobile-home' ),
                 'search_location_label'  => __( 'Où', 'loft1325-mobile-home' ),
+                'search_location_value'  => '',
                 'search_date_label'      => __( 'Quand', 'loft1325-mobile-home' ),
                 'search_guests_label'    => __( 'Invités', 'loft1325-mobile-home' ),
                 'search_submit_label'    => __( 'Rechercher', 'loft1325-mobile-home' ),
