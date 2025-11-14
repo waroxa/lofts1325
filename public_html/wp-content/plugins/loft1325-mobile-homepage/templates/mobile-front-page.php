@@ -40,7 +40,18 @@ get_header();
                     <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
                 </div>
 
-                <div class="loft1325-mobile-home__search-card" id="loft1325-mobile-home-search">
+                <div
+                    class="loft1325-mobile-home__search-card"
+                    id="loft1325-mobile-home-search"
+                    data-date-label="<?php echo esc_attr( $plugin->get_string( 'search_date_label' ) ); ?>"
+                    data-arrival-label="<?php echo esc_attr( __( 'Arrivée', 'loft1325-mobile-home' ) ); ?>"
+                    data-departure-label="<?php echo esc_attr( __( 'Départ', 'loft1325-mobile-home' ) ); ?>"
+                    data-guests-label="<?php echo esc_attr( $plugin->get_string( 'search_guests_label' ) ); ?>"
+                    data-submit-label="<?php echo esc_attr( $plugin->get_string( 'search_submit_label' ) ); ?>"
+                    data-date-placeholder="<?php echo esc_attr( __( 'Sélectionner les dates', 'loft1325-mobile-home' ) ); ?>"
+                    data-guests-singular="<?php echo esc_attr( __( 'invité', 'loft1325-mobile-home' ) ); ?>"
+                    data-guests-plural="<?php echo esc_attr( __( 'invités', 'loft1325-mobile-home' ) ); ?>"
+                >
                     <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
                     <div class="loft1325-mobile-home__search-location">
                         <span class="loft1325-mobile-home__search-location-label"><?php esc_html_e( 'Où', 'loft1325-mobile-home' ); ?></span>

@@ -77,13 +77,18 @@
             return;
         }
 
-        var searchComponent = searchCard.querySelector('.nd_booking_search_elem_component_l3');
+        var searchComponent = searchCard.querySelector('.nd_booking_search_component_l2, .nd_booking_search_elem_component_l3');
         if (!searchComponent || searchComponent.classList.contains('loft1325-mobile-home__search--enhanced')) {
             return;
         }
 
         searchComponent.classList.add('loft1325-mobile-home__search--enhanced');
         searchComponent.classList.add('loft1325-mobile-home__search-component');
+
+        var header = searchComponent.querySelector('.nd_booking_section.nd_booking_text_align_center');
+        if (header) {
+            header.remove();
+        }
 
         var form = searchComponent.querySelector('form');
         if (!form) {
@@ -92,56 +97,77 @@
 
         form.classList.add('loft1325-mobile-home__search-form-inner');
 
-        var fieldsWrapper = form.querySelector('.nd_booking_section_box_search_field');
-        if (!fieldsWrapper) {
+        var dataset = searchCard.dataset || {};
+        var dateLabel = dataset.dateLabel || 'Quand';
+        var arrivalLabel = dataset.arrivalLabel || 'Arrivée';
+        var departureLabel = dataset.departureLabel || 'Départ';
+        var guestsLabel = dataset.guestsLabel || 'Invités';
+        var submitLabel = dataset.submitLabel || 'Rechercher';
+        var datePlaceholder = dataset.datePlaceholder || 'Sélectionner les dates';
+        var guestsSingular = dataset.guestsSingular || 'invité';
+        var guestsPlural = dataset.guestsPlural || 'invités';
+
+        var wrappers = form.querySelectorAll('.nd_booking_width_100_percentage');
+        var fieldsSource = null;
+        Array.prototype.forEach.call(wrappers, function (wrapper) {
+            if (!fieldsSource && (wrapper.querySelector('#nd_booking_open_calendar_from') || wrapper.querySelector('#nd_booking_open_calendar_to'))) {
+                fieldsSource = wrapper;
+            }
+        });
+
+        if (!fieldsSource) {
             return;
         }
 
-        fieldsWrapper.classList.add('loft1325-mobile-home__search-fields');
+        var fieldsContainer = document.createElement('div');
+        fieldsContainer.className = 'loft1325-mobile-home__search-fields';
+        form.insertBefore(fieldsContainer, fieldsSource);
 
-        var dateWrappers = fieldsWrapper.querySelectorAll('.nd_booking_width_50_percentage');
-        var guestsWrapper = fieldsWrapper.querySelector('.nd_booking_border_top_1_solid_grey');
+        var datesField = document.createElement('div');
+        datesField.className = 'loft1325-mobile-home__search-field loft1325-mobile-home__search-field--dates';
 
-        if (dateWrappers.length === 2) {
-            var datesField = document.createElement('div');
-            datesField.className = 'loft1325-mobile-home__search-field loft1325-mobile-home__search-field--dates';
+        var datesLabel = document.createElement('span');
+        datesLabel.className = 'loft1325-mobile-home__search-label';
+        datesLabel.textContent = dateLabel;
+        datesField.appendChild(datesLabel);
 
-            var datesLabel = document.createElement('span');
-            datesLabel.className = 'loft1325-mobile-home__search-label';
-            datesLabel.textContent = 'Quand';
-            datesField.appendChild(datesLabel);
+        var datesGroup = document.createElement('div');
+        datesGroup.className = 'loft1325-mobile-home__search-date-group';
+        datesField.appendChild(datesGroup);
 
-            var datesGroup = document.createElement('div');
-            datesGroup.className = 'loft1325-mobile-home__search-date-group';
-            datesField.appendChild(datesGroup);
+        var dateWrappers = fieldsSource.querySelectorAll('.nd_booking_width_50_percentage');
+        Array.prototype.forEach.call(dateWrappers, function (wrapper, index) {
+            wrapper.classList.add('loft1325-mobile-home__search-date');
+            wrapper.classList.remove('nd_booking_width_50_percentage', 'nd_booking_width_100_percentage_all_iphone', 'nd_booking_float_left');
 
-            Array.prototype.forEach.call(dateWrappers, function (wrapper, index) {
-                wrapper.classList.add('loft1325-mobile-home__search-date');
-
-                var label = wrapper.querySelector('.nd_options_color_grey');
-                if (label) {
-                    label.classList.add('loft1325-mobile-home__search-subheading');
-                    label.textContent = index === 0 ? 'Arrivée' : 'Départ';
-                }
-
-                datesGroup.appendChild(wrapper);
-            });
-
-            if (guestsWrapper) {
-                fieldsWrapper.insertBefore(datesField, guestsWrapper);
-            } else {
-                fieldsWrapper.appendChild(datesField);
+            var label = wrapper.querySelector('.nd_options_color_grey');
+            if (label) {
+                label.classList.add('loft1325-mobile-home__search-subheading');
+                label.textContent = index === 0 ? arrivalLabel : departureLabel;
             }
+
+            datesGroup.appendChild(wrapper);
+        });
+
+        if (dateWrappers.length) {
+            fieldsContainer.appendChild(datesField);
         }
+
+        var guestsWrapper = null;
+        Array.prototype.forEach.call(fieldsSource.children, function (child) {
+            if (!guestsWrapper && child.querySelector && child.querySelector('#nd_booking_archive_form_guests')) {
+                guestsWrapper = child;
+            }
+        });
 
         if (guestsWrapper) {
             guestsWrapper.classList.add('loft1325-mobile-home__search-field', 'loft1325-mobile-home__search-field--guests');
-            guestsWrapper.classList.remove('nd_booking_border_top_1_solid_grey');
+            guestsWrapper.classList.remove('nd_booking_width_100_percentage', 'nd_booking_width_100_percentage_all_iphone', 'nd_booking_float_left', 'nd_booking_border_top_1_solid_grey');
 
-            var guestsLabel = guestsWrapper.querySelector('.nd_options_color_grey');
-            if (guestsLabel) {
-                guestsLabel.classList.add('loft1325-mobile-home__search-label');
-                guestsLabel.textContent = 'Invités';
+            var guestsLabelEl = guestsWrapper.querySelector('.nd_options_color_grey');
+            if (guestsLabelEl) {
+                guestsLabelEl.classList.add('loft1325-mobile-home__search-label');
+                guestsLabelEl.textContent = guestsLabel;
             }
 
             var spacers = guestsWrapper.querySelectorAll(
@@ -151,49 +177,78 @@
                 spacer.style.display = 'none';
             });
 
-            var guestsNumber = guestsWrapper.querySelector('.nd_booking_guests_number');
-            if (guestsNumber) {
-                var updateGuestLabel = function () {
-                    var value = parseInt(guestsNumber.textContent, 10);
-                    if (isNaN(value) || value < 0) {
-                        value = 0;
-                    }
-                    guestsNumber.setAttribute('data-suffix', value === 1 ? 'invité' : 'invités');
-                };
-
-                updateGuestLabel();
-
-                var guestsObserver = new MutationObserver(function () {
-                    updateGuestLabel();
-                });
-                guestsObserver.observe(guestsNumber, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
-                });
-            }
+            fieldsContainer.appendChild(guestsWrapper);
         }
 
-        var submitRow = form.querySelector('.nd_booking_text_align_center');
+        if (fieldsSource.parentNode) {
+            fieldsSource.parentNode.removeChild(fieldsSource);
+        }
+
+        var spacer = form.querySelector('.nd_booking_section.nd_booking_height_30');
+        if (spacer) {
+            spacer.remove();
+        }
+
+        var submitRow = form.querySelector('.nd_booking_width_100_percentage.nd_booking_bg_greydark');
         if (submitRow) {
             submitRow.classList.add('loft1325-mobile-home__search-actions');
+            submitRow.classList.remove('nd_booking_bg_greydark');
         }
 
         var submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
-            submitButton.value = 'Rechercher';
+            submitButton.value = submitLabel;
         }
 
-        var labels = fieldsWrapper.querySelectorAll('.nd_booking_label_search');
-        Array.prototype.forEach.call(labels, function (label) {
-            label.classList.add('loft1325-mobile-home__search-label');
+        var dateInputs = form.querySelectorAll('#nd_booking_archive_form_date_range_from, #nd_booking_archive_form_date_range_to');
+        Array.prototype.forEach.call(dateInputs, function (input) {
+            if (!input.placeholder || input.placeholder === 'Check In' || input.placeholder === 'Check Out') {
+                input.placeholder = datePlaceholder;
+            }
         });
 
-        var dateInputs = fieldsWrapper.querySelectorAll('input[type="text"], input[type="date"]');
-        Array.prototype.forEach.call(dateInputs, function (input) {
-            if (!input.placeholder) {
-                input.placeholder = 'Sélectionner les dates';
+        var guestsNumber = form.querySelector('.nd_booking_guests_number');
+        var guestsWord = form.querySelector('.nd_booking_guests_number_word');
+
+        if (guestsWord) {
+            guestsWord.textContent = guestsSingular;
+        }
+
+        var updateGuestLabel = function () {
+            if (!guestsNumber) {
+                return;
             }
+
+            var value = parseInt(guestsNumber.textContent, 10);
+            if (isNaN(value) || value < 0) {
+                value = 0;
+            }
+
+            var suffix = value === 1 ? guestsSingular : guestsPlural;
+            guestsNumber.setAttribute('data-suffix', suffix);
+
+            if (guestsWord) {
+                guestsWord.textContent = suffix;
+            }
+        };
+
+        if (guestsNumber) {
+            updateGuestLabel();
+
+            var guestsObserver = new MutationObserver(function () {
+                updateGuestLabel();
+            });
+
+            guestsObserver.observe(guestsNumber, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+            });
+        }
+
+        var labels = form.querySelectorAll('.nd_booking_label_search');
+        Array.prototype.forEach.call(labels, function (label) {
+            label.classList.add('loft1325-mobile-home__search-label');
         });
     }
 

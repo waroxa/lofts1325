@@ -253,7 +253,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     letter-spacing: 0.01em;
     text-shadow: 0 18px 36px rgba(4, 14, 24, 0.45), 0 3px 12px rgba(4, 14, 24, 0.32);
     text-wrap: balance;
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .loft1325-mobile-home__hero-text {
@@ -367,6 +367,32 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__search-card > * {
     position: relative;
     z-index: 1;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_component_l2,
+#loft1325-mobile-home-search .nd_booking_search_elem_component_l3 {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#loft1325-mobile-home-search .nd_booking_section.nd_booking_text_align_center {
+    display: none !important;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_component_l2 form,
+#loft1325-mobile-home-search .nd_booking_search_elem_component_l3 form {
+    padding: 0 !important;
+}
+
+#loft1325-mobile-home-search .nd_booking_width_100_percentage.nd_booking_bg_greydark {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+#loft1325-mobile-home-search .nd_booking_width_100_percentage.nd_booking_bg_greydark > * {
+    width: 100%;
 }
 
 .loft1325-mobile-home__search-title {
@@ -741,30 +767,26 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 @media (min-width: 1024px) {
     .loft1325-mobile-home__hero-body {
         width: min(100%, 60rem);
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         gap: clamp(1.8rem, 4vw, 2.6rem);
     }
 
-    .loft1325-mobile-home__hero-content {
-        grid-column: 1 / 2;
-        gap: 1.2rem;
-    }
-
-    .loft1325-mobile-home__hero-text {
-        grid-column: 1 / 2;
-        margin: 0;
-    }
-
     .loft1325-mobile-home__search-card {
-        grid-column: 2 / 3;
-        align-self: stretch;
+        display: none;
+    }
+
+    .loft1325-mobile-home__hero-content,
+    .loft1325-mobile-home__hero-text,
+    .loft1325-mobile-home__hero-actions {
+        width: 100%;
+        max-width: 40rem;
     }
 
     .loft1325-mobile-home__hero-actions {
-        grid-column: 1 / -1;
         justify-content: flex-start;
-        max-width: none;
+        max-width: 100%;
     }
 }
 
