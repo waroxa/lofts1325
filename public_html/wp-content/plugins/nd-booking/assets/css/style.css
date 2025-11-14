@@ -1304,3 +1304,53 @@ body.single-causes .single-featured-image-header { display: none; }
     padding: 20px;
   }
 }
+
+/* --------------------------------------------- */
+/* Custom mobile styling for Lofts1325 frontend  */
+/* --------------------------------------------- */
+
+#nd_booking_single_cpt_1_title {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .nd_booking_search_component_l1 {
+    padding: 0 20px;
+  }
+
+  .nd_booking_search_component_l1 .nd_booking_bg_white {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 18px 35px rgba(6, 24, 44, 0.35);
+    padding: 24px 20px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .nd_booking_search_component_l1 .nd_options_color_grey,
+  .nd_booking_search_component_l1 .nd_options_color_greydark,
+  .nd_booking_search_component_l1 h1,
+  .nd_booking_search_component_l1 h6,
+  .nd_booking_search_component_l1 p,
+  .nd_booking_search_component_l1 span,
+  .nd_booking_search_component_l1 .nd_booking_guests_number {
+    color: #ffffff !important;
+  }
+
+  .nd_booking_search_component_l1 img {
+    filter: brightness(0) invert(1);
+  }
+
+  .nd_booking_search_component_l1 .nd_booking_display_inline_flex {
+    align-items: center;
+  }
+
+  .nd_booking_search_component_l1 input[type="submit"] {
+    background-color: #ffffff !important;
+    color: #002d4f !important;
+    border-radius: 999px;
+    box-shadow: 0 10px 25px rgba(6, 24, 44, 0.25);
+    border: none;
+  }
+}
