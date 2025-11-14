@@ -51,6 +51,8 @@ get_header();
                     data-date-placeholder="<?php echo esc_attr( __( 'Sélectionner les dates', 'loft1325-mobile-home' ) ); ?>"
                     data-guests-singular="<?php echo esc_attr( __( 'invité', 'loft1325-mobile-home' ) ); ?>"
                     data-guests-plural="<?php echo esc_attr( __( 'invités', 'loft1325-mobile-home' ) ); ?>"
+                    data-nights-singular="<?php echo esc_attr( __( 'nuit', 'loft1325-mobile-home' ) ); ?>"
+                    data-nights-plural="<?php echo esc_attr( __( 'nuits', 'loft1325-mobile-home' ) ); ?>"
                 >
                     <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
                     <div class="loft1325-mobile-home__search-location">
@@ -58,33 +60,7 @@ get_header();
                         <span class="loft1325-mobile-home__search-location-value">Loft1325, Québec</span>
                     </div>
                     <div class="loft1325-mobile-home__search-form">
-                        <?php
-                        $search_form_markup = do_shortcode( '[nd_booking_search layout="2" button_label="' . esc_attr( $plugin->get_string( 'search_submit_label' ) ) . '"]' );
-
-                        $search_form_markup = str_replace(
-                            array(
-                                'CHECK-IN',
-                                'CHECK-OUT',
-                                'GUESTS',
-                                'CHECK AVAILABILITY',
-                                'Check In',
-                                'Check Out',
-                                'Guests',
-                            ),
-                            array(
-                                __( 'Arrivée', 'loft1325-mobile-home' ),
-                                __( 'Départ', 'loft1325-mobile-home' ),
-                                __( 'Invités', 'loft1325-mobile-home' ),
-                                $plugin->get_string( 'search_submit_label' ),
-                                __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                                __( 'Sélectionner les dates', 'loft1325-mobile-home' ),
-                                __( 'Invités', 'loft1325-mobile-home' ),
-                            ),
-                            $search_form_markup
-                        );
-
-                        echo $search_form_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        ?>
+                        <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                 </div>
 

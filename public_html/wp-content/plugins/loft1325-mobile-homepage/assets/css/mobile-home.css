@@ -1220,3 +1220,72 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
         width: 100%;
     }
 }
+
+#loft1325-mobile-home-search .nd_booking_search_form {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: clamp(1.2rem, 3.2vw, 1.6rem);
+    gap: clamp(1rem, 3vw, 1.4rem);
+    border-radius: 20px;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field {
+    flex: 1 1 100%;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__label {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__control,
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__summary {
+    min-height: 52px;
+    height: 52px;
+    padding-inline: 16px;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__summary {
+    justify-content: center;
+    text-align: center;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guests {
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guest-btn {
+    flex: 0 0 auto;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guests-value {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field--actions {
+    min-width: 0;
+    width: 100%;
+}
+
+#loft1325-mobile-home-search .nd_booking_search_form button.loft-search-toolbar__submit {
+    width: 100%;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+@media (min-width: 600px) {
+    #loft1325-mobile-home-search .nd_booking_search_form {
+        gap: 20px;
+    }
+
+    #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field {
+        flex: 1 1 calc(50% - 20px);
+    }
+
+    #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field--actions {
+        flex-basis: 100%;
+    }
+}
