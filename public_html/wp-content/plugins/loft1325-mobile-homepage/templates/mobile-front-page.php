@@ -38,6 +38,7 @@ get_header();
                 <div class="loft1325-mobile-home__hero-content">
                     <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
                     <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
+                    <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
                 </div>
 
                 <div
@@ -66,8 +67,6 @@ get_header();
                         <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                 </div>
-
-                <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
 
                 <div class="loft1325-mobile-home__hero-actions">
                 <?php if ( $plugin->get_string( 'hero_primary_label' ) ) : ?>
