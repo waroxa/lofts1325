@@ -178,7 +178,36 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $script_uri  = plugin_dir_url( __FILE__ ) . 'assets/js/mobile-home.js';
             $script_ver  = file_exists( $script_path ) ? (string) filemtime( $script_path ) : '1.0.0';
 
-            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array(), $script_ver, true );
+            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array( 'jquery', 'jquery-ui-datepicker' ), $script_ver, true );
+
+            $this->enqueue_search_dependencies();
+        }
+
+        /**
+         * Ensure the ND Booking search dependencies are available for the mobile form.
+         */
+        private function enqueue_search_dependencies() {
+            wp_enqueue_script( 'jquery-ui-datepicker' );
+
+            $nd_booking_search_file = WP_PLUGIN_DIR . '/nd-booking/addons/visual/search/index.php';
+
+            if ( ! file_exists( $nd_booking_search_file ) ) {
+                return;
+            }
+
+            $datepicker_path = plugin_dir_path( $nd_booking_search_file ) . 'jquery-ui-datepicker.css';
+
+            if ( ! file_exists( $datepicker_path ) ) {
+                return;
+            }
+
+            $datepicker_uri = plugin_dir_url( $nd_booking_search_file ) . 'jquery-ui-datepicker.css';
+            $handle         = 'nd-booking-datepicker';
+            $version        = (string) filemtime( $datepicker_path );
+
+            if ( ! wp_style_is( $handle, 'enqueued' ) ) {
+                wp_enqueue_style( $handle, $datepicker_uri, array(), $version );
+            }
         }
 
         /**
@@ -217,6 +246,78 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             }
 
             return $classes;
+        }
+
+        /**
+         * Generate the ND Booking search form markup used on the mobile homepage.
+         *
+         * @return string
+         */
+        public function get_mobile_search_form_markup() {
+            $this->enqueue_search_dependencies();
+
+            $action = function_exists( 'nd_booking_search_page' ) ? nd_booking_search_page() : home_url( '/' );
+
+            $check_in_ts  = current_time( 'timestamp' );
+            $check_out_ts = $check_in_ts + DAY_IN_SECONDS;
+
+            $check_in_value  = wp_date( 'm/d/Y', $check_in_ts );
+            $check_out_value = wp_date( 'm/d/Y', $check_out_ts );
+
+            $default_guests = 1;
+            $default_nights = max( 1, (int) round( ( $check_out_ts - $check_in_ts ) / DAY_IN_SECONDS ) );
+
+            $nights_label = sprintf( _n( '%s nuit', '%s nuits', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
+            $guests_label = sprintf( _n( '%s invité', '%s invités', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
+
+            ob_start();
+            ?>
+            <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $action ); ?>" method="get">
+                <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
+                    <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
+                        <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrivée', 'nd-booking' ); ?></label>
+                        <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
+                            <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_in_value ); ?>" autocomplete="off" readonly />
+                        </div>
+                    </div>
+
+                    <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
+                        <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php esc_html_e( 'Départ', 'nd-booking' ); ?></label>
+                        <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
+                            <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_out_value ); ?>" autocomplete="off" readonly />
+                        </div>
+                    </div>
+
+                    <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
+                        <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php esc_html_e( 'Invités', 'nd-booking' ); ?></label>
+                        <div class="loft-search-toolbar__control loft-search-toolbar__control--guests loft-search-toolbar__group loft-search-toolbar__guests">
+                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php esc_attr_e( 'Diminuer le nombre d’invités', 'nd-booking' ); ?>">−</button>
+                            <span class="loft-search-toolbar__guests-value" id="loft_search_guest_display"><?php echo esc_html( $guests_label ); ?></span>
+                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php esc_attr_e( 'Augmenter le nombre d’invités', 'nd-booking' ); ?>">+</button>
+                        </div>
+                        <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $default_guests ); ?>" />
+                    </div>
+
+                    <div class="loft-search-toolbar__field loft-search-toolbar__field--summary">
+                        <span class="loft-search-toolbar__label"><?php esc_html_e( 'Nuits', 'nd-booking' ); ?></span>
+                        <div class="loft-search-toolbar__summary loft-search-toolbar__group loft-search-toolbar__nights" id="nd_booking_nights_display"><?php echo esc_html( $nights_label ); ?></div>
+                    </div>
+
+                    <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
+                        <span class="loft-search-toolbar__label">&nbsp;</span>
+                        <button type="submit" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php echo esc_html( $this->get_string( 'search_submit_label' ) ); ?></button>
+                    </div>
+                </div>
+
+                <input type="hidden" id="nd_booking_archive_form_branches" name="nd_booking_archive_form_branches" value="" />
+                <input type="hidden" id="nd_booking_archive_form_max_price_for_day" name="nd_booking_archive_form_max_price_for_day" value="" />
+                <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="" />
+                <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="" />
+                <input type="hidden" id="nd_booking_archive_form_branch_stars" name="nd_booking_archive_form_branch_stars" value="" />
+            </form>
+            <?php
+
+            return trim( ob_get_clean() );
         }
 
         /**
