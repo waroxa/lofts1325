@@ -1,19 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
 body.loft1325-mobile-home-active {
-    font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f5f7fa;
-    color: #0f1b2d;
-    --loft1325-brand: #76B1C4;
-    --loft1325-brand-dark: #0f4c63;
-    --loft1325-brand-darker: #0a3648;
-    --loft1325-brand-light: #9fd0dd;
-    --loft1325-accent: #d8b675;
-    --loft1325-accent-soft: rgba(216, 182, 117, 0.18);
-    --loft1325-surface: #ffffff;
-    --loft1325-surface-muted: #f5f7fa;
-    --loft1325-text: #0f1b2d;
-    --loft1325-text-soft: rgba(15, 27, 45, 0.68);
-    --loft1325-text-on-dark: rgba(235, 247, 252, 0.94);
-    --loft1325-shadow-soft: 0 24px 42px rgba(12, 55, 72, 0.18);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background-color: #0A0E14;
+    color: #E8EDF2;
+    --loft1325-brand: #D4AF37;
+    --loft1325-brand-dark: #B9962F;
+    --loft1325-brand-darker: #8A7324;
+    --loft1325-brand-light: #F2D87A;
+    --loft1325-accent: #D4AF37;
+    --loft1325-accent-soft: rgba(212, 175, 55, 0.16);
+    --loft1325-surface: #FFFFFF;
+    --loft1325-surface-muted: #0F141C;
+    --loft1325-text: #0B0B0B;
+    --loft1325-text-soft: rgba(11, 11, 11, 0.7);
+    --loft1325-text-on-dark: #FFFFFF;
+    --loft1325-shadow-soft: 0 22px 48px rgba(0, 0, 0, 0.28);
 }
 
 body.loft1325-mobile-home-active .nicdark_site > .nicdark_section.nicdark_bg_greydark,
@@ -53,7 +55,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__wrapper {
     position: relative;
-    background: var(--loft1325-surface-muted);
+    background: #0A0E14;
     min-height: 100vh;
 }
 
@@ -62,10 +64,10 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.1rem 1.5rem 0.9rem;
-    background-color: #ffffff;
-    border-bottom: 1px solid rgba(15, 27, 45, 0.06);
-    color: var(--loft1325-text);
+    padding: 1.15rem 1.5rem;
+    background-color: #0A0E14;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
     position: sticky;
     top: 0;
     z-index: 5;
@@ -78,9 +80,10 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__site-title {
     font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--loft1325-text);
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.05em;
+    font-family: 'Playfair Display', serif;
 }
 
 .loft1325-mobile-home__nav-toggle {
@@ -185,15 +188,15 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__hero {
     position: relative;
     padding: clamp(2.6rem, 9vw, 3.25rem) 1.5rem clamp(3.1rem, 12vw, 3.9rem);
-    color: #f5f8fb;
-    background-color: #051224;
-    background: linear-gradient(180deg, rgba(5, 18, 36, 0.95) 0%, rgba(7, 41, 63, 0.92) 52%, rgba(11, 68, 98, 0.95) 100%);
+    color: #FFFFFF;
+    background-color: #0A0E14;
     overflow: hidden;
     isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: clamp(1.05rem, 4.6vw, 2.2rem);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .loft1325-mobile-home__hero-body {
@@ -217,7 +220,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(6, 18, 32, 0.88) 0%, rgba(6, 18, 32, 0.7) 26%, rgba(6, 18, 32, 0.45) 60%, rgba(4, 14, 24, 0.65) 100%);
+    background: rgba(10, 14, 20, 0.78);
     mix-blend-mode: multiply;
     opacity: 1;
     z-index: 1;
@@ -238,45 +241,42 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__hero-content--after-search {
     padding: 1.25rem 1.15rem;
     border-radius: 18px;
-    background: linear-gradient(145deg, rgba(8, 24, 40, 0.9), rgba(8, 41, 63, 0.78));
-    border: 1px solid rgba(235, 247, 252, 0.16);
-    box-shadow: 0 18px 32px rgba(4, 14, 24, 0.32);
-    backdrop-filter: blur(6px);
+    background: rgba(12, 16, 24, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.32);
 }
 
 .loft1325-mobile-home__hero-pill {
     display: inline-flex;
     align-self: flex-start;
     padding: 0.45rem 1.1rem;
-    border-radius: 999px;
-    background: linear-gradient(120deg, rgba(118, 177, 196, 0.28), rgba(32, 86, 113, 0.42));
-    border: 1px solid rgba(222, 241, 247, 0.55);
-    font-size: 0.74rem;
+    border-radius: 12px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.55);
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     font-weight: 700;
     color: #ffffff;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 14px 28px rgba(4, 14, 24, 0.32);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
 }
 
 .loft1325-mobile-home__hero-title {
-    font-size: clamp(2.1rem, 6.5vw, 2.8rem);
+    font-size: clamp(2.2rem, 6.8vw, 3rem);
     line-height: 1.18;
     font-weight: 700;
     margin: 0;
-    letter-spacing: 0.01em;
-    text-shadow: 0 18px 36px rgba(4, 14, 24, 0.45), 0 3px 12px rgba(4, 14, 24, 0.32);
+    letter-spacing: 0.02em;
     text-wrap: balance;
-    color: #ffffff !important;
+    color: #FFFFFF !important;
+    font-family: 'Playfair Display', serif;
 }
 
 .loft1325-mobile-home__hero-text {
-    font-size: clamp(1rem, 4.4vw, 1.15rem);
-    line-height: 1.65;
+    font-size: clamp(1.05rem, 4.4vw, 1.2rem);
+    line-height: 1.7;
     margin: 0;
-    color: rgba(233, 244, 250, 0.94);
-    text-shadow: 0 12px 26px rgba(4, 14, 24, 0.38);
+    color: rgba(255, 255, 255, 0.82);
     max-width: 32rem;
     justify-self: flex-start;
 }
@@ -298,52 +298,52 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: 999px;
+    padding: 0.9rem 1.35rem;
+    border-radius: 12px;
     text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.98rem;
+    font-weight: 700;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
     border: 1px solid transparent;
     cursor: pointer;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
 }
 
 .loft1325-mobile-home__btn--primary {
-    background-color: var(--loft1325-brand-dark);
-    color: #ffffff;
-    box-shadow: 0 14px 28px rgba(8, 60, 82, 0.22);
+    background-color: var(--loft1325-brand);
+    color: #FFFFFF;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26);
 }
 
 .loft1325-mobile-home__btn--primary:hover,
 .loft1325-mobile-home__btn--primary:focus {
-    background-color: #135b78;
+    background-color: var(--loft1325-brand-dark);
     transform: translateY(-1px);
-    box-shadow: 0 18px 32px rgba(8, 60, 82, 0.25);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 
 .loft1325-mobile-home__btn--ghost {
     background-color: transparent;
-    color: var(--loft1325-brand-dark);
-    border-color: rgba(19, 91, 120, 0.45);
+    color: #FFFFFF;
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
 .loft1325-mobile-home__btn--ghost:hover,
 .loft1325-mobile-home__btn--ghost:focus {
-    background-color: rgba(19, 91, 120, 0.08);
-    color: #0f1b2d;
+    background-color: rgba(212, 175, 55, 0.08);
+    color: #FFFFFF;
 }
 
 .loft1325-mobile-home__btn--secondary {
-    background: var(--loft1325-text);
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 10px 20px rgba(15, 27, 45, 0.25);
+    background: #0A0E14;
+    color: #FFFFFF;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.32);
 }
 
 .loft1325-mobile-home__btn--secondary:hover,
 .loft1325-mobile-home__btn--secondary:focus {
-    background: #14263c;
+    background: #111926;
 }
 
 .loft1325-mobile-home__btn--ghost,
@@ -357,17 +357,16 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     z-index: 3;
     width: 100%;
     margin: 0;
-    padding: clamp(1.9rem, 4.2vw, 2.4rem) clamp(1.8rem, 5.5vw, 2.6rem) clamp(2.15rem, 5vw, 2.8rem);
-    border-radius: 30px;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.96) 6%, rgba(231, 242, 249, 0.99) 58%, rgba(215, 231, 240, 0.94) 100%);
-    box-shadow: 0 34px 64px rgba(7, 40, 61, 0.2);
-    border: 1px solid rgba(118, 177, 196, 0.38);
+    padding: clamp(1.85rem, 4vw, 2.4rem) clamp(1.65rem, 4.8vw, 2.35rem) clamp(2.05rem, 5vw, 2.6rem);
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.22);
+    border: 1.5px solid #E5E7EB;
     text-align: left;
     display: grid;
-    gap: clamp(1.15rem, 3.4vw, 1.8rem);
+    gap: clamp(1.1rem, 3.2vw, 1.6rem);
     overflow: hidden;
-    color: var(--loft1325-text, #0f1b2d);
-    backdrop-filter: blur(22px);
+    color: #0B0B0B;
 }
 .loft1325-mobile-home__search-card,
 .loft1325-mobile-home__hero-actions {
@@ -375,30 +374,11 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     justify-self: center;
 }
 
-.loft1325-mobile-home__search-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(140deg, rgba(118, 177, 196, 0.22), rgba(12, 81, 110, 0.08));
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.92;
-}
-
-.loft1325-mobile-home__search-card::after {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -20%;
-    width: 70%;
-    height: 70%;
-    transform: rotate(22deg);
-    border-radius: 30px;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 68%);
-    opacity: 0.45;
-    pointer-events: none;
-    z-index: 0;
+.loft1325-mobile-home__search-card::before,
+.loft1325-mobile-home__search-card::after,
+.loft1325-mobile-home__search-fields::after,
+.loft1325-mobile-home__search-field::after {
+    display: none !important;
 }
 
 .loft1325-mobile-home__search-card > * {
@@ -433,12 +413,13 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 }
 
 .loft1325-mobile-home__search-title {
-    font-size: 1.28rem;
+    font-size: 1.32rem;
     font-weight: 700;
-    color: #0c3c52;
+    color: #0B0B0B;
     margin: 0;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
 }
 
 .loft1325-mobile-home__search-component {
@@ -450,11 +431,11 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     display: grid;
     gap: 0.45rem;
     padding: 1.15rem 1.4rem 1.1rem 3.4rem;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(244, 250, 255, 0.98) 0%, rgba(225, 238, 246, 0.98) 100%);
-    border: 1px solid rgba(118, 177, 196, 0.42);
-    box-shadow: 0 22px 44px rgba(7, 40, 61, 0.16);
-    color: #0f4c63;
+    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+    color: #0B0B0B;
 }
 
 .loft1325-mobile-home__search-location::before {
@@ -465,7 +446,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     transform: translateY(-50%);
     width: 28px;
     height: 28px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230f4c63' d='M12 2.5c-3.59 0-6.5 2.91-6.5 6.5 0 3.86 5.12 10.37 5.98 11.44.28.35.76.35 1.04 0 .86-1.07 5.98-7.58 5.98-11.44 0-3.59-2.91-6.5-6.5-6.5Zm0 9c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5Z'/%3E%3C/svg%3E") no-repeat center;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230B0B0B' d='M12 2.5c-3.59 0-6.5 2.91-6.5 6.5 0 3.86 5.12 10.37 5.98 11.44.28.35.76.35 1.04 0 .86-1.07 5.98-7.58 5.98-11.44 0-3.59-2.91-6.5-6.5-6.5Zm0 9c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5Z'/%3E%3C/svg%3E") no-repeat center;
     pointer-events: none;
 }
 
@@ -480,8 +461,8 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     width: 32%;
     height: 1px;
     margin: 0 auto;
-    background: linear-gradient(90deg, rgba(12, 76, 99, 0), rgba(12, 76, 99, 0.45), rgba(12, 76, 99, 0));
-    opacity: 0.6;
+    background: rgba(0, 0, 0, 0.08);
+    opacity: 1;
 }
 
 .loft1325-mobile-home__search-fields {
@@ -501,25 +482,19 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__search-field {
     position: relative;
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(234, 244, 250, 0.95) 100%);
-    border: 1px solid rgba(118, 177, 196, 0.28);
-    box-shadow: 0 24px 46px rgba(7, 40, 61, 0.18);
+    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
     padding: 1.05rem 1.2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    color: var(--loft1325-text, #0f1b2d);
+    gap: 0.65rem;
+    color: #0B0B0B;
 }
 
 .loft1325-mobile-home__search-field::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    pointer-events: none;
-    mix-blend-mode: screen;
+    display: none;
 }
 
 .loft1325-mobile-home__search-field--dates {
@@ -528,42 +503,34 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__search-label,
 .loft1325-mobile-home__search-location-label {
-    font-size: 0.75rem;
-    letter-spacing: 0.22em;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(12, 81, 110, 0.68);
+    color: #0B0B0B;
     font-weight: 700;
 }
 
 .loft1325-mobile-home__search-location-value {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #0a2a3c;
+    color: #0B0B0B;
     letter-spacing: 0.03em;
 }
 
 .loft1325-mobile-home__search-value {
     font-size: 1.08rem;
-    color: #041b2e;
+    color: #0B0B0B;
     font-weight: 600;
 }
 
 .loft1325-mobile-home__search-location::after {
-    content: '';
-    position: absolute;
-    right: 1.2rem;
-    bottom: 0.85rem;
-    width: 42px;
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(12, 81, 110, 0.1) 0%, rgba(12, 81, 110, 0.45) 52%, rgba(216, 182, 117, 0.6) 100%);
-    opacity: 0.8;
+    display: none;
 }
 
 .loft1325-mobile-home__search-subheading {
-    font-size: 0.68rem !important;
-    letter-spacing: 0.22em !important;
-    color: rgba(13, 77, 107, 0.65) !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.2em !important;
+    color: rgba(11, 11, 11, 0.7) !important;
     text-transform: uppercase;
     font-weight: 700 !important;
 }
@@ -589,10 +556,10 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__search-date .nd_booking_cursor_pointer {
     border-radius: 16px;
-    border: 1px solid rgba(13, 85, 117, 0.2);
+    border: 1.5px solid #E5E7EB;
     padding: 0.85rem 1.1rem;
     background: #ffffff;
-    box-shadow: inset 0 0 0 1px rgba(118, 177, 196, 0.25), 0 16px 28px rgba(10, 68, 96, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .loft1325-mobile-home__search-date .nd_booking_display_inline_flex {
@@ -609,7 +576,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 .loft1325-mobile-home__search-date .nd_booking_font_size_50 {
     font-size: 1.32rem !important;
-    color: #0f172a !important;
+    color: #0B0B0B !important;
     line-height: 1.1 !important;
     font-weight: 700 !important;
 }
@@ -617,13 +584,13 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 .loft1325-mobile-home__search-date .nd_booking_font_size_12 {
     font-size: 0.82rem !important;
     letter-spacing: 0.16em !important;
-    color: #0d4d6b !important;
+    color: rgba(11, 11, 11, 0.65) !important;
     text-transform: uppercase;
 }
 
 .loft1325-mobile-home__search-date img {
     width: 14px;
-    filter: invert(34%) sepia(23%) saturate(727%) hue-rotate(158deg) brightness(90%) contrast(92%);
+    filter: grayscale(1) brightness(0.1);
 }
 
 .loft1325-mobile-home__search-field--guests {
@@ -1292,35 +1259,29 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     max-width: none;
     width: 100%;
     margin: 0;
-    padding: clamp(1.35rem, 3.4vw, 1.8rem);
-    gap: clamp(1.1rem, 3.2vw, 1.6rem);
-    border-radius: 22px;
-    background: linear-gradient(140deg, rgba(247, 250, 252, 0.85) 0%, rgba(225, 238, 245, 0.92) 45%, rgba(209, 227, 237, 0.9) 100%);
-    border: 1px solid rgba(118, 177, 196, 0.3);
-    box-shadow: 0 26px 46px rgba(7, 40, 61, 0.16);
-    overflow: hidden;
+    padding: 0;
+    gap: clamp(1rem, 3vw, 1.4rem);
+    border-radius: 14px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 65%), radial-gradient(circle at 85% 90%, rgba(216, 182, 117, 0.18) 0%, rgba(216, 182, 117, 0) 55%);
-    pointer-events: none;
-    z-index: 0;
+    display: none;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding: 1.05rem 3.2rem 1.05rem 1.2rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(118, 177, 196, 0.28);
-    box-shadow: 0 18px 32px rgba(7, 40, 61, 0.14);
-    backdrop-filter: blur(10px);
+    gap: 0.65rem;
+    padding: 0;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     z-index: 1;
 }
 
@@ -1338,49 +1299,40 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field--date::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230b2c3f' d='M7 2a1 1 0 0 0-1 1v1H5a3 3 0 0 0-3 3v11a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-1V3a1 1 0 1 0-2 0v1H8V3a1 1 0 0 0-1-1m12 6v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8zm-8 3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 1 0 0-2h-3v-3a1 1 0 0 0-1-1'/%3E%3C/svg%3E") no-repeat center;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230B0B0B' d='M7 2a1 1 0 0 0-1 1v1H5a3 3 0 0 0-3 3v11a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-1V3a1 1 0 1 0-2 0v1H8V3a1 1 0 0 0-1-1m12 6v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8zm-8 3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 1 0 0-2h-3v-3a1 1 0 0 0-1-1'/%3E%3C/svg%3E") no-repeat center;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field--guests::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230b2c3f' d='M12 2a4 4 0 1 1 0 8a4 4 0 0 1 0-8m7 9c1.66 0 3 1.57 3 3.5S20.66 18 19 18s-3-1.57-3-3.5S17.34 11 19 11m-7 1c3.31 0 6 2.69 6 6v3H5v-3c0-3.31 2.69-6 6-6zm0 2c-2.22 0-4 1.85-4 4.13V19h8v-1.87C16 15.85 14.22 14 12 14m7 0a2 2 0 0 0-2 2c0 1.05.66 2 2 2s2-.95 2-2a2 2 0 0 0-2-2'/%3E%3C/svg%3E") no-repeat center;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230B0B0B' d='M12 2a4 4 0 1 1 0 8a4 4 0 0 1 0-8m7 9c1.66 0 3 1.57 3 3.5S20.66 18 19 18s-3-1.57-3-3.5S17.34 11 19 11m-7 1c3.31 0 6 2.69 6 6v3H5v-3c0-3.31 2.69-6 6-6zm0 2c-2.22 0-4 1.85-4 4.13V19h8v-1.87C16 15.85 14.22 14 12 14m7 0a2 2 0 0 0-2 2c0 1.05.66 2 2 2s2-.95 2-2a2 2 0 0 0-2-2'/%3E%3C/svg%3E") no-repeat center;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field--summary::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230b2c3f' d='M19 18v-5h2v7H3v-7h2v5zM4.21 11l7.07-7.07a1 1 0 0 1 1.42 0L19.79 11a1 1 0 0 1-.71 1.71H5a1 1 0 0 1-.79-1.71M12 6.41L8.41 10h7.18z'/%3E%3C/svg%3E") no-repeat center;
-}
-
-#loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__field::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath fill='%230B0B0B' d='M19 18v-5h2v7H3v-7h2v5zM4.21 11l7.07-7.07a1 1 0 0 1 1.42 0L19.79 11a1 1 0 0 1-.71 1.71H5a1 1 0 0 1-.79-1.71M12 6.41L8.41 10h7.18z'/%3E%3C/svg%3E") no-repeat center;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__label {
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     font-weight: 700;
-    color: rgba(12, 62, 84, 0.72);
+    color: #0B0B0B;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__group {
     display: flex;
     align-items: center;
     min-height: 54px;
-    padding: 0 18px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(236, 244, 249, 0.92) 100%);
-    border: 1px solid rgba(118, 177, 196, 0.32);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 12px 20px rgba(7, 40, 61, 0.12);
+    padding: 0 16px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__group:focus-within {
-    border-color: rgba(12, 81, 110, 0.5);
-    box-shadow: inset 0 0 0 1px rgba(12, 81, 110, 0.25), 0 18px 28px rgba(7, 40, 61, 0.18);
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
 }
 
@@ -1398,7 +1350,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     background: transparent;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #0b2537;
+    color: #0B0B0B;
     letter-spacing: 0.02em;
     padding: 0;
     outline: none;
@@ -1413,7 +1365,7 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     text-align: center;
     font-size: 1rem;
     font-weight: 600;
-    color: #0b2c3f;
+    color: #0B0B0B;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guests {
@@ -1423,14 +1375,14 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guest-btn {
     flex: 0 0 auto;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid rgba(12, 62, 84, 0.22);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(229, 241, 247, 0.9) 100%);
-    color: #0b2c3f;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1.5px solid #E5E7EB;
+    background: #FFFFFF;
+    color: #0B0B0B;
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1;
     display: inline-flex;
     align-items: center;
@@ -1442,8 +1394,8 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guest-btn:hover,
 #loft1325-mobile-home-search .nd_booking_search_form .loft-search-toolbar__guest-btn:focus {
     transform: translateY(-1px);
-    border-color: rgba(12, 81, 110, 0.4);
-    box-shadow: 0 10px 18px rgba(7, 40, 61, 0.16);
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     outline: none;
 }
 
@@ -1464,24 +1416,25 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 #loft1325-mobile-home-search .nd_booking_search_form button.loft-search-toolbar__submit {
     width: 100%;
     justify-content: center;
-    font-size: 1.05rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     padding: 0 1.2rem;
     height: 56px;
-    border-radius: 18px;
+    border-radius: 12px;
     border: none;
-    background: linear-gradient(135deg, #0f4c63 0%, #0a3648 48%, #051d2e 100%);
-    color: var(--loft1325-text-on-dark);
-    box-shadow: 0 22px 36px rgba(7, 40, 61, 0.24);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #D4AF37;
+    color: #FFFFFF;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form button.loft-search-toolbar__submit:hover,
 #loft1325-mobile-home-search .nd_booking_search_form button.loft-search-toolbar__submit:focus {
     transform: translateY(-2px);
-    box-shadow: 0 26px 40px rgba(7, 40, 61, 0.28);
+    background: #B9962F;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
 }
 
 @media (min-width: 600px) {
