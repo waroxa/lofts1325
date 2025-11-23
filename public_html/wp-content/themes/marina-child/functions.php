@@ -44,6 +44,7 @@ function marina_child_enqueue_custom_assets() {
 
     if ( is_front_page() ) {
         $mobile_home_path = get_stylesheet_directory() . '/css/mobile-home.css';
+        $home_translation_fix_path = get_stylesheet_directory() . '/js/home-translation-fix.js';
 
         if ( file_exists( $mobile_home_path ) && is_readable( $mobile_home_path ) ) {
             $mobile_home_version = (string) filemtime( $mobile_home_path );
@@ -53,6 +54,18 @@ function marina_child_enqueue_custom_assets() {
                 get_stylesheet_directory_uri() . '/css/mobile-home.css',
                 array( 'marina-child-header-fixes' ),
                 $mobile_home_version
+            );
+        }
+
+        if ( file_exists( $home_translation_fix_path ) && is_readable( $home_translation_fix_path ) ) {
+            $home_translation_fix_version = (string) filemtime( $home_translation_fix_path );
+
+            wp_enqueue_script(
+                'marina-child-home-translation-fix',
+                get_stylesheet_directory_uri() . '/js/home-translation-fix.js',
+                array(),
+                $home_translation_fix_version,
+                true
             );
         }
     }
