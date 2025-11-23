@@ -35,12 +35,6 @@ get_header();
         <section class="loft1325-mobile-home__hero" style="<?php echo $hero_background ? 'background-image: url(' . esc_url( $hero_background ) . ');' : ''; ?>">
             <div class="loft1325-mobile-home__hero-overlay"></div>
             <div class="loft1325-mobile-home__hero-body">
-                <div class="loft1325-mobile-home__hero-content">
-                    <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
-                    <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
-                    <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
-                </div>
-
                 <div
                     class="loft1325-mobile-home__search-card"
                     id="loft1325-mobile-home-search"
@@ -66,6 +60,12 @@ get_header();
                     <div class="loft1325-mobile-home__search-form">
                         <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
+                </div>
+
+                <div class="loft1325-mobile-home__hero-content loft1325-mobile-home__hero-content--after-search">
+                    <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
+                    <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
+                    <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
                 </div>
 
                 <div class="loft1325-mobile-home__hero-actions">
