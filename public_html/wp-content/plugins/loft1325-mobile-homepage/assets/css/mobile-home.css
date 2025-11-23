@@ -235,6 +235,15 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     max-width: 32rem;
 }
 
+.loft1325-mobile-home__hero-content--after-search {
+    padding: 1.25rem 1.15rem;
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(8, 24, 40, 0.9), rgba(8, 41, 63, 0.78));
+    border: 1px solid rgba(235, 247, 252, 0.16);
+    box-shadow: 0 18px 32px rgba(4, 14, 24, 0.32);
+    backdrop-filter: blur(6px);
+}
+
 .loft1325-mobile-home__hero-pill {
     display: inline-flex;
     align-self: flex-start;
