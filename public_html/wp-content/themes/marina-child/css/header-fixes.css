@@ -341,7 +341,7 @@
     background: #f8fafc;
     border: 1.5px solid #e5e7eb;
     border-radius: 16px;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -544,7 +544,7 @@
     background: #1f2937;
     border: none;
     border-radius: 10px;
-    box-shadow: 0 10px 22px rgba(17, 24, 39, 0.22);
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.16);
     color: #ffffff;
     cursor: pointer;
     display: inline-flex;
