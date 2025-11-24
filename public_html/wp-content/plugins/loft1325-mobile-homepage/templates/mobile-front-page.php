@@ -182,56 +182,6 @@ get_header();
         </section>
     </main>
 
-    <footer class="loft1325-mobile-home__footer" aria-labelledby="loft1325-mobile-footer-heading">
-        <h2 id="loft1325-mobile-footer-heading" class="screen-reader-text"><?php esc_html_e( 'Pied de page mobile Loft1325', 'loft1325-mobile-home' ); ?></h2>
-        <div class="loft1325-mobile-home__footer-brand">
-            <?php if ( has_custom_logo() ) : ?>
-                <?php the_custom_logo(); ?>
-            <?php else : ?>
-                <span class="loft1325-mobile-home__site-title"><?php bloginfo( 'name' ); ?></span>
-            <?php endif; ?>
-            <p class="loft1325-mobile-home__footer-tagline"><?php echo esc_html( $plugin->get_string( 'footer_legal' ) ); ?></p>
-        </div>
-        <div class="loft1325-mobile-home__footer-columns">
-            <div class="loft1325-mobile-home__footer-column">
-                <p class="loft1325-mobile-home__footer-heading"><?php echo esc_html( $plugin->get_string( 'footer_nav_heading' ) ); ?></p>
-                <?php
-                wp_nav_menu(
-                    array(
-                        'theme_location' => 'main-menu',
-                        'container'      => false,
-                        'menu_class'     => 'loft1325-mobile-home__footer-menu',
-                        'fallback_cb'    => '__return_empty_string',
-                    )
-                );
-                ?>
-            </div>
-            <div class="loft1325-mobile-home__footer-column">
-                <p class="loft1325-mobile-home__footer-heading"><?php echo esc_html( $plugin->get_string( 'footer_support_heading' ) ); ?></p>
-                <ul class="loft1325-mobile-home__footer-menu">
-                    <?php foreach ( array( 'faq', 'reglements', 'contact' ) as $slug ) :
-                        $page = get_page_by_path( $slug );
-                        if ( $page instanceof WP_Post ) :
-                            ?>
-                            <li><a href="<?php echo esc_url( get_permalink( $page ) ); ?>"><?php echo esc_html( get_the_title( $page ) ); ?></a></li>
-                        <?php endif;
-                    endforeach; ?>
-                </ul>
-            </div>
-            <?php $social_links = $plugin->get_social_links(); ?>
-            <?php if ( ! empty( $social_links ) ) : ?>
-                <div class="loft1325-mobile-home__footer-column">
-                    <p class="loft1325-mobile-home__footer-heading"><?php echo esc_html( $plugin->get_string( 'footer_social_heading' ) ); ?></p>
-                    <ul class="loft1325-mobile-home__footer-menu">
-                        <?php foreach ( $social_links as $link ) : ?>
-                            <li><a href="<?php echo esc_url( $link['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $link['label'] ); ?></a></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-        </div>
-        <p class="loft1325-mobile-home__footer-copy"><?php echo esc_html( $plugin->get_string( 'footer_copyright' ) ); ?></p>
-    </footer>
 </div>
 
 <?php

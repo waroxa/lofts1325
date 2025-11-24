@@ -32,7 +32,7 @@ body.loft1325-mobile-home-active .nicdark_site > .nicdark_section.nicdark_bg_whi
 }
 
 body.loft1325-mobile-home-active .nicdark_site {
-    background-color: transparent;
+    background-color: #f7f7f9;
     box-shadow: none;
 }
 
@@ -1089,64 +1089,6 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     margin-top: 0.5rem;
 }
 
-.loft1325-mobile-home__footer {
-    background: var(--loft1325-surface);
-    padding: 2.5rem 1.5rem 3rem;
-    display: grid;
-    gap: 2rem;
-    border-top: 1px solid rgba(118, 177, 196, 0.2);
-}
-
-.loft1325-mobile-home__footer-brand {
-    display: grid;
-    gap: 0.75rem;
-    justify-items: center;
-    text-align: center;
-}
-
-.loft1325-mobile-home__footer-brand img {
-    max-height: 42px;
-    width: auto;
-}
-
-.loft1325-mobile-home__footer-tagline {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--loft1325-text-soft);
-}
-
-.loft1325-mobile-home__footer-columns {
-    display: grid;
-    gap: 1.75rem;
-}
-
-.loft1325-mobile-home__footer-heading {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin: 0 0 0.75rem;
-    color: var(--loft1325-text);
-}
-
-.loft1325-mobile-home__footer-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 0.5rem;
-}
-
-.loft1325-mobile-home__footer-menu a {
-    color: rgba(15, 27, 45, 0.72);
-    text-decoration: none;
-    font-size: 0.92rem;
-    letter-spacing: 0.01em;
-}
-
-.loft1325-mobile-home__footer-menu a:hover,
-.loft1325-mobile-home__footer-menu a:focus {
-    color: var(--loft1325-brand-darker);
-}
-
 @media (max-width: 420px) {
     .loft1325-mobile-home__topbar {
         padding: 1rem 1.25rem 0.65rem;
@@ -1181,14 +1123,6 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     }
 }
 
-.loft1325-mobile-home__footer-copy {
-    text-align: center;
-    font-size: 0.78rem;
-    margin: 0;
-    color: rgba(15, 27, 45, 0.6);
-    line-height: 1.6;
-}
-
 .loft1325-mobile-home__empty {
     margin: 0;
     padding: 1.5rem;
@@ -1216,13 +1150,12 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
     }
 
     .loft1325-mobile-home__wrapper {
-        background: var(--loft1325-surface-muted);
+        background: #f7f7f9;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    .loft1325-mobile-home__footer,
     .loft1325-mobile-home__cta,
     .loft1325-mobile-home__rooms,
     .loft1325-mobile-home__features,
@@ -1230,6 +1163,42 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
         max-width: 520px;
         width: 100%;
     }
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .nd_booking_search_form {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .nd_booking_search_form * {
+    font-family: inherit !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .loft-search-toolbar__group {
+    background: #ffffff !important;
+    border: 1.5px solid #e5e7eb !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .loft-search-toolbar__input,
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .loft-search-toolbar__summary,
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .loft-search-toolbar__guests-value {
+    color: #1f2937 !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search .loft-search-toolbar__guest-btn {
+    background: #fdfdfd !important;
+    border-color: #e5e7eb !important;
+    color: #0f172a !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-home-search button.loft-search-toolbar__submit {
+    background: #ffd64f !important;
+    color: #0b0b0b !important;
+    border: none !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08) !important;
 }
 
 #loft1325-mobile-home-search .nd_booking_search_form {
