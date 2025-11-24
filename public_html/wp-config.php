@@ -1,5 +1,6 @@
 <?php
-define( 'WP_CACHE', true ); // By Speed Optimizer by SiteGround
+// Disable page cache to ensure dynamic plugins (e.g., TranslatePress) render content correctly.
+define( 'WP_CACHE', false ); // Previously enabled by Speed Optimizer by SiteGround
 
 /**
  * The base configuration for WordPress
