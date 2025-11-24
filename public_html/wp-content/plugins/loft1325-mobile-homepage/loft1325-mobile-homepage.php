@@ -346,7 +346,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 'search_submit_label'    => __( 'Rechercher', 'loft1325-mobile-home' ),
                 'rooms_heading'          => __( 'Lofts Haut de Gamme', 'loft1325-mobile-home' ),
                 'rooms_description'      => __( "Contrairement aux chambres d'hôtel traditionnelles, nos lofts offrent un espace de vie plus généreux, souvent 1,5 à 3 fois plus grand au même prix qu'une chambre d'hôtel.", 'loft1325-mobile-home' ),
-                'rooms_button_label'     => __( 'Nous joindre', 'loft1325-mobile-home' ),
+                'rooms_button_label'     => __( 'Réservez', 'loft1325-mobile-home' ),
                 'rooms_view_all_label'   => __( 'Voir tous les lofts', 'loft1325-mobile-home' ),
                 'cta_heading'            => __( "Prêt à vivre l'expérience?", 'loft1325-mobile-home' ),
                 'cta_description'        => __( 'Réservez dès maintenant votre séjour et découvrez une nouvelle façon de voyager.', 'loft1325-mobile-home' ),
