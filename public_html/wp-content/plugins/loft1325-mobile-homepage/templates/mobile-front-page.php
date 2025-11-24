@@ -12,6 +12,21 @@ $plugin = Loft1325_Mobile_Homepage::instance();
 $hero_background_id = (int) get_theme_mod( 'loft1325_mobile_home_hero_background', 0 );
 $hero_background    = $hero_background_id ? wp_get_attachment_image_url( $hero_background_id, 'full' ) : '';
 $rooms_archive      = get_post_type_archive_link( 'nd_booking_cpt_1' );
+$language           = $plugin->get_current_language();
+
+$arrival_label      = $plugin->localize_label( 'Arrivée', 'Arrival' );
+$departure_label    = $plugin->localize_label( 'Départ', 'Departure' );
+$date_placeholder   = $plugin->localize_label( 'Sélectionner les dates', 'Select dates' );
+$guest_singular     = $plugin->localize_label( 'invité', 'guest' );
+$guest_plural       = $plugin->localize_label( 'invités', 'guests' );
+$night_singular     = $plugin->localize_label( 'nuit', 'night' );
+$night_plural       = $plugin->localize_label( 'nuits', 'nights' );
+$search_helper_text = $plugin->localize_label( 'Choisissez vos dates et le nombre d’invités pour trouver un loft disponible.', 'Choose your dates and number of guests to find an available loft.' );
+$features_heading   = $plugin->localize_label( 'Avantages principaux', 'Key benefits' );
+$empty_rooms_text   = $plugin->localize_label( 'Aucun loft n’est actuellement disponible. Ajoutez vos chambres ND Booking pour alimenter cette section.', 'No lofts are currently available. Add your ND Booking rooms to populate this section.' );
+$price_label        = ( 'en' === $language ) ? 'From %1$s%2$s' : 'À partir de %1$s%2$s';
+$rating_label       = $plugin->localize_label( 'Note %s sur 5', 'Rating %s out of 5' );
+$per_night_label    = $plugin->localize_label( 'par nuit', 'per night' );
 
 if ( ! $rooms_archive ) {
     $rooms_archive = home_url( '/' );
@@ -242,20 +257,20 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
                     class="loft1325-mobile-home__search-card"
                     id="loft1325-mobile-home-search"
                     data-date-label="<?php echo esc_attr( $plugin->get_string( 'search_date_label' ) ); ?>"
-                    data-arrival-label="<?php echo esc_attr( __( 'Arrivée', 'loft1325-mobile-home' ) ); ?>"
-                    data-departure-label="<?php echo esc_attr( __( 'Départ', 'loft1325-mobile-home' ) ); ?>"
+                    data-arrival-label="<?php echo esc_attr( $arrival_label ); ?>"
+                    data-departure-label="<?php echo esc_attr( $departure_label ); ?>"
                     data-guests-label="<?php echo esc_attr( $plugin->get_string( 'search_guests_label' ) ); ?>"
                     data-submit-label="<?php echo esc_attr( $plugin->get_string( 'search_submit_label' ) ); ?>"
-                    data-date-placeholder="<?php echo esc_attr( __( 'Sélectionner les dates', 'loft1325-mobile-home' ) ); ?>"
-                    data-guests-singular="<?php echo esc_attr( __( 'invité', 'loft1325-mobile-home' ) ); ?>"
-                    data-guests-plural="<?php echo esc_attr( __( 'invités', 'loft1325-mobile-home' ) ); ?>"
-                    data-nights-singular="<?php echo esc_attr( __( 'nuit', 'loft1325-mobile-home' ) ); ?>"
-                    data-nights-plural="<?php echo esc_attr( __( 'nuits', 'loft1325-mobile-home' ) ); ?>"
+                    data-date-placeholder="<?php echo esc_attr( $date_placeholder ); ?>"
+                    data-guests-singular="<?php echo esc_attr( $guest_singular ); ?>"
+                    data-guests-plural="<?php echo esc_attr( $guest_plural ); ?>"
+                    data-nights-singular="<?php echo esc_attr( $night_singular ); ?>"
+                    data-nights-plural="<?php echo esc_attr( $night_plural ); ?>"
                 >
                     <div class="loft-search-card loft-search-card--stacked">
                         <div class="loft-search-card__header">
                             <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
-                            <p class="loft-search-card__subtext"><?php echo esc_html( __( 'Choisissez vos dates et le nombre d’invités pour trouver un loft disponible.', 'loft1325-mobile-home' ) ); ?></p>
+                            <p class="loft-search-card__subtext"><?php echo esc_html( $search_helper_text ); ?></p>
                         </div>
                         <div class="loft1325-mobile-home__search-form loft-search-card__body">
                             <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -285,7 +300,7 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
         </section>
 
         <section class="loft1325-mobile-home__features" aria-labelledby="loft1325-mobile-features-heading">
-            <h2 id="loft1325-mobile-features-heading" class="screen-reader-text"><?php esc_html_e( 'Avantages principaux', 'loft1325-mobile-home' ); ?></h2>
+            <h2 id="loft1325-mobile-features-heading" class="screen-reader-text"><?php echo esc_html( $features_heading ); ?></h2>
             <div class="loft1325-mobile-home__features-grid">
                 <?php foreach ( $plugin->get_feature_cards() as $feature ) : ?>
                     <article class="loft1325-mobile-home__feature">
@@ -316,7 +331,7 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
                 if ( empty( $rooms ) ) :
                     ?>
                     <p class="loft1325-mobile-home__empty">
-                        <?php esc_html_e( 'Aucun loft n’est actuellement disponible. Ajoutez vos chambres ND Booking pour alimenter cette section.', 'loft1325-mobile-home' ); ?>
+                        <?php echo esc_html( $empty_rooms_text ); ?>
                     </p>
                 <?php else :
                     foreach ( $rooms as $room ) :
@@ -329,7 +344,7 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
                             <?php endif; ?>
                             <div class="loft1325-mobile-home__room-body">
                                 <?php if ( ! empty( $room['rating'] ) ) : ?>
-                                    <span class="loft1325-mobile-home__room-badge" aria-label="<?php echo esc_attr( sprintf( __( 'Note %s sur 5', 'loft1325-mobile-home' ), $room['rating'] ) ); ?>"><?php echo esc_html( $room['rating'] ); ?></span>
+                                    <span class="loft1325-mobile-home__room-badge" aria-label="<?php echo esc_attr( sprintf( $rating_label, $room['rating'] ) ); ?>"><?php echo esc_html( $room['rating'] ); ?></span>
                                 <?php endif; ?>
                                 <h3 class="loft1325-mobile-home__room-title">
                                     <a href="<?php echo esc_url( $room['permalink'] ); ?>"><?php echo esc_html( $room['title'] ); ?></a>
@@ -342,13 +357,13 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
                                         echo esc_html(
                                             sprintf(
                                                 /* translators: 1: price amount, 2: currency symbol */
-                                                __( 'À partir de %1$s%2$s', 'loft1325-mobile-home' ),
+                                                $price_label,
                                                 number_format_i18n( (float) $room['price'], 0 ),
                                                 $currency_suffix
                                             )
                                         );
                                         ?>
-                                        <span class="loft1325-mobile-home__room-price-unit"><?php esc_html_e( 'par nuit', 'loft1325-mobile-home' ); ?></span>
+                                        <span class="loft1325-mobile-home__room-price-unit"><?php echo esc_html( $per_night_label ); ?></span>
                                     </p>
                                 <?php endif; ?>
                                 <div class="loft1325-mobile-home__room-actions">

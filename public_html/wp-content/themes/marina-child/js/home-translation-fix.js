@@ -1,14 +1,16 @@
 (function () {
-  const placeholderStartPattern = /#TRP[^#>]*>/gi;
-  const placeholderEndPattern = /#TRPEN#/gi;
-  const orphanedMarkerPattern = /#TRP\w*#/gi;
+  const placeholderStartPattern = /#TRP[^#>]*>|#!trpst#/gi;
+  const placeholderEndPattern = /#TRPEN#|#!trpen#/gi;
+  const orphanedMarkerPattern = /#TRP\w*#|#!trp\w*#/gi;
+  const wrappedMarkupPattern = /#!trpst#trp-gettext[^#]*#!trpen#(.*?)#!trpst#\/trp-gettext#!trpen#/gis;
 
   const cleanPlaceholderText = (text) => {
-    if (typeof text !== 'string' || text.indexOf('#TRP') === -1) {
+    if (typeof text !== 'string' || (text.indexOf('#TRP') === -1 && text.indexOf('#!trp') === -1)) {
       return text;
     }
 
     const stripped = text
+      .replace(wrappedMarkupPattern, '$1')
       .replace(placeholderStartPattern, '')
       .replace(placeholderEndPattern, '')
       .replace(orphanedMarkerPattern, '')
@@ -43,11 +45,7 @@
   };
 
   const runCleanup = () => {
-    const hero = document.querySelector('.elementor-11055');
-
-    if (hero) {
-      cleanNodeText(hero);
-    }
+    cleanNodeText(document.body || document.documentElement);
   };
 
   if (document.readyState === 'loading') {
