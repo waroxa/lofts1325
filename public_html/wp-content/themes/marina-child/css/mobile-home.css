@@ -104,7 +104,21 @@ body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_book
   border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.25rem;
+  isolation: isolate;
+}
+
+body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_search_elem_component_l3:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(130deg, rgba(242, 213, 143, 0.75), rgba(255, 255, 255, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_width_100_percentage_all_iphone,
@@ -146,6 +160,11 @@ body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_book
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_section.nd_booking_box_sizing_border_box {
+  padding: 0 !important;
+  gap: 0.65rem;
 }
 
 /* Inputs */
@@ -222,11 +241,21 @@ body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_book
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_background_color_fff {
-  border-radius: 24px;
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 26px 54px rgba(0, 0, 0, 0.22);
-  background: #0c1324;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, rgba(13, 20, 38, 0.95) 0%, rgba(9, 14, 27, 0.9) 100%);
   border: 1px solid rgba(244, 244, 248, 0.06);
+  position: relative;
+}
+
+body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_background_color_fff:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 20%, rgba(242, 213, 143, 0.08), transparent 36%),
+    radial-gradient(circle at 82% 10%, rgba(138, 163, 194, 0.12), transparent 40%);
+  pointer-events: none;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_position_relative {
@@ -247,7 +276,7 @@ body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_book
   color: #e7ecf6;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_bg_greydark_alpha_gradient_3 .nd_booking_position_absolute {
@@ -274,9 +303,10 @@ body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_book
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_e_rooms_postgrid_l1_title {
   font-family: 'Playfair Display', 'Times New Roman', serif;
-  font-size: 1.32rem;
+  font-size: 1.42rem;
   margin: 0;
   color: #f9fafb;
+  letter-spacing: 0.02em;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_display_table {
@@ -293,8 +323,8 @@ body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_book
 
 body.home .elementor-11055 .elementor-element.elementor-element-568874a .nd_booking_display_table p {
   color: #c7d2e8 !important;
-  font-size: 0.88rem;
-  letter-spacing: 0.09em;
+  font-size: 0.9rem;
+  letter-spacing: 0.11em;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-25ff9730 {
@@ -321,6 +351,10 @@ body.home .elementor-11055 .elementor-element.elementor-element-25ff9730 .elemen
   background: #111827;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
   transform: translateY(-2px);
+}
+
+body.home .elementor-11055 .elementor-element.elementor-element-25ff9730 .elementor-button:active {
+  transform: translateY(0);
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 {
@@ -403,6 +437,12 @@ body.home .elementor-11055 .elementor-element.elementor-element-42c9287d .elemen
 body.home .elementor-11055 .elementor-element.elementor-element-3484c57 {
   margin-top: 2.9rem;
   padding: 0 1.25rem;
+}
+
+body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-column,
+body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-column-wrap,
+body.home .elementor-11055 .elementor-element.elementor-element-3484c57 .elementor-widget-wrap {
+  height: 100%;
 }
 
 body.home .elementor-11055 .elementor-element.elementor-element-3484c57 > .e-con-inner {
