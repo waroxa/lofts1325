@@ -20,6 +20,209 @@ if ( ! $rooms_archive ) {
 get_header();
 ?>
 
+<style id="loft1325-mobile-home-inline-style">
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__rooms,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta {
+    background: linear-gradient(180deg, #f7f7f9 0%, #eef3f6 100%);
+    padding: 2.75rem 1.5rem 3.25rem;
+    color: #0b0b0b;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta {
+    padding: 3rem 1.5rem 3.65rem;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-heading,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-list,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-inner,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-footer {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-heading {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    text-align: left;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-title {
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.01em;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-description {
+    font-size: 0.94rem;
+    color: rgba(11, 11, 11, 0.7);
+    margin: 0;
+    line-height: 1.65;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-card {
+    background: #ffffff;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 18px 32px rgba(15, 27, 45, 0.08);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(118, 177, 196, 0.28);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-media img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    display: block;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-body {
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+    color: #0b0b0b;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-badge {
+    align-self: flex-start;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(118, 177, 196, 0.14);
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-title {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-title a {
+    color: #0f172a;
+    text-decoration: none;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-title a:hover,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-title a:focus {
+    color: #0b1220;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-text {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: rgba(11, 11, 11, 0.7);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-price {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-price-unit {
+    margin-left: 0.25rem;
+    font-size: 0.82rem;
+    color: rgba(11, 11, 11, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-footer {
+    margin-top: 2.35rem;
+    display: flex;
+    justify-content: center;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-inner {
+    position: relative;
+    z-index: 1;
+    background-color: #ffffff;
+    border-radius: 26px;
+    padding: 2.4rem 1.65rem;
+    display: grid;
+    gap: 1.35rem;
+    text-align: center;
+    border: 1px solid rgba(118, 177, 196, 0.28);
+    box-shadow: 0 22px 38px rgba(15, 27, 45, 0.08);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-title {
+    margin: 0;
+    font-size: clamp(1.45rem, 5.8vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: #0f172a;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-text {
+    margin: 0;
+    font-size: clamp(0.95rem, 4.2vw, 1.06rem);
+    line-height: 1.7;
+    color: rgba(11, 11, 11, 0.7);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+@media (max-width: 420px) {
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__search-card {
+        padding: 1.65rem 1.45rem;
+    }
+}
+
+@media (min-width: 600px) {
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) {
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage {
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    body.loft1325-mobile-home-active .loft1325-mobile-home__wrapper {
+        background: #f7f7f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__cta,
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__rooms,
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__features,
+    body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__hero {
+        max-width: 520px;
+        width: 100%;
+    }
+}
+</style>
+
 <div class="loft1325-mobile-home__wrapper">
     <header class="loft1325-mobile-home__topbar">
         <div class="loft1325-mobile-home__logo">
