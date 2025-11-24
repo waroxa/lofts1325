@@ -521,19 +521,23 @@ body.home .elementor-11055 .elementor-element.elementor-element-aa56e14 {
     color: var(--ink);
   }
 
+  /* Ensure the entire mobile experience shares the same pale backdrop */
   body.home .elementor-11055,
-  body.home .elementor-section {
+  body.home .elementor-section,
+  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1,
+  body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 {
     background: var(--bg-soft) !important;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 {
-    background: var(--bg-soft);
     padding: 3.6rem 1.35rem 2.3rem;
     color: var(--ink);
   }
 
-  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-background-overlay {
-    opacity: 0;
+  body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-background-overlay,
+  body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 > .elementor-background-overlay {
+    opacity: 0 !important;
+    background: transparent !important;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-450e1bd1 .elementor-heading-title,
@@ -561,6 +565,7 @@ body.home .elementor-11055 .elementor-element.elementor-element-aa56e14 {
     padding: 2.3rem 2.25rem 2.05rem;
     box-shadow: 0 26px 60px rgba(15, 17, 21, 0.16);
     max-width: 520px;
+    background: #ffffff !important;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-2da59f4 .nd_booking_search_form {
@@ -603,6 +608,13 @@ body.home .elementor-11055 .elementor-element.elementor-element-aa56e14 {
 
   body.home .elementor-11055 .elementor-element.elementor-element-322f8c89 > .elementor-background-overlay {
     background: transparent;
+  }
+
+  /* Hide the native footer area on mobile home to avoid the clash */
+  body.home footer,
+  body.home [id^="nd_options_footer_"],
+  body.home .nd_options_section_footer {
+    display: none !important;
   }
 
   body.home .elementor-11055 .elementor-element.elementor-element-6e90acd1 > .elementor-container {
