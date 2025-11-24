@@ -305,7 +305,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
 
                     <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
                         <span class="loft-search-toolbar__label">&nbsp;</span>
-                        <button type="submit" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php echo esc_html( $this->get_string( 'search_submit_label' ) ); ?></button>
+                        <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php echo esc_html( $this->get_string( 'search_submit_label' ) ); ?></button>
                     </div>
                 </div>
 

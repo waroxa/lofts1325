@@ -49,9 +49,14 @@ get_header();
                     data-nights-singular="<?php echo esc_attr( __( 'nuit', 'loft1325-mobile-home' ) ); ?>"
                     data-nights-plural="<?php echo esc_attr( __( 'nuits', 'loft1325-mobile-home' ) ); ?>"
                 >
-                    <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
-                    <div class="loft1325-mobile-home__search-form">
-                        <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <div class="loft-search-card loft-search-card--stacked">
+                        <div class="loft-search-card__header">
+                            <h2 class="loft1325-mobile-home__search-title"><?php echo esc_html( $plugin->get_string( 'search_card_title' ) ); ?></h2>
+                            <p class="loft-search-card__subtext"><?php echo esc_html( __( 'Choisissez vos dates et le nombre d’invités pour trouver un loft disponible.', 'loft1325-mobile-home' ) ); ?></p>
+                        </div>
+                        <div class="loft1325-mobile-home__search-form loft-search-card__body">
+                            <?php echo $plugin->get_mobile_search_form_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        </div>
                     </div>
                 </div>
 
