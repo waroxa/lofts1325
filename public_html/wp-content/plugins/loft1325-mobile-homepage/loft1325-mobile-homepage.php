@@ -36,6 +36,13 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
         private $default_strings = array();
 
         /**
+         * Cached language code (fr or en).
+         *
+         * @var string|null
+         */
+        private $current_language = null;
+
+        /**
          * Initialize singleton instance.
          *
          * @return Loft1325_Mobile_Homepage
@@ -266,40 +273,53 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
 
             $default_guests = 1;
             $default_nights = max( 1, (int) round( ( $check_out_ts - $check_in_ts ) / DAY_IN_SECONDS ) );
+            $language       = $this->get_current_language();
 
-            $nights_label = sprintf( _n( '%s nuit', '%s nuits', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
-            $guests_label = sprintf( _n( '%s invité', '%s invités', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
+            $arrival_label      = $this->localize_label( 'Arrivée', 'Arrival' );
+            $departure_label    = $this->localize_label( 'Départ', 'Departure' );
+            $guests_label_title = $this->localize_label( 'Invités', 'Guests' );
+            $decrease_guests    = $this->localize_label( 'Diminuer le nombre d’invités', 'Decrease guest count' );
+            $increase_guests    = $this->localize_label( 'Augmenter le nombre d’invités', 'Increase guest count' );
+            $nights_title       = $this->localize_label( 'Nuits', 'Nights' );
+
+            if ( 'en' === $language ) {
+                $nights_label = sprintf( _n( '%s night', '%s nights', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
+                $guests_label = sprintf( _n( '%s guest', '%s guests', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
+            } else {
+                $nights_label = sprintf( _n( '%s nuit', '%s nuits', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
+                $guests_label = sprintf( _n( '%s invité', '%s invités', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
+            }
 
             ob_start();
             ?>
             <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $action ); ?>" method="get">
                 <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
                     <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                        <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php esc_html_e( 'Arrivée', 'nd-booking' ); ?></label>
+                        <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php echo esc_html( $arrival_label ); ?></label>
                         <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
                             <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_in_value ); ?>" autocomplete="off" readonly />
                         </div>
                     </div>
 
                     <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                        <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php esc_html_e( 'Départ', 'nd-booking' ); ?></label>
+                        <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php echo esc_html( $departure_label ); ?></label>
                         <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
                             <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_out_value ); ?>" autocomplete="off" readonly />
                         </div>
                     </div>
 
                     <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
-                        <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php esc_html_e( 'Invités', 'nd-booking' ); ?></label>
+                        <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php echo esc_html( $guests_label_title ); ?></label>
                         <div class="loft-search-toolbar__control loft-search-toolbar__control--guests loft-search-toolbar__group loft-search-toolbar__guests">
-                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php esc_attr_e( 'Diminuer le nombre d’invités', 'nd-booking' ); ?>">−</button>
+                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php echo esc_attr( $decrease_guests ); ?>">−</button>
                             <span class="loft-search-toolbar__guests-value" id="loft_search_guest_display"><?php echo esc_html( $guests_label ); ?></span>
-                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php esc_attr_e( 'Augmenter le nombre d’invités', 'nd-booking' ); ?>">+</button>
+                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php echo esc_attr( $increase_guests ); ?>">+</button>
                         </div>
                         <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $default_guests ); ?>" />
                     </div>
 
                     <div class="loft-search-toolbar__field loft-search-toolbar__field--summary">
-                        <span class="loft-search-toolbar__label"><?php esc_html_e( 'Nuits', 'nd-booking' ); ?></span>
+                        <span class="loft-search-toolbar__label"><?php echo esc_html( $nights_title ); ?></span>
                         <div class="loft-search-toolbar__summary loft-search-toolbar__group loft-search-toolbar__nights" id="nd_booking_nights_display"><?php echo esc_html( $nights_label ); ?></div>
                     </div>
 
@@ -321,20 +341,46 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
         }
 
         /**
+         * Retrieve the active language.
+         *
+         * @return string fr or en.
+         */
+        public function get_current_language() {
+            if ( null !== $this->current_language ) {
+                return $this->current_language;
+            }
+
+            $language = 'fr';
+
+            if ( function_exists( 'trp_get_current_language' ) ) {
+                $language = (string) trp_get_current_language();
+            } else {
+                $language = function_exists( 'determine_locale' ) ? (string) determine_locale() : get_locale();
+            }
+
+            $language          = strtolower( substr( $language, 0, 2 ) );
+            $this->current_language = ( 'en' === $language ) ? 'en' : 'fr';
+
+            return $this->current_language;
+        }
+
+        /**
          * Retrieve default strings used in the layout.
          *
          * @return array<string, string>
          */
         public function get_default_strings() {
-            if ( ! empty( $this->default_strings ) ) {
-                return $this->default_strings;
+            $language = $this->get_current_language();
+
+            if ( isset( $this->default_strings[ $language ] ) ) {
+                return $this->default_strings[ $language ];
             }
 
-            $this->default_strings = array(
+            $this->default_strings['fr'] = array(
                 'hero_tagline'           => __( 'Concierge Virtuel', 'loft1325-mobile-home' ),
                 'hero_title'             => __( 'Expérience Hôtelière 100% Virtuelle', 'loft1325-mobile-home' ),
                 'hero_description'       => __( "Pour le prix d'une chambre d'hôtel, offrez-vous tout le confort d'une maison et une expérience entièrement autonome. Notre concept unique vous permet de gérer votre séjour directement depuis votre mobile, sans réception ni attente. Créez vos propres clés numériques, invitez vos proches et contrôlez vos réservations en quelques clics seulement.", 'loft1325-mobile-home' ),
-                'hero_primary_label'     => __( 'Réserver un loft', 'loft1325-mobile-home' ),
+                'hero_primary_label'     => __( 'Réserver', 'loft1325-mobile-home' ),
                 'hero_primary_url'       => '#loft1325-mobile-home-search',
                 'hero_secondary_label'   => __( 'Nous contacter', 'loft1325-mobile-home' ),
                 'hero_secondary_url'     => '/contact',
@@ -350,7 +396,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 'rooms_view_all_label'   => __( 'Voir tous les lofts', 'loft1325-mobile-home' ),
                 'cta_heading'            => __( "Prêt à vivre l'expérience?", 'loft1325-mobile-home' ),
                 'cta_description'        => __( 'Réservez dès maintenant votre séjour et découvrez une nouvelle façon de voyager.', 'loft1325-mobile-home' ),
-                'cta_primary_label'      => __( 'Réserver un loft', 'loft1325-mobile-home' ),
+                'cta_primary_label'      => __( 'Réserver', 'loft1325-mobile-home' ),
                 'cta_primary_url'        => '#loft1325-mobile-home-search',
                 'cta_secondary_label'    => __( 'Nous contacter', 'loft1325-mobile-home' ),
                 'cta_secondary_url'      => '/contact',
@@ -361,7 +407,38 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 'footer_copyright'       => sprintf( __( '© %1$s Loft1325. Tous droits réservés. | CITQ Certificat: 301842', 'loft1325-mobile-home' ), date_i18n( 'Y' ) ),
             );
 
-            return $this->default_strings;
+            $this->default_strings['en'] = array(
+                'hero_tagline'           => __( 'Virtual Concierge', 'loft1325-mobile-home' ),
+                'hero_title'             => __( '100% Virtual Hotel Experience', 'loft1325-mobile-home' ),
+                'hero_description'       => __( "For the price of a hotel room, enjoy the comfort of a home and a fully self-service stay. Our unique concept lets you manage your visit from your phone with no front desk or waiting. Create your own digital keys, invite guests, and control bookings in just a few taps.", 'loft1325-mobile-home' ),
+                'hero_primary_label'     => __( 'Book Now', 'loft1325-mobile-home' ),
+                'hero_primary_url'       => '#loft1325-mobile-home-search',
+                'hero_secondary_label'   => __( 'Contact Us', 'loft1325-mobile-home' ),
+                'hero_secondary_url'     => '/contact',
+                'search_card_title'      => __( 'Virtual Concierge', 'loft1325-mobile-home' ),
+                'search_location_label'  => __( 'Where', 'loft1325-mobile-home' ),
+                'search_location_value'  => '',
+                'search_date_label'      => __( 'When', 'loft1325-mobile-home' ),
+                'search_guests_label'    => __( 'Guests', 'loft1325-mobile-home' ),
+                'search_submit_label'    => __( 'Search', 'loft1325-mobile-home' ),
+                'rooms_heading'          => __( 'Premium Lofts', 'loft1325-mobile-home' ),
+                'rooms_description'      => __( 'Unlike traditional hotel rooms, our lofts offer a more generous living space—often 1.5 to 3 times larger for the same price as a hotel room.', 'loft1325-mobile-home' ),
+                'rooms_button_label'     => __( 'Contact Us', 'loft1325-mobile-home' ),
+                'rooms_view_all_label'   => __( 'See all lofts', 'loft1325-mobile-home' ),
+                'cta_heading'            => __( 'Ready to experience it?', 'loft1325-mobile-home' ),
+                'cta_description'        => __( 'Book your stay now and discover a new way to travel.', 'loft1325-mobile-home' ),
+                'cta_primary_label'      => __( 'Book Now', 'loft1325-mobile-home' ),
+                'cta_primary_url'        => '#loft1325-mobile-home-search',
+                'cta_secondary_label'    => __( 'Contact Us', 'loft1325-mobile-home' ),
+                'cta_secondary_url'      => '/contact',
+                'footer_nav_heading'     => __( 'Navigation', 'loft1325-mobile-home' ),
+                'footer_support_heading' => __( 'Support', 'loft1325-mobile-home' ),
+                'footer_social_heading'  => __( 'Follow us', 'loft1325-mobile-home' ),
+                'footer_legal'           => __( '100% virtual hotel experience', 'loft1325-mobile-home' ),
+                'footer_copyright'       => sprintf( __( '© %1$s Loft1325. All rights reserved. | CITQ Certificate: 301842', 'loft1325-mobile-home' ), date_i18n( 'Y' ) ),
+            );
+
+            return $this->default_strings[ $language ];
         }
 
         /**
@@ -372,14 +449,28 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          * @return string
          */
         public function get_string( $key ) {
-            $defaults = $this->get_default_strings();
-            $setting  = get_theme_mod( 'loft1325_mobile_home_' . $key );
+            $defaults  = $this->get_default_strings();
+            $language  = $this->get_current_language();
+            $setting   = get_theme_mod( 'loft1325_mobile_home_' . $key );
+            $has_setting = is_string( $setting ) && '' !== trim( $setting );
 
-            if ( is_string( $setting ) && '' !== trim( $setting ) ) {
+            if ( 'fr' === $language && $has_setting ) {
                 return $setting;
             }
 
             return isset( $defaults[ $key ] ) ? $defaults[ $key ] : '';
+        }
+
+        /**
+         * Quickly return a localized string for inline labels.
+         *
+         * @param string $french  French text.
+         * @param string $english English text.
+         *
+         * @return string
+         */
+        public function localize_label( $french, $english ) {
+            return ( 'en' === $this->get_current_language() ) ? $english : $french;
         }
 
         /**

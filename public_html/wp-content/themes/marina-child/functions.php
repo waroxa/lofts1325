@@ -616,6 +616,45 @@ add_action( 'wp_head', function() {
 }, 999 );
 
 /**
+ * Strip broken TranslatePress placeholders from rendered HTML.
+ *
+ * @param string $html Output buffer contents.
+ *
+ * @return string
+ */
+function marina_child_strip_trp_placeholders( $html ) {
+    if ( false === strpos( $html, '#!trp' ) && false === strpos( $html, '#TRP' ) ) {
+        return $html;
+    }
+
+    $patterns = array(
+        '/#!trpst#trp-gettext[^#]*#!trpen#(.*?)#!trpst#\\/trp-gettext#!trpen#/si',
+        '/#!trpst#trp-ltr-start#!trpen#(.*?)#!trpst#trp-ltr-end#!trpen#/si',
+    );
+
+    foreach ( $patterns as $pattern ) {
+        $html = preg_replace( $pattern, '$1', $html );
+    }
+
+    $html = str_replace( array( '#!trpst#', '#!trpen#' ), '', $html );
+    $html = preg_replace( '/#TRP[^#<]*#/i', '', $html );
+
+    return $html;
+}
+
+/**
+ * Start output buffering early to clean TRP markers.
+ */
+function marina_child_start_trp_cleanup_buffer() {
+    if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+        return;
+    }
+
+    ob_start( 'marina_child_strip_trp_placeholders' );
+}
+add_action( 'template_redirect', 'marina_child_start_trp_cleanup_buffer', 0 );
+
+/**
  * Force specific ND Booking availability alerts to display in fr-CA by default.
  */
 function marina_child_translate_booking_alerts( $translation, $text, $domain ) {
