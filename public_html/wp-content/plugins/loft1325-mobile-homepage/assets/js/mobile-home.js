@@ -95,6 +95,7 @@
         var nightsDisplay = form.querySelector('#nd_booking_nights_display');
         var guestButtons = form.querySelectorAll('.loft-search-toolbar__guest-btn');
         var dateControls = form.querySelectorAll('.loft-search-toolbar__control--date');
+        var submitButton = form.querySelector('.loft-search-toolbar__submit');
 
         var MIN_GUESTS = 1;
         var MAX_GUESTS = 12;
@@ -300,6 +301,18 @@
         }
 
         updateNightsDisplay();
+
+        if (submitButton) {
+            submitButton.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                if (guestInput) {
+                    guestInput.value = clampGuests(guestInput.value);
+                }
+
+                form.submit();
+            });
+        }
 
         form.addEventListener('submit', function () {
             if (guestInput) {
