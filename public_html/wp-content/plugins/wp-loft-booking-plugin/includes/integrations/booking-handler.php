@@ -358,8 +358,8 @@ if (!function_exists('wp_loft_booking_calculate_price_breakdown')) {
      *     lodging_subtotal: float
      * }
      */
-    function wp_loft_booking_calculate_price_breakdown($booking)
-    {
+function wp_loft_booking_calculate_price_breakdown($booking)
+{
         $total = isset($booking['total']) ? (float) $booking['total'] : 0.0;
         $currency = isset($booking['currency']) && $booking['currency'] ? $booking['currency'] : 'CAD';
 
@@ -390,7 +390,325 @@ if (!function_exists('wp_loft_booking_calculate_price_breakdown')) {
             'currency'        => $currency,
             'lodging_subtotal'=> $lodging_subtotal,
         ];
-    }
+}
+
+/**
+ * Build a stable hash that represents the current booking/charge state for invoice artifacts.
+ *
+ * @param array $booking
+ * @param array $price_breakdown
+ *
+ * @return string
+ */
+function wp_loft_booking_build_invoice_fingerprint(array $booking, array $price_breakdown)
+{
+        $normalized_extras = $price_breakdown['extras'] ?? [];
+        $normalized_taxes  = $price_breakdown['taxes'] ?? [];
+
+        usort($normalized_extras, function ($a, $b) {
+                return strcmp($a['title'] ?? '', $b['title'] ?? '');
+        });
+
+        usort($normalized_taxes, function ($a, $b) {
+                return strcmp($a['label'] ?? '', $b['label'] ?? '');
+        });
+
+        $data = [
+                'booking_id'  => $booking['booking_id'] ?? $booking['room_id'] ?? 0,
+                'room_id'     => $booking['room_id'] ?? 0,
+                'guest'       => trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')),
+                'dates'       => [
+                        'from' => $booking['date_from'] ?? '',
+                        'to'   => $booking['date_to'] ?? '',
+                ],
+                'charges'     => [
+                        'subtotal'         => $price_breakdown['subtotal'] ?? 0,
+                        'extras_total'     => $price_breakdown['extras_total'] ?? 0,
+                        'tax_total'        => $price_breakdown['tax_total'] ?? 0,
+                        'total'            => $price_breakdown['total'] ?? 0,
+                        'currency'         => $price_breakdown['currency'] ?? 'CAD',
+                        'lodging_subtotal' => $price_breakdown['lodging_subtotal'] ?? 0,
+                        'extras'           => array_values($normalized_extras),
+                        'taxes'            => array_values($normalized_taxes),
+                ],
+                'payment'     => [
+                        'status' => $booking['payment_status'] ?? '',
+                        'txn'    => $booking['transaction_id'] ?? '',
+                ],
+        ];
+
+        return substr(sha1(wp_json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)), 0, 16);
+}
+
+/**
+ * Render the invoice HTML body in a deterministic way for archival and reuse.
+ *
+ * @param array $booking
+ * @param array $price_breakdown
+ *
+ * @return string
+ */
+function wp_loft_booking_render_invoice_html(array $booking, array $price_breakdown)
+{
+        $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Invité', 'wp-loft-booking');
+        $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '') ?: __('Votre loft', 'wp-loft-booking');
+        $booking_ref = $booking['booking_id'] ?? $booking['room_id'] ?? __('N/A', 'wp-loft-booking');
+        $checkin     = !empty($booking['date_from']) ? wp_date('Y-m-d', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
+        $checkout    = !empty($booking['date_to']) ? wp_date('Y-m-d', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+        $currency    = $price_breakdown['currency'] ?? 'CAD';
+
+        $extras = $price_breakdown['extras'] ?? [];
+        $taxes  = $price_breakdown['taxes'] ?? [];
+
+        usort($extras, function ($a, $b) {
+                return strcmp($a['title'] ?? '', $b['title'] ?? '');
+        });
+
+        usort($taxes, function ($a, $b) {
+                return strcmp($a['label'] ?? '', $b['label'] ?? '');
+        });
+
+        ob_start();
+        ?>
+        <div style="font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#ffffff;color:#111827;">
+            <header style="border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:16px;">
+                <h1 style="margin:0;font-size:22px;">Loft 1325 &ndash; Invoice</h1>
+                <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">Booking #<?php echo esc_html($booking_ref); ?> &middot; <?php echo esc_html($room_name); ?></p>
+            </header>
+            <section style="margin-bottom:16px;font-size:14px;">
+                <p style="margin:0 0 6px;"><strong>Guest:</strong> <?php echo esc_html($guest_name); ?></p>
+                <p style="margin:0 0 6px;"><strong>Email:</strong> <?php echo esc_html($booking['email'] ?? __('N/A', 'wp-loft-booking')); ?></p>
+                <p style="margin:0;"><strong>Stay:</strong> <?php echo esc_html($checkin); ?> → <?php echo esc_html($checkout); ?></p>
+            </section>
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;margin-bottom:16px;font-size:14px;">
+                <tr>
+                    <th style="text-align:left;padding:6px 0;color:#6b7280;font-weight:600;">Line item</th>
+                    <th style="text-align:right;padding:6px 0;color:#6b7280;font-weight:600;">Amount</th>
+                </tr>
+                <tr>
+                    <td style="padding:4px 0;color:#111827;">Lodging (pre-tax)</td>
+                    <td style="padding:4px 0;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency)); ?></td>
+                </tr>
+                <?php if (!empty($extras)) : ?>
+                    <?php foreach ($extras as $extra) : ?>
+                        <tr>
+                            <td style="padding:4px 0;color:#111827;">Extra &ndash; <?php echo esc_html($extra['title']); ?></td>
+                            <td style="padding:4px 0;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($extra['price'] ?? 0, $currency)); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if (!empty($taxes)) : ?>
+                    <?php foreach ($taxes as $tax) : ?>
+                        <tr>
+                            <td style="padding:4px 0;color:#111827;">Tax &ndash; <?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%)</td>
+                            <td style="padding:4px 0;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <tr>
+                    <td style="padding:8px 0;font-weight:700;border-top:1px solid #e5e7eb;">Total</td>
+                    <td style="padding:8px 0;text-align:right;font-weight:700;border-top:1px solid #e5e7eb;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency)); ?></td>
+                </tr>
+            </table>
+            <section style="font-size:13px;color:#4b5563;">
+                <p style="margin:0 0 4px;"><strong>Payment status:</strong> <?php echo esc_html($booking['payment_status'] ?? __('Unknown', 'wp-loft-booking')); ?></p>
+                <p style="margin:0;"><strong>Transaction:</strong> <?php echo esc_html($booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking')); ?></p>
+            </section>
+        </div>
+        <?php
+
+        return trim((string) ob_get_clean());
+}
+
+/**
+ * Render a minimal PDF document containing the invoice summary.
+ *
+ * @param array $booking
+ * @param array $price_breakdown
+ * @param string $fingerprint
+ *
+ * @return string PDF binary payload
+ */
+function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdown, $fingerprint)
+{
+        $escape = function ($text) {
+                $text = str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], (string) $text);
+
+                return preg_replace('/[\r\n]+/', ' ', $text);
+        };
+
+        $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '') ?: __('Votre loft', 'wp-loft-booking');
+        $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Invité', 'wp-loft-booking');
+        $booking_ref = $booking['booking_id'] ?? $booking['room_id'] ?? __('N/A', 'wp-loft-booking');
+        $currency    = $price_breakdown['currency'] ?? 'CAD';
+
+        $lines = [];
+        $lines[] = 'BT';
+        $lines[] = '/F1 16 Tf';
+        $lines[] = '50 760 Td';
+        $lines[] = '(' . $escape('Loft 1325 Invoice') . ') Tj';
+        $lines[] = '0 -18 Td';
+        $lines[] = '/F1 11 Tf';
+        $lines[] = '(' . $escape(sprintf('Booking #%s · %s', $booking_ref, $room_name)) . ') Tj';
+        $lines[] = '0 -14 Td';
+        $lines[] = '(' . $escape(sprintf('Guest: %s', $guest_name)) . ') Tj';
+        $lines[] = '0 -14 Td';
+        $lines[] = '(' . $escape(sprintf('Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A')) . ') Tj';
+        $lines[] = '0 -20 Td';
+        $lines[] = '/F1 12 Tf';
+        $lines[] = '(' . $escape('Charges') . ') Tj';
+        $lines[] = '0 -14 Td';
+        $lines[] = '/F1 10 Tf';
+        $lines[] = '(' . $escape(sprintf('Lodging: %s', wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency))) . ') Tj';
+
+        $extras = $price_breakdown['extras'] ?? [];
+        usort($extras, function ($a, $b) {
+                return strcmp($a['title'] ?? '', $b['title'] ?? '');
+        });
+
+        foreach ($extras as $extra) {
+                $lines[] = '0 -12 Td';
+                $lines[] = '(' . $escape(sprintf('Extra – %s: %s', $extra['title'], wp_loft_booking_format_currency($extra['price'] ?? 0, $currency))) . ') Tj';
+        }
+
+        $taxes = $price_breakdown['taxes'] ?? [];
+        usort($taxes, function ($a, $b) {
+                return strcmp($a['label'] ?? '', $b['label'] ?? '');
+        });
+
+        foreach ($taxes as $tax) {
+                $lines[] = '0 -12 Td';
+                $rate    = number_format((float) ($tax['rate'] ?? 0), 2);
+                $lines[] = '(' . $escape(sprintf('Tax – %s (%s%%): %s', $tax['label'], $rate, wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency))) . ') Tj';
+        }
+
+        $lines[] = '0 -16 Td';
+        $lines[] = '/F1 11 Tf';
+        $lines[] = '(' . $escape(sprintf('Total: %s', wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency))) . ') Tj';
+        $lines[] = '0 -18 Td';
+        $lines[] = '/F1 9 Tf';
+        $lines[] = '(' . $escape(sprintf('Status: %s', $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking'))) . ') Tj';
+        $lines[] = '0 -12 Td';
+        $lines[] = '(' . $escape(sprintf('Transaction: %s', $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking'))) . ') Tj';
+        $lines[] = '0 -12 Td';
+        $lines[] = '(' . $escape(sprintf('Fingerprint: %s', $fingerprint)) . ') Tj';
+        $lines[] = 'ET';
+
+        $stream = implode("\n", $lines);
+        $stream_length = strlen($stream);
+
+        $objects = [
+                1 => "<< /Type /Catalog /Pages 2 0 R >>",
+                2 => "<< /Type /Pages /Count 1 /Kids [3 0 R] >>",
+                3 => "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+                4 => "<< /Length {$stream_length} >>\nstream\n{$stream}\nendstream",
+                5 => "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        ];
+
+        $pdf = "%PDF-1.4\n";
+        $offsets = [];
+
+        foreach ($objects as $id => $body) {
+                $offsets[$id] = strlen($pdf);
+                $pdf .= sprintf("%d 0 obj\n%s\nendobj\n", $id, $body);
+        }
+
+        $xref_position = strlen($pdf);
+        $pdf .= sprintf("xref\n0 %d\n", count($objects) + 1);
+        $pdf .= "0000000000 65535 f \n";
+
+        for ($i = 1; $i <= count($objects); $i++) {
+                $pdf .= sprintf("%010d 00000 n \n", $offsets[$i]);
+        }
+
+        $pdf .= "trailer\n<< /Size " . (count($objects) + 1) . " /Root 1 0 R >>\n";
+        $pdf .= "startxref\n" . $xref_position . "\n%%EOF";
+
+        return $pdf;
+}
+
+/**
+ * Persist invoice artifacts (HTML + PDF) and record them in the audit table.
+ *
+ * @param array $booking
+ * @param array $price_breakdown
+ *
+ * @return array|WP_Error
+ */
+function wp_loft_booking_store_invoice_artifact(array $booking, array $price_breakdown)
+{
+        $uploads = wp_upload_dir();
+
+        if (!empty($uploads['error'])) {
+                return new WP_Error('invoice_upload_unavailable', $uploads['error']);
+        }
+
+        $fingerprint = wp_loft_booking_build_invoice_fingerprint($booking, $price_breakdown);
+        $directory   = trailingslashit($uploads['basedir']) . 'loft-invoices';
+
+        if (!wp_mkdir_p($directory)) {
+                return new WP_Error('invoice_directory_unwritable', __('Unable to prepare the invoice storage folder.', 'wp-loft-booking'));
+        }
+
+        $basename  = sprintf('invoice-%s-%s', $booking['booking_id'] ?? $booking['room_id'] ?? 'booking', $fingerprint);
+        $html_body = wp_loft_booking_render_invoice_html($booking, $price_breakdown);
+        $html_path = trailingslashit($directory) . $basename . '.html';
+        $pdf_path  = trailingslashit($directory) . $basename . '.pdf';
+
+        file_put_contents($html_path, $html_body);
+        file_put_contents($pdf_path, wp_loft_booking_render_invoice_pdf($booking, $price_breakdown, $fingerprint));
+
+        $artifact_url = trailingslashit($uploads['baseurl']) . 'loft-invoices/' . $basename . '.pdf';
+
+        global $wpdb;
+        $artifacts_table = $wpdb->prefix . 'loft_invoice_artifacts';
+
+        $booking_condition = ' AND booking_id IS NULL';
+        $params            = [$artifact_url];
+
+        if (isset($booking['booking_id']) && is_numeric($booking['booking_id'])) {
+                $booking_condition = ' AND booking_id = %d';
+                $params[]          = (int) $booking['booking_id'];
+        }
+
+        $existing_id = $wpdb->get_var(
+                $wpdb->prepare(
+                        "SELECT id FROM {$artifacts_table} WHERE artifact_url = %s{$booking_condition} ORDER BY id DESC LIMIT 1",
+                        ...$params
+                )
+        );
+
+        if ($existing_id) {
+                $wpdb->update(
+                        $artifacts_table,
+                        ['updated_at' => current_time('mysql'), 'status' => 'stored'],
+                        ['id' => (int) $existing_id],
+                        ['%s', '%s'],
+                        ['%d']
+                );
+        } else {
+                $wpdb->insert(
+                        $artifacts_table,
+                        [
+                                'booking_id'  => isset($booking['booking_id']) ? (int) $booking['booking_id'] : null,
+                                'loft_id'     => isset($booking['room_id']) ? (int) $booking['room_id'] : null,
+                                'artifact_url'=> $artifact_url,
+                                'status'      => 'stored',
+                        ],
+                        ['%d', '%d', '%s', '%s']
+                );
+
+                $existing_id = $wpdb->insert_id;
+        }
+
+        return [
+                'id'         => $existing_id ? (int) $existing_id : null,
+                'html_path'  => $html_path,
+                'pdf_path'   => $pdf_path,
+                'artifact_url' => $artifact_url,
+                'fingerprint' => $fingerprint,
+        ];
+}
 }
 
 
@@ -1033,6 +1351,15 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
 
     $price_breakdown = wp_loft_booking_calculate_price_breakdown($booking);
 
+    $invoice_artifact = wp_loft_booking_store_invoice_artifact($booking, $price_breakdown);
+    $attachments     = [];
+
+    if (!is_wp_error($invoice_artifact) && !empty($invoice_artifact['pdf_path'])) {
+        $attachments[] = $invoice_artifact['pdf_path'];
+    } elseif (is_wp_error($invoice_artifact)) {
+        error_log('⚠️ Failed to store invoice artifact: ' . $invoice_artifact->get_error_message());
+    }
+
     $payment_status = !empty($booking['payment_status']) ? $booking['payment_status'] : __('Unknown', 'wp-loft-booking');
     $transaction_id = !empty($booking['transaction_id']) ? $booking['transaction_id'] : __('Not provided', 'wp-loft-booking');
 
@@ -1233,6 +1560,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
         'html'    => $body,
         'text'    => wp_strip_all_tags($body),
         'bcc'     => $bcc,
+        'attachments' => $attachments,
     ];
 
     $variables = [
@@ -1252,6 +1580,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
         'property_address' => $property_address,
         'virtual_key'      => $virtual_key_success,
         'booking_reference'=> $booking['booking_id'] ?? '',
+        'invoice_artifact' => is_wp_error($invoice_artifact) ? null : $invoice_artifact,
     ];
 
     $job_id = wp_loft_email_provider_enqueue_job(
@@ -1264,12 +1593,29 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
             'send_at'   => $options['send_at'] ?? null,
+            'force_new_job' => !empty($options['force_new_job']),
         ]
     );
 
     if (is_wp_error($job_id)) {
         error_log('❌ Booking receipt email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
     } else {
+        if (!is_wp_error($invoice_artifact) && !empty($invoice_artifact['artifact_url'])) {
+            global $wpdb;
+
+            if (!empty($invoice_artifact['id'])) {
+                $wpdb->update(
+                    $wpdb->prefix . 'loft_invoice_artifacts',
+                    ['status' => 'linked'],
+                    ['id' => (int) $invoice_artifact['id']],
+                    ['%s'],
+                    ['%d']
+                );
+            }
+
+            error_log(sprintf('🧾 Invoice artifact %s linked to job #%d.', $invoice_artifact['artifact_url'], $job_id));
+        }
+
         error_log(sprintf('✅ Booking receipt email queued as job #%d for %s', $job_id, $recipient));
     }
 }
