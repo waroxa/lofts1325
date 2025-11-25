@@ -270,4 +270,109 @@ function wp_loft_booking_create_tables() {
     }
 
 
+
+
+    $email_templates_table = $wpdb->prefix . 'loft_email_templates';
+    $sql = "CREATE TABLE $email_templates_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
+        description TEXT NULL,
+        subject VARCHAR(255) NOT NULL,
+        body LONGTEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $email_jobs_table = $wpdb->prefix . 'loft_email_jobs';
+    $sql = "CREATE TABLE $email_jobs_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        template_id MEDIUMINT(9) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        scheduled_at DATETIME NULL,
+        processed_at DATETIME NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_email_jobs_lookup (booking_id, loft_id, status, created_at),
+        CONSTRAINT fk_email_jobs_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_email_jobs_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_lofts(id) ON DELETE SET NULL,
+        CONSTRAINT fk_email_jobs_template_id FOREIGN KEY (template_id) REFERENCES {$wpdb->prefix}loft_email_templates(id) ON DELETE CASCADE
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $email_renders_table = $wpdb->prefix . 'loft_email_renders';
+    $sql = "CREATE TABLE $email_renders_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        job_id MEDIUMINT(9) NOT NULL,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        rendered_body LONGTEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_email_renders_lookup (booking_id, loft_id, status, created_at),
+        CONSTRAINT fk_email_renders_job_id FOREIGN KEY (job_id) REFERENCES {$wpdb->prefix}loft_email_jobs(id) ON DELETE CASCADE,
+        CONSTRAINT fk_email_renders_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_email_renders_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_lofts(id) ON DELETE SET NULL
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $recipients_table = $wpdb->prefix . 'loft_recipients';
+    $sql = "CREATE TABLE $recipients_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        job_id MEDIUMINT(9) NOT NULL,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        email VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_recipients_lookup (booking_id, loft_id, status, created_at),
+        CONSTRAINT fk_recipients_job_id FOREIGN KEY (job_id) REFERENCES {$wpdb->prefix}loft_email_jobs(id) ON DELETE CASCADE,
+        CONSTRAINT fk_recipients_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_recipients_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_lofts(id) ON DELETE SET NULL
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $housekeeping_rules_table = $wpdb->prefix . 'loft_housekeeping_rules';
+    $sql = "CREATE TABLE $housekeeping_rules_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        rule_type VARCHAR(100) NOT NULL,
+        details LONGTEXT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_housekeeping_rules_lookup (booking_id, loft_id, status, created_at),
+        CONSTRAINT fk_housekeeping_rules_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_housekeeping_rules_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_lofts(id) ON DELETE SET NULL
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $invoice_artifacts_table = $wpdb->prefix . 'loft_invoice_artifacts';
+    $sql = "CREATE TABLE $invoice_artifacts_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        artifact_url VARCHAR(255) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_invoice_artifacts_lookup (booking_id, loft_id, status, created_at),
+        CONSTRAINT fk_invoice_artifacts_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_invoice_artifacts_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_lofts(id) ON DELETE SET NULL
+    ) $charset_collate;";
+    dbDelta($sql);
+
 }
