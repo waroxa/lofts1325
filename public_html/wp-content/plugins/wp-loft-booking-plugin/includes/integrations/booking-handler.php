@@ -3,6 +3,31 @@ defined('ABSPATH') || exit;
 
 add_action('nd_booking_reservation_added_in_db', 'wp_loft_booking_handle_booking', 10, 23);
 
+/**
+ * Return the list of internal recipients who must be copied on guest notifications.
+ *
+ * @return array<int,string>
+ */
+function wp_loft_booking_get_notification_recipients() {
+    $addresses = [
+        get_option('admin_email'),
+        'info@loft1325.com',
+        'maria@websitesmdla.com',
+    ];
+
+    $valid = [];
+
+    foreach ($addresses as $address) {
+        $address = sanitize_email((string) $address);
+
+        if ($address && is_email($address)) {
+            $valid[$address] = $address; // prevent duplicates
+        }
+    }
+
+    return array_values($valid);
+}
+
 if (!function_exists('wp_loft_booking_format_unit_label')) {
     /**
      * Normalize a unit label so it can be displayed without duplicated wording.
@@ -92,6 +117,91 @@ if (!function_exists('wp_loft_booking_format_currency')) {
 
         return sprintf('%s %s', number_format($numeric_amount, 2), strtoupper($currency ?: 'CAD'));
     }
+}
+
+/**
+ * Build a normalized booking payload using ND Booking records and custom data.
+ *
+ * @param int   $booking_id ND Booking record ID.
+ * @param array $overrides  Values that should take precedence over DB values.
+ *
+ * @return array<string,mixed>
+ */
+function wp_loft_booking_build_booking_payload($booking_id, array $overrides = []) {
+    $booking = wp_loft_booking_fetch_nd_booking($booking_id);
+
+    foreach ($overrides as $key => $value) {
+        if (null !== $value && '' !== $value) {
+            $booking[$key] = $value;
+        }
+    }
+
+    return $booking;
+}
+
+/**
+ * Retrieve an ND Booking entry and normalize it for email notifications.
+ *
+ * @param int $booking_id Booking ID from the nd_booking_booking table.
+ *
+ * @return array<string,mixed>
+ */
+function wp_loft_booking_fetch_nd_booking($booking_id) {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'nd_booking_booking';
+
+    $row = $wpdb->get_row(
+        $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", (int) $booking_id),
+        ARRAY_A
+    );
+
+    if (empty($row)) {
+        return [];
+    }
+
+    $room_id   = isset($row['id_post']) ? (int) $row['id_post'] : 0;
+    $room_name = $room_id > 0 ? get_the_title($room_id) : '';
+
+    return [
+        'room_id'        => $room_id,
+        'room_name'      => $room_name,
+        'name'           => $row['user_first_name'] ?? '',
+        'surname'        => $row['user_last_name'] ?? '',
+        'email'          => $row['paypal_email'] ?? '',
+        'phone'          => $row['user_phone'] ?? '',
+        'address'        => $row['user_address'] ?? '',
+        'city'           => $row['user_city'] ?? '',
+        'country'        => $row['user_country'] ?? '',
+        'date_from'      => $row['date_from'] ?? '',
+        'date_to'        => $row['date_to'] ?? '',
+        'created_at'     => $row['date'] ?? '',
+        'total'          => isset($row['final_trip_price']) ? (float) $row['final_trip_price'] : 0.0,
+        'currency'       => $row['paypal_currency'] ?? 'CAD',
+        'payment_status' => $row['paypal_payment_status'] ?? '',
+        'transaction_id' => $row['paypal_tx'] ?? '',
+        'extra_services' => $row['extra_services'] ?? '',
+        'coupon'         => $row['user_coupon'] ?? '',
+        'arrival_time'   => $row['user_arrival'] ?? '',
+        'message'        => $row['user_message'] ?? '',
+        'guests'         => isset($row['guests']) ? (int) $row['guests'] : 0,
+        'action_type'    => $row['action_type'] ?? '',
+    ];
+}
+
+/**
+ * Send all email notifications for a booking event.
+ *
+ * @param array                 $booking            Normalized booking payload.
+ * @param array|WP_Error        $virtual_key_result Result from the virtual key generator.
+ * @param bool                  $is_manual          Flag to annotate manual sends.
+ *
+ * @return void
+ */
+function wp_loft_booking_send_all_booking_emails(array $booking, $virtual_key_result, $is_manual = false) {
+    wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual);
+    wp_loft_booking_send_receipt_email($booking, $virtual_key_result);
+    wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result);
 }
 
 if (!function_exists('wp_loft_booking_parse_extra_services')) {
@@ -329,14 +439,7 @@ function wp_loft_booking_handle_booking(
         // 🗓️ Crear evento en Google Calendar
         wp_loft_booking_create_google_event($booking);
 
-        // 📧 Enviar correo de confirmación al huésped
-        wp_loft_booking_send_confirmation_email($booking, $virtual_key_result);
-
-        // 🧾 Enviar recibo detallado al huésped
-        wp_loft_booking_send_receipt_email($booking, $virtual_key_result);
-
-        // 🗂️ Notificar a la administración
-        wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result);
+        wp_loft_booking_send_all_booking_emails($booking, $virtual_key_result);
 
         if (!is_wp_error($virtual_key_result)) {
             $keychain_id = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : 0;
@@ -623,8 +726,10 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $support_email = sanitize_email(get_option('admin_email'));
     $headers       = ['Content-Type: text/html; charset=UTF-8'];
 
-    if ($support_email && is_email($support_email)) {
-        $headers[] = 'Bcc: ' . $support_email;
+    foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
+        if (strtolower($internal_email) !== strtolower($recipient)) {
+            $headers[] = 'Bcc: ' . $internal_email;
+        }
     }
 
     $subject = 'Loft 1325 – Confirmation de réservation | Reservation Confirmation';
@@ -672,6 +777,16 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Accès et clé numérique</h3>
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#e5e7eb;"><?php echo esc_html($virtual_key_message_fr); ?></p>
                                 </div>
+                                <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Instructions d'accès au bâtiment</h3>
+                                    <ol style="margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.7;color:#4b5563;">
+                                        <li>Utilisez le code à 6 chiffres reçu par SMS ou courriel.</li>
+                                        <li>Composez le code sur l'interphone ou le clavier, puis appuyez sur <strong>3</strong> et sur la touche <strong>#</strong>.</li>
+                                        <li>Une fois à l'intérieur, prenez les escaliers (à droite) ou l'ascenseur (porte devant vous).</li>
+                                        <li>Pour du matériel de déménagement, l'ascenseur se trouve au 2<sup>e</sup> étage.</li>
+                                        <li>En cas d'urgence, contactez notre concierge au 514-239-9080.</li>
+                                    </ol>
+                                </div>
                                 <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Préparez votre arrivée</h3>
                                 <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
                                     <li>Arrivée à partir de 15&nbsp;h (heure de l’Est)</li>
@@ -711,6 +826,16 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 <div style="margin:28px 0;padding:24px;border-radius:18px;background:linear-gradient(135deg,#111827,#1f2937);color:#f9fafb;box-shadow:0 20px 40px rgba(15,23,42,0.18);">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Digital key &amp; access</h3>
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#e5e7eb;"><?php echo esc_html($virtual_key_message_en); ?></p>
+                                </div>
+                                <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Building entry instructions</h3>
+                                    <ol style="margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.7;color:#4b5563;">
+                                        <li>Use the 6-digit code sent by SMS or email.</li>
+                                        <li>Enter the code on the intercom or keypad, then press <strong>3</strong> followed by the <strong>#</strong> key.</li>
+                                        <li>Inside, you will find the stairs on the right or the elevator at the front.</li>
+                                        <li>Moving carts and equipment are available on the 2nd floor by the elevator.</li>
+                                        <li>For emergencies, call the concierge at 514-239-9080.</li>
+                                    </ol>
                                 </div>
                                 <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Before you arrive</h3>
                                 <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
@@ -799,6 +924,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     $support_email    = sanitize_email(get_option('admin_email'));
 
     $headers = ['Content-Type: text/html; charset=UTF-8'];
+
+    foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
+        if (strtolower($internal_email) !== strtolower($recipient)) {
+            $headers[] = 'Bcc: ' . $internal_email;
+        }
+    }
 
     $subject = 'Loft 1325 – Reçu de paiement | Payment Receipt';
 
@@ -986,7 +1117,8 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
 }
 
 function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result) {
-    $recipient = sanitize_email(get_option('admin_email'));
+    $recipients = wp_loft_booking_get_notification_recipients();
+    $recipient  = array_shift($recipients);
 
     if (empty($recipient) || !is_email($recipient)) {
         error_log('⚠️ Admin booking email skipped: invalid recipient.');
@@ -1077,6 +1209,10 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
     }
 
     $headers = ['Content-Type: text/html; charset=UTF-8'];
+
+    foreach ($recipients as $internal_email) {
+        $headers[] = 'Bcc: ' . $internal_email;
+    }
     $subject = 'Loft 1325 – Nouvelle réservation confirmée | New Reservation Confirmation';
 
     $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
