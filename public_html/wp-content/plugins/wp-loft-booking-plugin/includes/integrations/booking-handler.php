@@ -341,6 +341,7 @@ function wp_loft_booking_handle_booking(
         global $wpdb;
 
     $booking = [
+        'booking_id'     => $id_post,
         'room_id'        => $id_post,
         'name'           => $user_first_name,
         'surname'        => $user_last_name,
@@ -724,13 +725,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     }
 
     $support_email = sanitize_email(get_option('admin_email'));
-    $headers       = ['Content-Type: text/html; charset=UTF-8'];
     $bcc           = [];
 
     foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
         if (strtolower($internal_email) !== strtolower($recipient)) {
-            $headers[] = 'Bcc: ' . $internal_email;
-            $bcc[]     = $internal_email;
+            $bcc[] = $internal_email;
         }
     }
 
@@ -869,12 +868,46 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
+    $message = [
+        'to'      => [$recipient],
+        'subject' => $subject,
+        'html'    => $body,
+        'text'    => wp_strip_all_tags($body),
+        'bcc'     => $bcc,
+    ];
 
-    if (!$sent) {
-        error_log('❌ Booking confirmation email could not be sent to ' . $recipient);
+    $variables = [
+        'guest_name'            => $guest_name,
+        'room_name'             => $room_name,
+        'checkin_fr'            => $checkin_fr,
+        'checkout_fr'           => $checkout_fr,
+        'checkin_en'            => $checkin,
+        'checkout_en'           => $checkout,
+        'guest_count_display_fr'=> $guest_count_display_fr,
+        'guest_count_display_en'=> $guest_count_display_en,
+        'total_display_fr'      => $total_display_fr,
+        'total_display_en'      => $total_display_en,
+        'virtual_key_message_fr'=> $virtual_key_message_fr,
+        'virtual_key_message_en'=> $virtual_key_message_en,
+        'property_address'      => $property_address,
+        'support_email'         => $support_email,
+        'booking_reference'     => $booking['booking_id'] ?? '',
+    ];
+
+    $job_id = wp_loft_email_provider_enqueue_job(
+        $message,
+        $booking,
+        [
+            'event'     => 'booking-confirmation',
+            'template'  => 'guest-confirmation',
+            'variables' => $variables,
+        ]
+    );
+
+    if (is_wp_error($job_id)) {
+        error_log('❌ Booking confirmation email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
     } else {
-        error_log('✅ Booking confirmation email sent to ' . $recipient);
+        error_log(sprintf('✅ Booking confirmation email queued as job #%d for %s', $job_id, $recipient));
     }
 }
 
@@ -925,13 +958,11 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     $website_url      = 'https://loft1325.com';
     $support_email    = sanitize_email(get_option('admin_email'));
 
-    $headers = ['Content-Type: text/html; charset=UTF-8'];
-    $bcc     = [];
+    $bcc = [];
 
     foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
         if (strtolower($internal_email) !== strtolower($recipient)) {
-            $headers[] = 'Bcc: ' . $internal_email;
-            $bcc[]     = $internal_email;
+            $bcc[] = $internal_email;
         }
     }
 
@@ -1111,12 +1142,47 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
+    $message = [
+        'to'      => [$recipient],
+        'subject' => $subject,
+        'html'    => $body,
+        'text'    => wp_strip_all_tags($body),
+        'bcc'     => $bcc,
+    ];
 
-    if (!$sent) {
-        error_log('❌ Booking receipt email could not be sent to ' . $recipient);
+    $variables = [
+        'guest_name'       => $guest_name,
+        'room_name'        => $room_name,
+        'checkin_fr'       => $checkin_fr,
+        'checkout_fr'      => $checkout_fr,
+        'checkin_en'       => $checkin,
+        'checkout_en'      => $checkout,
+        'purchase_date_fr' => $purchase_date_fr,
+        'purchase_date_en' => $purchase_date_en,
+        'payment_status'   => $payment_status,
+        'transaction_id'   => $transaction_id,
+        'price_breakdown'  => $price_breakdown,
+        'currency'         => $currency,
+        'support_email'    => $support_email,
+        'property_address' => $property_address,
+        'virtual_key'      => $virtual_key_success,
+        'booking_reference'=> $booking['booking_id'] ?? '',
+    ];
+
+    $job_id = wp_loft_email_provider_enqueue_job(
+        $message,
+        $booking,
+        [
+            'event'     => 'booking-receipt',
+            'template'  => 'guest-receipt',
+            'variables' => $variables,
+        ]
+    );
+
+    if (is_wp_error($job_id)) {
+        error_log('❌ Booking receipt email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
     } else {
-        error_log('✅ Booking receipt email sent to ' . $recipient);
+        error_log(sprintf('✅ Booking receipt email queued as job #%d for %s', $job_id, $recipient));
     }
 }
 
@@ -1212,12 +1278,10 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
         $access_point_summary = implode(', ', array_map('strval', (array) $virtual_key_result['access_point_ids']));
     }
 
-    $headers = ['Content-Type: text/html; charset=UTF-8'];
-    $bcc     = [];
+    $bcc = [];
 
     foreach ($recipients as $internal_email) {
-        $headers[] = 'Bcc: ' . $internal_email;
-        $bcc[]     = $internal_email;
+        $bcc[] = $internal_email;
     }
     $subject = 'Loft 1325 – Nouvelle réservation confirmée | New Reservation Confirmation';
 
@@ -1446,12 +1510,54 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
+    $message = [
+        'to'      => [$recipient],
+        'subject' => $subject,
+        'html'    => $body,
+        'text'    => wp_strip_all_tags($body),
+        'bcc'     => $bcc,
+    ];
 
-    if (!$sent) {
-        error_log('❌ Admin booking email could not be sent to ' . $recipient);
+    $variables = [
+        'guest_name'             => $guest_name,
+        'guest_email'            => $guest_email,
+        'guest_phone'            => $guest_phone,
+        'room_name'              => $room_name,
+        'checkin_fr'             => $checkin_fr,
+        'checkout_fr'            => $checkout_fr,
+        'checkin_en'             => $checkin,
+        'checkout_en'            => $checkout,
+        'guest_count_display_fr' => $guest_count_display_fr,
+        'guest_count_display_en' => $guest_count_display_en,
+        'price_breakdown'        => $price_breakdown,
+        'payment_status'         => $payment_status,
+        'transaction_id'         => $transaction_id,
+        'virtual_key_message_fr' => $virtual_key_message_fr,
+        'virtual_key_message_en' => $virtual_key_message_en,
+        'access_points'          => $access_point_summary,
+        'address'                => $address_display,
+        'arrival_note_fr'        => $arrival_note_fr,
+        'arrival_note_en'        => $arrival_note_en,
+        'guest_message'          => $guest_message,
+        'purchase_date_fr'       => $purchase_date_fr,
+        'purchase_date_en'       => $purchase_date_en,
+        'booking_reference'      => $booking['booking_id'] ?? '',
+    ];
+
+    $job_id = wp_loft_email_provider_enqueue_job(
+        $message,
+        $booking,
+        [
+            'event'     => 'admin-booking-summary',
+            'template'  => 'admin-summary',
+            'variables' => $variables,
+        ]
+    );
+
+    if (is_wp_error($job_id)) {
+        error_log('❌ Admin booking email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
     } else {
-        error_log('✅ Admin booking email sent to ' . $recipient);
+        error_log(sprintf('✅ Admin booking email queued as job #%d for %s', $job_id, $recipient));
     }
 }
 
