@@ -23,7 +23,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/admin/butterflymx-settings.ph
 require_once plugin_dir_path(__FILE__) . 'includes/admin/access-points.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/payment-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/tenants.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/email-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/butterflymx.php';
+require_once plugin_dir_path(__FILE__) . 'includes/integrations/email-provider.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/booking-handler.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/amelia-hooks.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/booking-form.php';
