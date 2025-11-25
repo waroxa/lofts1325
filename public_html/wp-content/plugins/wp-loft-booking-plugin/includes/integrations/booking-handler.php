@@ -725,10 +725,12 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 
     $support_email = sanitize_email(get_option('admin_email'));
     $headers       = ['Content-Type: text/html; charset=UTF-8'];
+    $bcc           = [];
 
     foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
         if (strtolower($internal_email) !== strtolower($recipient)) {
             $headers[] = 'Bcc: ' . $internal_email;
+            $bcc[]     = $internal_email;
         }
     }
 
@@ -867,7 +869,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_mail($recipient, $subject, $body, $headers);
+    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
 
     if (!$sent) {
         error_log('❌ Booking confirmation email could not be sent to ' . $recipient);
@@ -924,10 +926,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     $support_email    = sanitize_email(get_option('admin_email'));
 
     $headers = ['Content-Type: text/html; charset=UTF-8'];
+    $bcc     = [];
 
     foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
         if (strtolower($internal_email) !== strtolower($recipient)) {
             $headers[] = 'Bcc: ' . $internal_email;
+            $bcc[]     = $internal_email;
         }
     }
 
@@ -1107,7 +1111,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_mail($recipient, $subject, $body, $headers);
+    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
 
     if (!$sent) {
         error_log('❌ Booking receipt email could not be sent to ' . $recipient);
@@ -1209,9 +1213,11 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
     }
 
     $headers = ['Content-Type: text/html; charset=UTF-8'];
+    $bcc     = [];
 
     foreach ($recipients as $internal_email) {
         $headers[] = 'Bcc: ' . $internal_email;
+        $bcc[]     = $internal_email;
     }
     $subject = 'Loft 1325 – Nouvelle réservation confirmée | New Reservation Confirmation';
 
@@ -1440,7 +1446,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
     <?php
     $body = ob_get_clean();
 
-    $sent = wp_mail($recipient, $subject, $body, $headers);
+    $sent = wp_loft_email_provider_send_or_fallback($recipient, $subject, $body, $headers, $bcc);
 
     if (!$sent) {
         error_log('❌ Admin booking email could not be sent to ' . $recipient);
