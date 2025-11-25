@@ -34,6 +34,7 @@ function wp_loft_booking_email_settings_page() {
         <h1><?php esc_html_e('Email Deliverability', 'wp-loft-booking'); ?></h1>
 
         <p>Configure the dedicated sending domain, DNS records, and Mailgun credentials used for transactional emails.</p>
+        <p class="description">If you leave Mailgun blank, booking emails will fall back to WordPress <code>wp_mail()</code>; any SMTP plugin (e.g., WP Mail SMTP) will be respected.</p>
 
         <form method="post" action="options.php">
             <?php
