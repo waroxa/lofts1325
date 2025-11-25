@@ -276,13 +276,39 @@ function wp_loft_booking_create_tables() {
     $sql = "CREATE TABLE $email_templates_table (
         id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
         name VARCHAR(255) NOT NULL,
+        slug VARCHAR(191) NULL,
         description TEXT NULL,
         subject VARCHAR(255) NOT NULL,
         body LONGTEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'active',
+        published_version_id MEDIUMINT(9) NULL,
+        latest_version_id MEDIUMINT(9) NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (id)
+        PRIMARY KEY (id),
+        KEY idx_loft_email_templates_slug (slug)
+    ) $charset_collate;";
+    dbDelta($sql);
+
+    $email_template_versions_table = $wpdb->prefix . 'loft_email_template_versions';
+    $sql = "CREATE TABLE $email_template_versions_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        template_id MEDIUMINT(9) NOT NULL,
+        version_number MEDIUMINT(9) NOT NULL,
+        status VARCHAR(50) DEFAULT 'draft',
+        subject_fr VARCHAR(255) NOT NULL,
+        subject_en VARCHAR(255) NOT NULL,
+        body_html_fr LONGTEXT NOT NULL,
+        body_html_en LONGTEXT NOT NULL,
+        body_text_fr LONGTEXT NULL,
+        body_text_en LONGTEXT NULL,
+        notes TEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by BIGINT(20) UNSIGNED NULL,
+        published_at DATETIME NULL,
+        PRIMARY KEY (id),
+        KEY idx_loft_email_template_versions_lookup (template_id, version_number, status),
+        CONSTRAINT fk_loft_email_template_versions_template_id FOREIGN KEY (template_id) REFERENCES {$wpdb->prefix}loft_email_templates(id) ON DELETE CASCADE
     ) $charset_collate;";
     dbDelta($sql);
 
