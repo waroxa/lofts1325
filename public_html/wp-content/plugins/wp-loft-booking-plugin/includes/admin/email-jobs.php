@@ -24,7 +24,7 @@ function wp_loft_booking_email_job_filters() {
         }
     }
 
-    $valid_statuses = ['pending', 'processing', 'retrying', 'completed', 'failed'];
+    $valid_statuses = ['pending', 'processing', 'retrying', 'completed', 'failed', 'rendered'];
     if (!in_array($filters['status'], $valid_statuses, true)) {
         $filters['status'] = '';
     }
