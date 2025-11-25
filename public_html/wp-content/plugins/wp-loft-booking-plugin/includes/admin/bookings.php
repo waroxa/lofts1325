@@ -84,6 +84,7 @@ function wp_loft_booking_bookings_page() {
                 <p>
                     <button class="button button-primary" type="submit" name="template_key" value="guest-confirmation">Send/Resend confirmation</button>
                     <button class="button" type="submit" name="template_key" value="guest-receipt">Send/Resend invoice</button>
+                    <button class="button" type="submit" name="template_key" value="guest-receipt-recreate">Recreate &amp; send invoice</button>
                     <button class="button" type="submit" name="template_key" value="guest-post-stay">Send/Resend post-stay</button>
                 </p>
                 <p class="description">Manual sends are tagged as such in the email job log. Post-stay emails scheduled via automation are delayed until after checkout.</p>
@@ -157,6 +158,12 @@ function wp_loft_booking_handle_booking_actions() {
         $booking_id = isset($_POST['booking_id']) ? absint($_POST['booking_id']) : 0;
         $template   = isset($_POST['template_key']) ? sanitize_text_field((string) $_POST['template_key']) : '';
         $dry_run    = !empty($_POST['dry_run']);
+        $force_new_job = false;
+
+        if ('guest-receipt-recreate' === $template) {
+            $template      = 'guest-receipt';
+            $force_new_job = true;
+        }
 
         if (!$booking_id || '' === $template) {
             add_settings_error(
@@ -190,8 +197,13 @@ function wp_loft_booking_handle_booking_actions() {
                 $result_message = __('Confirmation queued.', 'wp-loft-booking');
                 break;
             case 'guest-receipt':
-                wp_loft_booking_send_receipt_email($booking, [], true, ['dry_run' => $dry_run]);
-                $result_message = __('Invoice queued.', 'wp-loft-booking');
+                wp_loft_booking_send_receipt_email($booking, [], true, [
+                    'dry_run'       => $dry_run,
+                    'force_new_job' => $force_new_job,
+                ]);
+                $result_message = $force_new_job
+                    ? __('Invoice regenerated and queued.', 'wp-loft-booking')
+                    : __('Invoice queued.', 'wp-loft-booking');
                 break;
             case 'guest-post-stay':
                 $send_at = $dry_run ? null : wp_loft_booking_calculate_post_stay_send_at($booking);

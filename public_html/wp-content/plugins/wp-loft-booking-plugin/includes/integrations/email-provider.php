@@ -258,15 +258,54 @@ function wp_loft_email_provider_send(array $message) {
         $body['bcc'] = implode(',', array_filter(array_map('sanitize_email', (array) $message['bcc'])));
     }
 
-    $response = wp_loft_email_provider_request('POST', '/v3/' . rawurlencode($settings['domain']) . '/messages', $body);
+    if (!empty($message['attachments'])) {
+        $body['attachment'] = [];
+
+        foreach ((array) $message['attachments'] as $attachment) {
+            if (!is_string($attachment) || !file_exists($attachment)) {
+                continue;
+            }
+
+            if (function_exists('curl_file_create')) {
+                $body['attachment'][] = curl_file_create($attachment, 'application/pdf', basename($attachment));
+            } else {
+                $body['attachment'][] = '@' . $attachment;
+            }
+        }
+    }
+
+    $url = trailingslashit($settings['endpoint']) . 'v3/' . rawurlencode($settings['domain']) . '/messages';
+
+    $response = wp_remote_request($url, [
+        'method'  => 'POST',
+        'timeout' => 20,
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode('api:' . $settings['api_key']),
+        ],
+        'body'    => $body,
+    ]);
 
     if (is_wp_error($response)) {
         return $response;
     }
 
+    $code    = wp_remote_retrieve_response_code($response);
+    $payload = json_decode(wp_remote_retrieve_body($response), true);
+
+    if ($code >= 400) {
+        return new WP_Error(
+            'loft_email_http_error',
+            sprintf('Mailgun API responded with %d', $code),
+            [
+                'code' => $code,
+                'body' => $payload,
+            ]
+        );
+    }
+
     return [
-        'id'      => $response['id'] ?? null,
-        'message' => $response['message'] ?? __('Queued for delivery', 'wp-loft-booking'),
+        'id'      => $payload['id'] ?? null,
+        'message' => $payload['message'] ?? __('Queued for delivery', 'wp-loft-booking'),
         'to'      => $body['to'],
     ];
 }
@@ -383,6 +422,7 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $send_at    = isset($context['send_at']) ? $context['send_at'] : null;
     $dry_run    = !empty($context['dry_run']);
     $status     = $dry_run ? 'rendered' : 'pending';
+    $force_new  = !empty($context['force_new_job']);
 
     if ($send_at instanceof DateTimeInterface) {
         $send_at = $send_at->getTimestamp();
@@ -407,19 +447,21 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
         $message['to'][0] ?? '',
     ]);
 
-    $idempotency_key = hash('sha256', $id_source);
+    $idempotency_key = hash('sha256', $id_source . ($force_new ? '|' . microtime(true) : ''));
 
-    $existing_job = $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT id FROM {$jobs_table} WHERE idempotency_key = %s LIMIT 1",
-            $idempotency_key
-        )
-    );
+    if (!$force_new) {
+        $existing_job = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$jobs_table} WHERE idempotency_key = %s LIMIT 1",
+                $idempotency_key
+            )
+        );
 
-    if ($existing_job) {
-        error_log(sprintf('ℹ️ Email job reused for key %s (job #%d).', $idempotency_key, $existing_job));
+        if ($existing_job) {
+            error_log(sprintf('ℹ️ Email job reused for key %s (job #%d).', $idempotency_key, $existing_job));
 
-        return (int) $existing_job;
+            return (int) $existing_job;
+        }
     }
 
     $inserted = $wpdb->insert(
