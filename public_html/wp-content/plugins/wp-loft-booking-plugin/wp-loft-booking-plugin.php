@@ -25,6 +25,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/admin/payment-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/tenants.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/email-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin/email-templates.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/email-jobs.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/butterflymx.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/email-provider.php';
 require_once plugin_dir_path(__FILE__) . 'includes/integrations/booking-handler.php';
