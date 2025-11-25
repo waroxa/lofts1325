@@ -11,6 +11,7 @@ function wp_loft_booking_admin_menu() {
     add_submenu_page('wp_loft_booking', 'Tenants', '👨 Tenants', 'manage_options', 'tenants', 'tenants_page_function');
     add_submenu_page('wp_loft_booking', 'Keychains', '🔑🗝️ Keychains', 'manage_options', 'wp_loft_booking_keychains', 'keychains_page_function');
     add_submenu_page('wp_loft_booking', 'Email Deliverability', '📧 Email Deliverability', 'manage_options', 'wp_loft_booking_email_settings', 'wp_loft_booking_email_settings_page');
+    add_submenu_page('wp_loft_booking', 'Transactional Emails', '📨 Email Templates', 'manage_options', 'wp_loft_booking_email_templates', 'wp_loft_booking_email_templates_page');
     add_menu_page('Loft Types', 'Loft Types', 'manage_options', 'wp_loft_booking_loft_types', '', '', 7);
     add_submenu_page('wp_loft_booking', 'Loft Types', 'All Loft Types', 'manage_options', 'loft-types', 'wp_loft_types_admin_page');
     add_submenu_page('wp_loft_booking', 'Add/Edit Loft Type', 'Add Loft Type', 'manage_options', 'add-edit-loft-type', 'wp_add_edit_loft_type_page');
