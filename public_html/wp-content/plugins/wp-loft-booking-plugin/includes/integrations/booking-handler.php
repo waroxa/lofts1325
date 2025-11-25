@@ -28,6 +28,75 @@ function wp_loft_booking_get_notification_recipients() {
     return array_values($valid);
 }
 
+function wp_loft_booking_default_template_keys() {
+    return [
+        'guest-confirmation' => __('Guest confirmation', 'wp-loft-booking'),
+        'guest-receipt'      => __('Guest invoice/receipt', 'wp-loft-booking'),
+        'guest-post-stay'    => __('Post-stay follow-up', 'wp-loft-booking'),
+    ];
+}
+
+function wp_loft_booking_get_auto_send_settings() {
+    $defaults = [
+        'global' => array_fill_keys(array_keys(wp_loft_booking_default_template_keys()), true),
+        'lofts'  => [],
+    ];
+
+    $settings = get_option('loft_email_auto_send', []);
+
+    if (!is_array($settings)) {
+        $settings = [];
+    }
+
+    $settings = wp_parse_args($settings, $defaults);
+
+    foreach ($defaults['global'] as $template_key => $enabled) {
+        if (!isset($settings['global'][$template_key])) {
+            $settings['global'][$template_key] = $enabled;
+        }
+    }
+
+    return $settings;
+}
+
+function wp_loft_booking_should_auto_send($template_key, $loft_id = 0) {
+    $settings = wp_loft_booking_get_auto_send_settings();
+
+    $value = $settings['global'][$template_key] ?? true;
+
+    if ($loft_id && isset($settings['lofts'][$loft_id][$template_key])) {
+        $value = $settings['lofts'][$loft_id][$template_key];
+    }
+
+    return (bool) $value;
+}
+
+function wp_loft_booking_calculate_post_stay_send_at(array $booking) {
+    $date_to = $booking['date_to'] ?? '';
+
+    if (empty($date_to)) {
+        return null;
+    }
+
+    $timezone_string = get_option('timezone_string');
+    if (empty($timezone_string)) {
+        $timezone_string = 'America/Toronto';
+    }
+
+    try {
+        $tz        = new DateTimeZone($timezone_string);
+        $checkout  = new DateTime($date_to, $tz);
+        $checkout->setTime(11, 0, 0);
+        $checkout->modify('+2 hours');
+
+        return $checkout->getTimestamp();
+    } catch (Exception $e) {
+        error_log('⚠️ Unable to schedule post-stay email: ' . $e->getMessage());
+    }
+
+    return null;
+}
+
 if (!function_exists('wp_loft_booking_format_unit_label')) {
     /**
      * Normalize a unit label so it can be displayed without duplicated wording.
@@ -199,8 +268,21 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
  * @return void
  */
 function wp_loft_booking_send_all_booking_emails(array $booking, $virtual_key_result, $is_manual = false) {
-    wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual);
-    wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual);
+    $loft_id = isset($booking['room_id']) ? (int) $booking['room_id'] : 0;
+
+    if (wp_loft_booking_should_auto_send('guest-confirmation', $loft_id)) {
+        wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual);
+    }
+
+    if (wp_loft_booking_should_auto_send('guest-receipt', $loft_id)) {
+        wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual);
+    }
+
+    if (wp_loft_booking_should_auto_send('guest-post-stay', $loft_id)) {
+        $send_at = wp_loft_booking_calculate_post_stay_send_at($booking);
+        wp_loft_booking_send_post_stay_email($booking, $is_manual, ['send_at' => $send_at]);
+    }
+
     wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual);
 }
 
@@ -664,7 +746,7 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
     return $result;
 }
 
-function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual = false) {
+function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
     $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
 
     if (empty($recipient) || !is_email($recipient)) {
@@ -902,6 +984,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
             'template'  => 'guest-confirmation',
             'variables' => $variables,
             'source'    => $is_manual ? 'manual' : 'automatic',
+            'dry_run'   => !empty($options['dry_run']),
+            'send_at'   => $options['send_at'] ?? null,
         ]
     );
 
@@ -912,7 +996,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     }
 }
 
-function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual = false) {
+function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
     $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
 
     if (empty($recipient) || !is_email($recipient)) {
@@ -1178,6 +1262,8 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
             'template'  => 'guest-receipt',
             'variables' => $variables,
             'source'    => $is_manual ? 'manual' : 'automatic',
+            'dry_run'   => !empty($options['dry_run']),
+            'send_at'   => $options['send_at'] ?? null,
         ]
     );
 
@@ -1564,6 +1650,112 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
     }
 }
 
+
+function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, array $options = []) {
+    $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
+
+    if (empty($recipient) || !is_email($recipient)) {
+        error_log('⚠️ Post-stay email skipped: invalid recipient.');
+        return;
+    }
+
+    $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
+    if ('' === $guest_name) {
+        $guest_name = __('Invité', 'wp-loft-booking');
+    }
+
+    $room_name_raw = !empty($booking['room_name']) ? $booking['room_name'] : '';
+    $room_name = wp_loft_booking_format_unit_label($room_name_raw);
+    if ('' === $room_name) {
+        $room_name = __('Votre loft', 'wp-loft-booking');
+    }
+
+    $checkin  = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
+    $checkout = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+
+    $bcc = [];
+
+    foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
+        if (strtolower($internal_email) !== strtolower($recipient)) {
+            $bcc[] = $internal_email;
+        }
+    }
+
+    $subject = 'Loft 1325 – Merci pour votre séjour | Thank you for your stay';
+
+    ob_start();
+    ?>
+    <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f3f4f6;padding:28px 0;">
+            <tr>
+                <td align="center" style="padding:0 16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 32px rgba(15,23,42,0.12);">
+                        <tr>
+                            <td style="padding:32px 32px 20px;background:linear-gradient(135deg,#0f172a,#1f2937);color:#f9fafb;">
+                                <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
+                                <h1 style="margin:8px 0 0;font-size:20px;">Merci pour votre visite | Thank you for staying</h1>
+                                <p style="margin:12px 0 0;font-size:14px;line-height:1.6;">Nous espérons que vous avez apprécié votre séjour dans <?php echo esc_html($room_name); ?>. | We hope you enjoyed your time in <?php echo esc_html($room_name); ?>.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:28px 32px;">
+                                <p style="margin:0 0 12px;font-size:15px;color:#111827;font-weight:600;">Bonjour <?php echo esc_html($guest_name); ?>,</p>
+                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Merci d’avoir choisi Loft 1325 pour votre visite à Val-d’Or. / Thank you for choosing Loft 1325 for your stay in Val-d’Or.</p>
+                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Vos dates · Your dates:<br><strong><?php echo esc_html($checkin); ?> → <?php echo esc_html($checkout); ?></strong></p>
+                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Nous aimerions connaître votre avis. / We would love your feedback.</p>
+                                <p style="margin:0;">
+                                    <a href="https://g.page/r/CfeXFP4gAiijEAg/review" style="background-color:#0ea5e9;color:#f8fafc;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:700;display:inline-block;">Laisser un avis · Leave a review</a>
+                                </p>
+                                <?php if ($is_manual) : ?>
+                                    <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#9ca3af;">Cette relance a été envoyée manuellement depuis le portail Loft 1325. / This follow-up was issued manually from the Loft 1325 portal.</p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <?php
+    $body = ob_get_clean();
+
+    $message = [
+        'to'      => [$recipient],
+        'subject' => $subject,
+        'html'    => $body,
+        'text'    => wp_strip_all_tags($body),
+        'bcc'     => $bcc,
+    ];
+
+    $variables = [
+        'guest_name'    => $guest_name,
+        'room_name'     => $room_name,
+        'checkin'       => $checkin,
+        'checkout'      => $checkout,
+        'booking_id'    => $booking['booking_id'] ?? '',
+        'manual'        => $is_manual,
+        'post_stay_eta' => $options['send_at'] ?? null,
+    ];
+
+    $job_id = wp_loft_email_provider_enqueue_job(
+        $message,
+        $booking,
+        [
+            'event'     => 'post-stay-follow-up',
+            'template'  => 'guest-post-stay',
+            'variables' => $variables,
+            'source'    => $is_manual ? 'manual' : 'automatic',
+            'dry_run'   => !empty($options['dry_run']),
+            'send_at'   => $options['send_at'] ?? null,
+        ]
+    );
+
+    if (is_wp_error($job_id)) {
+        error_log('❌ Post-stay email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
+    } else {
+        error_log(sprintf('✅ Post-stay email queued as job #%d for %s', $job_id, $recipient));
+    }
+}
 
 function wp_loft_booking_create_google_event($booking) {
     $access_token = loft_booking_get_valid_access_token();

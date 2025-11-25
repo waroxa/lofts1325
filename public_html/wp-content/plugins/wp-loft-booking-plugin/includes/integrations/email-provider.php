@@ -380,6 +380,24 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $event      = $context['event'] ?? 'booking-email';
     $template   = $context['template'] ?? ($message['subject'] ?? '');
     $source     = $context['source'] ?? 'automatic';
+    $send_at    = isset($context['send_at']) ? $context['send_at'] : null;
+    $dry_run    = !empty($context['dry_run']);
+    $status     = $dry_run ? 'rendered' : 'pending';
+
+    if ($send_at instanceof DateTimeInterface) {
+        $send_at = $send_at->getTimestamp();
+    }
+
+    if (is_numeric($send_at)) {
+        $send_at      = (int) $send_at;
+        $scheduled_at = get_date_from_gmt(gmdate('Y-m-d H:i:s', $send_at), 'Y-m-d H:i:s');
+    } elseif (is_string($send_at) && strtotime($send_at)) {
+        $scheduled_at = wp_date('Y-m-d H:i:s', strtotime($send_at));
+        $send_at      = strtotime($scheduled_at . ' UTC');
+    } else {
+        $scheduled_at = current_time('mysql');
+        $send_at      = time();
+    }
     $id_source  = implode('|', [
         $event,
         $booking_id ?: 'none',
@@ -413,8 +431,8 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
             'event'           => $event,
             'template_key'    => $template,
             'source'          => $source,
-            'status'          => 'pending',
-            'scheduled_at'    => current_time('mysql'),
+            'status'          => $status,
+            'scheduled_at'    => $scheduled_at,
             'idempotency_key' => $idempotency_key,
             'payload'         => wp_json_encode($message),
             'attempts'        => 0,
@@ -430,12 +448,29 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
 
     wp_loft_email_provider_store_render($job_id, $booking, $message, $context['variables'] ?? []);
 
-    if (!wp_next_scheduled('wp_loft_email_provider_process_job', [$job_id])) {
-        wp_schedule_single_event(time() + 5, 'wp_loft_email_provider_process_job', [$job_id]);
-    }
+    if (!$dry_run) {
+        $timestamp = max(time() + 1, (int) $send_at);
 
-    // Attempt an immediate run to reduce latency while still scheduling retries.
-    wp_loft_email_provider_process_job($job_id);
+        if (!wp_next_scheduled('wp_loft_email_provider_process_job', [$job_id])) {
+            wp_schedule_single_event($timestamp, 'wp_loft_email_provider_process_job', [$job_id]);
+        }
+
+        // Attempt an immediate run to reduce latency while still scheduling retries.
+        wp_loft_email_provider_process_job($job_id);
+    } else {
+        $wpdb->update(
+            $jobs_table,
+            [
+                'processed_at' => current_time('mysql'),
+                'updated_at'   => current_time('mysql'),
+            ],
+            ['id' => $job_id],
+            ['%s', '%s'],
+            ['%d']
+        );
+
+        error_log(sprintf('🧪 Stored dry-run email render as job #%d for booking %s.', $job_id, $booking_id ?: 'n/a'));
+    }
 
     error_log(sprintf('✉️ Enqueued email job #%d (%s) for booking %s.', $job_id, $event, $booking_id ?: 'n/a'));
 
@@ -458,8 +493,20 @@ function wp_loft_email_provider_process_job($job_id) {
         ARRAY_A
     );
 
-    if (empty($job) || in_array($job['status'], ['completed', 'failed'], true)) {
+    if (empty($job) || in_array($job['status'], ['completed', 'failed', 'rendered'], true)) {
         return;
+    }
+
+    if (!empty($job['scheduled_at'])) {
+        $scheduled_timestamp = strtotime(get_gmt_from_date($job['scheduled_at']));
+
+        if ($scheduled_timestamp && $scheduled_timestamp > time()) {
+            if (!wp_next_scheduled('wp_loft_email_provider_process_job', [$job_id])) {
+                wp_schedule_single_event($scheduled_timestamp, 'wp_loft_email_provider_process_job', [$job_id]);
+            }
+
+            return;
+        }
     }
 
     $payload = json_decode($job['payload'] ?? '', true);
