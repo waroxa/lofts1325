@@ -200,8 +200,8 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
  */
 function wp_loft_booking_send_all_booking_emails(array $booking, $virtual_key_result, $is_manual = false) {
     wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual);
-    wp_loft_booking_send_receipt_email($booking, $virtual_key_result);
-    wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result);
+    wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual);
+    wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual);
 }
 
 if (!function_exists('wp_loft_booking_parse_extra_services')) {
@@ -901,6 +901,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
             'event'     => 'booking-confirmation',
             'template'  => 'guest-confirmation',
             'variables' => $variables,
+            'source'    => $is_manual ? 'manual' : 'automatic',
         ]
     );
 
@@ -911,7 +912,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     }
 }
 
-function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
+function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual = false) {
     $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
 
     if (empty($recipient) || !is_email($recipient)) {
@@ -1176,6 +1177,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
             'event'     => 'booking-receipt',
             'template'  => 'guest-receipt',
             'variables' => $variables,
+            'source'    => $is_manual ? 'manual' : 'automatic',
         ]
     );
 
@@ -1186,7 +1188,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result) {
     }
 }
 
-function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result) {
+function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual = false) {
     $recipients = wp_loft_booking_get_notification_recipients();
     $recipient  = array_shift($recipients);
 
@@ -1551,6 +1553,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result)
             'event'     => 'admin-booking-summary',
             'template'  => 'admin-summary',
             'variables' => $variables,
+            'source'    => $is_manual ? 'manual' : 'automatic',
         ]
     );
 

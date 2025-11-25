@@ -314,6 +314,9 @@ function wp_loft_email_provider_maybe_upgrade_tables() {
     $renders_table = $wpdb->prefix . 'loft_email_renders';
 
     maybe_add_column($jobs_table, 'idempotency_key', "ALTER TABLE {$jobs_table} ADD COLUMN idempotency_key VARCHAR(191) NULL");
+    maybe_add_column($jobs_table, 'event', "ALTER TABLE {$jobs_table} ADD COLUMN event VARCHAR(100) DEFAULT 'booking-email'");
+    maybe_add_column($jobs_table, 'template_key', "ALTER TABLE {$jobs_table} ADD COLUMN template_key VARCHAR(150) NULL");
+    maybe_add_column($jobs_table, 'source', "ALTER TABLE {$jobs_table} ADD COLUMN source VARCHAR(50) DEFAULT 'automatic'");
     maybe_add_column($jobs_table, 'payload', "ALTER TABLE {$jobs_table} ADD COLUMN payload LONGTEXT NULL");
     maybe_add_column($jobs_table, 'attempts', "ALTER TABLE {$jobs_table} ADD COLUMN attempts SMALLINT DEFAULT 0");
     maybe_add_column($jobs_table, 'last_error', "ALTER TABLE {$jobs_table} ADD COLUMN last_error TEXT NULL");
@@ -376,6 +379,7 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $loft_id    = isset($booking['room_id']) ? (int) $booking['room_id'] : null;
     $event      = $context['event'] ?? 'booking-email';
     $template   = $context['template'] ?? ($message['subject'] ?? '');
+    $source     = $context['source'] ?? 'automatic';
     $id_source  = implode('|', [
         $event,
         $booking_id ?: 'none',
@@ -406,13 +410,16 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
             'booking_id'      => $booking_id ?: null,
             'loft_id'         => $loft_id ?: null,
             'template_id'     => 0,
+            'event'           => $event,
+            'template_key'    => $template,
+            'source'          => $source,
             'status'          => 'pending',
             'scheduled_at'    => current_time('mysql'),
             'idempotency_key' => $idempotency_key,
             'payload'         => wp_json_encode($message),
             'attempts'        => 0,
         ],
-        ['%d', '%d', '%d', '%s', '%s', '%s', '%s', '%d']
+        ['%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
     );
 
     if (false === $inserted) {
