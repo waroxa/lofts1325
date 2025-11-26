@@ -1111,7 +1111,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 
     if (empty($recipients)) {
         error_log('⚠️ Booking confirmation email skipped: invalid recipient.');
-        return;
+
+        return new WP_Error(
+            'loft_email_invalid_recipient',
+            __('Booking confirmation email skipped: invalid recipient.', 'wp-loft-booking')
+        );
     }
 
     $recipient = array_shift($recipients);
@@ -1357,9 +1361,13 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 
     if (is_wp_error($job_id)) {
         error_log('❌ Booking confirmation email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
-    } else {
-        error_log(sprintf('✅ Booking confirmation email queued as job #%d for %s', $job_id, $recipient));
+
+        return $job_id;
     }
+
+    error_log(sprintf('✅ Booking confirmation email queued as job #%d for %s', $job_id, $recipient));
+
+    return $job_id;
 }
 
 function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
@@ -1367,7 +1375,11 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
 
     if (empty($recipients)) {
         error_log('⚠️ Booking receipt email skipped: invalid recipient.');
-        return;
+
+        return new WP_Error(
+            'loft_email_invalid_recipient',
+            __('Booking receipt email skipped: invalid recipient.', 'wp-loft-booking')
+        );
     }
 
     $recipient = array_shift($recipients);
@@ -1653,25 +1665,29 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
 
     if (is_wp_error($job_id)) {
         error_log('❌ Booking receipt email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
-    } else {
-        if (!is_wp_error($invoice_artifact) && !empty($invoice_artifact['artifact_url'])) {
-            global $wpdb;
 
-            if (!empty($invoice_artifact['id'])) {
-                $wpdb->update(
-                    $wpdb->prefix . 'loft_invoice_artifacts',
-                    ['status' => 'linked'],
-                    ['id' => (int) $invoice_artifact['id']],
-                    ['%s'],
-                    ['%d']
-                );
-            }
+        return $job_id;
+    }
 
-            error_log(sprintf('🧾 Invoice artifact %s linked to job #%d.', $invoice_artifact['artifact_url'], $job_id));
+    if (!is_wp_error($invoice_artifact) && !empty($invoice_artifact['artifact_url'])) {
+        global $wpdb;
+
+        if (!empty($invoice_artifact['id'])) {
+            $wpdb->update(
+                $wpdb->prefix . 'loft_invoice_artifacts',
+                ['status' => 'linked'],
+                ['id' => (int) $invoice_artifact['id']],
+                ['%s'],
+                ['%d']
+            );
         }
 
-        error_log(sprintf('✅ Booking receipt email queued as job #%d for %s', $job_id, $recipient));
+        error_log(sprintf('🧾 Invoice artifact %s linked to job #%d.', $invoice_artifact['artifact_url'], $job_id));
     }
+
+    error_log(sprintf('✅ Booking receipt email queued as job #%d for %s', $job_id, $recipient));
+
+    return $job_id;
 }
 
 function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
@@ -1680,7 +1696,11 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
 
     if (empty($recipient) || !is_email($recipient)) {
         error_log('⚠️ Admin booking email skipped: invalid recipient.');
-        return;
+
+        return new WP_Error(
+            'loft_email_invalid_recipient',
+            __('Admin summary email skipped: invalid recipient.', 'wp-loft-booking')
+        );
     }
 
     $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
@@ -2047,9 +2067,13 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
 
     if (is_wp_error($job_id)) {
         error_log('❌ Admin booking email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
-    } else {
-        error_log(sprintf('✅ Admin booking email queued as job #%d for %s', $job_id, $recipient));
+
+        return $job_id;
     }
+
+    error_log(sprintf('✅ Admin booking email queued as job #%d for %s', $job_id, $recipient));
+
+    return $job_id;
 }
 
 
@@ -2058,7 +2082,11 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
 
     if (empty($recipients)) {
         error_log('⚠️ Cleaning email skipped: no valid recipients.');
-        return;
+
+        return new WP_Error(
+            'loft_email_invalid_recipient',
+            __('Cleaning reminder skipped: no recipients.', 'wp-loft-booking')
+        );
     }
 
     $recipient = array_shift($recipients);
@@ -2122,9 +2150,13 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
 
     if (is_wp_error($job_id)) {
         error_log('❌ Cleaning email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
-    } else {
-        error_log(sprintf('✅ Cleaning email queued as job #%d for %s', $job_id, $recipient));
+
+        return $job_id;
     }
+
+    error_log(sprintf('✅ Cleaning email queued as job #%d for %s', $job_id, $recipient));
+
+    return $job_id;
 }
 
 
@@ -2133,7 +2165,11 @@ function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, arra
 
     if (empty($recipient) || !is_email($recipient)) {
         error_log('⚠️ Post-stay email skipped: invalid recipient.');
-        return;
+
+        return new WP_Error(
+            'loft_email_invalid_recipient',
+            __('Post-stay email skipped: invalid recipient.', 'wp-loft-booking')
+        );
     }
 
     $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
@@ -2229,9 +2265,13 @@ function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, arra
 
     if (is_wp_error($job_id)) {
         error_log('❌ Post-stay email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
-    } else {
-        error_log(sprintf('✅ Post-stay email queued as job #%d for %s', $job_id, $recipient));
+
+        return $job_id;
     }
+
+    error_log(sprintf('✅ Post-stay email queued as job #%d for %s', $job_id, $recipient));
+
+    return $job_id;
 }
 
 function wp_loft_booking_create_google_event($booking) {
