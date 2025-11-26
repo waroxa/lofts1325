@@ -311,13 +311,15 @@ function wp_loft_booking_handle_booking_actions() {
 
         $result_message = __('Email queued.', 'wp-loft-booking');
 
+        $result = null;
+
         switch ($template) {
             case 'guest-confirmation':
-                wp_loft_booking_send_confirmation_email($booking, [], true, ['dry_run' => $dry_run]);
+                $result = wp_loft_booking_send_confirmation_email($booking, [], true, ['dry_run' => $dry_run]);
                 $result_message = __('Confirmation queued.', 'wp-loft-booking');
                 break;
             case 'admin-confirmation':
-                wp_loft_booking_send_confirmation_email($booking, [], true, [
+                $result = wp_loft_booking_send_confirmation_email($booking, [], true, [
                     'dry_run'             => $dry_run,
                     'recipient_override'  => wp_loft_booking_get_notification_recipients(),
                     'bcc_override'        => [],
@@ -325,7 +327,7 @@ function wp_loft_booking_handle_booking_actions() {
                 $result_message = __('Admin confirmation queued.', 'wp-loft-booking');
                 break;
             case 'guest-receipt':
-                wp_loft_booking_send_receipt_email($booking, [], true, [
+                $result = wp_loft_booking_send_receipt_email($booking, [], true, [
                     'dry_run'       => $dry_run,
                     'force_new_job' => $force_new_job,
                 ]);
@@ -334,7 +336,7 @@ function wp_loft_booking_handle_booking_actions() {
                     : __('Invoice queued.', 'wp-loft-booking');
                 break;
             case 'admin-receipt':
-                wp_loft_booking_send_receipt_email($booking, [], true, [
+                $result = wp_loft_booking_send_receipt_email($booking, [], true, [
                     'dry_run'            => $dry_run,
                     'recipient_override' => wp_loft_booking_get_invoice_recipients(),
                     'bcc_override'       => [],
@@ -344,20 +346,20 @@ function wp_loft_booking_handle_booking_actions() {
                 break;
             case 'guest-post-stay':
                 $send_at = $dry_run ? null : wp_loft_booking_calculate_post_stay_send_at($booking);
-                wp_loft_booking_send_post_stay_email($booking, true, [
+                $result = wp_loft_booking_send_post_stay_email($booking, true, [
                     'dry_run' => $dry_run,
                     'send_at' => $send_at,
                 ]);
                 $result_message = __('Post-stay email queued.', 'wp-loft-booking');
                 break;
             case 'admin-summary':
-                wp_loft_booking_send_admin_summary_email($booking, [], true, [
+                $result = wp_loft_booking_send_admin_summary_email($booking, [], true, [
                     'dry_run' => $dry_run,
                 ]);
                 $result_message = __('Admin summary queued.', 'wp-loft-booking');
                 break;
             case 'cleaning-notice':
-                wp_loft_booking_send_cleaning_email($booking, true, [
+                $result = wp_loft_booking_send_cleaning_email($booking, true, [
                     'dry_run'            => $dry_run,
                     'recipient_override' => wp_loft_booking_get_cleaning_recipients(),
                 ]);
@@ -376,10 +378,29 @@ function wp_loft_booking_handle_booking_actions() {
 
         $suffix = $dry_run ? ' ' . __('(dry-run render only)', 'wp-loft-booking') : '';
 
+        if (is_wp_error($result) || empty($result)) {
+            $error_message = is_wp_error($result)
+                ? $result->get_error_message()
+                : __('Unknown error while queuing the email.', 'wp-loft-booking');
+
+            add_settings_error(
+                'wp_loft_booking_bookings',
+                'manual_send_error',
+                sprintf(__('Unable to queue email: %s', 'wp-loft-booking'), $error_message),
+                'error'
+            );
+
+            return;
+        }
+
+        $job_note = is_int($result)
+            ? ' ' . sprintf(__('(job #%d)', 'wp-loft-booking'), $result)
+            : '';
+
         add_settings_error(
             'wp_loft_booking_bookings',
             'manual_send_success',
-            $result_message . $suffix,
+            $result_message . $suffix . $job_note,
             'updated'
         );
     }
