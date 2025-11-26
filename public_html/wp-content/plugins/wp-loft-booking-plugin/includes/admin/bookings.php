@@ -16,6 +16,24 @@ function wp_loft_booking_bookings_page() {
     $auto_values   = $selected_loft && !empty($settings['lofts'][$selected_loft])
         ? $settings['lofts'][$selected_loft]
         : ($settings['global'] ?? []);
+    $notification_recipients = implode("\n", wp_loft_booking_get_notification_recipients());
+    $invoice_recipients      = implode("\n", wp_loft_booking_get_invoice_recipients());
+    $cleaning_recipients     = implode("\n", wp_loft_booking_get_cleaning_recipients());
+
+    $recent_records = $wpdb->get_results(
+        "SELECT id FROM {$wpdb->prefix}nd_booking_booking ORDER BY id DESC LIMIT 50"
+    );
+
+    $recent_bookings = [];
+
+    foreach ($recent_records as $record) {
+        $payload = wp_loft_booking_build_booking_payload((int) $record->id);
+
+        if (!empty($payload)) {
+            $payload['booking_id'] = (int) $record->id;
+            $recent_bookings[]     = $payload;
+        }
+    }
 
     ?>
     <div class="wrap">
@@ -58,6 +76,37 @@ function wp_loft_booking_bookings_page() {
             </p>
         </form>
 
+        <h2>Notification recipients</h2>
+        <p>Manage who receives copies of confirmations, invoices, admin notices, and cleaning reminders.</p>
+        <form method="post" style="margin-bottom:24px;">
+            <?php wp_nonce_field('wp_loft_booking_update_recipients'); ?>
+            <input type="hidden" name="wp_loft_booking_update_recipients" value="1">
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><label for="notification_recipients">Admin/notification emails</label></th>
+                    <td>
+                        <textarea id="notification_recipients" name="notification_recipients" class="large-text code" rows="3" placeholder="admin@example.com&#10;team@example.com"><?php echo esc_textarea($notification_recipients); ?></textarea>
+                        <p class="description">Copied on confirmations, guest receipts, and admin summaries.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="invoice_recipients">Invoice emails</label></th>
+                    <td>
+                        <textarea id="invoice_recipients" name="invoice_recipients" class="large-text code" rows="3" placeholder="billing@example.com"><?php echo esc_textarea($invoice_recipients); ?></textarea>
+                        <p class="description">Used when resending invoices directly to admins.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="cleaning_recipients">Cleaning team emails</label></th>
+                    <td>
+                        <textarea id="cleaning_recipients" name="cleaning_recipients" class="large-text code" rows="3" placeholder="cleaning@example.com"><?php echo esc_textarea($cleaning_recipients); ?></textarea>
+                        <p class="description">Recipients for cleaning reminders tied to each booking.</p>
+                    </td>
+                </tr>
+            </table>
+            <p><button class="button button-primary" type="submit">Save recipients</button></p>
+        </form>
+
         <hr>
 
         <h2>Booking lookup</h2>
@@ -83,10 +132,13 @@ function wp_loft_booking_bookings_page() {
                 </p>
                 <p>
                     <button class="button button-primary" type="submit" name="template_key" value="guest-confirmation">Send/Resend confirmation</button>
+                    <button class="button" type="submit" name="template_key" value="admin-confirmation">Send confirmation to admins</button>
                     <button class="button" type="submit" name="template_key" value="guest-receipt">Send/Resend invoice</button>
+                    <button class="button" type="submit" name="template_key" value="admin-receipt">Send invoice to admins</button>
                     <button class="button" type="submit" name="template_key" value="guest-receipt-recreate">Recreate &amp; send invoice</button>
                     <button class="button" type="submit" name="template_key" value="guest-post-stay">Send/Resend post-stay</button>
                     <button class="button" type="submit" name="template_key" value="admin-summary">Send/Resend admin summary</button>
+                    <button class="button" type="submit" name="template_key" value="cleaning-notice">Send cleaning reminder</button>
                 </p>
                 <p class="description">Manual sends are tagged as such in the email job log. Post-stay emails scheduled via automation are delayed until after checkout. Admin summaries deliver to your internal notification list.</p>
             </form>
@@ -95,6 +147,49 @@ function wp_loft_booking_bookings_page() {
         <?php endif; ?>
 
         <hr>
+
+        <h2>Recent bookings (ND Booking)</h2>
+        <p>Browse the latest ND Booking records and resend the same checkout-triggered emails.</p>
+        <?php if (!empty($recent_bookings)) : ?>
+            <table class="widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Guest</th>
+                        <th>Loft</th>
+                        <th>Dates</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($recent_bookings as $recent) : ?>
+                        <tr>
+                            <td><?php echo esc_html($recent['booking_id'] ?? ''); ?></td>
+                            <td><?php echo esc_html(trim(($recent['name'] ?? '') . ' ' . ($recent['surname'] ?? ''))); ?><br><small><?php echo esc_html($recent['email'] ?? ''); ?></small></td>
+                            <td><?php echo esc_html($recent['room_name'] ?? ''); ?></td>
+                            <td><?php echo esc_html(($recent['date_from'] ?? '') . ' → ' . ($recent['date_to'] ?? '')); ?></td>
+                            <td><?php echo esc_html(wp_loft_booking_format_currency($recent['total'] ?? 0, $recent['currency'] ?? 'CAD')); ?></td>
+                            <td>
+                                <form method="post" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                                    <?php wp_nonce_field('wp_loft_booking_manual_send'); ?>
+                                    <input type="hidden" name="wp_loft_booking_manual_send" value="1">
+                                    <input type="hidden" name="booking_id" value="<?php echo esc_attr($recent['booking_id'] ?? 0); ?>">
+                                    <button class="button" type="submit" name="template_key" value="guest-confirmation">Guest confirmation</button>
+                                    <button class="button" type="submit" name="template_key" value="admin-confirmation">Admin confirmation</button>
+                                    <button class="button" type="submit" name="template_key" value="guest-receipt">Guest invoice</button>
+                                    <button class="button" type="submit" name="template_key" value="admin-receipt">Admin invoice</button>
+                                    <button class="button" type="submit" name="template_key" value="admin-summary">Admin summary</button>
+                                    <button class="button" type="submit" name="template_key" value="cleaning-notice">Cleaning team</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else : ?>
+            <p class="description">No ND Booking records were found.</p>
+        <?php endif; ?>
 
         <p>Use the controls below to resend receipts/invoices to every guest email on record. A copy is automatically BCC’d to the Loft 1325 inboxes.</p>
         <form method="post">
@@ -153,6 +248,30 @@ function wp_loft_booking_handle_booking_actions() {
         );
     }
 
+    if (!empty($_POST['wp_loft_booking_update_recipients'])) {
+        check_admin_referer('wp_loft_booking_update_recipients');
+
+        update_option(
+            'loft_booking_notification_recipients',
+            sanitize_textarea_field(wp_unslash($_POST['notification_recipients'] ?? ''))
+        );
+        update_option(
+            'loft_booking_invoice_recipients',
+            sanitize_textarea_field(wp_unslash($_POST['invoice_recipients'] ?? ''))
+        );
+        update_option(
+            'loft_booking_cleaning_recipients',
+            sanitize_textarea_field(wp_unslash($_POST['cleaning_recipients'] ?? ''))
+        );
+
+        add_settings_error(
+            'wp_loft_booking_bookings',
+            'recipients_saved',
+            __('Recipient lists saved.', 'wp-loft-booking'),
+            'updated'
+        );
+    }
+
     if (!empty($_POST['wp_loft_booking_manual_send'])) {
         check_admin_referer('wp_loft_booking_manual_send');
 
@@ -197,6 +316,14 @@ function wp_loft_booking_handle_booking_actions() {
                 wp_loft_booking_send_confirmation_email($booking, [], true, ['dry_run' => $dry_run]);
                 $result_message = __('Confirmation queued.', 'wp-loft-booking');
                 break;
+            case 'admin-confirmation':
+                wp_loft_booking_send_confirmation_email($booking, [], true, [
+                    'dry_run'             => $dry_run,
+                    'recipient_override'  => wp_loft_booking_get_notification_recipients(),
+                    'bcc_override'        => [],
+                ]);
+                $result_message = __('Admin confirmation queued.', 'wp-loft-booking');
+                break;
             case 'guest-receipt':
                 wp_loft_booking_send_receipt_email($booking, [], true, [
                     'dry_run'       => $dry_run,
@@ -205,6 +332,15 @@ function wp_loft_booking_handle_booking_actions() {
                 $result_message = $force_new_job
                     ? __('Invoice regenerated and queued.', 'wp-loft-booking')
                     : __('Invoice queued.', 'wp-loft-booking');
+                break;
+            case 'admin-receipt':
+                wp_loft_booking_send_receipt_email($booking, [], true, [
+                    'dry_run'            => $dry_run,
+                    'recipient_override' => wp_loft_booking_get_invoice_recipients(),
+                    'bcc_override'       => [],
+                    'force_new_job'      => $force_new_job,
+                ]);
+                $result_message = __('Admin invoice queued.', 'wp-loft-booking');
                 break;
             case 'guest-post-stay':
                 $send_at = $dry_run ? null : wp_loft_booking_calculate_post_stay_send_at($booking);
@@ -219,6 +355,13 @@ function wp_loft_booking_handle_booking_actions() {
                     'dry_run' => $dry_run,
                 ]);
                 $result_message = __('Admin summary queued.', 'wp-loft-booking');
+                break;
+            case 'cleaning-notice':
+                wp_loft_booking_send_cleaning_email($booking, true, [
+                    'dry_run'            => $dry_run,
+                    'recipient_override' => wp_loft_booking_get_cleaning_recipients(),
+                ]);
+                $result_message = __('Cleaning reminder queued.', 'wp-loft-booking');
                 break;
             default:
                 add_settings_error(

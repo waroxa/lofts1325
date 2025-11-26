@@ -8,24 +8,64 @@ add_action('nd_booking_reservation_added_in_db', 'wp_loft_booking_handle_booking
  *
  * @return array<int,string>
  */
-function wp_loft_booking_get_notification_recipients() {
-    $addresses = [
-        get_option('admin_email'),
-        'info@loft1325.com',
-        'maria@websitesmdla.com',
-    ];
-
+function wp_loft_booking_parse_email_list($value) {
     $valid = [];
 
-    foreach ($addresses as $address) {
+    if (is_string($value)) {
+        $value = preg_split('/[,\n]+/', $value);
+    }
+
+    if (!is_array($value)) {
+        $value = [];
+    }
+
+    foreach ($value as $address) {
         $address = sanitize_email((string) $address);
 
         if ($address && is_email($address)) {
-            $valid[$address] = $address; // prevent duplicates
+            $valid[strtolower($address)] = $address; // prevent duplicates
         }
     }
 
     return array_values($valid);
+}
+
+function wp_loft_booking_get_notification_recipients() {
+    $default = implode(",\n", array_filter([
+        get_option('admin_email'),
+        'info@loft1325.com',
+        'maria@websitesmdla.com',
+    ]));
+
+    $stored = get_option('loft_booking_notification_recipients', $default);
+
+    return wp_loft_booking_parse_email_list($stored);
+}
+
+function wp_loft_booking_get_invoice_recipients() {
+    $fallback = get_option('loft_booking_notification_recipients', '');
+    $stored   = get_option('loft_booking_invoice_recipients', $fallback);
+
+    $list = wp_loft_booking_parse_email_list($stored);
+
+    if (empty($list)) {
+        return wp_loft_booking_parse_email_list($fallback);
+    }
+
+    return $list;
+}
+
+function wp_loft_booking_get_cleaning_recipients() {
+    $fallback = get_option('loft_booking_notification_recipients', '');
+    $stored   = get_option('loft_booking_cleaning_recipients', $fallback);
+
+    $list = wp_loft_booking_parse_email_list($stored);
+
+    if (empty($list)) {
+        return wp_loft_booking_parse_email_list($fallback);
+    }
+
+    return $list;
 }
 
 function wp_loft_booking_default_template_keys() {
@@ -284,6 +324,8 @@ function wp_loft_booking_send_all_booking_emails(array $booking, $virtual_key_re
     }
 
     wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual);
+
+    wp_loft_booking_send_cleaning_email($booking, $is_manual);
 }
 
 if (!function_exists('wp_loft_booking_parse_extra_services')) {
@@ -1065,12 +1107,14 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
 }
 
 function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
-    $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
+    $recipients = wp_loft_booking_parse_email_list($options['recipient_override'] ?? ($booking['email'] ?? ''));
 
-    if (empty($recipient) || !is_email($recipient)) {
+    if (empty($recipients)) {
         error_log('⚠️ Booking confirmation email skipped: invalid recipient.');
         return;
     }
+
+    $recipient = array_shift($recipients);
 
     $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
     if (empty($guest_name)) {
@@ -1125,11 +1169,15 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     }
 
     $support_email = sanitize_email(get_option('admin_email'));
-    $bcc           = [];
+    $bcc           = isset($options['bcc_override'])
+        ? wp_loft_booking_parse_email_list($options['bcc_override'])
+        : [];
 
-    foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
-        if (strtolower($internal_email) !== strtolower($recipient)) {
-            $bcc[] = $internal_email;
+    if (empty($options['bcc_override'])) {
+        foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
+            if (strtolower($internal_email) !== strtolower($recipient)) {
+                $bcc[] = $internal_email;
+            }
         }
     }
 
@@ -1269,7 +1317,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $body = ob_get_clean();
 
     $message = [
-        'to'      => [$recipient],
+        'to'      => array_merge([$recipient], $recipients),
         'subject' => $subject,
         'html'    => $body,
         'text'    => wp_strip_all_tags($body),
@@ -1315,12 +1363,14 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 }
 
 function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
-    $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
+    $recipients = wp_loft_booking_parse_email_list($options['recipient_override'] ?? ($booking['email'] ?? ''));
 
-    if (empty($recipient) || !is_email($recipient)) {
+    if (empty($recipients)) {
         error_log('⚠️ Booking receipt email skipped: invalid recipient.');
         return;
     }
+
+    $recipient = array_shift($recipients);
 
     $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? ''));
     if ('' === $guest_name) {
@@ -1370,11 +1420,15 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     $website_url      = 'https://loft1325.com';
     $support_email    = sanitize_email(get_option('admin_email'));
 
-    $bcc = [];
+    $bcc = isset($options['bcc_override'])
+        ? wp_loft_booking_parse_email_list($options['bcc_override'])
+        : [];
 
-    foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
-        if (strtolower($internal_email) !== strtolower($recipient)) {
-            $bcc[] = $internal_email;
+    if (empty($options['bcc_override'])) {
+        foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
+            if (strtolower($internal_email) !== strtolower($recipient)) {
+                $bcc[] = $internal_email;
+            }
         }
     }
 
@@ -1555,7 +1609,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     $body = ob_get_clean();
 
     $message = [
-        'to'      => [$recipient],
+        'to'      => array_merge([$recipient], $recipients),
         'subject' => $subject,
         'html'    => $body,
         'text'    => wp_strip_all_tags($body),
@@ -1995,6 +2049,81 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
         error_log('❌ Admin booking email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
     } else {
         error_log(sprintf('✅ Admin booking email queued as job #%d for %s', $job_id, $recipient));
+    }
+}
+
+
+function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array $options = []) {
+    $recipients = wp_loft_booking_parse_email_list($options['recipient_override'] ?? wp_loft_booking_get_cleaning_recipients());
+
+    if (empty($recipients)) {
+        error_log('⚠️ Cleaning email skipped: no valid recipients.');
+        return;
+    }
+
+    $recipient = array_shift($recipients);
+
+    $room_name_raw = !empty($booking['room_name']) ? $booking['room_name'] : '';
+    $room_name = wp_loft_booking_format_unit_label($room_name_raw);
+    if ('' === $room_name) {
+        $room_name = __('Loft non spécifié', 'wp-loft-booking');
+    }
+
+    $guest_name = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
+    $checkin    = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
+    $checkout   = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+
+    $bcc = wp_loft_booking_parse_email_list($recipients);
+
+    $subject = sprintf(__('Lofts 1325 – Cleaning scheduled for %s', 'wp-loft-booking'), $room_name);
+
+    ob_start();
+    ?>
+    <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
+        <p style="margin:0 0 8px;font-size:15px;font-weight:700;">Cleaning scheduled</p>
+        <p style="margin:0 0 12px;font-size:14px;">Unit: <strong><?php echo esc_html($room_name); ?></strong></p>
+        <p style="margin:0 0 12px;font-size:14px;">Guest: <strong><?php echo esc_html($guest_name); ?></strong></p>
+        <p style="margin:0 0 12px;font-size:14px;">Dates: <strong><?php echo esc_html($checkin); ?></strong> → <strong><?php echo esc_html($checkout); ?></strong></p>
+        <p style="margin:0 0 12px;font-size:14px;">Notes: <?php echo esc_html($booking['message'] ?? __('None provided', 'wp-loft-booking')); ?></p>
+        <?php if ($is_manual) : ?>
+            <p style="margin:12px 0 0;font-size:12px;color:#6b7280;">Manual resend from the Loft 1325 bookings portal.</p>
+        <?php endif; ?>
+    </div>
+    <?php
+    $body = ob_get_clean();
+
+    $message = [
+        'to'      => array_merge([$recipient], $recipients),
+        'subject' => $subject,
+        'html'    => $body,
+        'text'    => wp_strip_all_tags($body),
+        'bcc'     => $bcc,
+    ];
+
+    $variables = [
+        'room_name' => $room_name,
+        'guest_name' => $guest_name,
+        'checkin'   => $checkin,
+        'checkout'  => $checkout,
+        'manual'    => $is_manual,
+    ];
+
+    $job_id = wp_loft_email_provider_enqueue_job(
+        $message,
+        $booking,
+        [
+            'event'     => 'cleaning-notice',
+            'template'  => 'cleaning-notice',
+            'variables' => $variables,
+            'source'    => $is_manual ? 'manual' : 'automatic',
+            'dry_run'   => !empty($options['dry_run']),
+        ]
+    );
+
+    if (is_wp_error($job_id)) {
+        error_log('❌ Cleaning email could not be queued for ' . $recipient . ': ' . $job_id->get_error_message());
+    } else {
+        error_log(sprintf('✅ Cleaning email queued as job #%d for %s', $job_id, $recipient));
     }
 }
 
