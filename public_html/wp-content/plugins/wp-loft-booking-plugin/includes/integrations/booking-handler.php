@@ -1133,7 +1133,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         }
     }
 
-    $subject = 'Loft 1325 – Confirmation de réservation | Reservation Confirmation';
+    $subject = 'Lofts 1325 – Confirmation de réservation | Reservation Confirmation';
 
     ob_start();
     ?>
@@ -1378,7 +1378,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
         }
     }
 
-    $subject = 'Loft 1325 – Reçu de paiement | Payment Receipt';
+    $subject = 'Lofts 1325 – Reçu de paiement | Payment Receipt';
 
     ob_start();
     ?>
@@ -1620,7 +1620,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     }
 }
 
-function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual = false) {
+function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result, $is_manual = false, array $options = []) {
     $recipients = wp_loft_booking_get_notification_recipients();
     $recipient  = array_shift($recipients);
 
@@ -1717,7 +1717,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
     foreach ($recipients as $internal_email) {
         $bcc[] = $internal_email;
     }
-    $subject = 'Loft 1325 – Nouvelle réservation confirmée | New Reservation Confirmation';
+    $subject = 'Lofts 1325 – Nouvelle réservation confirmée | New Reservation Confirmation';
 
     $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
     $property_address = '1325 3e Avenue, Val-d’Or, QC, Canada';
@@ -1986,6 +1986,8 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
             'template'  => 'admin-summary',
             'variables' => $variables,
             'source'    => $is_manual ? 'manual' : 'automatic',
+            'dry_run'   => !empty($options['dry_run']),
+            'send_at'   => $options['send_at'] ?? null,
         ]
     );
 
@@ -2027,7 +2029,7 @@ function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, arra
         }
     }
 
-    $subject = 'Loft 1325 – Merci pour votre séjour | Thank you for your stay';
+    $subject = 'Lofts 1325 – Merci pour votre séjour | Thank you for your stay';
 
     ob_start();
     ?>

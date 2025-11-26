@@ -86,8 +86,9 @@ function wp_loft_booking_bookings_page() {
                     <button class="button" type="submit" name="template_key" value="guest-receipt">Send/Resend invoice</button>
                     <button class="button" type="submit" name="template_key" value="guest-receipt-recreate">Recreate &amp; send invoice</button>
                     <button class="button" type="submit" name="template_key" value="guest-post-stay">Send/Resend post-stay</button>
+                    <button class="button" type="submit" name="template_key" value="admin-summary">Send/Resend admin summary</button>
                 </p>
-                <p class="description">Manual sends are tagged as such in the email job log. Post-stay emails scheduled via automation are delayed until after checkout.</p>
+                <p class="description">Manual sends are tagged as such in the email job log. Post-stay emails scheduled via automation are delayed until after checkout. Admin summaries deliver to your internal notification list.</p>
             </form>
         <?php elseif ($booking_id) : ?>
             <div class="notice notice-warning inline"><p>Booking not found for ID <?php echo esc_html($booking_id); ?>.</p></div>
@@ -212,6 +213,12 @@ function wp_loft_booking_handle_booking_actions() {
                     'send_at' => $send_at,
                 ]);
                 $result_message = __('Post-stay email queued.', 'wp-loft-booking');
+                break;
+            case 'admin-summary':
+                wp_loft_booking_send_admin_summary_email($booking, [], true, [
+                    'dry_run' => $dry_run,
+                ]);
+                $result_message = __('Admin summary queued.', 'wp-loft-booking');
                 break;
             default:
                 add_settings_error(

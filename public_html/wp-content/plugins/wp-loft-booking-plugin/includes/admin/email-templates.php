@@ -42,7 +42,7 @@ function wp_loft_booking_seed_default_email_template() {
             'name'        => 'Booking confirmation',
             'slug'        => 'booking-confirmation',
             'description' => 'Guest confirmation email with bilingual content.',
-            'subject'     => 'Loft 1325 booking',
+            'subject'     => 'Lofts 1325 booking',
             'body'        => '<p>Merci pour votre réservation | Thank you for your booking</p>',
             'status'      => 'active',
         ),
