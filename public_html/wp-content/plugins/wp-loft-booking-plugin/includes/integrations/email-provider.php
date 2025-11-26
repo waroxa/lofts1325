@@ -371,6 +371,42 @@ function wp_loft_email_provider_maybe_upgrade_tables() {
 add_action('plugins_loaded', 'wp_loft_email_provider_maybe_upgrade_tables');
 
 /**
+ * Guarantee required email tables exist before enqueueing work.
+ *
+ * @return bool
+ */
+function wp_loft_email_provider_ensure_tables_exist() {
+    global $wpdb;
+
+    $jobs_table       = $wpdb->prefix . 'loft_email_jobs';
+    $renders_table    = $wpdb->prefix . 'loft_email_renders';
+    $recipients_table = $wpdb->prefix . 'loft_recipients';
+
+    $missing_tables = [];
+
+    foreach ([$jobs_table, $renders_table, $recipients_table] as $table) {
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            $missing_tables[] = $table;
+        }
+    }
+
+    if (!empty($missing_tables) && function_exists('wp_loft_booking_create_tables')) {
+        wp_loft_booking_create_tables();
+    }
+
+    // Run the column upgrade routine even if tables existed to ensure schema is current.
+    wp_loft_email_provider_maybe_upgrade_tables();
+
+    foreach ([$jobs_table, $renders_table, $recipients_table] as $table) {
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Persist a rendered email snapshot for debugging or auditing.
  *
  * @param int   $job_id
@@ -413,6 +449,13 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     global $wpdb;
 
     $jobs_table = $wpdb->prefix . 'loft_email_jobs';
+
+    if (!wp_loft_email_provider_ensure_tables_exist()) {
+        return new WP_Error(
+            'loft_email_jobs_table_missing',
+            __('Unable to enqueue email job because the email queue tables are missing.', 'wp-loft-booking')
+        );
+    }
 
     $booking_id = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) ($booking['id'] ?? 0);
     $loft_id    = isset($booking['room_id']) ? (int) $booking['room_id'] : null;
@@ -483,7 +526,14 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     );
 
     if (false === $inserted) {
-        return new WP_Error('loft_email_job_insert_failed', __('Unable to enqueue email job.', 'wp-loft-booking'));
+        return new WP_Error(
+            'loft_email_job_insert_failed',
+            sprintf(
+                /* translators: %s: database error message */
+                __('Unable to enqueue email job: %s', 'wp-loft-booking'),
+                $wpdb->last_error ?: __('Unknown database error', 'wp-loft-booking')
+            )
+        );
     }
 
     $job_id = (int) $wpdb->insert_id;
