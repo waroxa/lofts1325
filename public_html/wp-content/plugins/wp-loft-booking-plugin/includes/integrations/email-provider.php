@@ -418,13 +418,26 @@ function wp_loft_email_provider_store_render($job_id, array $booking, array $mes
     global $wpdb;
 
     $renders_table = $wpdb->prefix . 'loft_email_renders';
+    $lofts_table   = $wpdb->prefix . 'loft_lofts';
+
+    $loft_id = isset($booking['room_id']) ? (int) $booking['room_id'] : null;
+
+    if ($loft_id) {
+        $loft_exists = $wpdb->get_var(
+            $wpdb->prepare("SELECT id FROM {$lofts_table} WHERE id = %d", $loft_id)
+        );
+
+        if (!$loft_exists) {
+            $loft_id = null;
+        }
+    }
 
     $wpdb->insert(
         $renders_table,
         [
             'job_id'           => (int) $job_id,
             'booking_id'       => isset($booking['booking_id']) ? (int) $booking['booking_id'] : null,
-            'loft_id'          => isset($booking['room_id']) ? (int) $booking['room_id'] : null,
+            'loft_id'          => $loft_id,
             'status'           => 'rendered',
             'rendered_subject' => $message['subject'] ?? '',
             'rendered_body'    => $message['html'] ?? '',

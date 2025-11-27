@@ -8,7 +8,7 @@ function wp_loft_booking_bookings_page() {
     global $wpdb;
 
     $selected_loft = isset($_GET['loft_id']) ? absint($_GET['loft_id']) : 0;
-    $lofts         = $wpdb->get_results("SELECT id, unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY unit_name ASC");
+    $lofts         = $wpdb->get_results("SELECT id, name AS unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY name ASC");
     $settings      = wp_loft_booking_get_auto_send_settings();
     $templates     = wp_loft_booking_default_template_keys();
     $booking_id    = isset($_GET['booking_id']) ? absint($_GET['booking_id']) : 0;
