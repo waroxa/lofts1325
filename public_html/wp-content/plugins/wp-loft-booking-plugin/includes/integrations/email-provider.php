@@ -237,7 +237,7 @@ function wp_loft_email_provider_send(array $message) {
     $settings = wp_loft_email_provider_get_settings();
 
     if (empty($settings['api_key']) || empty($settings['domain'])) {
-        return new WP_Error('loft_email_not_configured', __('Mailgun is not fully configured.', 'wp-loft-booking'));
+        return wp_loft_email_provider_send_via_wp_mail($message);
     }
 
     $body = [
@@ -307,6 +307,61 @@ function wp_loft_email_provider_send(array $message) {
         'id'      => $payload['id'] ?? null,
         'message' => $payload['message'] ?? __('Queued for delivery', 'wp-loft-booking'),
         'to'      => $body['to'],
+    ];
+}
+
+/**
+ * Send an email using WordPress' built-in wp_mail().
+ *
+ * @param array $message
+ *
+ * @return array|WP_Error
+ */
+function wp_loft_email_provider_send_via_wp_mail(array $message) {
+    $to = array_values(array_filter(array_map('sanitize_email', (array) ($message['to'] ?? []))));
+
+    if (empty($to)) {
+        return new WP_Error('loft_email_missing_recipient', __('Missing email recipient.', 'wp-loft-booking'));
+    }
+
+    $subject = $message['subject'] ?? '';
+    $body    = $message['html'] ?? ($message['text'] ?? '');
+
+    $headers = ['Content-Type: text/html; charset=UTF-8'];
+    $from    = $message['from'] ?? wp_loft_email_provider_get_from_address();
+
+    if (!empty($from)) {
+        $headers[] = 'From: ' . $from;
+    }
+
+    if (!empty($message['bcc'])) {
+        $bcc = array_values(array_filter(array_map('sanitize_email', (array) $message['bcc'])));
+        if (!empty($bcc)) {
+            $headers[] = 'Bcc: ' . implode(',', $bcc);
+        }
+    }
+
+    $attachments = [];
+    if (!empty($message['attachments'])) {
+        foreach ((array) $message['attachments'] as $attachment) {
+            if (is_string($attachment) && file_exists($attachment)) {
+                $attachments[] = $attachment;
+            }
+        }
+    }
+
+    $sent = wp_mail($to, $subject, $body, $headers, $attachments);
+
+    if (!$sent) {
+        return new WP_Error('loft_email_wp_mail_failed', __('WordPress mail delivery failed.', 'wp-loft-booking'));
+    }
+
+    error_log(sprintf('✅ Email sent via wp_mail to %s.', implode(', ', $to)));
+
+    return [
+        'id'      => null,
+        'message' => __('Sent via wp_mail', 'wp-loft-booking'),
+        'to'      => $to,
     ];
 }
 
@@ -463,6 +518,7 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
 
     $jobs_table      = $wpdb->prefix . 'loft_email_jobs';
     $templates_table = $wpdb->prefix . 'loft_email_templates';
+    $recipients_table = $wpdb->prefix . 'loft_recipients';
 
     $recipients = isset($message['to']) ? array_filter(array_map('sanitize_email', (array) $message['to'])) : [];
 
@@ -644,6 +700,20 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
 
     $job_id = (int) $wpdb->insert_id;
 
+    foreach ($message['to'] as $recipient_email) {
+        $wpdb->insert(
+            $recipients_table,
+            [
+                'job_id'     => $job_id,
+                'booking_id' => $booking_id ?: null,
+                'loft_id'    => $loft_id ?: null,
+                'email'      => $recipient_email,
+                'status'     => 'pending',
+            ],
+            ['%d', '%d', '%d', '%s', '%s']
+        );
+    }
+
     wp_loft_email_provider_store_render($job_id, $booking, $message, $context['variables'] ?? []);
 
     if (!$dry_run) {
@@ -685,6 +755,7 @@ function wp_loft_email_provider_process_job($job_id) {
 
     $jobs_table    = $wpdb->prefix . 'loft_email_jobs';
     $renders_table = $wpdb->prefix . 'loft_email_renders';
+    $recipients_table = $wpdb->prefix . 'loft_recipients';
 
     $job = $wpdb->get_row(
         $wpdb->prepare("SELECT * FROM {$jobs_table} WHERE id = %d", (int) $job_id),
@@ -708,6 +779,51 @@ function wp_loft_email_provider_process_job($job_id) {
     }
 
     $payload = json_decode($job['payload'] ?? '', true);
+
+    if (empty($payload) || empty($payload['to'])) {
+        $fallback_recipients = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT email FROM {$recipients_table} WHERE job_id = %d AND email <> '' ORDER BY id ASC",
+                $job_id
+            )
+        );
+
+        $rendered_row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT rendered_subject, rendered_body, rendered_text, attachments FROM {$renders_table} WHERE job_id = %d ORDER BY id DESC LIMIT 1",
+                $job_id
+            ),
+            ARRAY_A
+        );
+
+        if (!empty($fallback_recipients) && !empty($rendered_row)) {
+            $payload = [
+                'to'      => array_values(array_filter($fallback_recipients)),
+                'subject' => $rendered_row['rendered_subject'] ?? '',
+                'html'    => $rendered_row['rendered_body'] ?? '',
+                'text'    => $rendered_row['rendered_text'] ?? '',
+            ];
+
+            if (!empty($rendered_row['attachments'])) {
+                $attachments = json_decode($rendered_row['attachments'], true);
+                if (!empty($attachments)) {
+                    $payload['attachments'] = $attachments;
+                }
+            }
+
+            $payload_json = wp_json_encode($payload);
+            if ($payload_json) {
+                $wpdb->update(
+                    $jobs_table,
+                    ['payload' => $payload_json, 'updated_at' => current_time('mysql')],
+                    ['id' => $job_id],
+                    ['%s', '%s'],
+                    ['%d']
+                );
+            }
+        }
+    }
+
     if (empty($payload) || empty($payload['to'])) {
         $wpdb->update(
             $jobs_table,
