@@ -1239,6 +1239,9 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $checkin_fr  = !empty($booking['date_from']) ? wp_date('j F Y', strtotime($booking['date_from'])) : __('N/D', 'wp-loft-booking');
     $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : __('N/D', 'wp-loft-booking');
 
+    $price_breakdown = wp_loft_booking_calculate_price_breakdown($booking);
+    $currency        = $price_breakdown['currency'] ?? 'CAD';
+
     $total = isset($booking['total']) && $booking['total'] !== '' ? sprintf('$%s', number_format((float) $booking['total'], 2)) : __('Non disponible', 'wp-loft-booking');
 
     $guest_count = isset($booking['guests']) ? (int) $booking['guests'] : 0;
@@ -1250,9 +1253,19 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $guest_count_display_en = 'Not specified';
     }
 
+    $has_price_breakdown = is_array($price_breakdown) && !empty($price_breakdown);
+
     $total_display_fr = $total;
     $total_display_en = $total;
-    if ($total !== __('Non disponible', 'wp-loft-booking')) {
+    $tax_total_display = '';
+    $taxes_for_display = [];
+
+    if ($has_price_breakdown && isset($price_breakdown['total'])) {
+        $total_display_fr = wp_loft_booking_format_currency($price_breakdown['total'], $currency);
+        $total_display_en = wp_loft_booking_format_currency($price_breakdown['total'], $currency);
+        $tax_total_display = wp_loft_booking_format_currency($price_breakdown['tax_total'] ?? 0, $currency);
+        $taxes_for_display = array_values($price_breakdown['taxes'] ?? []);
+    } elseif ($total !== __('Non disponible', 'wp-loft-booking')) {
         $total_display_fr = sprintf('%s CAD', $total);
         $total_display_en = sprintf('%s CAD', $total);
     }
@@ -1328,14 +1341,31 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Invités</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($guest_count_display_fr); ?></td>
                                     </tr>
+                                    <?php if (!empty($tax_total_display)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Taxes</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">
+                                                <?php echo esc_html($tax_total_display); ?>
+                                                <?php if (!empty($taxes_for_display)) : ?>
+                                                    <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
+                                                        <?php foreach ($taxes_for_display as $tax) : ?>
+                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%) &middot; <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
-                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Montant total</td>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Montant total (taxes incluses)</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_fr); ?></td>
                                     </tr>
                                 </table>
-                                <div style="margin:28px 0;padding:24px;border-radius:18px;background:linear-gradient(135deg,#0b1533,#1f2937);color:#f8fafc;box-shadow:0 20px 40px rgba(15,23,42,0.18);">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Accès et clé numérique</h3>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#f8fafc;font-weight:600;letter-spacing:0.01em;"><?php echo esc_html($virtual_key_message_fr); ?></p>
+                                <div style="margin:28px 0;padding:24px;border-radius:18px;background-color:#eef2ff;border:1px solid #c7d2fe;color:#0f172a;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Accès et clé numérique</h3>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#111827;font-weight:600;letter-spacing:0.01em;">
+                                        <?php echo esc_html($virtual_key_message_fr); ?>
+                                    </p>
                                 </div>
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Instructions d'accès au bâtiment</h3>
@@ -1360,8 +1390,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
                                     <li>Arrivée à partir de 15&nbsp;h (heure de l’Est)</li>
                                     <li>Départ au plus tard à 11&nbsp;h (heure de l’Est)</li>
-                                    <li>Présentez une pièce d’identité valide à l’enregistrement</li>
                                 </ul>
+                                <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">Votre pièce d’identité téléversée lors de la réservation est déjà enregistrée pour votre dossier.</p>
                                 <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Coordonnées</h3>
                                     <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
@@ -1387,14 +1417,31 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Guests</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($guest_count_display_en); ?></td>
                                     </tr>
+                                    <?php if (!empty($tax_total_display)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Taxes</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">
+                                                <?php echo esc_html($tax_total_display); ?>
+                                                <?php if (!empty($taxes_for_display)) : ?>
+                                                    <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
+                                                        <?php foreach ($taxes_for_display as $tax) : ?>
+                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%) · <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
-                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Total amount</td>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Total amount (taxes included)</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_en); ?></td>
                                     </tr>
                                 </table>
-                                <div style="margin:28px 0;padding:24px;border-radius:18px;background:linear-gradient(135deg,#0b1533,#1f2937);color:#f8fafc;box-shadow:0 20px 40px rgba(15,23,42,0.18);">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Digital key &amp; access</h3>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#f8fafc;font-weight:600;letter-spacing:0.01em;"><?php echo esc_html($virtual_key_message_en); ?></p>
+                                <div style="margin:28px 0;padding:24px;border-radius:18px;background-color:#eef2ff;border:1px solid #c7d2fe;color:#0f172a;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Digital key &amp; access</h3>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#111827;font-weight:600;letter-spacing:0.01em;">
+                                        <?php echo esc_html($virtual_key_message_en); ?>
+                                    </p>
                                 </div>
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Building entry instructions</h3>
@@ -1419,8 +1466,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#4b5563;">
                                     <li>Check-in available from 3:00&nbsp;PM (Eastern Time)</li>
                                     <li>Check-out by 11:00&nbsp;AM (Eastern Time)</li>
-                                    <li>Please have a valid photo ID ready at arrival</li>
                                 </ul>
+                                <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">The ID you uploaded during booking is already securely stored for your reservation record.</p>
                                 <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Contact</h3>
                                     <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Address</strong><br><?php echo esc_html($property_address); ?></p>
@@ -1466,6 +1513,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         'total_display_en'      => $total_display_en,
         'virtual_key_message_fr'=> $virtual_key_message_fr,
         'virtual_key_message_en'=> $virtual_key_message_en,
+        'tax_total_display'     => $tax_total_display,
+        'taxes_for_display'     => $taxes_for_display,
         'property_address'      => $property_address,
         'support_email'         => $support_email,
         'booking_reference'     => $booking['booking_id'] ?? '',
