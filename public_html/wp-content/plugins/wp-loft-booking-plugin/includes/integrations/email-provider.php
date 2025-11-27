@@ -512,17 +512,27 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $idempotency_key = hash('sha256', $id_source . ($force_new ? '|' . microtime(true) : ''));
 
     if (!$force_new) {
-        $existing_job = $wpdb->get_var(
+        $existing_job = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT id FROM {$jobs_table} WHERE idempotency_key = %s LIMIT 1",
+                "SELECT id, payload FROM {$jobs_table} WHERE idempotency_key = %s LIMIT 1",
                 $idempotency_key
-            )
+            ),
+            ARRAY_A
         );
 
         if ($existing_job) {
-            error_log(sprintf('ℹ️ Email job reused for key %s (job #%d).', $idempotency_key, $existing_job));
+            $decoded_payload     = json_decode($existing_job['payload'] ?? '', true);
+            $has_valid_recipient = !empty($decoded_payload) && !empty($decoded_payload['to']);
 
-            return (int) $existing_job;
+            if ($has_valid_recipient) {
+                error_log(sprintf('ℹ️ Email job reused for key %s (job #%d).', $idempotency_key, $existing_job['id']));
+
+                return (int) $existing_job['id'];
+            }
+
+            // Stale jobs from older plugin versions may lack a payload; create a fresh job instead of failing immediately.
+            $force_new       = true;
+            $idempotency_key = hash('sha256', $id_source . '|' . microtime(true));
         }
     }
 
