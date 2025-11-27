@@ -684,30 +684,35 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         $payment_status  = $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking');
         $transaction_id  = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
 
-        $lines = [];
-        $lines[] = 'BT';
-        $lines[] = '/F1 16 Tf';
-        $lines[] = '50 760 Td';
-        $lines[] = '(' . $escape('Loft 1325 · Payment Receipt / Reçu de paiement') . ') Tj';
-        $lines[] = '0 -16 Td';
-        $lines[] = '/F1 11 Tf';
-        $lines[] = '(' . $escape('Signature stay experience · Expérience signature') . ') Tj';
-        $lines[] = '0 -18 Td';
-        $lines[] = '(' . $escape(sprintf('Booking #%s · %s', $booking_ref, $room_name)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Guest: %s', $guest_name)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A')) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Status: %s', $payment_status)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Stripe txn (for Sage): %s', $transaction_id)) . ') Tj';
-        $lines[] = '0 -20 Td';
-        $lines[] = '/F1 12 Tf';
-        $lines[] = '(' . $escape('Charges / Frais') . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '/F1 10 Tf';
-        $lines[] = '(' . $escape(sprintf('Lodging: %s', wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency))) . ') Tj';
+    $lines = [];
+    $lines[] = 'BT';
+    $lines[] = '/F1 18 Tf';
+    $lines[] = '50 760 Td';
+    $lines[] = '(' . $escape('Loft 1325 · Payment Receipt / Reçu de paiement') . ') Tj';
+    $lines[] = '0 -18 Td';
+    $lines[] = '/F1 11 Tf';
+    $lines[] = '(' . $escape('Expérience signature · Signature stay experience') . ') Tj';
+    $lines[] = '0 -12 Td';
+    $lines[] = '/F1 10 Tf';
+    $lines[] = '(' . $escape('1325 3e Avenue, Val-d’Or, QC · reservation@loft1325.com · 514-239-9080') . ') Tj';
+    $lines[] = '0 -22 Td';
+    $lines[] = '/F1 14 Tf';
+    $lines[] = '(' . $escape(sprintf('Booking #%s · %s', $booking_ref, $room_name)) . ') Tj';
+    $lines[] = '0 -14 Td';
+    $lines[] = '/F1 12 Tf';
+    $lines[] = '(' . $escape(sprintf('Guest: %s', $guest_name)) . ') Tj';
+    $lines[] = '0 -12 Td';
+    $lines[] = '(' . $escape(sprintf('Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A')) . ') Tj';
+    $lines[] = '0 -12 Td';
+    $lines[] = '(' . $escape(sprintf('Payment status: %s', $payment_status)) . ') Tj';
+    $lines[] = '0 -12 Td';
+    $lines[] = '(' . $escape(sprintf('Stripe transaction (Sage ref): %s', $transaction_id)) . ') Tj';
+    $lines[] = '0 -18 Td';
+    $lines[] = '/F1 12 Tf';
+    $lines[] = '(' . $escape('Payment breakdown / Détails du paiement') . ') Tj';
+    $lines[] = '0 -14 Td';
+    $lines[] = '/F1 10 Tf';
+    $lines[] = '(' . $escape(sprintf('Hébergement (avant taxes) · Lodging: %s', wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency))) . ') Tj';
 
         $extras = $price_breakdown['extras'] ?? [];
         usort($extras, function ($a, $b) {
@@ -726,7 +731,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
 
         $lines[] = '0 -14 Td';
         $lines[] = '/F1 12 Tf';
-        $lines[] = '(' . $escape('Taxes') . ') Tj';
+        $lines[] = '(' . $escape('Taxes / Taxes applicables') . ') Tj';
         $lines[] = '0 -12 Td';
         $lines[] = '/F1 10 Tf';
 
@@ -736,18 +741,17 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         }
 
         $lines[] = '0 -16 Td';
-        $lines[] = '/F1 11 Tf';
-        $lines[] = '(' . $escape(sprintf('Total: %s', wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency))) . ') Tj';
+        $lines[] = '/F1 12 Tf';
+        $lines[] = '(' . $escape(sprintf('Total payé / Amount received: %s', wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency))) . ') Tj';
         $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Status: %s', $payment_status)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Stripe txn: %s (use in Sage)', $transaction_id)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape(sprintf('Fingerprint: %s', $fingerprint)) . ') Tj';
-        $lines[] = '0 -14 Td';
-        $lines[] = '(' . $escape('Contact: reservation@loft1325.com / info@loft1325.com · 514-239-9080') . ') Tj';
+        $lines[] = '/F1 10 Tf';
+        $lines[] = '(' . $escape(sprintf('Transaction: %s · Statut: %s', $transaction_id, $payment_status)) . ') Tj';
         $lines[] = '0 -12 Td';
-        $lines[] = '(' . $escape('Adresse: 1325 3e Avenue, Val-d’Or, QC') . ') Tj';
+        $lines[] = '(' . $escape(sprintf('Empreinte de reçu · Receipt fingerprint: %s', $fingerprint)) . ') Tj';
+        $lines[] = '0 -12 Td';
+        $lines[] = '(' . $escape('Pour assistance / Need help? reservation@loft1325.com · info@loft1325.com') . ') Tj';
+        $lines[] = '0 -12 Td';
+        $lines[] = '(' . $escape('Adresse: 1325 3e Avenue, Val-d’Or, QC J9P 5P5') . ') Tj';
         $lines[] = 'ET';
 
         $stream = implode("\n", $lines);
@@ -1746,21 +1750,25 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;border-bottom-right-radius:18px;"><?php echo esc_html($transaction_id); ?></td>
                                     </tr>
                                 </table>
-                                <div style="margin:0 0 24px;padding:24px;background:linear-gradient(135deg,#111827,#1f2937);color:#f9fafb;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Payment details</h3>
+                                <div style="margin:0 0 24px;padding:24px;background:linear-gradient(135deg,#0f172a,#0b1222);color:#f9fafb;border-radius:18px;box-shadow:0 18px 36px rgba(15,23,42,0.26);border:1px solid rgba(226,232,240,0.12);">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#fef3c7;">Payment details</h3>
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#e5e7eb;">Lodging (pre-tax)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'], $currency)); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#e2e8f0;font-weight:700;">Lodging (pre-tax)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f8fafc;text-align:right;font-weight:700;">
+                                                <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'], $currency)); ?>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#e5e7eb;">Additional services</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'], $currency)); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#e2e8f0;font-weight:700;">Additional services</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f8fafc;text-align:right;font-weight:700;">
+                                                <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'], $currency)); ?>
+                                            </td>
                                         </tr>
                                         <?php if (!empty($price_breakdown['extras'])) : ?>
                                             <tr>
                                                 <td colspan="2" style="padding:6px 0 0;">
-                                                    <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:#cbd5f5;">
+                                                    <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:#cbd5f5;line-height:1.6;">
                                                         <?php foreach ($price_breakdown['extras'] as $extra) : ?>
                                                             <li><?php echo esc_html($extra['title']); ?> · <?php echo esc_html(wp_loft_booking_format_currency($extra['price'], $currency)); ?></li>
                                                         <?php endforeach; ?>
@@ -1770,13 +1778,15 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#e5e7eb;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
-                                                <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?></td>
+                                                <td style="padding:6px 0;font-size:14px;color:#fcd34d;font-weight:800;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#fefce8;text-align:right;font-weight:800;">
+                                                    <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <tr>
-                                            <td style="padding:12px 0 0;font-size:15px;font-weight:700;color:#f9fafb;border-top:1px solid rgba(148,163,184,0.3);">Total</td>
-                                            <td style="padding:12px 0 0;font-size:15px;font-weight:700;color:#f9fafb;text-align:right;border-top:1px solid rgba(148,163,184,0.3);"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
+                                            <td style="padding:12px 0 0;font-size:15px;font-weight:800;color:#fefefe;border-top:1px solid rgba(148,163,184,0.38);">Total</td>
+                                            <td style="padding:12px 0 0;font-size:15px;font-weight:800;color:#fefefe;text-align:right;border-top:1px solid rgba(148,163,184,0.38);"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
                                 </div>
