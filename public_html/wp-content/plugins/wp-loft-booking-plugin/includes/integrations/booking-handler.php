@@ -616,8 +616,8 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                             <?php if (!empty($taxes)) : ?>
                                                 <?php foreach ($taxes as $tax) : ?>
                                                     <tr>
-                                                        <td style="padding:6px 0;color:#f8fafc;font-weight:700;">Taxe / Tax &ndash; <?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%)</td>
-                                                        <td style="padding:6px 0;color:#ffffff;text-align:right;font-weight:700;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
+                                                        <td style="padding:6px 0;color:#7dd3fc;font-weight:700;">Taxe / Tax &ndash; <?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%)</td>
+                                                        <td style="padding:6px 0;color:#facc15;text-align:right;font-weight:700;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
