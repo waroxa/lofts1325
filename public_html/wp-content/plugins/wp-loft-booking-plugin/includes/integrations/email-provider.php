@@ -30,13 +30,20 @@ function wp_loft_email_provider_get_settings() {
 function wp_loft_email_provider_get_from_address() {
     $settings = wp_loft_email_provider_get_settings();
 
-    if (!empty($settings['domain']) && is_email('booking@' . $settings['domain'])) {
-        return sprintf('Loft 1325 <%s>', 'booking@' . $settings['domain']);
+    $preferred_domain = !empty($settings['domain']) ? $settings['domain'] : 'loft1325.com';
+    $preferred_from   = sprintf('info@%s', $preferred_domain);
+
+    if (is_email($preferred_from)) {
+        return sprintf('Loft 1325 <%s>', $preferred_from);
     }
 
     $admin_email = get_option('admin_email');
 
-    return is_email($admin_email) ? sprintf('Loft 1325 <%s>', $admin_email) : 'Loft 1325 <no-reply@loft1325.com>';
+    if (is_email($admin_email) && (!function_exists('wp_loft_booking_is_blocked_email') || !wp_loft_booking_is_blocked_email($admin_email))) {
+        return sprintf('Loft 1325 <%s>', $admin_email);
+    }
+
+    return 'Loft 1325 <info@loft1325.com>';
 }
 
 /**
