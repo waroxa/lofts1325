@@ -228,6 +228,8 @@ function wp_loft_booking_update_auto_send_settings($loft_id, array $template_val
  * Handle manual actions on the bookings admin page.
  */
 function wp_loft_booking_handle_booking_actions() {
+    global $wpdb;
+
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -396,6 +398,40 @@ function wp_loft_booking_handle_booking_actions() {
         $job_note = is_int($result)
             ? ' ' . sprintf(__('(job #%d)', 'wp-loft-booking'), $result)
             : '';
+
+        if (is_int($result)) {
+            $job_link = add_query_arg(
+                [
+                    'page'   => 'wp_loft_booking_email_jobs',
+                    'job_id' => $result,
+                ],
+                admin_url('admin.php')
+            );
+
+            $jobs_table = $wpdb->prefix . 'loft_email_jobs';
+            $job_row    = $wpdb->get_row(
+                $wpdb->prepare("SELECT status, last_error FROM {$jobs_table} WHERE id = %d", $result),
+                ARRAY_A
+            );
+
+            if (!empty($job_row['status']) && 'failed' === $job_row['status']) {
+                add_settings_error(
+                    'wp_loft_booking_bookings',
+                    'manual_send_failed',
+                    sprintf(
+                        __('Email job #%1$d failed immediately: %2$s. <a href="%3$s">View job log</a>.', 'wp-loft-booking'),
+                        $result,
+                        esc_html($job_row['last_error'] ?? __('Unknown error', 'wp-loft-booking')),
+                        esc_url($job_link)
+                    ),
+                    'error'
+                );
+
+                return;
+            }
+
+            $job_note .= ' · <a href="' . esc_url($job_link) . '">' . __('View in Email Jobs', 'wp-loft-booking') . '</a>';
+        }
 
         add_settings_error(
             'wp_loft_booking_bookings',

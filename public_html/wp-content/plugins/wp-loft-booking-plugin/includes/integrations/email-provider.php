@@ -451,6 +451,21 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $jobs_table      = $wpdb->prefix . 'loft_email_jobs';
     $templates_table = $wpdb->prefix . 'loft_email_templates';
 
+    $recipients = isset($message['to']) ? array_filter(array_map('sanitize_email', (array) $message['to'])) : [];
+
+    if (empty($recipients)) {
+        return new WP_Error(
+            'loft_email_missing_recipient',
+            __('Unable to enqueue email job because no recipients were provided.', 'wp-loft-booking')
+        );
+    }
+
+    $message['to'] = array_values($recipients);
+
+    if (!empty($message['bcc'])) {
+        $message['bcc'] = array_filter(array_map('sanitize_email', (array) $message['bcc']));
+    }
+
     if (!wp_loft_email_provider_ensure_tables_exist()) {
         return new WP_Error(
             'loft_email_jobs_table_missing',
@@ -566,6 +581,15 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
         );
     }
 
+    $payload_json = wp_json_encode($message);
+
+    if (false === $payload_json || '' === $payload_json) {
+        return new WP_Error(
+            'loft_email_invalid_payload',
+            __('Unable to enqueue email job because the email payload could not be saved.', 'wp-loft-booking')
+        );
+    }
+
     $inserted = $wpdb->insert(
         $jobs_table,
         [
@@ -578,7 +602,7 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
             'status'          => $status,
             'scheduled_at'    => $scheduled_at,
             'idempotency_key' => $idempotency_key,
-            'payload'         => wp_json_encode($message),
+            'payload'         => $payload_json,
             'attempts'        => 0,
         ],
         ['%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
