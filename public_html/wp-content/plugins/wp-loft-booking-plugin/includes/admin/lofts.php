@@ -152,56 +152,196 @@ function normalize_label( $label ) {
     return strtoupper( preg_replace( '/[^A-Z0-9]/', '', $label ) );
 }
 
-function wp_loft_booking_display_units() {
+function wp_loft_booking_prepare_unit_rows( $update_db = true ) {
     global $wpdb;
+
     $units_table     = $wpdb->prefix . 'loft_units';
     $keychains_table = $wpdb->prefix . 'loft_keychains';
     $tenant_table    = $wpdb->prefix . 'loft_tenants';
     $now             = current_time('mysql');
 
-    // 1) Load active digital keys
-    $active_keys = $wpdb->get_results($wpdb->prepare(
-        "SELECT name, valid_until
+    $active_keys = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT name, valid_until
            FROM $keychains_table
           WHERE valid_from <= %s AND valid_until >= %s",
-        $now, $now
-    ), ARRAY_A);
+            $now,
+            $now
+        ),
+        ARRAY_A
+    );
 
     $keys_map = [];
-    foreach ($active_keys as $row) {
-        $label = normalize_label($row['name']);
-        $keys_map[$label] = $row['valid_until'];
+    foreach ( $active_keys as $row ) {
+        $label             = normalize_label( $row['name'] );
+        $keys_map[ $label ] = $row['valid_until'];
     }
 
-    error_log("🗝️ KEYS MAP: " . print_r($keys_map, true));
-
-
-    // 2) Load only valid tenants
-    $active_tenants = $wpdb->get_results("SELECT unit_label, lease_start, lease_end FROM $tenant_table", ARRAY_A);
+    $active_tenants = $wpdb->get_results( "SELECT unit_label, lease_start, lease_end FROM $tenant_table", ARRAY_A );
 
     $tenants_map = [];
-    foreach ($active_tenants as $row) {
-        $label = normalize_label($row['unit_label']);
+    foreach ( $active_tenants as $row ) {
+        $label = normalize_label( $row['unit_label'] );
+
         if (
-            !empty($row['lease_start']) &&
-            !empty($row['lease_end']) &&
-            strtotime($row['lease_start']) <= time() &&
-            strtotime($row['lease_end']) >= time()
+            ! empty( $row['lease_start'] ) &&
+            ! empty( $row['lease_end'] ) &&
+            strtotime( $row['lease_start'] ) <= time() &&
+            strtotime( $row['lease_end'] ) >= time()
         ) {
             if (
-                empty($tenants_map[$label]) ||
-                strtotime($row['lease_end']) < strtotime($tenants_map[$label])
+                empty( $tenants_map[ $label ] ) ||
+                strtotime( $row['lease_end'] ) < strtotime( $tenants_map[ $label ] )
             ) {
-                $tenants_map[$label] = $row['lease_end'];
+                $tenants_map[ $label ] = $row['lease_end'];
             }
         }
     }
 
-    error_log("🏠 TENANTS MAP: " . print_r($tenants_map, true));
+    $units = $wpdb->get_results(
+        "SELECT u.*, b.building_id AS branch_building_id
+           FROM $units_table u
+      LEFT JOIN {$wpdb->prefix}loft_branches b ON u.branch_id = b.id
+          WHERE u.unit_name LIKE '%LOFT%'
+       ORDER BY u.unit_name ASC"
+    );
 
+    $unit_profiles_cache   = [];
+    $building_access_cache = [];
+    $environment           = wp_loft_booking_get_butterflymx_environment();
+    $format_access_points  = static function( $ids ) {
+        if ( empty( $ids ) ) {
+            return '<span class="description">None</span>';
+        }
 
-    // 3) Render the table and update DB statuses
-    echo wp_nonce_field('wplb_generate_virtual_key', 'wplb_generate_virtual_key_nonce', true, false);
+        $parts = [];
+        foreach ( $ids as $id ) {
+            $parts[] = '<code>' . esc_html( (string) $id ) . '</code>';
+        }
+
+        return implode( ', ', $parts );
+    };
+
+    $rows = [];
+
+    foreach ( $units as $unit ) {
+        $status  = strtolower( $unit->status );
+        $label   = normalize_label( $unit->unit_name );
+        $has_key = isset( $keys_map[ $label ] );
+
+        $has_tenant = isset( $tenants_map[ $label ] );
+        $occupied   = $has_key || $has_tenant;
+
+        if ( $has_key ) {
+            $avail = date( 'Y-m-d H:i', strtotime( $keys_map[ $label ] ) );
+        } elseif ( $has_tenant ) {
+            $lease_end = $tenants_map[ $label ];
+            $avail     = $lease_end ? date( 'Y-m-d H:i', strtotime( $lease_end ) ) : 'N/A';
+        } else {
+            $avail = 'N/A';
+        }
+
+        $new_status = $status;
+
+        if ( 'unavailable' !== $status ) {
+            $new_status = $occupied ? 'occupied' : 'available';
+
+            if ( $update_db ) {
+                $wpdb->update(
+                    $units_table,
+                    [
+                        'status'             => $new_status,
+                        'availability_until' => ( 'N/A' !== $avail ) ? $avail : null,
+                    ],
+                    [ 'id' => $unit->id ],
+                    [ '%s', '%s' ],
+                    [ '%d' ]
+                );
+            }
+        } elseif ( $update_db ) {
+            $wpdb->update(
+                $units_table,
+                [
+                    'availability_until' => ( 'N/A' !== $avail ) ? $avail : null,
+                ],
+                [ 'id' => $unit->id ],
+                [ '%s' ],
+                [ '%d' ]
+            );
+        }
+
+        $status = $new_status;
+
+        $text  = ucfirst( $status );
+        $color = ( 'available' === $status ) ? 'green' : 'red';
+
+        $unit_api_id          = (int) $unit->unit_id_api;
+        $branch_building_id   = isset( $unit->branch_building_id ) ? trim( (string) $unit->branch_building_id ) : '';
+        $display_building_id  = $branch_building_id;
+        $building_id_for_api  = ctype_digit( $branch_building_id ) ? (int) $branch_building_id : 0;
+        $unit_access_points   = '<span class="description">—</span>';
+        $building_access      = '<span class="description">—</span>';
+
+        if ( $unit_api_id > 0 ) {
+            if ( ! array_key_exists( $unit_api_id, $unit_profiles_cache ) ) {
+                $unit_profiles_cache[ $unit_api_id ] = wp_loft_booking_fetch_unit_profile( $unit_api_id, $environment );
+            }
+
+            $profile = $unit_profiles_cache[ $unit_api_id ];
+
+            if ( is_wp_error( $profile ) ) {
+                $unit_access_points = '<span style="color:#b91c1c;font-weight:600;">' . esc_html( $profile->get_error_message() ) . '</span>';
+            } else {
+                if ( ! empty( $profile['building_id'] ) ) {
+                    $display_building_id = (string) $profile['building_id'];
+                    $building_id_for_api = (int) $profile['building_id'];
+                }
+
+                $unit_access_points = $format_access_points( $profile['access_point_ids'] ?? [] );
+            }
+        }
+
+        if ( $building_id_for_api > 0 ) {
+            if ( ! array_key_exists( $building_id_for_api, $building_access_cache ) ) {
+                $building_access_cache[ $building_id_for_api ] = wp_loft_booking_fetch_building_access_points( $building_id_for_api, $environment );
+            }
+
+            $building_points = $building_access_cache[ $building_id_for_api ];
+
+            if ( is_wp_error( $building_points ) ) {
+                if ( 'no_access_points' === $building_points->get_error_code() ) {
+                    $building_access = '<span class="description">None</span>';
+                } else {
+                    $building_access = '<span style="color:#b91c1c;font-weight:600;">' . esc_html( $building_points->get_error_message() ) . '</span>';
+                }
+            } else {
+                $building_access = $format_access_points( $building_points );
+            }
+        }
+
+        $rows[] = [
+            'id'                   => (int) $unit->id,
+            'name'                 => (string) $unit->unit_name,
+            'unit_id_display'      => $unit_api_id > 0 ? (string) $unit_api_id : '—',
+            'building_id_display'  => '' !== $display_building_id ? $display_building_id : '—',
+            'unit_access_points'   => $unit_access_points,
+            'building_access'      => $building_access,
+            'status_text'          => $text,
+            'status_color'         => $color,
+            'availability_display' => ( 'N/A' === $avail || empty( $avail ) ) ? '—' : $avail,
+            'button_disabled'      => ( 'available' !== $status ),
+        ];
+    }
+
+    return $rows;
+}
+
+function wp_loft_booking_display_units() {
+    $rows = wp_loft_booking_prepare_unit_rows();
+
+    error_log( '✅ Updated unit statuses during display_units check' );
+
+    echo wp_nonce_field( 'wplb_generate_virtual_key', 'wplb_generate_virtual_key_nonce', true, false );
     echo '<div id="wplb-generate-key-feedback" style="margin:15px 0;"></div>';
 
     echo '<table class="widefat fixed striped">
@@ -212,165 +352,86 @@ function wp_loft_booking_display_units() {
             </tr></thead>
             <tbody>';
 
-    $units = $wpdb->get_results(
-        "SELECT u.*, b.building_id AS branch_building_id
-           FROM $units_table u
-      LEFT JOIN {$wpdb->prefix}loft_branches b ON u.branch_id = b.id
-          WHERE u.unit_name LIKE '%LOFT%'
-       ORDER BY u.unit_name ASC"
-    );
-
-    $unit_profiles_cache   = array();
-    $building_access_cache = array();
-    $environment           = wp_loft_booking_get_butterflymx_environment();
-    $format_access_points  = static function( $ids ) {
-        if ( empty( $ids ) ) {
-            return '<span class="description">None</span>';
-        }
-
-        $parts = array();
-        foreach ( $ids as $id ) {
-            $parts[] = '<code>' . esc_html( (string) $id ) . '</code>';
-        }
-
-        return implode( ', ', $parts );
-    };
-    foreach ($units as $unit) {
-        $status      = strtolower($unit->status);
-        $label       = normalize_label($unit->unit_name);
-        $has_key     = isset($keys_map[$label]);
-        $has_tenant  = isset($tenants_map[$label]);
-        error_log("🔍 UNIT: {$unit->unit_name} | LABEL: {$label} | HAS_KEY: " . (isset($keys_map[$label]) ? 'YES' : 'NO'));
-
-        $occupied    = $has_key || $has_tenant;
-
-        // pick the right availability date
-        if ($has_key) {
-            $avail = date('Y-m-d H:i', strtotime($keys_map[$label]));
-        } elseif ($has_tenant) {
-            $lease_end = $tenants_map[$label];
-            $avail     = $lease_end
-                ? date('Y-m-d H:i', strtotime($lease_end))
-                : 'N/A';
-        } else {
-            $avail = 'N/A';
-        }
-
-        // 📝 Update DB status for this unit, preserving 'unavailable'
-        if ($status !== 'unavailable') {
-            $status = $occupied ? 'occupied' : 'available';
-            $wpdb->update(
-                $units_table,
-                [
-                    'status'             => $status,
-                    'availability_until' => ($avail !== 'N/A') ? $avail : null,
-                ],
-                ['id' => $unit->id],
-                ['%s', '%s'],
-                ['%d']
-            );
-        } else {
-            $wpdb->update(
-                $units_table,
-                [
-                    'availability_until' => ($avail !== 'N/A') ? $avail : null,
-                ],
-                ['id' => $unit->id],
-                ['%s'],
-                ['%d']
-            );
-        }
-
-        $text  = ucfirst($status);
-        $color = ($status === 'available') ? 'green' : 'red';
-
-        $button_label   = esc_html__('Generate Virtual Key', 'wp-loft-booking');
-        $button_disabled = $status === 'available' ? '' : ' disabled="disabled"';
+    foreach ( $rows as $row ) {
+        $button_label   = esc_html__( 'Generate Virtual Key', 'wp-loft-booking' );
         $button_html    = sprintf(
             '<button type="button" class="button button-secondary wplb-generate-key" data-unit-id="%d" data-unit-name="%s"%s>%s</button>',
-            (int) $unit->id,
-            esc_attr($unit->unit_name),
-            $button_disabled,
+            (int) $row['id'],
+            esc_attr( $row['name'] ),
+            $row['button_disabled'] ? ' disabled="disabled"' : '',
             $button_label
         );
 
-        $unit_api_id = (int) $unit->unit_id_api;
-        $branch_building_id = isset($unit->branch_building_id) ? trim((string) $unit->branch_building_id) : '';
-        $display_building_id = $branch_building_id;
-        $building_id_for_api = ctype_digit($branch_building_id) ? (int) $branch_building_id : 0;
-        $unit_access_points  = '<span class="description">—</span>';
-        $building_access     = '<span class="description">—</span>';
-
-        if ($unit_api_id > 0) {
-            if (!array_key_exists($unit_api_id, $unit_profiles_cache)) {
-                $unit_profiles_cache[$unit_api_id] = wp_loft_booking_fetch_unit_profile($unit_api_id, $environment);
-            }
-
-            $profile = $unit_profiles_cache[$unit_api_id];
-
-            if (is_wp_error($profile)) {
-                $unit_access_points = '<span style="color:#b91c1c;font-weight:600;">' . esc_html($profile->get_error_message()) . '</span>';
-            } else {
-                if (!empty($profile['building_id'])) {
-                    $display_building_id = (string) $profile['building_id'];
-                    $building_id_for_api = (int) $profile['building_id'];
-                }
-
-                $unit_access_points = $format_access_points($profile['access_point_ids'] ?? array());
-            }
-        }
-
-        if ($building_id_for_api > 0) {
-            if (!array_key_exists($building_id_for_api, $building_access_cache)) {
-                $building_access_cache[$building_id_for_api] = wp_loft_booking_fetch_building_access_points($building_id_for_api, $environment);
-            }
-
-            $building_points = $building_access_cache[$building_id_for_api];
-
-            if (is_wp_error($building_points)) {
-                if ('no_access_points' === $building_points->get_error_code()) {
-                    $building_access = '<span class="description">None</span>';
-                } else {
-                    $building_access = '<span style="color:#b91c1c;font-weight:600;">' . esc_html($building_points->get_error_message()) . '</span>';
-                }
-            } else {
-                $building_access = $format_access_points($building_points);
-            }
-        }
-
-        $unit_id_display      = $unit_api_id > 0 ? (string) $unit_api_id : '—';
-        $building_id_display  = $display_building_id !== '' ? $display_building_id : '—';
-        $availability_display = ($avail === 'N/A' || empty($avail)) ? '—' : $avail;
-
         echo '<tr>';
-        echo '<td>' . esc_html($unit->unit_name) . '</td>';
-        echo '<td>' . esc_html($unit_id_display) . '</td>';
-        echo '<td>' . esc_html($building_id_display) . '</td>';
-        echo '<td>' . wp_kses_post($unit_access_points) . '</td>';
-        echo '<td>' . wp_kses_post($building_access) . '</td>';
-        echo '<td style="color:' . esc_attr($color) . ';font-weight:bold;">' . esc_html($text) . '</td>';
-        echo '<td>' . esc_html($availability_display) . '</td>';
-        echo '<td>' . wp_kses_post($button_html) . '</td>';
+        echo '<td>' . esc_html( $row['name'] ) . '</td>';
+        echo '<td>' . esc_html( $row['unit_id_display'] ) . '</td>';
+        echo '<td>' . esc_html( $row['building_id_display'] ) . '</td>';
+        echo '<td>' . wp_kses_post( $row['unit_access_points'] ) . '</td>';
+        echo '<td>' . wp_kses_post( $row['building_access'] ) . '</td>';
+        echo '<td style="color:' . esc_attr( $row['status_color'] ) . ';font-weight:bold;">' . esc_html( $row['status_text'] ) . '</td>';
+        echo '<td>' . esc_html( $row['availability_display'] ) . '</td>';
+        echo '<td>' . wp_kses_post( $button_html ) . '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
 
-    error_log("✅ Updated unit statuses during display_units check");
+    wp_loft_booking_render_virtual_key_script();
+}
+
+function wp_loft_booking_render_virtual_key_script() {
+    static $printed = false;
+
+    if ( $printed ) {
+        return;
+    }
+
+    $printed = true;
+
+    $i18n = [
+        'guestNamePrompt'        => __( 'Nom du client / Guest name', 'wp-loft-booking' ),
+        'guestNameRequired'      => __( 'Le nom du client est requis. / Guest name is required.', 'wp-loft-booking' ),
+        'guestEmailPrompt'       => __( 'Courriel du client / Guest email', 'wp-loft-booking' ),
+        'guestEmailRequired'     => __( 'Le courriel du client est requis. / Guest email is required.', 'wp-loft-booking' ),
+        'guestPhonePrompt'       => __( 'Téléphone du client / Guest phone (optionnel)', 'wp-loft-booking' ),
+        'checkinPrompt'          => __( "Date d'arrivée (YYYY-MM-DD) / Check-in date", 'wp-loft-booking' ),
+        'checkinRequired'        => __( "La date d'arrivée est requise. / Check-in date is required.", 'wp-loft-booking' ),
+        'checkoutPrompt'         => __( 'Date de départ (YYYY-MM-DD) / Check-out date', 'wp-loft-booking' ),
+        'checkoutRequired'       => __( 'La date de départ est requise. / Check-out date is required.', 'wp-loft-booking' ),
+        'generatingMessage'      => __( 'Création de la clé virtuelle pour %s… / Generating virtual key…', 'wp-loft-booking' ),
+        'defaultSuccess'         => __( 'Clé virtuelle créée. / Virtual key created.', 'wp-loft-booking' ),
+        'defaultError'           => __( 'Une erreur est survenue. / An error occurred.', 'wp-loft-booking' ),
+        'serverError'            => __( 'Erreur de communication avec le serveur. / Server communication error.', 'wp-loft-booking' ),
+        'missingAjaxEndpoint'    => __( 'Impossible de déterminer le point de terminaison AJAX.', 'wp-loft-booking' ),
+    ];
 
     ?>
     <script type="text/javascript">
-        (function($) {
-            const nonceField = document.getElementById('wplb_generate_virtual_key_nonce');
-            const nonce = nonceField ? nonceField.value : '';
-            const feedback = document.getElementById('wplb-generate-key-feedback');
+        (function() {
+            var buttons = document.querySelectorAll('.wplb-generate-key');
+            if (!buttons.length) {
+                return;
+            }
+
+            var nonceField = document.getElementById('wplb_generate_virtual_key_nonce');
+            var feedback = document.getElementById('wplb-generate-key-feedback');
+            var ajaxEndpoint = (typeof ajaxurl !== 'undefined') ? ajaxurl : ((window.ajax_object && window.ajax_object.ajax_url) ? window.ajax_object.ajax_url : '');
+
+            var i18n = <?php echo wp_json_encode( $i18n ); ?>;
+
+            if (!nonceField || !nonceField.value || !ajaxEndpoint) {
+                if (feedback) {
+                    feedback.innerHTML = '<span style="color:#b91c1c;font-weight:600;">' + (i18n.missingAjaxEndpoint || 'Missing AJAX endpoint or security token.') + '</span>';
+                }
+                return;
+            }
 
             function showMessage(message, type) {
                 if (!feedback) {
                     return;
                 }
 
-                let color = '#1f2937';
+                var color = '#1f2937';
 
                 if (type === 'success') {
                     color = '#047857';
@@ -383,7 +444,23 @@ function wp_loft_booking_display_units() {
                 feedback.innerHTML = '<span style="font-weight:600;color:' + color + ';">' + message + '</span>';
             }
 
-            document.querySelectorAll('.wplb-generate-key').forEach(function(button) {
+            function postData(payload) {
+                return fetch(ajaxEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    body: new URLSearchParams(payload).toString(),
+                    credentials: 'same-origin'
+                }).then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('network_error');
+                    }
+                    return response.json();
+                });
+            }
+
+            buttons.forEach(function(button) {
                 button.addEventListener('click', function(event) {
                     event.preventDefault();
 
@@ -391,41 +468,41 @@ function wp_loft_booking_display_units() {
                         return;
                     }
 
-                    const unitId = button.getAttribute('data-unit-id');
-                    const unitName = button.getAttribute('data-unit-name');
+                    var unitId = button.getAttribute('data-unit-id');
+                    var unitName = button.getAttribute('data-unit-name');
 
-                    const guestNamePrompt = window.prompt('Nom du client / Guest name');
+                    var guestNamePrompt = window.prompt(i18n.guestNamePrompt);
                     if (guestNamePrompt === null || guestNamePrompt.trim() === '') {
-                        showMessage('Le nom du client est requis. / Guest name is required.', 'error');
+                        showMessage(i18n.guestNameRequired, 'error');
                         return;
                     }
 
-                    const guestEmailPrompt = window.prompt('Courriel du client / Guest email');
+                    var guestEmailPrompt = window.prompt(i18n.guestEmailPrompt);
                     if (guestEmailPrompt === null || guestEmailPrompt.trim() === '') {
-                        showMessage('Le courriel du client est requis. / Guest email is required.', 'error');
+                        showMessage(i18n.guestEmailRequired, 'error');
                         return;
                     }
 
-                    const guestPhonePrompt = window.prompt('Téléphone du client / Guest phone (optionnel)');
+                    var guestPhonePrompt = window.prompt(i18n.guestPhonePrompt);
                     if (guestPhonePrompt === null) {
                         return;
                     }
 
-                    const checkinPrompt = window.prompt('Date d\'arrivée (YYYY-MM-DD) / Check-in date');
+                    var checkinPrompt = window.prompt(i18n.checkinPrompt);
                     if (checkinPrompt === null || checkinPrompt.trim() === '') {
-                        showMessage('La date d\'arrivée est requise. / Check-in date is required.', 'error');
+                        showMessage(i18n.checkinRequired, 'error');
                         return;
                     }
 
-                    const checkoutPrompt = window.prompt('Date de départ (YYYY-MM-DD) / Check-out date');
+                    var checkoutPrompt = window.prompt(i18n.checkoutPrompt);
                     if (checkoutPrompt === null || checkoutPrompt.trim() === '') {
-                        showMessage('La date de départ est requise. / Check-out date is required.', 'error');
+                        showMessage(i18n.checkoutRequired, 'error');
                         return;
                     }
 
-                    const payload = {
+                    var payload = {
                         action: 'wplb_admin_generate_virtual_key',
-                        nonce: nonce,
+                        nonce: nonceField.value,
                         unit_id: unitId,
                         guest_name: guestNamePrompt.trim(),
                         guest_email: guestEmailPrompt.trim(),
@@ -435,27 +512,27 @@ function wp_loft_booking_display_units() {
                     };
 
                     button.disabled = true;
-                    showMessage('Création de la clé virtuelle pour ' + unitName + '… / Generating virtual key…', 'info');
+                    showMessage((i18n.generatingMessage || '').replace('%s', unitName), 'info');
 
-                    $.post(ajaxurl, payload).done(function(response) {
+                    postData(payload).then(function(response) {
                         if (response && response.success) {
-                            const message = response.data && response.data.message ? response.data.message : 'Clé virtuelle créée. / Virtual key created.';
+                            var message = (response.data && response.data.message) ? response.data.message : i18n.defaultSuccess;
                             showMessage(message, 'success');
                             setTimeout(function() {
                                 window.location.reload();
                             }, 2000);
                         } else {
-                            const errorMessage = response && response.data && response.data.message ? response.data.message : 'Une erreur est survenue. / An error occurred.';
+                            var errorMessage = (response && response.data && response.data.message) ? response.data.message : i18n.defaultError;
                             showMessage(errorMessage, 'error');
                             button.disabled = false;
                         }
-                    }).fail(function() {
-                        showMessage('Erreur de communication avec le serveur. / Server communication error.', 'error');
+                    }).catch(function() {
+                        showMessage(i18n.serverError, 'error');
                         button.disabled = false;
                     });
                 });
             });
-        })(jQuery);
+        })();
     </script>
     <?php
 }
