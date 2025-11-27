@@ -107,7 +107,7 @@ function wp_loft_booking_fetch_email_jobs(array $filters, $limit = 200) {
     $where_sql = implode(' AND ', $where);
 
     $query = $wpdb->prepare(
-        "SELECT j.*, l.unit_name AS loft_name, t.name AS template_name, t.slug AS template_slug,
+        "SELECT j.*, l.name AS loft_name, t.name AS template_name, t.slug AS template_slug,
             (SELECT rendered_subject FROM {$renders_table} r WHERE r.job_id = j.id ORDER BY r.id DESC LIMIT 1) AS rendered_subject,
             (SELECT rendered_body FROM {$renders_table} r WHERE r.job_id = j.id ORDER BY r.id DESC LIMIT 1) AS rendered_body,
             (SELECT rendered_text FROM {$renders_table} r WHERE r.job_id = j.id ORDER BY r.id DESC LIMIT 1) AS rendered_text,
