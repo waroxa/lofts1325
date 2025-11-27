@@ -1558,6 +1558,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
             'send_at'   => $options['send_at'] ?? null,
+            'force_new_job' => $is_manual || !empty($options['force_new_job']),
         ]
     );
 
@@ -1870,7 +1871,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
             'send_at'   => $options['send_at'] ?? null,
-            'force_new_job' => !empty($options['force_new_job']),
+            'force_new_job' => $is_manual || !empty($options['force_new_job']),
         ]
     );
 
@@ -2275,6 +2276,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
             'send_at'   => $options['send_at'] ?? null,
+            'force_new_job' => $is_manual || !empty($options['force_new_job']),
         ]
     );
 
@@ -2437,6 +2439,7 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
             'variables' => $variables,
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
+            'force_new_job' => $is_manual || !empty($options['force_new_job']),
         ]
     );
 
@@ -2552,6 +2555,7 @@ function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, arra
             'source'    => $is_manual ? 'manual' : 'automatic',
             'dry_run'   => !empty($options['dry_run']),
             'send_at'   => $options['send_at'] ?? null,
+            'force_new_job' => $is_manual || !empty($options['force_new_job']),
         ]
     );
 
