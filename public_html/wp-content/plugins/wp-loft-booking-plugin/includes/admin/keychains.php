@@ -331,7 +331,7 @@ function wp_loft_booking_run_test_keychain_request() {
             'unit_id'          => 1632229,
             'starts_at'        => $starts_at_iso,
             'ends_at'          => $ends_at_iso,
-            'recipients'       => ['waroxa@gmail.com', '+15145537497'],
+            'recipients'       => ['info@loft1325.com', '+15145537497'],
             'access_point_ids' => [23940, 23941, 23942],
             'device_ids'       => [],
         ],
