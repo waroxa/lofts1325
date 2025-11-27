@@ -2308,17 +2308,95 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
 
     $subject = sprintf(__('Lofts 1325 – Cleaning scheduled for %s', 'wp-loft-booking'), $room_name);
 
+    $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
+    $website_url      = 'https://loft1325.com';
+    $property_address = '1325 3e Avenue, Val-d’Or, QC, Canada';
+
+    $checkin_fr = !empty($booking['date_from']) ? wp_date('j F Y', strtotime($booking['date_from'])) : $checkin;
+    $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : $checkout;
+    $checkin_en = $checkin;
+    $checkout_en = $checkout;
+
+    $attachments = [];
+
+    if (!empty($booking['date_to'])) {
+        try {
+            $timezone       = new DateTimeZone('America/Toronto');
+            $cleaning_start = new DateTime($booking['date_to'] . ' 11:00', $timezone);
+            $cleaning_end   = new DateTime($booking['date_to'] . ' 15:00', $timezone);
+
+            $ics_body = "BEGIN:VCALENDAR\r\n" .
+                "VERSION:2.0\r\n" .
+                "PRODID:-//Loft 1325//Cleaning Schedule//EN\r\n" .
+                "BEGIN:VEVENT\r\n" .
+                'UID:' . uniqid('loft1325-cleaning-', true) . "@loft1325.com\r\n" .
+                'DTSTAMP:' . gmdate('Ymd\THis\Z') . "\r\n" .
+                'SUMMARY:' . sprintf('Cleaning – %s', $room_name) . "\r\n" .
+                'DESCRIPTION:' . sprintf(
+                    'Guest arrives at 3:00 PM and checks out at 11:00 AM. Cleaning window on %s from 11:00 to 15:00.',
+                    $cleaning_start->format('Y-m-d')
+                ) . "\r\n" .
+                'DTSTART;TZID=America/Toronto:' . $cleaning_start->format('Ymd\THis') . "\r\n" .
+                'DTEND;TZID=America/Toronto:' . $cleaning_end->format('Ymd\THis') . "\r\n" .
+                'LOCATION:' . $property_address . "\r\n" .
+                'ORGANIZER;CN=Loft 1325:MAILTO:reservation@loft1325.com' . "\r\n" .
+                "END:VEVENT\r\n" .
+                "END:VCALENDAR\r\n";
+
+            $ics_path = wp_tempnam('loft1325-cleaning.ics');
+
+            if ($ics_path && false !== file_put_contents($ics_path, $ics_body)) {
+                $attachments[] = $ics_path;
+            }
+        } catch (Exception $exception) {
+            error_log('⚠️ Unable to generate cleaning calendar invite: ' . $exception->getMessage());
+        }
+    }
+
     ob_start();
     ?>
-    <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
-        <p style="margin:0 0 8px;font-size:15px;font-weight:700;">Cleaning scheduled</p>
-        <p style="margin:0 0 12px;font-size:14px;">Unit: <strong><?php echo esc_html($room_name); ?></strong></p>
-        <p style="margin:0 0 12px;font-size:14px;">Guest: <strong><?php echo esc_html($guest_name); ?></strong></p>
-        <p style="margin:0 0 12px;font-size:14px;">Dates: <strong><?php echo esc_html($checkin); ?></strong> → <strong><?php echo esc_html($checkout); ?></strong></p>
-        <p style="margin:0 0 12px;font-size:14px;">Notes: <?php echo esc_html($booking['message'] ?? __('None provided', 'wp-loft-booking')); ?></p>
-        <?php if ($is_manual) : ?>
-            <p style="margin:12px 0 0;font-size:12px;color:#6b7280;">Manual resend from the Loft 1325 bookings portal.</p>
-        <?php endif; ?>
+    <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f3f4f6;padding:28px 0;">
+            <tr>
+                <td align="center" style="padding:0 16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 32px rgba(15,23,42,0.12);">
+                        <tr>
+                            <td style="padding:28px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
+                                <a href="<?php echo esc_url($website_url); ?>" style="text-decoration:none;">
+                                    <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:180px;width:100%;height:auto;display:block;margin:0 auto 12px;">
+                                </a>
+                                <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
+                                <p style="margin:10px 0 0;font-size:14px;color:#e5e7eb;">Préparation du loft &middot; Loft preparation</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:28px 28px 12px;">
+                                <p style="margin:0 0 8px;font-size:16px;font-weight:700;color:#0f172a;">Nettoyage planifié</p>
+                                <p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#374151;">Loft : <strong><?php echo esc_html($room_name); ?></strong><br>Invité : <strong><?php echo esc_html($guest_name); ?></strong><br>Dates : <strong><?php echo esc_html($checkin_fr); ?></strong> → <strong><?php echo esc_html($checkout_fr); ?></strong></p>
+                                <p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#111827;">Arrivée du client : <strong>15&nbsp;h</strong><br>Départ du client : <strong>11&nbsp;h</strong><br>Créneau de ménage le jour du départ : <strong>11&nbsp;h à 15&nbsp;h</strong></p>
+                                <div style="margin:0 0 18px;padding:16px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;">
+                                    <p style="margin:0;font-size:13px;line-height:1.6;color:#4b5563;">Notes : <?php echo esc_html($booking['message'] ?? __('None provided', 'wp-loft-booking')); ?></p>
+                                </div>
+                                <p style="margin:0 0 6px;font-size:13px;line-height:1.6;color:#6b7280;">Adresse : <?php echo esc_html($property_address); ?></p>
+                                <p style="margin:0 0 20px;font-size:13px;line-height:1.6;color:#6b7280;">Ajoutez l’invitation calendrier ci-jointe pour bloquer votre plage de ménage.</p>
+                                <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0;">
+                                <p style="margin:0 0 8px;font-size:16px;font-weight:700;color:#0f172a;">Cleaning scheduled</p>
+                                <p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#374151;">Unit: <strong><?php echo esc_html($room_name); ?></strong><br>Guest: <strong><?php echo esc_html($guest_name); ?></strong><br>Dates: <strong><?php echo esc_html($checkin_en); ?></strong> → <strong><?php echo esc_html($checkout_en); ?></strong></p>
+                                <p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#111827;">Guest arrival: <strong>3:00 PM</strong><br>Guest departure: <strong>11:00 AM</strong><br>Cleaning window on checkout day: <strong>11:00 AM to 3:00 PM</strong></p>
+                                <div style="margin:0 0 18px;padding:16px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;">
+                                    <p style="margin:0;font-size:13px;line-height:1.6;color:#4b5563;">Notes: <?php echo esc_html($booking['message'] ?? __('None provided', 'wp-loft-booking')); ?></p>
+                                </div>
+                                <p style="margin:0 0 6px;font-size:13px;line-height:1.6;color:#6b7280;">Location: <?php echo esc_html($property_address); ?></p>
+                                <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#6b7280;">Invite attached so you can accept and add this cleaning to your calendar.</p>
+                                <?php if ($is_manual) : ?>
+                                    <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Manual resend from the Loft 1325 bookings portal.</p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </div>
     <?php
     $body = ob_get_clean();
@@ -2329,6 +2407,7 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
         'html'    => $body,
         'text'    => wp_strip_all_tags($body),
         'bcc'     => $bcc,
+        'attachments' => $attachments,
     ];
 
     $variables = [
