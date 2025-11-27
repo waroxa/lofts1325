@@ -457,8 +457,10 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
         );
     }
 
-    $booking_id = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) ($booking['id'] ?? 0);
-    $loft_id    = isset($booking['room_id']) ? (int) $booking['room_id'] : null;
+    $booking_id   = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) ($booking['id'] ?? 0);
+    $loft_id      = isset($booking['room_id']) ? (int) $booking['room_id'] : null;
+    $lofts_table  = $wpdb->prefix . 'loft_lofts';
+    $loft_id      = $loft_id > 0 ? $loft_id : null;
     $event      = $context['event'] ?? 'booking-email';
     $template   = $context['template'] ?? ($message['subject'] ?? '');
     $source     = $context['source'] ?? 'automatic';
@@ -504,6 +506,16 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
             error_log(sprintf('ℹ️ Email job reused for key %s (job #%d).', $idempotency_key, $existing_job));
 
             return (int) $existing_job;
+        }
+    }
+
+    if ($loft_id) {
+        $loft_exists = $wpdb->get_var(
+            $wpdb->prepare("SELECT id FROM {$lofts_table} WHERE id = %d", $loft_id)
+        );
+
+        if (!$loft_exists) {
+            $loft_id = null; // Avoid FK failures when the loft is missing locally.
         }
     }
 
