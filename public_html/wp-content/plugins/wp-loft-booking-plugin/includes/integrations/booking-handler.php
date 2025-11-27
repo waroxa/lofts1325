@@ -1750,12 +1750,16 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#f9fafb;">Payment details</h3>
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#e5e7eb;">Lodging (pre-tax)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'], $currency)); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f8fafc;font-weight:600;">Lodging (pre-tax)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:600;">
+                                                <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'], $currency)); ?>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#e5e7eb;">Additional services</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'], $currency)); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f8fafc;font-weight:600;">Additional services</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:600;">
+                                                <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'], $currency)); ?>
+                                            </td>
                                         </tr>
                                         <?php if (!empty($price_breakdown['extras'])) : ?>
                                             <tr>
@@ -1770,8 +1774,10 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#e5e7eb;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
-                                                <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?></td>
+                                                <td style="padding:6px 0;font-size:14px;color:#f8fafc;font-weight:600;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:600;">
+                                                    <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <tr>
