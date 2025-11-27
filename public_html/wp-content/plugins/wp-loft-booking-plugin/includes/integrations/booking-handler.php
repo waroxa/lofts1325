@@ -1618,9 +1618,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     $invoice_artifact = wp_loft_booking_store_invoice_artifact($booking, $price_breakdown);
     $attachments     = [];
 
-    if (!is_wp_error($invoice_artifact) && !empty($invoice_artifact['pdf_path'])) {
-        $attachments[] = $invoice_artifact['pdf_path'];
-    } elseif (is_wp_error($invoice_artifact)) {
+    if (is_wp_error($invoice_artifact)) {
         error_log('⚠️ Failed to store invoice artifact: ' . $invoice_artifact->get_error_message());
     }
 
