@@ -448,7 +448,8 @@ function wp_loft_email_provider_store_render($job_id, array $booking, array $mes
 function wp_loft_email_provider_enqueue_job(array $message, array $booking, array $context = []) {
     global $wpdb;
 
-    $jobs_table = $wpdb->prefix . 'loft_email_jobs';
+    $jobs_table      = $wpdb->prefix . 'loft_email_jobs';
+    $templates_table = $wpdb->prefix . 'loft_email_templates';
 
     if (!wp_loft_email_provider_ensure_tables_exist()) {
         return new WP_Error(
@@ -468,6 +469,7 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
     $dry_run    = !empty($context['dry_run']);
     $status     = $dry_run ? 'rendered' : 'pending';
     $force_new  = !empty($context['force_new_job']);
+    $template_id = isset($context['template_id']) ? (int) $context['template_id'] : null;
 
     if ($send_at instanceof DateTimeInterface) {
         $send_at = $send_at->getTimestamp();
@@ -519,12 +521,57 @@ function wp_loft_email_provider_enqueue_job(array $message, array $booking, arra
         }
     }
 
+    if (!$template_id && $template) {
+        $template_id = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$templates_table} WHERE slug = %s OR name = %s LIMIT 1",
+                $template,
+                $template
+            )
+        );
+        $template_id = $template_id > 0 ? $template_id : null;
+    }
+
+    if (!$template_id) {
+        $template_id = (int) $wpdb->get_var("SELECT id FROM {$templates_table} ORDER BY id ASC LIMIT 1");
+
+        if (!$template_id) {
+            $template_slug    = function_exists('sanitize_title') ? sanitize_title($template ?: $event) : strtolower(preg_replace('/[^a-z0-9]+/i', '-', $template ?: $event));
+            $template_subject = $message['subject'] ?? ($template ?: 'Email');
+            $template_body    = $message['html'] ?? ($message['text'] ?? '');
+
+            $created = $wpdb->insert(
+                $templates_table,
+                [
+                    'name'        => $template ?: $template_subject,
+                    'slug'        => $template_slug ?: null,
+                    'description' => 'Auto-created placeholder template for queued email.',
+                    'subject'     => $template_subject,
+                    'body'        => $template_body,
+                    'status'      => 'active',
+                ],
+                ['%s', '%s', '%s', '%s', '%s', '%s']
+            );
+
+            if (false !== $created) {
+                $template_id = (int) $wpdb->insert_id;
+            }
+        }
+    }
+
+    if (!$template_id) {
+        return new WP_Error(
+            'loft_email_missing_template',
+            __('Unable to enqueue email job because no email template exists.', 'wp-loft-booking')
+        );
+    }
+
     $inserted = $wpdb->insert(
         $jobs_table,
         [
             'booking_id'      => $booking_id ?: null,
             'loft_id'         => $loft_id ?: null,
-            'template_id'     => 0,
+            'template_id'     => $template_id,
             'event'           => $event,
             'template_key'    => $template,
             'source'          => $source,
