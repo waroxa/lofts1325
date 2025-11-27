@@ -10,6 +10,7 @@ defined('ABSPATH') || exit;
  */
 function wp_loft_booking_email_job_filters() {
     $filters = [
+        'job_id'    => isset($_GET['job_id']) ? (int) $_GET['job_id'] : 0,
         'start_date' => isset($_GET['start_date']) ? sanitize_text_field((string) $_GET['start_date']) : '',
         'end_date'   => isset($_GET['end_date']) ? sanitize_text_field((string) $_GET['end_date']) : '',
         'loft_id'    => isset($_GET['loft_id']) ? (int) $_GET['loft_id'] : 0,
@@ -23,6 +24,8 @@ function wp_loft_booking_email_job_filters() {
             $filters[$key] = '';
         }
     }
+
+    $filters['job_id'] = max(0, (int) $filters['job_id']);
 
     $valid_statuses = ['pending', 'processing', 'retrying', 'completed', 'failed', 'rendered'];
     if (!in_array($filters['status'], $valid_statuses, true)) {
@@ -73,6 +76,11 @@ function wp_loft_booking_fetch_email_jobs(array $filters, $limit = 200) {
     if (!empty($filters['end_date'])) {
         $where[]  = 'j.created_at <= %s';
         $params[] = $filters['end_date'] . ' 23:59:59';
+    }
+
+    if (!empty($filters['job_id'])) {
+        $where[]  = 'j.id = %d';
+        $params[] = (int) $filters['job_id'];
     }
 
     if (!empty($filters['loft_id'])) {
@@ -257,6 +265,10 @@ function wp_loft_booking_email_jobs_page() {
 
         <form method="get" style="margin-bottom:16px;">
             <input type="hidden" name="page" value="wp_loft_booking_email_jobs">
+            <label style="margin-right:12px;">
+                Job ID:
+                <input type="number" name="job_id" value="<?php echo esc_attr($filters['job_id']); ?>" min="0" step="1" style="width:120px;">
+            </label>
             <label>
                 Start date:
                 <input type="date" name="start_date" value="<?php echo esc_attr($filters['start_date']); ?>">
