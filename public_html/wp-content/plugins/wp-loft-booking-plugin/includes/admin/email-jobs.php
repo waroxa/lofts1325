@@ -225,7 +225,7 @@ function wp_loft_booking_email_jobs_page() {
     $jobs = wp_loft_booking_fetch_email_jobs($filters);
 
     $loft_options = $wpdb->get_results(
-        "SELECT id, unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY unit_name",
+        "SELECT id, name AS unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY name",
         ARRAY_A
     );
 
