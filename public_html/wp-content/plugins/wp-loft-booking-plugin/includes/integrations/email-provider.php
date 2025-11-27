@@ -237,7 +237,7 @@ function wp_loft_email_provider_send(array $message) {
     $settings = wp_loft_email_provider_get_settings();
 
     if (empty($settings['api_key']) || empty($settings['domain'])) {
-        return new WP_Error('loft_email_not_configured', __('Mailgun is not fully configured.', 'wp-loft-booking'));
+        return wp_loft_email_provider_send_via_wp_mail($message);
     }
 
     $body = [
@@ -307,6 +307,61 @@ function wp_loft_email_provider_send(array $message) {
         'id'      => $payload['id'] ?? null,
         'message' => $payload['message'] ?? __('Queued for delivery', 'wp-loft-booking'),
         'to'      => $body['to'],
+    ];
+}
+
+/**
+ * Send an email using WordPress' built-in wp_mail().
+ *
+ * @param array $message
+ *
+ * @return array|WP_Error
+ */
+function wp_loft_email_provider_send_via_wp_mail(array $message) {
+    $to = array_values(array_filter(array_map('sanitize_email', (array) ($message['to'] ?? []))));
+
+    if (empty($to)) {
+        return new WP_Error('loft_email_missing_recipient', __('Missing email recipient.', 'wp-loft-booking'));
+    }
+
+    $subject = $message['subject'] ?? '';
+    $body    = $message['html'] ?? ($message['text'] ?? '');
+
+    $headers = ['Content-Type: text/html; charset=UTF-8'];
+    $from    = $message['from'] ?? wp_loft_email_provider_get_from_address();
+
+    if (!empty($from)) {
+        $headers[] = 'From: ' . $from;
+    }
+
+    if (!empty($message['bcc'])) {
+        $bcc = array_values(array_filter(array_map('sanitize_email', (array) $message['bcc'])));
+        if (!empty($bcc)) {
+            $headers[] = 'Bcc: ' . implode(',', $bcc);
+        }
+    }
+
+    $attachments = [];
+    if (!empty($message['attachments'])) {
+        foreach ((array) $message['attachments'] as $attachment) {
+            if (is_string($attachment) && file_exists($attachment)) {
+                $attachments[] = $attachment;
+            }
+        }
+    }
+
+    $sent = wp_mail($to, $subject, $body, $headers, $attachments);
+
+    if (!$sent) {
+        return new WP_Error('loft_email_wp_mail_failed', __('WordPress mail delivery failed.', 'wp-loft-booking'));
+    }
+
+    error_log(sprintf('✅ Email sent via wp_mail to %s.', implode(', ', $to)));
+
+    return [
+        'id'      => null,
+        'message' => __('Sent via wp_mail', 'wp-loft-booking'),
+        'to'      => $to,
     ];
 }
 
