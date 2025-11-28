@@ -921,6 +921,17 @@ function loft_vk_rest_generate_key_for_loft( WP_REST_Request $request ) {
             $starts_at,
             $ends_at
         );
+
+        if ( function_exists( 'wp_loft_booking_record_virtual_key_log' ) ) {
+            wp_loft_booking_record_virtual_key_log(
+                null,
+                $unit_id,
+                $keychain_id,
+                isset( $result['virtual_key_ids'] ) ? (array) $result['virtual_key_ids'] : array(),
+                $starts_at,
+                $ends_at
+            );
+        }
     }
 
     $wpdb->update(

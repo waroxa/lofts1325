@@ -416,4 +416,21 @@ function wp_loft_booking_create_tables() {
     ) $charset_collate;";
     dbDelta($sql);
 
+    $virtual_key_logs_table = $wpdb->prefix . 'loft_virtual_key_logs';
+    $sql = "CREATE TABLE $virtual_key_logs_table (
+        id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+        booking_id MEDIUMINT(9) NULL,
+        loft_id MEDIUMINT(9) NULL,
+        keychain_id INT UNSIGNED NULL,
+        virtual_key_ids LONGTEXT NULL,
+        valid_from DATETIME NULL,
+        valid_until DATETIME NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loft_virtual_key_logs_lookup (booking_id, loft_id, keychain_id, created_at),
+        CONSTRAINT fk_virtual_key_logs_booking_id FOREIGN KEY (booking_id) REFERENCES {$wpdb->prefix}loft_bookings(id) ON DELETE SET NULL,
+        CONSTRAINT fk_virtual_key_logs_loft_id FOREIGN KEY (loft_id) REFERENCES {$wpdb->prefix}loft_units(id) ON DELETE SET NULL
+    ) $charset_collate;";
+    dbDelta($sql);
+
 }
