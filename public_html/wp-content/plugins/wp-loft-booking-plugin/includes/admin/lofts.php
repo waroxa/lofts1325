@@ -618,6 +618,15 @@ function wplb_admin_generate_virtual_key() {
             $starts_at,
             $ends_at
         );
+
+        wp_loft_booking_record_virtual_key_log(
+            null,
+            $unit_id,
+            $keychain_id,
+            $result['virtual_key_ids'] ?? [],
+            $starts_at,
+            $ends_at
+        );
     }
 
     $wpdb->update(

@@ -240,6 +240,118 @@ if (!function_exists('wp_loft_booking_format_currency')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_format_tax_rate')) {
+    /**
+     * Format a tax rate with up to three decimals (for 9.975% TVQ compliance).
+     *
+     * @param float|int|string $rate Raw tax rate value.
+     *
+     * @return string
+     */
+    function wp_loft_booking_format_tax_rate($rate)
+    {
+        $numeric_rate = is_numeric($rate)
+            ? (float) $rate
+            : floatval(preg_replace('/[^0-9\.,-]/', '', (string) $rate));
+
+        $formatted = number_format($numeric_rate, 3, '.', '');
+
+        return rtrim(rtrim($formatted, '0'), '.');
+    }
+}
+
+if (!function_exists('wp_loft_booking_get_tax_registration_numbers')) {
+    /**
+     * Retrieve the TPS and TVQ registration numbers for invoice rendering.
+     *
+     * @return array{tps:string,tvq:string}
+     */
+    function wp_loft_booking_get_tax_registration_numbers()
+    {
+        $numbers = [
+            'tps' => '142422344 RT 0001',
+            'tvq' => '1021287543 TQ 0001',
+        ];
+
+        /**
+         * Filter the registration numbers displayed on invoices and receipts.
+         */
+        return apply_filters('wp_loft_booking_tax_registration_numbers', $numbers);
+    }
+}
+
+if (!function_exists('wp_loft_booking_record_virtual_key_log')) {
+    /**
+     * Persist an audit log of generated virtual keys.
+     *
+     * @param int|string|null $booking_id   Booking identifier (optional).
+     * @param int|string|null $unit_id      Loft/unit identifier.
+     * @param int|string|null $keychain_id  ButterflyMX keychain ID.
+     * @param array           $virtual_keys List of virtual key IDs.
+     * @param string|null     $valid_from   Start datetime (any parseable format).
+     * @param string|null     $valid_until  End datetime (any parseable format).
+     *
+     * @return bool True on success, false if the log table is unavailable or the insert fails.
+     */
+    function wp_loft_booking_record_virtual_key_log($booking_id, $unit_id, $keychain_id, array $virtual_keys = [], $valid_from = null, $valid_until = null)
+    {
+        global $wpdb;
+
+        static $table_exists = null;
+
+        $table_name = $wpdb->prefix . 'loft_virtual_key_logs';
+
+        if (null === $table_exists) {
+            $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name)) === $table_name;
+        }
+
+        if (!$table_exists) {
+            return false;
+        }
+
+        $clean_keys = array_values(array_filter(array_map('strval', $virtual_keys), 'strlen'));
+
+        $data = [];
+        $formats = [];
+
+        if (!empty($booking_id)) {
+            $data['booking_id'] = (int) $booking_id;
+            $formats[]          = '%d';
+        }
+
+        if (!empty($unit_id)) {
+            $data['loft_id'] = (int) $unit_id;
+            $formats[]       = '%d';
+        }
+
+        if (!empty($keychain_id)) {
+            $data['keychain_id'] = (int) $keychain_id;
+            $formats[]           = '%d';
+        }
+
+        if (!empty($clean_keys)) {
+            $data['virtual_key_ids'] = wp_json_encode($clean_keys);
+            $formats[]               = '%s';
+        }
+
+        if (!empty($valid_from)) {
+            $data['valid_from'] = gmdate('Y-m-d H:i:s', strtotime($valid_from));
+            $formats[]          = '%s';
+        }
+
+        if (!empty($valid_until)) {
+            $data['valid_until'] = gmdate('Y-m-d H:i:s', strtotime($valid_until));
+            $formats[]           = '%s';
+        }
+
+        if (empty($data)) {
+            return false;
+        }
+
+        return false !== $wpdb->insert($table_name, $data, $formats);
+    }
+}
+
 /**
  * Build a normalized booking payload using ND Booking records and custom data.
  *
@@ -525,6 +637,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
         $payment_status = $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking');
         $transaction_id = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
         $support_email  = 'reservation@loft1325.com';
+        $tax_numbers    = wp_loft_booking_get_tax_registration_numbers();
 
         $admin_email = sanitize_email(get_option('admin_email'));
         if ($admin_email && !wp_loft_booking_is_blocked_email($admin_email)) {
@@ -616,7 +729,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                             <?php if (!empty($taxes)) : ?>
                                                 <?php foreach ($taxes as $tax) : ?>
                                                     <tr>
-                                                        <td style="padding:6px 0;color:#92400e;font-weight:900;">Taxe / Tax &ndash; <?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%)</td>
+                                                        <td style="padding:6px 0;color:#92400e;font-weight:900;">Taxe / Tax &ndash; <?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%)</td>
                                                         <td style="padding:6px 0;color:#7c2d12;text-align:right;font-weight:900;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
@@ -626,6 +739,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                                 <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#7c2d12;text-align:right;border-top:1px solid rgba(217,119,6,0.35);"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency)); ?></td>
                                             </tr>
                                         </table>
+                                        <p style="margin:10px 0 0;font-size:13px;color:#92400e;font-weight:700;">Numéros de taxes / Tax numbers<br>TPS: <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ: <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                     </div>
                                 </td>
                             </tr>
@@ -683,22 +797,25 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         $currency        = $price_breakdown['currency'] ?? 'CAD';
         $payment_status  = $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking');
         $transaction_id  = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
+        $tax_numbers     = wp_loft_booking_get_tax_registration_numbers();
 
-	$lines = [];
-	$lines[] = 'BT';
-	$lines[] = '/F1 18 Tf';
-	$lines[] = '50 760 Td';
+        $lines = [];
+        $lines[] = 'BT';
+        $lines[] = '/F1 18 Tf';
+        $lines[] = '50 760 Td';
 	$lines[] = '(' . $escape('Loft 1325 · Payment Receipt / Reçu de paiement') . ') Tj';
 	$lines[] = '0 -18 Td';
-	$lines[] = '/F1 11 Tf';
-	$lines[] = '(' . $escape('Expérience signature · Signature stay experience') . ') Tj';
-	$lines[] = '0 -11 Td';
-	$lines[] = '/F1 10 Tf';
-	$lines[] = '(' . $escape('1325 3e Avenue, Val-d’Or, QC · reservation@loft1325.com · 514-239-9080') . ') Tj';
+        $lines[] = '/F1 11 Tf';
+        $lines[] = '(' . $escape('Expérience signature · Signature stay experience') . ') Tj';
+        $lines[] = '0 -11 Td';
+        $lines[] = '/F1 10 Tf';
+        $lines[] = '(' . $escape('1325 3e Avenue, Val-d’Or, QC · reservation@loft1325.com · 514-239-9080') . ') Tj';
+        $lines[] = '0 -12 Td';
+        $lines[] = '(' . $escape(sprintf('TPS: %s · TVQ: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? '')) . ') Tj';
 
-	$lines[] = '0 -26 Td';
-	$lines[] = '/F1 12 Tf';
-	$lines[] = '(' . $escape('Booking overview / Résumé de réservation') . ') Tj';
+        $lines[] = '0 -26 Td';
+        $lines[] = '/F1 12 Tf';
+        $lines[] = '(' . $escape('Booking overview / Résumé de réservation') . ') Tj';
 	$lines[] = '0 -14 Td';
 	$lines[] = '/F1 10 Tf';
 	$lines[] = '(' . $escape(sprintf('• Booking #: %s', $booking_ref)) . ') Tj';
@@ -740,7 +857,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
 	$lines[] = '/F1 10 Tf';
 
 	foreach ($taxes as $tax) {
-		$lines[] = '(' . $escape(sprintf('• %s (%s%%): %s', $tax['label'], number_format((float) ($tax['rate'] ?? 0), 2), wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency))) . ') Tj';
+        $lines[] = '(' . $escape(sprintf('• %s (%s%%): %s', $tax['label'], wp_loft_booking_format_tax_rate($tax['rate'] ?? 0), wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency))) . ') Tj';
 		$lines[] = '0 -12 Td';
 	}
 
@@ -1024,6 +1141,15 @@ function wp_loft_booking_handle_booking(
                     $booking['room_id'],
                     $keychain_id,
                     $primary_virtual_key_id,
+                    $starts_at,
+                    $ends_at
+                );
+
+                wp_loft_booking_record_virtual_key_log(
+                    $id_post,
+                    $booking['room_id'],
+                    $keychain_id,
+                    $virtual_key_result['virtual_key_ids'] ?? [],
                     $starts_at,
                     $ends_at
                 );
@@ -1377,7 +1503,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                                 <?php if (!empty($taxes_for_display)) : ?>
                                                     <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
                                                         <?php foreach ($taxes_for_display as $tax) : ?>
-                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%) &middot; <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
+                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%) &middot; <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
                                                         <?php endforeach; ?>
                                                     </div>
                                                 <?php endif; ?>
@@ -1453,7 +1579,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                                 <?php if (!empty($taxes_for_display)) : ?>
                                                     <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
                                                         <?php foreach ($taxes_for_display as $tax) : ?>
-                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) ($tax['rate'] ?? 0), 2)); ?>%) · <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
+                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%) · <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
                                                         <?php endforeach; ?>
                                                     </div>
                                                 <?php endif; ?>
@@ -1615,6 +1741,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     $currency = !empty($booking['currency']) ? strtoupper($booking['currency']) : 'CAD';
 
     $price_breakdown = wp_loft_booking_calculate_price_breakdown($booking);
+    $tax_numbers     = wp_loft_booking_get_tax_registration_numbers();
 
     $invoice_artifact = wp_loft_booking_store_invoice_artifact($booking, $price_breakdown);
     $attachments     = [];
@@ -1718,7 +1845,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;">&nbsp;<?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;">&nbsp;<?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'])); ?>%)</td>
                                                 <td style="padding:6px 0;font-size:14px;color:#7c2d12;text-align:right;font-weight:900;">&nbsp;<?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -1727,6 +1854,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#7c2d12;text-align:right;border-top:1px solid rgba(217,119,6,0.35);"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
+                                    <p style="margin:10px 0 0;font-size:13px;color:#92400e;font-weight:700;">Numéros de taxes / Tax numbers&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                 </div>
                                 <?php if (!empty($booking['coupon'])) : ?>
                                     <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">Code promotionnel appliqué&nbsp;: <strong><?php echo esc_html($booking['coupon']); ?></strong></p>
@@ -1789,7 +1917,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'])); ?>%)</td>
                                                 <td style="padding:6px 0;font-size:14px;color:#7c2d12;text-align:right;font-weight:900;">
                                                     <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?>
                                                 </td>
@@ -1800,6 +1928,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#7c2d12;text-align:right;border-top:1px solid rgba(217,119,6,0.35);"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
+                                <p style="margin:10px 0 0;font-size:13px;color:#92400e;font-weight:700;">Tax numbers: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                 </div>
                                 <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">Stay dates: <?php echo esc_html($checkin); ?> &ndash; <?php echo esc_html($checkout); ?></p>
                                 <?php if (!empty($booking['coupon'])) : ?>
@@ -2079,7 +2208,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#92400e;font-weight:900;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'])); ?>%)</td>
                                                 <td style="padding:6px 0;font-size:14px;color:#7c2d12;text-align:right;font-weight:900;">&nbsp;<?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -2177,7 +2306,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                         <?php endif; ?>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
-                                                <td style="padding:6px 0;font-size:14px;color:#f8fafc;font-weight:700;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(number_format((float) $tax['rate'], 2)); ?>%)</td>
+                                                <td style="padding:6px 0;font-size:14px;color:#f8fafc;font-weight:700;"><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'])); ?>%)</td>
                                                 <td style="padding:6px 0;font-size:14px;color:#ffffff;text-align:right;font-weight:700;">&nbsp;<?php echo esc_html(wp_loft_booking_format_currency($tax['amount'], $currency)); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
