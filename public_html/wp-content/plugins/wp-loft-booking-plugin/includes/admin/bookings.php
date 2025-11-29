@@ -119,7 +119,7 @@ function wp_loft_booking_bookings_page() {
 
         <?php if (!empty($booking)) : ?>
             <div class="notice notice-info inline">
-                <p><strong>Guest:</strong> <?php echo esc_html(trim(($booking['name'] ?? '') . ' ' . ($booking['surname'] ?? ''))); ?> · <strong>Email:</strong> <?php echo esc_html($booking['email'] ?? ''); ?> · <strong>Loft:</strong> <?php echo esc_html($booking['room_name'] ?? ''); ?></p>
+                <p><strong>Guest:</strong> <?php echo esc_html(trim(($booking['name'] ?? '') . ' ' . ($booking['surname'] ?? ''))); ?> · <strong>Email:</strong> <?php echo esc_html($booking['email'] ?? ''); ?> · <strong>Loft:</strong> <?php echo esc_html($booking['room_name'] ?? ''); ?><?php if (!empty($booking['unit_name']) && $booking['unit_name'] !== ($booking['room_name'] ?? '')) : ?> <small style="color:#475569;">(Assigned: <?php echo esc_html($booking['unit_name']); ?>)</small><?php endif; ?></p>
                 <p><strong>Dates:</strong> <?php echo esc_html($booking['date_from'] ?? ''); ?> → <?php echo esc_html($booking['date_to'] ?? ''); ?> · <strong>Total:</strong> <?php echo esc_html($booking['total'] ?? ''); ?> <?php echo esc_html($booking['currency'] ?? 'CAD'); ?></p>
             </div>
 
@@ -167,7 +167,12 @@ function wp_loft_booking_bookings_page() {
                         <tr>
                             <td><?php echo esc_html($recent['booking_id'] ?? ''); ?></td>
                             <td><?php echo esc_html(trim(($recent['name'] ?? '') . ' ' . ($recent['surname'] ?? ''))); ?><br><small><?php echo esc_html($recent['email'] ?? ''); ?></small></td>
-                            <td><?php echo esc_html($recent['room_name'] ?? ''); ?></td>
+                            <td>
+                                <?php echo esc_html($recent['room_name'] ?? ''); ?>
+                                <?php if (!empty($recent['unit_name']) && $recent['unit_name'] !== ($recent['room_name'] ?? '')) : ?>
+                                    <br><small class="description">Assigned: <?php echo esc_html($recent['unit_name']); ?></small>
+                                <?php endif; ?>
+                            </td>
                             <td><?php echo esc_html(($recent['date_from'] ?? '') . ' → ' . ($recent['date_to'] ?? '')); ?></td>
                             <td><?php echo esc_html(wp_loft_booking_format_currency($recent['total'] ?? 0, $recent['currency'] ?? 'CAD')); ?></td>
                             <td>
