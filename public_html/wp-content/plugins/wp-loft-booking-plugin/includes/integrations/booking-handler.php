@@ -1407,6 +1407,36 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $guest_count_display_en = 'Not specified';
     }
 
+    $building_entry_instructions_fr = [
+        'Utilisez le code 6 chiffres reçu par SMS ou courriel.',
+        'Composez le code sur l’interphone ou le clavier, appuyez sur le <strong>3</strong> et <strong>#</strong>.',
+        'Passez la porte intérieure, prenez l’ascenseur (porte devant vous) ou les escaliers.',
+        'Pour le matériel de déménagement, l’ascenseur est au 2<sup>e</sup> étage.',
+        'Pour assistance ou urgence, contactez le concierge au 514-239-9080.',
+    ];
+
+    $wayfinding_instructions_fr = [
+        'Entrée principale au <strong>1325 3e Avenue</strong> (façade Loft 1325 sombre et logo métallique).',
+        'Garez-vous derrière l’immeuble : suivez la 3e Avenue puis les panneaux «&nbsp;Loft 1325&nbsp;».',
+        'L’interphone est à droite de la porte vitrée (ou du Logo) ; ascenseur et escaliers juste à l’entrée.',
+        'Si la signalisation ne saute pas aux yeux, appelez&nbsp;: <strong>514-239-9080</strong> pour assistance.',
+    ];
+
+    $building_entry_instructions_en = [
+        'Use the 6-digit code sent by SMS or email.',
+        'Enter the code on the intercom or keypad, press <strong>3</strong> and then <strong>#</strong>.',
+        'After the glass door, take the elevator (door ahead) or the stairs.',
+        'Moving equipment and luggage carts are on the 2nd floor by the elevator.',
+        'For assistance or emergencies, contact the concierge at 514-239-9080.',
+    ];
+
+    $wayfinding_instructions_en = [
+        'Main entrance at <strong>1325 3e Avenue</strong> (dark Loft 1325 façade with metal logo).',
+        'Guest parking is behind the building—follow 3e Avenue and the “Loft 1325” signs.',
+        'The intercom is to the right of the glass door (or Logo); the elevator and stairs are immediately inside the entrance.',
+        'If signage isn’t obvious, call us at <strong>514-239-9080</strong> for guidance.',
+    ];
+
     $has_price_breakdown = is_array($price_breakdown) && !empty($price_breakdown);
 
     $total_display_fr = $total;
@@ -1524,20 +1554,17 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Instructions d'accès au bâtiment</h3>
                                     <ol style="margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.7;color:#4b5563;">
-                                        <li>Utilisez le code à 6 chiffres reçu par SMS ou courriel.</li>
-                                        <li>Composez le code sur l'interphone ou le clavier, puis appuyez sur <strong>3</strong> et sur la touche <strong>#</strong>.</li>
-                                        <li>Une fois à l'intérieur, prenez les escaliers (à droite) ou l'ascenseur (porte devant vous).</li>
-                                        <li>Pour du matériel de déménagement, l'ascenseur se trouve au 2<sup>e</sup> étage.</li>
-                                        <li>En cas d'urgence, contactez notre concierge au 514-239-9080.</li>
+                                        <?php foreach ($building_entry_instructions_fr as $instruction) : ?>
+                                            <li><?php echo $instruction; ?></li>
+                                        <?php endforeach; ?>
                                     </ol>
                                 </div>
                                 <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#fff7ed;border:1px solid #fb923c;">
                                     <h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:#9a3412;">Repères pour nous trouver facilement</h3>
                                     <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#7c2d12;">
-                                        <li>Entrée principale au <strong>1325 3e Avenue</strong> (façade Loft 1325 sombre et logo métallique).</li>
-                                        <li>Stationnement invités derrière l'immeuble : suivez la 3e Avenue puis les panneaux «&nbsp;Loft 1325&nbsp;».</li>
-                                        <li>La porte vitrée et l'interphone sont à droite de la grande enseigne «&nbsp;1325&nbsp;»; ascenseur et escaliers juste à l'entrée.</li>
-                                        <li>Si vous ne voyez pas immédiatement la signalisation, appelez <strong>514-239-9080</strong> et nous vous guiderons.</li>
+                                        <?php foreach ($wayfinding_instructions_fr as $instruction) : ?>
+                                            <li><?php echo $instruction; ?></li>
+                                        <?php endforeach; ?>
                                     </ul>
                                 </div>
                                 <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Préparez votre arrivée</h3>
@@ -1600,20 +1627,17 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Building entry instructions</h3>
                                     <ol style="margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.7;color:#4b5563;">
-                                        <li>Use the 6-digit code sent by SMS or email.</li>
-                                        <li>Enter the code on the intercom or keypad, then press <strong>3</strong> followed by the <strong>#</strong> key.</li>
-                                        <li>Inside, you will find the stairs on the right or the elevator at the front.</li>
-                                        <li>Moving carts and equipment are available on the 2nd floor by the elevator.</li>
-                                        <li>For emergencies, call the concierge at 514-239-9080.</li>
+                                        <?php foreach ($building_entry_instructions_en as $instruction) : ?>
+                                            <li><?php echo $instruction; ?></li>
+                                        <?php endforeach; ?>
                                     </ol>
                                 </div>
                                 <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#ecfeff;border:1px solid #06b6d4;">
                                     <h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:#0f172a;">Wayfinding to the lofts</h3>
                                     <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#0f172a;">
-                                        <li>Main entrance at <strong>1325 3e Avenue</strong> with the Loft 1325 sign on the dark façade.</li>
-                                        <li>Guest parking is behind the building; turn from 3e Avenue and follow the “Loft 1325” signs.</li>
-                                        <li>The glass door and intercom sit to the right of the large “1325” sign; stairs and elevator are just inside.</li>
-                                        <li>If you need guidance on arrival, call <strong>514-239-9080</strong> and we will guide you in.</li>
+                                        <?php foreach ($wayfinding_instructions_en as $instruction) : ?>
+                                            <li><?php echo $instruction; ?></li>
+                                        <?php endforeach; ?>
                                     </ul>
                                 </div>
                                 <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Before you arrive</h3>
@@ -1669,6 +1693,10 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         'virtual_key_message_en'=> $virtual_key_message_en,
         'tax_total_display'     => $tax_total_display,
         'taxes_for_display'     => $taxes_for_display,
+        'building_entry_instructions_fr' => $building_entry_instructions_fr,
+        'wayfinding_instructions_fr'     => $wayfinding_instructions_fr,
+        'building_entry_instructions_en' => $building_entry_instructions_en,
+        'wayfinding_instructions_en'     => $wayfinding_instructions_en,
         'property_address'      => $property_address,
         'support_email'         => $support_email,
         'booking_reference'     => $booking['booking_id'] ?? '',
