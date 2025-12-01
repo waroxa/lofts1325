@@ -43,17 +43,17 @@ function wp_loft_booking_check_token_refresh() {
 
 function wp_loft_booking_schedule_unit_sync() {
     if (!wp_next_scheduled('wp_loft_booking_sync_units')) {
-        wp_schedule_event(time(), 'hourly', 'wp_loft_booking_sync_units');
+        wp_schedule_event(time(), 'every_5_minutes', 'wp_loft_booking_sync_units');
     }
 }
 add_action('wp_loft_booking_sync_units', 'wp_loft_booking_sync_units');
 register_activation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php', 'wp_loft_booking_schedule_unit_sync');
 
-// 1️⃣ Add custom cron schedule (e.g., every 15 minutes)
+// 1️⃣ Add custom cron schedule (e.g., every 5 minutes)
 add_filter('cron_schedules', function ($schedules) {
-    $schedules['every_15_minutes'] = [
-        'interval' => 15 * 60, // 15 minutes in seconds
-        'display'  => __('Every 15 Minutes')
+    $schedules['every_5_minutes'] = [
+        'interval' => 5 * 60, // 5 minutes in seconds
+        'display'  => __('Every 5 Minutes')
     ];
     return $schedules;
 });
@@ -61,7 +61,7 @@ add_filter('cron_schedules', function ($schedules) {
 // 2️⃣ Schedule cron event on plugin activation
 register_activation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php', function () {
     if (!wp_next_scheduled('wp_loft_booking_cron_sync')) {
-        wp_schedule_event(time(), 'every_15_minutes', 'wp_loft_booking_cron_sync');
+        wp_schedule_event(time(), 'every_5_minutes', 'wp_loft_booking_cron_sync');
     }
 });
 
@@ -70,7 +70,28 @@ register_deactivation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php',
     wp_clear_scheduled_hook('wp_loft_booking_cron_sync');
 });
 
-// 4️⃣ Main cron hook
+// 4️⃣ Ensure cron intervals stay at 5 minutes
+add_action('init', function () {
+    $hooks = [
+        'wp_loft_booking_cron_sync',
+        'wp_loft_booking_sync_units',
+    ];
+
+    foreach ($hooks as $hook) {
+        $next_run = wp_next_scheduled($hook);
+        $current_schedule = $next_run ? wp_get_schedule($hook) : false;
+
+        if ($next_run && 'every_5_minutes' !== $current_schedule) {
+            wp_unschedule_event($next_run, $hook);
+        }
+
+        if (!wp_next_scheduled($hook)) {
+            wp_schedule_event(time(), 'every_5_minutes', $hook);
+        }
+    }
+});
+
+// 5️⃣ Main cron hook
 add_action('wp_loft_booking_cron_sync', function () {
     error_log("⏰ Running cron: syncing tenants, keychains, and units");
 

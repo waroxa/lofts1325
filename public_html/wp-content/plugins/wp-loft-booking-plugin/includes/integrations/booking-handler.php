@@ -180,6 +180,72 @@ if (!function_exists('wp_loft_booking_format_unit_label')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_normalize_unit_label_for_lookup')) {
+    /**
+     * Create a canonical, lowercase label for loft matching.
+     *
+     * @param string $label Raw label value.
+     * @return string Normalized label ready for comparisons.
+     */
+    function wp_loft_booking_normalize_unit_label_for_lookup($label)
+    {
+        $label = remove_accents((string) $label);
+        $label = strtolower($label);
+        $label = preg_replace('/[^a-z0-9]+/', ' ', $label);
+
+        return trim(preg_replace('/\s+/', ' ', $label));
+    }
+}
+
+if (!function_exists('wp_loft_booking_find_unit_by_label')) {
+    /**
+     * Find a loft unit by its human-facing label, ignoring case and punctuation.
+     *
+     * @param string $label Loft label coming from ND Booking/WordPress.
+     * @return array{id:int,unit_name:string}|null Matching unit record or null when none found.
+     */
+    function wp_loft_booking_find_unit_by_label($label)
+    {
+        global $wpdb;
+
+        $targets = array_filter(
+            array_unique(
+                array(
+                    wp_loft_booking_normalize_unit_label_for_lookup($label),
+                    wp_loft_booking_normalize_unit_label_for_lookup(wp_loft_booking_format_unit_label($label)),
+                )
+            )
+        );
+
+        if (empty($targets)) {
+            return null;
+        }
+
+        $units_table = $wpdb->prefix . 'loft_units';
+        $units       = $wpdb->get_results("SELECT id, unit_name FROM {$units_table}");
+
+        foreach ($units as $unit) {
+            $normalized_unit_labels = array_filter(
+                array_unique(
+                    array(
+                        wp_loft_booking_normalize_unit_label_for_lookup($unit->unit_name),
+                        wp_loft_booking_normalize_unit_label_for_lookup(wp_loft_booking_format_unit_label($unit->unit_name)),
+                    )
+                )
+            );
+
+            if (!empty(array_intersect($targets, $normalized_unit_labels))) {
+                return [
+                    'id'        => (int) $unit->id,
+                    'unit_name' => (string) $unit->unit_name,
+                ];
+            }
+        }
+
+        return null;
+    }
+}
+
 if (!function_exists('wp_loft_booking_apply_virtual_key_lead_time')) {
     /**
      * Ensure the virtual key check-in time respects the minimum lead time.
@@ -396,9 +462,13 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
     $room_id   = isset($row['id_post']) ? (int) $row['id_post'] : 0;
     $room_name = $room_id > 0 ? get_the_title($room_id) : '';
 
+    $matched_unit = wp_loft_booking_find_unit_by_label($room_name);
+
     return [
         'room_id'        => $room_id,
         'room_name'      => $room_name,
+        'unit_id'        => $matched_unit['id'] ?? 0,
+        'unit_name'      => $matched_unit['unit_name'] ?? '',
         'name'           => $row['user_first_name'] ?? '',
         'surname'        => $row['user_last_name'] ?? '',
         'email'          => $row['paypal_email'] ?? '',
@@ -1029,6 +1099,8 @@ function wp_loft_booking_handle_booking(
     try {
         global $wpdb;
 
+    $requested_label = $title_post;
+
     $booking = [
         'booking_id'     => $id_post,
         'room_id'        => $id_post,
@@ -1062,22 +1134,42 @@ function wp_loft_booking_handle_booking(
             $wpdb->prepare("SELECT id FROM {$units_table} WHERE id = %d", $booking['room_id'])
         );
 
-        if (!$has_valid_unit) {
+        $matched_unit = wp_loft_booking_find_unit_by_label($booking['room_name'] ?? '');
+        $resolved_by  = '';
+
+        if ($matched_unit && ($booking['room_id'] !== $matched_unit['id'])) {
+            // Prefer an exact label match over the raw ND Booking ID to keep the requested loft in sync.
+            $booking['room_id']   = $matched_unit['id'];
+            $booking['room_name'] = $matched_unit['unit_name'];
+            $resolved_by          = 'label-match';
+        } elseif (!$has_valid_unit) {
+            $resolved_by = 'fallback-available';
             $available_unit = $wpdb->get_var(
                 "SELECT id FROM {$units_table} WHERE status = 'available' ORDER BY unit_name ASC LIMIT 1"
             );
 
             if ($available_unit) {
                 $booking['room_id'] = intval($available_unit);
-
-                $wpdb->update(
-                    $bookings_table,
-                    ['unit_id' => $booking['room_id']],
-                    ['id' => $id_post],
-                    ['%d'],
-                    ['%d']
-                );
             }
+        }
+
+        if (!empty($booking['room_id']) && $resolved_by) {
+            $wpdb->update(
+                $bookings_table,
+                ['unit_id' => $booking['room_id']],
+                ['id' => $id_post],
+                ['%d'],
+                ['%d']
+            );
+
+            error_log(sprintf(
+                'ℹ️ Booking %d loft resolved via %s. Requested label: "%s" → Assigned ID %d (%s).',
+                $id_post,
+                $resolved_by,
+                (string) $requested_label,
+                (int) $booking['room_id'],
+                $resolved_by === 'label-match' && $matched_unit ? $matched_unit['unit_name'] : 'fallback'
+            ));
         }
 
         $timezone_string = get_option('timezone_string');
@@ -1208,9 +1300,10 @@ function wp_loft_booking_generate_virtual_key($unit_id, $name, $email, $phone, $
         return new WP_Error('missing_unit_api', 'Missing ButterflyMX unit ID.');
     }
 
-    $unit_label = wp_loft_booking_format_unit_label($unit->unit_name ?? '');
+    $unit_label = trim(preg_replace('/\s+/', ' ', (string) ($unit->unit_name ?? '')));
+
     if ('' === $unit_label) {
-        $unit_label = $unit->unit_name;
+        $unit_label = wp_loft_booking_format_unit_label($unit->unit_name ?? '');
     }
 
     $environment = wp_loft_booking_get_butterflymx_environment();
