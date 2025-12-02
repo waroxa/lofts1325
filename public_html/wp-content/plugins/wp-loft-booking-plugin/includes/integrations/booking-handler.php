@@ -880,18 +880,19 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                         <div style="padding:22px;border-radius:20px;background-color:#f8fafc;border:1px solid #e5e7eb;box-shadow:0 18px 34px rgba(15,23,42,0.08);color:#0f172a;">
                                             <h3 style="margin:0 0 12px;font-size:17px;font-weight:900;color:#0f172a;"><?php echo esc_html($copy['payment_details']); ?></h3>
                                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
-                                                <tr>
-                                                    <td colspan="2" style="padding:6px 0 0;">
-                                                        <ul style="margin:6px 0 0;padding-left:18px;color:#475569;font-size:13px;">
-                                                            <?php foreach ($extras as $extra) : ?>
-                                                                <li style="font-weight:800;">
-                                                                    <?php echo esc_html($extra['title']); ?> &middot; <?php echo esc_html(wp_loft_booking_format_currency($extra['price'] ?? 0, $currency)); ?>
-                                                                </li>
-                                                            <?php endforeach; ?>
-                                                        </ul>
-                                                    </td>
-                                                </tr>
-                                            <?php endif; ?>
+                                <?php if (!empty($extras)) : ?>
+                                    <tr>
+                                        <td colspan="2" style="padding:6px 0 0;">
+                                            <ul style="margin:6px 0 0;padding-left:18px;color:#475569;font-size:13px;">
+                                                <?php foreach ($extras as $extra) : ?>
+                                                    <li style="font-weight:800;">
+                                                        <?php echo esc_html($extra['title']); ?> &middot; <?php echo esc_html(wp_loft_booking_format_currency($extra['price'] ?? 0, $currency)); ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                                             <?php foreach ($taxes as $tax) : ?>
                                                 <tr>
                                                     <td style="padding:6px 0;color:#334155;font-weight:800;">&nbsp;<?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%)</td>
