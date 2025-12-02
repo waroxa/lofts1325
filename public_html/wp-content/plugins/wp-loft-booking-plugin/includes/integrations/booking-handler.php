@@ -2248,6 +2248,8 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                 <?php if ($is_admin_invoice) : ?>
                                     <div style="margin:0 0 18px;padding:16px;border-radius:14px;background-color:#e0f2fe;border:1px solid #bae6fd;">
                                         <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;font-weight:700;">Nouvelle facture créée par Gestion Camisa.</p>
+                                        <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;">Merci de transmettre cette facture à l’équipe Comptabilité pour que Sonia puisse la saisir dans Sage.</p>
+                                        <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">Veuillez aussi confirmer que le numéro de loft apparaît bien dans la réservation ou sur la facture.</p>
                                         <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">A new invoice was created by Gestion Camisa.</p>
                                     </div>
                                 <?php endif; ?>
