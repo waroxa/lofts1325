@@ -704,6 +704,50 @@ function wp_loft_booking_build_invoice_fingerprint(array $booking, array $price_
 }
 
 /**
+ * Create a bilingual label for a payment status.
+ *
+ * @param string $status
+ *
+ * @return array{fr:string,en:string}
+ */
+function wp_loft_booking_translate_payment_status($status)
+{
+        $normalized = strtolower(trim((string) $status));
+
+        $translations = [
+                'completed'            => ['fr' => __('Complété', 'wp-loft-booking'), 'en' => __('Completed', 'wp-loft-booking')],
+                'succeeded'            => ['fr' => __('Réussi', 'wp-loft-booking'), 'en' => __('Succeeded', 'wp-loft-booking')],
+                'processing'           => ['fr' => __('En traitement', 'wp-loft-booking'), 'en' => __('Processing', 'wp-loft-booking')],
+                'pending'              => ['fr' => __('En attente', 'wp-loft-booking'), 'en' => __('Pending', 'wp-loft-booking')],
+                'refunded'             => ['fr' => __('Remboursé', 'wp-loft-booking'), 'en' => __('Refunded', 'wp-loft-booking')],
+                'partially_refunded'   => ['fr' => __('Partiellement remboursé', 'wp-loft-booking'), 'en' => __('Partially refunded', 'wp-loft-booking')],
+                'failed'               => ['fr' => __('Échoué', 'wp-loft-booking'), 'en' => __('Failed', 'wp-loft-booking')],
+                'authorized'           => ['fr' => __('Autorisé', 'wp-loft-booking'), 'en' => __('Authorized', 'wp-loft-booking')],
+                'requires_action'      => ['fr' => __('Action requise', 'wp-loft-booking'), 'en' => __('Action required', 'wp-loft-booking')],
+                'requires_payment'     => ['fr' => __('Paiement requis', 'wp-loft-booking'), 'en' => __('Payment required', 'wp-loft-booking')],
+        ];
+
+        $fallback_fr = $status ?: __('Inconnu', 'wp-loft-booking');
+        $fallback_en = $status ?: __('Unknown', 'wp-loft-booking');
+
+        return $translations[$normalized] ?? ['fr' => $fallback_fr, 'en' => $fallback_en];
+}
+
+/**
+ * Return a combined bilingual payment status label.
+ *
+ * @param string $status
+ *
+ * @return string
+ */
+function wp_loft_booking_format_payment_status_display($status)
+{
+        $labels = wp_loft_booking_translate_payment_status($status);
+
+        return sprintf('%s · %s', $labels['fr'], $labels['en']);
+}
+
+/**
  * Render the invoice HTML body in a deterministic way for archival and reuse.
  *
  * @param array $booking
@@ -732,6 +776,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
         });
 
         $payment_status = $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking');
+        $payment_status_display = wp_loft_booking_format_payment_status_display($payment_status);
         $transaction_id = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
         $support_email  = 'reservation@loft1325.com';
         $tax_numbers    = wp_loft_booking_get_tax_registration_numbers();
@@ -821,8 +866,8 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                     <p style="margin:0 0 12px;font-size:24px;font-weight:800;color:#0f172a;">Séjour confirmé | Stay confirmed</p>
                                     <p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#334155;">Réservation #<?php echo esc_html($booking_ref); ?> &middot; <?php echo esc_html($room_name); ?>.<br>Dates&nbsp;: <?php echo esc_html($checkin); ?> → <?php echo esc_html($checkout); ?>.</p>
                                     <div style="margin:12px 0 20px;display:flex;gap:12px;flex-wrap:wrap;">
-                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#0f172a;color:#f8fafc;font-size:13px;font-weight:700;">Statut&nbsp;/ Status: <?php echo esc_html($payment_status); ?></span>
-                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#e0f2fe;color:#075985;font-size:13px;font-weight:700;">Transaction Stripe: <?php echo esc_html($transaction_id); ?></span>
+                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef08a;color:#854d0e;font-size:13px;font-weight:800;">Statut&nbsp;/ Status: <?php echo esc_html($payment_status_display); ?></span>
+                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef9c3;color:#854d0e;font-size:13px;font-weight:800;">Transaction Stripe: <?php echo esc_html($transaction_id); ?></span>
                                     </div>
                                     <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#334155;">Paiement traité via Stripe. Pour l’entrée dans Sage, réutilisez le numéro de transaction <strong><?php echo esc_html($transaction_id); ?></strong> comme référence unique.</p>
                                 </td>
@@ -858,7 +903,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
                                             <tr>
                                                 <td style="padding:6px 0;color:#334155;font-weight:800;">Statut / Status</td>
-                                                <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($payment_status); ?></td>
+                                                <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($payment_status_display); ?></td>
                                             </tr>
                                             <tr>
                                                 <td style="padding:6px 0;color:#334155;font-weight:800;">Transaction (Stripe)</td>
@@ -968,6 +1013,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         $booking_ref     = $booking['booking_id'] ?? $booking['room_id'] ?? __('N/A', 'wp-loft-booking');
         $currency        = $price_breakdown['currency'] ?? 'CAD';
         $payment_status  = $booking['payment_status'] ?? __('Unknown', 'wp-loft-booking');
+        $payment_status_labels = wp_loft_booking_translate_payment_status($payment_status);
         $transaction_id  = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
         $tax_numbers     = wp_loft_booking_get_tax_registration_numbers();
 
@@ -1063,7 +1109,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                         sprintf('• Loft : %s', $room_name),
                         sprintf('• Invité : %s', $guest_name),
                         sprintf('• Séjour : %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
-                        sprintf('• Statut : %s', $payment_status),
+                        sprintf('• Statut : %s', $payment_status_labels['fr']),
                 ],
                 'payment_heading'       => 'Sommaire du paiement',
                 'lodging_line'          => '• Hébergement (avant taxes) : %s',
@@ -1090,7 +1136,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                         sprintf('• Loft: %s', $room_name),
                         sprintf('• Guest: %s', $guest_name),
                         sprintf('• Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
-                        sprintf('• Status: %s', $payment_status),
+                        sprintf('• Status: %s', $payment_status_labels['en']),
                 ],
                 'payment_heading'       => 'Payment summary',
                 'lodging_line'          => '• Lodging (before taxes): %s',
@@ -2136,7 +2182,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Statut du paiement</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($payment_status); ?></td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($payment_status_labels['fr']); ?></td>
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Transaction</td>
@@ -2167,12 +2213,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Sous-total (avant taxes)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#ca8a04;font-weight:800;">Sous-total (avant taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#a16207;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
                                         </tr>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Subtotal (before taxes)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;">
+                                            <td style="padding:6px 0;font-size:14px;color:#ca8a04;font-weight:800;">Subtotal (before taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#a16207;text-align:right;font-weight:900;">
                                                 <?php echo esc_html($subtotal_display); ?>
                                             </td>
                                         </tr>
@@ -2223,7 +2269,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Payment status</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($payment_status); ?></td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($payment_status_labels['en']); ?></td>
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Transaction</td>
@@ -2435,6 +2481,8 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
 
     $currency = !empty($booking['currency']) ? strtoupper($booking['currency']) : 'CAD';
     $payment_status = !empty($booking['payment_status']) ? $booking['payment_status'] : __('Unknown', 'wp-loft-booking');
+    $payment_status_labels = wp_loft_booking_translate_payment_status($payment_status);
+    $payment_status_display = wp_loft_booking_format_payment_status_display($payment_status);
     $transaction_id = !empty($booking['transaction_id']) ? $booking['transaction_id'] : __('Not provided', 'wp-loft-booking');
 
     $price_breakdown = wp_loft_booking_calculate_price_breakdown($booking);
@@ -2535,7 +2583,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
                                             <td style="padding:6px 0;font-size:14px;color:#334155;font-weight:800;">Statut / Status</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($payment_status); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($payment_status_display); ?></td>
                                         </tr>
                                         <tr>
                                             <td style="padding:6px 0;font-size:14px;color:#334155;font-weight:800;">Transaction</td>
@@ -2561,8 +2609,8 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Sous-total (avant taxes)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#ca8a04;font-weight:800;">Sous-total (avant taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#a16207;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
                                         </tr>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
@@ -2639,7 +2687,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
                                             <td style="padding:6px 0;font-size:14px;color:#e2e8f0;font-weight:600;">Status</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:700;"><?php echo esc_html($payment_status); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:700;"><?php echo esc_html($payment_status_labels['en']); ?></td>
                                         </tr>
                                         <tr>
                                             <td style="padding:6px 0;font-size:14px;color:#e2e8f0;font-weight:600;">Transaction</td>
