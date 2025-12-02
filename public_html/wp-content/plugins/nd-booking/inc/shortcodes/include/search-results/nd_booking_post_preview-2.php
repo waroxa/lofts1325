@@ -141,21 +141,28 @@ $nd_booking_shortcode_right_content .= '
                         if ( $nd_booking_meta_box_min_booking_day == '' ) { $nd_booking_meta_box_min_booking_day = 1; }
                         if ( nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to) >= $nd_booking_meta_box_min_booking_day ) {
 
-                            $nd_booking_trip_price = 0;
-                            $nd_booking_index = 1;
-                            $nd_booking_date_cicle = $nd_booking_date_from;
-                            while ($nd_booking_index <= nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to)) {
+                            $nd_booking_loft_rule = nd_booking_find_loft_pricing_rule( $nd_booking_id_room );
 
-                                $nd_booking_trip_price = $nd_booking_trip_price + nd_booking_get_final_price($nd_booking_id,$nd_booking_date_cicle);
+                            if ( null !== $nd_booking_loft_rule ) {
+                                $nd_booking_loft_price = nd_booking_calculate_loft_pricing( $nd_booking_loft_rule, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
+                                $nd_booking_trip_price = $nd_booking_loft_price['total'];
+                            } else {
+                                $nd_booking_trip_price = 0;
+                                $nd_booking_index = 1;
+                                $nd_booking_date_cicle = $nd_booking_date_from;
+                                while ($nd_booking_index <= nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to)) {
 
-                                $nd_booking_date_cicle = date('Y/m/d', strtotime($nd_booking_date_cicle.' + 1 days'));
+                                    $nd_booking_trip_price = $nd_booking_trip_price + nd_booking_get_final_price($nd_booking_id,$nd_booking_date_cicle);
 
-                                $nd_booking_index++;
-                            } 
+                                    $nd_booking_date_cicle = date('Y/m/d', strtotime($nd_booking_date_cicle.' + 1 days'));
 
-                            //ADJUST TRIP PRICE based on the price per guest settings
-                            if ( get_option('nd_booking_price_guests') == 1 ) {
-                                $nd_booking_trip_price = $nd_booking_trip_price * $nd_booking_archive_form_guests;
+                                    $nd_booking_index++;
+                                }
+
+                                //ADJUST TRIP PRICE based on the price per guest settings
+                                if ( get_option('nd_booking_price_guests') == 1 ) {
+                                    $nd_booking_trip_price = $nd_booking_trip_price * $nd_booking_archive_form_guests;
+                                }
                             }
 
                             $nd_booking_shortcode_right_content .= '

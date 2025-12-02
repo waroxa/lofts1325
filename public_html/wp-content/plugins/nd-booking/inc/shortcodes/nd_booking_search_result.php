@@ -1207,18 +1207,27 @@ if ( ! function_exists( 'nd_booking_calculate_search_card_pricing' ) ) {
             return $nd_booking_pricing;
         }
 
+        $nd_booking_loft_rule  = nd_booking_find_loft_pricing_rule( $nd_booking_id_room );
         $nd_booking_trip_price = 0;
-        $nd_booking_index      = 1;
-        $nd_booking_date_cicle = $nd_booking_date_from;
+        $nd_booking_nightly_rate = 0;
 
-        while ( $nd_booking_index <= $nd_booking_total_nights ) {
-            $nd_booking_trip_price += nd_booking_get_final_price( $nd_booking_room_post_id, $nd_booking_date_cicle );
-            $nd_booking_date_cicle  = date( 'Y/m/d', strtotime( $nd_booking_date_cicle . ' + 1 days' ) );
-            $nd_booking_index++;
-        }
+        if ( null !== $nd_booking_loft_rule ) {
+            $nd_booking_loft_price = nd_booking_calculate_loft_pricing( $nd_booking_loft_rule, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
+            $nd_booking_trip_price = $nd_booking_loft_price['total'];
+            $nd_booking_nightly_rate = $nd_booking_loft_price['nightly_rate'];
+        } else {
+            $nd_booking_index      = 1;
+            $nd_booking_date_cicle = $nd_booking_date_from;
 
-        if ( get_option( 'nd_booking_price_guests' ) == 1 ) {
-            $nd_booking_trip_price = $nd_booking_trip_price * $nd_booking_archive_form_guests;
+            while ( $nd_booking_index <= $nd_booking_total_nights ) {
+                $nd_booking_trip_price += nd_booking_get_final_price( $nd_booking_room_post_id, $nd_booking_date_cicle );
+                $nd_booking_date_cicle  = date( 'Y/m/d', strtotime( $nd_booking_date_cicle . ' + 1 days' ) );
+                $nd_booking_index++;
+            }
+
+            if ( get_option( 'nd_booking_price_guests' ) == 1 ) {
+                $nd_booking_trip_price = $nd_booking_trip_price * $nd_booking_archive_form_guests;
+            }
         }
 
         $nd_booking_price_decimals     = ( floor( $nd_booking_trip_price ) == $nd_booking_trip_price ) ? 0 : 2;
@@ -1232,7 +1241,10 @@ if ( ! function_exists( 'nd_booking_calculate_search_card_pricing' ) ) {
             $nd_booking_total_nights_for_rate = 1;
         }
 
-        $nd_booking_nightly_rate         = ( $nd_booking_total_nights_for_rate > 0 ) ? $nd_booking_trip_price / $nd_booking_total_nights_for_rate : 0;
+        if ( $nd_booking_nightly_rate <= 0 ) {
+            $nd_booking_nightly_rate = ( $nd_booking_total_nights_for_rate > 0 ) ? $nd_booking_trip_price / $nd_booking_total_nights_for_rate : 0;
+        }
+
         $nd_booking_nightly_decimals     = ( floor( $nd_booking_nightly_rate ) == $nd_booking_nightly_rate ) ? 0 : 2;
         $nd_booking_nightly_rate_number  = number_format_i18n( $nd_booking_nightly_rate, $nd_booking_nightly_decimals );
         $nd_booking_night_label          = _n( 'nuit', 'nuits', $nd_booking_total_nights_for_rate, 'marina-child' );

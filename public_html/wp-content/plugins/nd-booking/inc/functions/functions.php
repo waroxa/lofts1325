@@ -112,6 +112,308 @@ function nd_booking_get_final_price($nd_booking_id,$nd_booking_date){
 
 }
 
+/**
+ * Custom pricing rules for Lofts1325.
+ *
+ * Update the numeric values below to adjust seasonal and long-stay pricing for
+ * each loft type. Seasons use MM-DD boundaries and cover a full calendar year.
+ * Long-stay tiers apply a flat nightly rate (or a flat total for monthly stays)
+ * once the guest's night count falls in the configured range.
+ *
+ * @return array<string,array{matches:array<int,string>,seasons:array<int,array{label:string,start:string,end:string,rate:float}>,long_stay:array<int,array{min_nights:int,max_nights:int,nightly_rate?:float,flat_total?:float}>}>
+ */
+function nd_booking_get_loft_pricing_rules() {
+        return array(
+                'loft-simple' => array(
+                        'matches' => array('loft-simple', 'simple'),
+                        'seasons' => array(
+                                array(
+                                        'label' => 'fall_winter',
+                                        'start' => '09-01',
+                                        'end'   => '03-30',
+                                        'rate'  => 285.0,
+                                ),
+                                array(
+                                        'label' => 'spring',
+                                        'start' => '04-01',
+                                        'end'   => '06-30',
+                                        'rate'  => 275.0,
+                                ),
+                                array(
+                                        'label' => 'summer',
+                                        'start' => '07-01',
+                                        'end'   => '08-31',
+                                        'rate'  => 250.0,
+                                ),
+                        ),
+                        'long_stay' => array(
+                                array(
+                                        'min_nights'  => 11,
+                                        'max_nights'  => 21,
+                                        'nightly_rate'=> 120.0,
+                                ),
+                                array(
+                                        'min_nights'  => 22,
+                                        'max_nights'  => 27,
+                                        'nightly_rate'=> 110.0,
+                                ),
+                                array(
+                                        'min_nights' => 28,
+                                        'max_nights' => 30,
+                                        'flat_total' => 2850.0,
+                                ),
+                        ),
+                ),
+                'loft-double' => array(
+                        'matches' => array('loft-double', 'double'),
+                        'seasons' => array(
+                                array(
+                                        'label' => 'fall_winter',
+                                        'start' => '09-01',
+                                        'end'   => '03-30',
+                                        'rate'  => 385.0,
+                                ),
+                                array(
+                                        'label' => 'spring',
+                                        'start' => '04-01',
+                                        'end'   => '06-30',
+                                        'rate'  => 365.0,
+                                ),
+                                array(
+                                        'label' => 'summer',
+                                        'start' => '07-01',
+                                        'end'   => '08-31',
+                                        'rate'  => 350.0,
+                                ),
+                        ),
+                        'long_stay' => array(
+                                array(
+                                        'min_nights'  => 11,
+                                        'max_nights'  => 21,
+                                        'nightly_rate'=> 175.0,
+                                ),
+                                array(
+                                        'min_nights'  => 22,
+                                        'max_nights'  => 27,
+                                        'nightly_rate'=> 160.0,
+                                ),
+                                array(
+                                        'min_nights' => 28,
+                                        'max_nights' => 30,
+                                        'flat_total' => 3850.0,
+                                ),
+                        ),
+                ),
+        );
+}
+
+/**
+ * Normalize a post into an identifier usable for matching custom pricing rules.
+ *
+ * @param WP_Post|int $room_post Room post or ID.
+ *
+ * @return array{slug:string,title:string}|null
+ */
+function nd_booking_normalize_loft_identifier( $room_post ) {
+        $post = get_post( $room_post );
+
+        if ( ! $post instanceof WP_Post ) {
+                return null;
+        }
+
+        $title = strtolower( (string) $post->post_title );
+        $slug  = sanitize_title( $post->post_name ?: $post->post_title );
+
+        return array(
+                'slug'  => $slug,
+                'title' => $title,
+        );
+}
+
+/**
+ * Attempt to find a loft pricing rule for a given room.
+ *
+ * @param int $room_id Room post ID.
+ *
+ * @return array|null
+ */
+function nd_booking_find_loft_pricing_rule( $room_id ) {
+        $identifier = nd_booking_normalize_loft_identifier( $room_id );
+
+        if ( null === $identifier ) {
+                return null;
+        }
+
+        $rules = nd_booking_get_loft_pricing_rules();
+
+        foreach ( $rules as $rule ) {
+                if ( empty( $rule['matches'] ) || ! is_array( $rule['matches'] ) ) {
+                        continue;
+                }
+
+                foreach ( $rule['matches'] as $match ) {
+                        $match = strtolower( (string) $match );
+
+                        if ( '' === $match ) {
+                                continue;
+                        }
+
+                        if ( false !== strpos( $identifier['slug'], $match ) || false !== strpos( $identifier['title'], $match ) ) {
+                                return $rule;
+                        }
+                }
+        }
+
+        return null;
+}
+
+/**
+ * Determine whether a date falls within a season range, handling wrapped years.
+ *
+ * @param string $date    Date string in Y/m/d or Y-m-d format.
+ * @param string $start   Season start in MM-DD format.
+ * @param string $end     Season end in MM-DD format.
+ *
+ * @return bool
+ */
+function nd_booking_loft_date_in_range( $date, $start, $end ) {
+        $target_md      = (int) date( 'md', strtotime( $date ) );
+        $start_md       = (int) str_replace( '-', '', $start );
+        $end_md         = (int) str_replace( '-', '', $end );
+        $wraps_calendar = $start_md > $end_md;
+
+        if ( $wraps_calendar ) {
+                return ( $target_md >= $start_md ) || ( $target_md <= $end_md );
+        }
+
+        return ( $target_md >= $start_md ) && ( $target_md <= $end_md );
+}
+
+/**
+ * Resolve the seasonal nightly rate for a given date.
+ *
+ * @param array  $rule Pricing rule payload.
+ * @param string $date Date in Y/m/d or Y-m-d format.
+ *
+ * @return float
+ */
+function nd_booking_get_loft_seasonal_rate( array $rule, $date ) {
+        if ( empty( $rule['seasons'] ) || ! is_array( $rule['seasons'] ) ) {
+                return 0.0;
+        }
+
+        foreach ( $rule['seasons'] as $season ) {
+                if ( empty( $season['start'] ) || empty( $season['end'] ) || ! isset( $season['rate'] ) ) {
+                        continue;
+                }
+
+                if ( nd_booking_loft_date_in_range( $date, $season['start'], $season['end'] ) ) {
+                        return (float) $season['rate'];
+                }
+        }
+
+        return isset( $rule['seasons'][0]['rate'] ) ? (float) $rule['seasons'][0]['rate'] : 0.0;
+}
+
+/**
+ * Return the long-stay tier (if any) that matches the provided night count.
+ *
+ * @param array $rule        Pricing rule payload.
+ * @param int   $night_count Number of nights in the booking.
+ *
+ * @return array|null
+ */
+function nd_booking_get_loft_long_stay_tier( array $rule, $night_count ) {
+        if ( empty( $rule['long_stay'] ) || ! is_array( $rule['long_stay'] ) ) {
+                return null;
+        }
+
+        foreach ( $rule['long_stay'] as $tier ) {
+                $min = isset( $tier['min_nights'] ) ? (int) $tier['min_nights'] : 0;
+                $max = isset( $tier['max_nights'] ) ? (int) $tier['max_nights'] : 0;
+
+                if ( $night_count >= $min && ( 0 === $max || $night_count <= $max ) ) {
+                        return $tier;
+                }
+        }
+
+        return null;
+}
+
+/**
+ * Determine the nightly rate for a specific date, honoring long-stay tiers.
+ *
+ * @param array      $rule            Pricing rule payload.
+ * @param string     $date            Nightly date in Y/m/d or Y-m-d format.
+ * @param array|null $long_stay_tier  Active long-stay tier, if any.
+ * @param int|null   $night_count     Total nights in the booking (used for flat totals).
+ *
+ * @return float
+ */
+function nd_booking_get_loft_nightly_rate( array $rule, $date, ?array $long_stay_tier = null, $night_count = null ) {
+        if ( null !== $long_stay_tier ) {
+                if ( isset( $long_stay_tier['nightly_rate'] ) ) {
+                        return (float) $long_stay_tier['nightly_rate'];
+                }
+
+                if ( isset( $long_stay_tier['flat_total'] ) && $night_count ) {
+                        return (float) $long_stay_tier['flat_total'] / max( 1, (int) $night_count );
+                }
+        }
+
+        return nd_booking_get_loft_seasonal_rate( $rule, $date );
+}
+
+/**
+ * Calculate loft pricing (including seasonal and long-stay tiers) for a date range.
+ *
+ * @param array  $rule        Pricing rule payload.
+ * @param string $date_from   Arrival date (Y/m/d or Y-m-d).
+ * @param string $date_to     Departure date (Y/m/d or Y-m-d).
+ * @param int    $guest_count Number of guests to factor when the plugin is set to price per guest.
+ *
+ * @return array{total:float,nightly_rate:float,night_count:int,long_stay_tier:array|null}
+ */
+function nd_booking_calculate_loft_pricing( array $rule, $date_from, $date_to, $guest_count = 1 ) {
+        $night_count = nd_booking_get_number_night( $date_from, $date_to );
+
+        if ( $night_count <= 0 ) {
+                return array(
+                        'total'          => 0.0,
+                        'nightly_rate'   => 0.0,
+                        'night_count'    => 0,
+                        'long_stay_tier' => null,
+                );
+        }
+
+        $long_stay_tier = nd_booking_get_loft_long_stay_tier( $rule, $night_count );
+
+        $running_total = 0.0;
+        $current_date  = $date_from;
+
+        for ( $index = 1; $index <= $night_count; $index++ ) {
+                $running_total += nd_booking_get_loft_nightly_rate( $rule, $current_date, $long_stay_tier, $night_count );
+                $current_date   = date( 'Y/m/d', strtotime( $current_date . ' + 1 days' ) );
+        }
+
+        $base_total = ( null !== $long_stay_tier && isset( $long_stay_tier['flat_total'] ) )
+                ? (float) $long_stay_tier['flat_total']
+                : $running_total;
+
+        if ( get_option( 'nd_booking_price_guests' ) == 1 ) {
+                $base_total = $base_total * max( 1, (int) $guest_count );
+        }
+
+        $effective_nightly_rate = $night_count > 0 ? $base_total / $night_count : 0.0;
+
+        return array(
+                'total'          => round( $base_total, 2 ),
+                'nightly_rate'   => round( $effective_nightly_rate, 2 ),
+                'night_count'    => (int) $night_count,
+                'long_stay_tier' => $long_stay_tier,
+        );
+}
+
 
 
 function nd_booking_get_next_prev_month_year($nd_booking_date,$nd_booking_month_year,$nd_booking_next_prev){
