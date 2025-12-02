@@ -157,8 +157,11 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
                 'qst'     => __( 'QST', 'nd-booking' ),
             );
 
-            $nd_booking_email_tax_lines_default = '<p>'.__( 'Subtotal', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
-            $nd_booking_email_tax_lines_template = '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__( 'Subtotal', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
+            $nd_booking_email_nights = max( 1, absint( nd_booking_get_number_night( $nd_booking_date_from, $nd_booking_date_to ) ) );
+            $nd_booking_email_nights_label = sprintf( _n( '%s night', '%s nights', $nd_booking_email_nights, 'nd-booking' ), number_format_i18n( $nd_booking_email_nights ) );
+
+            $nd_booking_email_tax_lines_default = '<p>'.__( 'Subtotal (before taxes)', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
+            $nd_booking_email_tax_lines_template = '<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__( 'Subtotal (before taxes)', 'nd-booking' ).' : '.$nd_booking_email_subtotal.' '.$nd_booking_paypal_currency.'</p>';
 
             foreach ( $nd_booking_email_known_tax_labels as $nd_booking_tax_key => $nd_booking_tax_label ) {
                 if ( isset( $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ] ) && $nd_booking_email_tax_breakdown['taxes'][ $nd_booking_tax_key ]['amount'] > 0 ) {
@@ -207,10 +210,11 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 		  <p>'.__('Hi, you received a new reservation on your site, here all details','nd-booking').' :</p>
 		  
 		  <p><strong>'.__('MAIN INFORMATIONS','nd-booking').' :</strong></p>
-		  <p>'.__('Room','nd-booking').' : '.$nd_booking_title_post.'</p>
-		  <p>'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
-		  <p>'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
-		  <p>'.__('Guests','nd-booking').' : '.$nd_booking_guests.'</p><br/>
+                  <p>'.__('Room','nd-booking').' : '.$nd_booking_title_post.'</p>
+                  <p>'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
+                  <p>'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
+                  <p>'.__('Nights','nd-booking').' : '.$nd_booking_email_nights_label.'</p>
+                  <p>'.__('Guests','nd-booking').' : '.$nd_booking_guests.'</p><br/>
 
                   <p><strong>'.__('TOTAL PRICE','nd-booking').' :</strong></p>
                   '.$nd_booking_email_tax_lines_default.'<br/>
@@ -280,12 +284,16 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 					</div>
 
 					<div style="float:left; width:50%; background-color:#f9f9f9; padding:20px; box-sizing:border-box;">
-						<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
-						<div style="float:left; width:100%; height:10px;"></div>
-						<div style="float:left; width:100%; height:1px; background-color:#f1f1f1;"></div>
-						<div style="float:left; width:100%; height:10px;"></div>
-						<p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
-					</div>
+                                                <p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
+                                                <div style="float:left; width:100%; height:10px;"></div>
+                                                <div style="float:left; width:100%; height:1px; background-color:#f1f1f1;"></div>
+                                                <div style="float:left; width:100%; height:10px;"></div>
+                                                <p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
+                                                <div style="float:left; width:100%; height:10px;"></div>
+                                                <div style="float:left; width:100%; height:1px; background-color:#f1f1f1;"></div>
+                                                <div style="float:left; width:100%; height:10px;"></div>
+                                                <p style="margin:0px; padding:0px; float:left; width:100%; color:#878787;">'.__('Nights','nd-booking').' : '.$nd_booking_email_nights_label.'</p>
+                                        </div>
 					
 				</div>
 				<!--START SECTION-->
@@ -434,11 +442,12 @@ if ( $nd_booking_message_enable == 1 and get_option('nicdark_theme_author') == 1
 		<body>
 		  <p>'.__('Hi, below your reservation details','nd-booking').' :</p>
 		  
-		  <p><strong>'.__('MAIN INFORMATIONS','nd-booking').' :</strong></p>
-		  <p>'.__('Room','nd-booking').' : '.$nd_booking_title_post.'</p>
-		  <p>'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
-		  <p>'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
-		  <p>'.__('Guests','nd-booking').' : '.$nd_booking_guests.'</p><br/>
+                  <p><strong>'.__('MAIN INFORMATIONS','nd-booking').' :</strong></p>
+                  <p>'.__('Room','nd-booking').' : '.$nd_booking_title_post.'</p>
+                  <p>'.__('Date From','nd-booking').' : '.$nd_booking_date_from.'</p>
+                  <p>'.__('Date To','nd-booking').' : '.$nd_booking_date_to.'</p>
+                  <p>'.__('Nights','nd-booking').' : '.$nd_booking_email_nights_label.'</p>
+                  <p>'.__('Guests','nd-booking').' : '.$nd_booking_guests.'</p><br/>
 
 		  <p><strong>'.__('TOTAL PRICE','nd-booking').' :</strong></p>
 		  <p>'.__('Price','nd-booking').' : '.$nd_booking_final_trip_price.' '.$nd_booking_paypal_currency.'</p><br/>
