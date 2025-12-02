@@ -347,6 +347,7 @@ function wp_loft_booking_handle_booking_actions() {
                     'dry_run'            => $dry_run,
                     'recipient_override' => wp_loft_booking_get_invoice_recipients(),
                     'bcc_override'       => [],
+                    'admin_context'      => true,
                     'force_new_job'      => $force_new_job,
                 ]);
                 $result_message = __('Admin invoice queued.', 'wp-loft-booking');

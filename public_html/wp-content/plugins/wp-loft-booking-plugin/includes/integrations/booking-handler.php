@@ -979,10 +979,11 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                             </tr>
                             <tr>
                                 <td style="padding:0 32px 28px;">
-                                    <div style="padding:18px;border-radius:16px;border:1px solid #e5e7eb;background-color:#ffffff;">
-                                        <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#0f172a;">Contact</p>
-                                        <p style="margin:0 0 6px;font-size:14px;color:#374151;">1325 3e Avenue, Val-d’Or, QC, Canada</p>
-                                        <p style="margin:0;font-size:14px;color:#1d4ed8;">reservation@loft1325.com &bull; info@loft1325.com &bull; 514-239-9080</p>
+                                    <div style="padding:18px;border-radius:16px;border:1px solid #bae6fd;background-color:#e0f2fe;">
+                                        <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#0f172a;">Coordonnées / Contact</p>
+                                        <p style="margin:0 0 6px;font-size:14px;color:#0f172a;">1325 3e Avenue, Val-d’Or, QC, Canada</p>
+                                        <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:reservation@loft1325.com" style="color:#0f172a;text-decoration:underline;font-weight:600;">reservation@loft1325.com</a>.</p>
+                                        <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">Need assistance? Email us at <a href="mailto:reservation@loft1325.com" style="color:#0f172a;text-decoration:underline;font-weight:600;">reservation@loft1325.com</a> or visit <a href="https://loft1325.com" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1739,11 +1740,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     }
 
     $building_entry_instructions_fr = [
-        'Utilisez le code 6 chiffres reçu par SMS ou courriel.',
-        'Composez le code sur l’interphone ou le clavier, appuyez sur le <strong>3</strong> et <strong>#</strong>.',
-        'Passez la porte intérieure, prenez l’ascenseur (porte devant vous) ou les escaliers.',
-        'Pour le matériel de déménagement, l’ascenseur est au 2<sup>e</sup> étage.',
-        'Pour assistance ou urgence, contactez le concierge au 514-239-9080.',
+        'Utilisez le code à 6 chiffres reçu par SMS ou courriel.',
+        'Composez le code sur l’interphone ou le clavier, puis appuyez sur 3 et sur la touche #.',
+        'Passez la porte intérieure et prenez l’ascenseur (porte devant vous) ou les escaliers.',
+        'Pour le matériel de déménagement, l’ascenseur se situe au 2e étage.',
+        'Pour toute demande d’assistance, appelez au 514-239-9080.',
     ];
 
     $wayfinding_instructions_fr = [
@@ -1754,11 +1755,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     ];
 
     $building_entry_instructions_en = [
-        'Use the 6-digit code sent by SMS or email.',
-        'Enter the code on the intercom or keypad, press <strong>3</strong> and then <strong>#</strong>.',
-        'After the glass door, take the elevator (door ahead) or the stairs.',
-        'Moving equipment and luggage carts are on the 2nd floor by the elevator.',
-        'For assistance or emergencies, contact the concierge at 514-239-9080.',
+        'Use the 6-digit code you received by SMS or email.',
+        'Enter the code on the intercom or keypad, press 3 and the # key.',
+        'Once inside, go through the lobby, take the elevator on the 2nd floor, and then take the 2nd floor.',
+        'For moving in and unloading, take the elevator to the 2nd floor.',
+        'For assistance or emergencies, please contact 514-239-9080.',
     ];
 
     $wayfinding_instructions_en = [
@@ -1837,7 +1838,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous. &middot; Here, you feel at home.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous.</p>
                             </td>
                         </tr>
                         <tr>
@@ -1918,10 +1919,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     <li>Départ au plus tard à 11&nbsp;h (heure de l’Est)</li>
                                 </ul>
                                 <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">Votre pièce d’identité téléversée lors de la réservation est déjà enregistrée pour votre dossier.</p>
-                                <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Coordonnées</h3>
-                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
+                                <div style="margin:0 0 28px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées / Contact</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
+                                    <p style="margin:0 0 6px;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
                                 </div>
                                 <p style="margin:0 0 28px;font-size:14px;line-height:1.7;color:#4b5563;">Nous avons hâte de vous accueillir pour une expérience tout confort signée Loft 1325.</p>
                                 <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;">
@@ -2001,10 +2003,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     <li>Check-out by 11:00&nbsp;AM (Eastern Time)</li>
                                 </ul>
                                 <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">The ID you uploaded during booking is already securely stored for your reservation record.</p>
-                                <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Contact</h3>
-                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Address</strong><br><?php echo esc_html($property_address); ?></p>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#1d4ed8;text-decoration:none;">loft1325.com</a>.</p>
+                                <div style="margin:0 0 28px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées / Contact</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Adresse / Address</strong><br><?php echo esc_html($property_address); ?></p>
+                                    <p style="margin:0 0 6px;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
                                 </div>
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">We can’t wait to welcome you to your private retreat at Loft 1325.</p>
                                 <?php if ($is_manual) : ?>
@@ -2195,6 +2198,8 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
         ? wp_loft_booking_parse_email_list($options['bcc_override'])
         : [];
 
+    $is_admin_invoice = !empty($options['admin_context']);
+
     if (empty($options['bcc_override'])) {
         foreach (wp_loft_booking_get_notification_recipients() as $internal_email) {
             if (strtolower($internal_email) !== strtolower($recipient)) {
@@ -2204,6 +2209,10 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     }
 
     $subject = 'Lofts 1325 – Reçu de paiement | Payment Receipt';
+
+    if ($is_admin_invoice) {
+        $subject = 'Lofts 1325 – Nouvelle facture créée par Gestion Camisa | New invoice created by Gestion Camisa';
+    }
 
     ob_start();
     ?>
@@ -2216,7 +2225,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous. &middot; Here, you feel at home.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous.</p>
                             </td>
                         </tr>
                         <tr>
@@ -2225,6 +2234,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                         </tr>
                         <tr>
                             <td style="padding:0 40px 0;">
+                                <?php if ($is_admin_invoice) : ?>
+                                    <div style="margin:0 0 18px;padding:16px;border-radius:14px;background-color:#e0f2fe;border:1px solid #bae6fd;">
+                                        <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;font-weight:700;">Nouvelle facture créée par Gestion Camisa.</p>
+                                        <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">A new invoice was created by Gestion Camisa.</p>
+                                    </div>
+                                <?php endif; ?>
                                 <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#374151;">Merci pour votre paiement. Nous confirmons la réception de <strong><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></strong>. Voici votre reçu détaillé pour votre séjour dans <strong><?php echo esc_html($room_name); ?></strong>.</p>
                                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 24px;border-collapse:separate;border-spacing:0;background-color:#f9fafb;border-radius:18px;overflow:hidden;">
                                     <tr>
@@ -2378,11 +2393,11 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                 <?php else : ?>
                                     <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#dc2626;">Our team will reach out shortly to finalize digital access to your loft.</p>
                                 <?php endif; ?>
-                                <div style="margin:0 0 28px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Contact</h3>
-                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#4b5563;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a>.</p>
-                                    <p style="margin:12px 0 0;font-size:14px;line-height:1.7;color:#4b5563;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#1d4ed8;text-decoration:none;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#1d4ed8;text-decoration:none;">loft1325.com</a>.</p>
+                                <div style="margin:0 0 28px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;">
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées / Contact</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Adresse / Address</strong><br><?php echo esc_html($property_address); ?></p>
+                                    <p style="margin:0 0 6px;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
                                 </div>
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Merci encore d’avoir choisi Loft 1325. / Thank you for choosing Loft 1325.</p>
                             </td>
@@ -2598,7 +2613,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#0b1222);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#cbd5e1;font-weight:700;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#f3f4f6;font-weight:600;">Ici, vous vous sentez chez vous. &middot; Here, you feel at home.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#f3f4f6;font-weight:600;">Ici, vous vous sentez chez vous.</p>
                         </td>
                     </tr>
                     <tr>
