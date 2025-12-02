@@ -80,6 +80,93 @@ function wp_loft_booking_get_cleaning_recipients() {
     return $list;
 }
 
+function wp_loft_booking_cleaning_status_choices() {
+    return [
+        'pending',
+        'assigned',
+        'in_progress',
+        'ready',
+        'done',
+        'issue',
+    ];
+}
+
+function wp_loft_booking_normalize_cleaning_status($status) {
+    $status = sanitize_key((string) $status);
+
+    if (!$status) {
+        return 'pending';
+    }
+
+    $allowed = wp_loft_booking_cleaning_status_choices();
+
+    if (!in_array($status, $allowed, true)) {
+        return 'pending';
+    }
+
+    return $status;
+}
+
+function wp_loft_booking_get_cleaning_status_store() {
+    $store = get_option('loft_booking_cleaning_statuses', []);
+
+    if (!is_array($store)) {
+        $store = [];
+    }
+
+    return $store;
+}
+
+function wp_loft_booking_update_cleaning_status_store(array $store) {
+    return update_option('loft_booking_cleaning_statuses', $store, false);
+}
+
+function wp_loft_booking_touch_cleaning_status($booking_id, array $data = []) {
+    $booking_id = absint($booking_id);
+
+    if (!$booking_id) {
+        return [];
+    }
+
+    $store = wp_loft_booking_get_cleaning_status_store();
+    $existing = isset($store[$booking_id]) && is_array($store[$booking_id]) ? $store[$booking_id] : [];
+
+    $status = wp_loft_booking_normalize_cleaning_status($data['status'] ?? ($existing['status'] ?? 'pending'));
+
+    $store[$booking_id] = array_merge(
+        [
+            'status'       => 'pending',
+            'note'         => '',
+            'updated_at'   => null,
+            'updated_by'   => '',
+            'email_sent'   => false,
+            'notified_at'  => null,
+        ],
+        $existing,
+        $data,
+        [
+            'status' => $status,
+        ]
+    );
+
+    wp_loft_booking_update_cleaning_status_store($store);
+
+    return $store[$booking_id];
+}
+
+function wp_loft_booking_mark_cleaning_email_sent($booking_id) {
+    $timestamp = current_time('mysql');
+
+    return wp_loft_booking_touch_cleaning_status(
+        $booking_id,
+        [
+            'email_sent'  => true,
+            'notified_at' => $timestamp,
+            'updated_at'  => $timestamp,
+        ]
+    );
+}
+
 function wp_loft_booking_default_template_keys() {
     return [
         'guest-confirmation' => __('Guest confirmation', 'wp-loft-booking'),
@@ -786,6 +873,7 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
     $matched_unit = wp_loft_booking_find_unit_by_label($room_name);
 
     return [
+        'booking_id'     => (int) $booking_id,
         'room_id'        => $room_id,
         'room_name'      => $room_name,
         'unit_id'        => $matched_unit['id'] ?? 0,
@@ -3328,6 +3416,14 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
 function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array $options = []) {
     $recipients = wp_loft_booking_parse_email_list($options['recipient_override'] ?? wp_loft_booking_get_cleaning_recipients());
 
+    $booking_id = isset($booking['booking_id']) ? (int) $booking['booking_id'] : 0;
+
+    if ($booking_id) {
+        wp_loft_booking_touch_cleaning_status($booking_id, [
+            'status' => wp_loft_booking_normalize_cleaning_status($options['status'] ?? 'pending'),
+        ]);
+    }
+
     if (empty($recipients)) {
         error_log('⚠️ Cleaning email skipped: no valid recipients.');
 
@@ -3483,6 +3579,10 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
     }
 
     error_log(sprintf('✅ Cleaning email queued as job #%d for %s', $job_id, $recipient));
+
+    if ($booking_id) {
+        wp_loft_booking_mark_cleaning_email_sent($booking_id);
+    }
 
     return $job_id;
 }

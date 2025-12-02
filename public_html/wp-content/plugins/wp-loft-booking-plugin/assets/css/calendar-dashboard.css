@@ -1,0 +1,328 @@
+:root {
+    --loft-navy: #0f172a;
+    --loft-sky: #1d4ed8;
+    --loft-amber: #f59e0b;
+    --loft-sage: #10b981;
+    --loft-rose: #f43f5e;
+    --loft-surface: #f8fafc;
+    --loft-stroke: #e2e8f0;
+    --loft-text: #0f172a;
+    --loft-muted: #6b7280;
+}
+
+.loft-calendar {
+    margin-top: 12px;
+    color: var(--loft-text);
+}
+
+.loft-calendar__hero {
+    background: linear-gradient(135deg, #0f172a, #1f2937);
+    color: #fff;
+    padding: 32px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.25);
+    margin-bottom: 18px;
+}
+
+.loft-calendar__hero h1 {
+    margin: 4px 0;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+}
+
+.loft-calendar__hero-text {
+    max-width: 720px;
+}
+
+.loft-calendar__eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 11px;
+    margin: 0;
+    color: #bfdbfe;
+}
+
+.loft-calendar__lede {
+    margin: 6px 0 12px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 14px;
+    max-width: 720px;
+}
+
+.loft-calendar__chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.loft-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: var(--loft-text);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+}
+
+.loft-chip strong {
+    font-weight: 700;
+}
+
+.loft-chip--primary {
+    background: rgba(99, 102, 241, 0.14);
+    color: #e0e7ff;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.loft-chip--info {
+    background: rgba(14, 165, 233, 0.16);
+    color: #e0f2fe;
+    border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.loft-chip--warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fffbeb;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.loft-chip--muted {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.loft-chip--accent {
+    background: rgba(37, 99, 235, 0.16);
+    color: #1d4ed8;
+    border: 1px solid rgba(37, 99, 235, 0.32);
+}
+
+.loft-chip--success {
+    background: rgba(16, 185, 129, 0.18);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.32);
+}
+
+.loft-chip--alert {
+    background: rgba(244, 63, 94, 0.12);
+    color: #9f1239;
+    border: 1px solid rgba(244, 63, 94, 0.32);
+}
+
+.loft-calendar__actions {
+    min-width: 240px;
+    text-align: right;
+}
+
+.loft-calendar__actions .loft-calendar__cta {
+    display: inline-block;
+    padding: 10px 16px;
+    font-weight: 700;
+}
+
+.loft-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.loft-calendar__panel {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid var(--loft-stroke);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.loft-calendar__panel--full {
+    margin-top: 14px;
+}
+
+.loft-calendar__panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.loft-calendar__title {
+    margin: 2px 0;
+}
+
+.loft-calendar__canvas {
+    border: 1px solid var(--loft-stroke);
+    border-radius: 14px;
+    background: var(--loft-surface);
+    padding: 10px;
+}
+
+.loft-calendar__weekdays,
+.loft-calendar__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(90px, 1fr));
+    gap: 6px;
+}
+
+.loft-calendar__weekday {
+    padding: 6px 4px;
+    text-align: center;
+    font-weight: 700;
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.loft-calendar__weekdays {
+    margin-bottom: 4px;
+    color: var(--loft-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.loft-calendar__day {
+    min-height: 120px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--loft-stroke);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.35);
+}
+
+.loft-calendar__day--muted {
+    background: #f1f5f9;
+    color: var(--loft-muted);
+}
+
+.loft-calendar__date {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--loft-text);
+}
+
+.loft-calendar__date.loft-calendar__date--today {
+    color: var(--loft-sky);
+}
+
+.loft-calendar__event {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.22);
+}
+
+.loft-calendar__event h4 {
+    margin: 0 0 4px;
+    font-size: 13px;
+}
+
+.loft-calendar__event p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.loft-calendar__event--cleaning {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.18);
+}
+
+.loft-calendar__event--attention {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 6px 12px rgba(217, 119, 6, 0.2);
+}
+
+.loft-calendar__event--issue {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    box-shadow: 0 6px 12px rgba(244, 63, 94, 0.18);
+}
+
+.loft-calendar__legend {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.loft-calendar__queue {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.loft-calendar__card {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--loft-stroke);
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.loft-calendar__card h3 {
+    margin: 0 0 4px;
+}
+
+.loft-calendar__meta {
+    margin: 6px 0 12px;
+    color: var(--loft-muted);
+    font-size: 13px;
+}
+
+.loft-calendar__actions-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.loft-calendar__nav {
+    display: flex;
+    gap: 6px;
+}
+
+.loft-calendar__nav button {
+    border-radius: 8px;
+}
+
+.loft-calendar__embed iframe {
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.loft-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.loft-status-pill--pending { background: #fef9c3; color: #92400e; }
+.loft-status-pill--assigned { background: #e0f2fe; color: #075985; }
+.loft-status-pill--in_progress { background: #dbeafe; color: #1d4ed8; }
+.loft-status-pill--ready { background: #dcfce7; color: #166534; }
+.loft-status-pill--done { background: #bbf7d0; color: #14532d; }
+.loft-status-pill--issue { background: #fee2e2; color: #991b1b; }
+
+@media (max-width: 960px) {
+    .loft-calendar__hero {
+        flex-direction: column;
+    }
+
+    .loft-calendar__weekdays,
+    .loft-calendar__days {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+}
