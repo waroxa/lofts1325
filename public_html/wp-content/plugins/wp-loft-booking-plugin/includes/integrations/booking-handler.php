@@ -2248,6 +2248,8 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                 <?php if ($is_admin_invoice) : ?>
                                     <div style="margin:0 0 18px;padding:16px;border-radius:14px;background-color:#e0f2fe;border:1px solid #bae6fd;">
                                         <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;font-weight:700;">Nouvelle facture créée par Gestion Camisa.</p>
+                                        <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;">Merci de transmettre cette facture à l’équipe Comptabilité pour que Sonia puisse la saisir dans Sage.</p>
+                                        <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">Veuillez aussi confirmer que le numéro de loft apparaît bien dans la réservation ou sur la facture.</p>
                                         <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">A new invoice was created by Gestion Camisa.</p>
                                     </div>
                                 <?php endif; ?>
@@ -2316,7 +2318,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#0f172a;text-align:right;border-top:1px solid #e5e7eb;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
-                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Numéros de taxes / Tax numbers&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
+                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                 </div>
                                 <?php if (!empty($booking['coupon'])) : ?>
                                     <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">Code promotionnel appliqué&nbsp;: <strong><?php echo esc_html($booking['coupon']); ?></strong></p>
