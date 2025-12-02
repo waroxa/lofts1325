@@ -289,6 +289,178 @@ if (!function_exists('wp_loft_booking_find_unit_by_label')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_detect_room_type')) {
+    /**
+     * Normalize the requested loft type into a canonical keyword.
+     *
+     * @param string $label Room or loft label.
+     * @return string One of SIMPLE, DOUBLE, PENTHOUSE or an empty string when unknown.
+     */
+    function wp_loft_booking_detect_room_type($label)
+    {
+        $normalized = strtoupper((string) $label);
+
+        if (false !== strpos($normalized, 'PENTHOUSE')) {
+            return 'PENTHOUSE';
+        }
+
+        if (false !== strpos($normalized, 'DOUBLE')) {
+            return 'DOUBLE';
+        }
+
+        if (false !== strpos($normalized, 'SIMPLE')) {
+            return 'SIMPLE';
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('wp_loft_booking_calculate_booking_window')) {
+    /**
+     * Build normalized check-in/check-out timestamps for a booking.
+     *
+     * @param string $date_from Raw check-in date string.
+     * @param string $date_to   Raw check-out date string.
+     * @param string $timezone_string Optional timezone identifier.
+     *
+     * @return array|WP_Error
+     */
+    function wp_loft_booking_calculate_booking_window($date_from, $date_to, $timezone_string = '')
+    {
+        if (empty($timezone_string)) {
+            $timezone_string = get_option('timezone_string');
+
+            if (empty($timezone_string)) {
+                $timezone_string = 'America/Toronto';
+            }
+        }
+
+        try {
+            $site_timezone  = new DateTimeZone($timezone_string);
+            $checkin_local  = new DateTime($date_from, $site_timezone);
+            $checkout_local = new DateTime($date_to, $site_timezone);
+            $checkin_local->setTime(15, 0, 0);
+            $checkout_local->setTime(11, 0, 0);
+
+            $adjusted_checkin = wp_loft_booking_apply_virtual_key_lead_time($checkin_local, $checkout_local, $site_timezone);
+
+            if (is_wp_error($adjusted_checkin)) {
+                return $adjusted_checkin;
+            }
+
+            $checkin_local = $adjusted_checkin;
+
+            $checkin_utc  = clone $checkin_local;
+            $checkout_utc = clone $checkout_local;
+            $checkin_utc->setTimezone(new DateTimeZone('UTC'));
+            $checkout_utc->setTimezone(new DateTimeZone('UTC'));
+
+            return [
+                'checkin_local'     => $checkin_local,
+                'checkout_local'    => $checkout_local,
+                'checkin_utc'       => $checkin_utc,
+                'checkout_utc'      => $checkout_utc,
+                'starts_at'         => $checkin_utc->format('Y-m-d\TH:i:s\Z'),
+                'ends_at'           => $checkout_utc->format('Y-m-d\TH:i:s\Z'),
+                'availability_until'=> $checkout_local->format('Y-m-d H:i:s'),
+            ];
+        } catch (Exception $e) {
+            return new WP_Error('loft_booking_invalid_dates', $e->getMessage());
+        }
+    }
+}
+
+if (!function_exists('wp_loft_booking_unit_is_available_for_range')) {
+    /**
+     * Ensure a loft is free for the requested stay window.
+     *
+     * @param int             $unit_id        Loft unit ID.
+     * @param DateTime        $checkin_local  Local check-in time.
+     * @param DateTime        $checkout_local Local check-out time.
+     * @param DateTime        $checkin_utc    UTC check-in time.
+     * @param DateTime        $checkout_utc   UTC check-out time.
+     * @return bool
+     */
+    function wp_loft_booking_unit_is_available_for_range($unit_id, $checkin_local, $checkout_local, $checkin_utc, $checkout_utc)
+    {
+        global $wpdb;
+
+        $units_table     = $wpdb->prefix . 'loft_units';
+        $keychains_table = $wpdb->prefix . 'loft_keychains';
+
+        $unit = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT status, availability_until FROM {$units_table} WHERE id = %d",
+                $unit_id
+            )
+        );
+
+        if (!$unit || strtolower((string) $unit->status) !== 'available') {
+            return false;
+        }
+
+        if (!empty($unit->availability_until)) {
+            $available_until_ts = strtotime($unit->availability_until);
+
+            if ($available_until_ts && $available_until_ts < $checkout_local->getTimestamp()) {
+                return false;
+            }
+        }
+
+        $overlap = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$keychains_table} WHERE unit_id = %d AND valid_from < %s AND valid_until > %s",
+                $unit_id,
+                $checkout_utc->format('Y-m-d H:i:s'),
+                $checkin_utc->format('Y-m-d H:i:s')
+            )
+        );
+
+        return $overlap === 0;
+    }
+}
+
+if (!function_exists('wp_loft_booking_find_available_unit_for_type')) {
+    /**
+     * Locate the first available loft for the requested type and date range.
+     *
+     * @param string   $requested_type Canonical type keyword.
+     * @param DateTime $checkin_local  Local check-in time.
+     * @param DateTime $checkout_local Local check-out time.
+     * @param DateTime $checkin_utc    UTC check-in time.
+     * @param DateTime $checkout_utc   UTC check-out time.
+     * @return array{id:int,unit_name:string}|null
+     */
+    function wp_loft_booking_find_available_unit_for_type($requested_type, $checkin_local, $checkout_local, $checkin_utc, $checkout_utc)
+    {
+        global $wpdb;
+
+        $units_table = $wpdb->prefix . 'loft_units';
+        $where       = ["status = 'available'"];
+        $params      = [];
+
+        if ($requested_type !== '') {
+            $where[]  = 'UPPER(unit_name) LIKE %s';
+            $params[] = '%' . $wpdb->esc_like($requested_type) . '%';
+        }
+
+        $sql = "SELECT id, unit_name, availability_until FROM {$units_table} WHERE " . implode(' AND ', $where) . ' ORDER BY unit_name ASC';
+        $units = empty($params) ? $wpdb->get_results($sql) : $wpdb->get_results($wpdb->prepare($sql, ...$params));
+
+        foreach ($units as $unit) {
+            if (wp_loft_booking_unit_is_available_for_range((int) $unit->id, $checkin_local, $checkout_local, $checkin_utc, $checkout_utc)) {
+                return [
+                    'id'        => (int) $unit->id,
+                    'unit_name' => (string) $unit->unit_name,
+                ];
+            }
+        }
+
+        return null;
+    }
+}
+
 if (!function_exists('wp_loft_booking_apply_virtual_key_lead_time')) {
     /**
      * Ensure the virtual key check-in time respects the minimum lead time.
@@ -1504,31 +1676,58 @@ function wp_loft_booking_handle_booking(
 
         $units_table    = $wpdb->prefix . 'loft_units';
         $bookings_table = $wpdb->prefix . 'loft_bookings';
+        $requested_type = wp_loft_booking_detect_room_type($booking['room_name'] ?? '');
 
-        $has_valid_unit = !empty($booking['room_id']) && $wpdb->get_var(
-            $wpdb->prepare("SELECT id FROM {$units_table} WHERE id = %d", $booking['room_id'])
-        );
+        $booking_window = wp_loft_booking_calculate_booking_window($booking['date_from'], $booking['date_to']);
 
-        $matched_unit = wp_loft_booking_find_unit_by_label($booking['room_name'] ?? '');
-        $resolved_by  = '';
+        if (is_wp_error($booking_window)) {
+            throw new Exception($booking_window->get_error_message());
+        }
 
-        if ($matched_unit && ($booking['room_id'] !== $matched_unit['id'])) {
-            // Prefer an exact label match over the raw ND Booking ID to keep the requested loft in sync.
-            $booking['room_id']   = $matched_unit['id'];
-            $booking['room_name'] = $matched_unit['unit_name'];
-            $resolved_by          = 'label-match';
-        } elseif (!$has_valid_unit) {
-            $resolved_by = 'fallback-available';
-            $available_unit = $wpdb->get_var(
-                "SELECT id FROM {$units_table} WHERE status = 'available' ORDER BY unit_name ASC LIMIT 1"
-            );
+        $checkin_local      = $booking_window['checkin_local'];
+        $checkout_local     = $booking_window['checkout_local'];
+        $starts_at          = $booking_window['starts_at'];
+        $ends_at            = $booking_window['ends_at'];
+        $availability_until = $booking_window['availability_until'];
+        $checkin_utc        = $booking_window['checkin_utc'];
+        $checkout_utc       = $booking_window['checkout_utc'];
 
-            if ($available_unit) {
-                $booking['room_id'] = intval($available_unit);
+        $matched_unit  = wp_loft_booking_find_unit_by_label($booking['room_name'] ?? '');
+        $resolved_by   = '';
+        $selected_unit = null;
+
+        if ($matched_unit) {
+            $matched_type  = wp_loft_booking_detect_room_type($matched_unit['unit_name']);
+            $type_matches  = ($requested_type === '' || $matched_type === $requested_type);
+            $is_available  = wp_loft_booking_unit_is_available_for_range((int) $matched_unit['id'], $checkin_local, $checkout_local, $checkin_utc, $checkout_utc);
+
+            if ($type_matches && $is_available) {
+                $selected_unit = $matched_unit;
+                $resolved_by   = 'label-match';
+            } else {
+                error_log(sprintf(
+                    '⚠️ Requested loft %s is unavailable or mismatched for booking %d (%s) between %s and %s.',
+                    (string) $matched_unit['unit_name'],
+                    (int) $id_post,
+                    $requested_type ?: 'ANY',
+                    $booking['date_from'],
+                    $booking['date_to']
+                ));
             }
         }
 
-        if (!empty($booking['room_id']) && $resolved_by) {
+        if (null === $selected_unit) {
+            $selected_unit = wp_loft_booking_find_available_unit_for_type($requested_type, $checkin_local, $checkout_local, $checkin_utc, $checkout_utc);
+
+            if ($selected_unit) {
+                $resolved_by = 'availability-scan';
+            }
+        }
+
+        if ($selected_unit) {
+            $booking['room_id']   = $selected_unit['id'];
+            $booking['room_name'] = $selected_unit['unit_name'];
+
             $wpdb->update(
                 $bookings_table,
                 ['unit_id' => $booking['room_id']],
@@ -1540,47 +1739,21 @@ function wp_loft_booking_handle_booking(
             error_log(sprintf(
                 'ℹ️ Booking %d loft resolved via %s. Requested label: "%s" → Assigned ID %d (%s).',
                 $id_post,
-                $resolved_by,
+                $resolved_by ?: 'manual',
                 (string) $requested_label,
                 (int) $booking['room_id'],
-                $resolved_by === 'label-match' && $matched_unit ? $matched_unit['unit_name'] : 'fallback'
+                $booking['room_name']
             ));
-        }
+        } else {
+            error_log(sprintf(
+                '❌ No available %s loft found for booking %d from %s to %s.',
+                $requested_type ?: 'ANY',
+                (int) $id_post,
+                $booking['date_from'],
+                $booking['date_to']
+            ));
 
-        $timezone_string = get_option('timezone_string');
-        if (empty($timezone_string)) {
-            $timezone_string = 'America/Toronto';
-        }
-
-        $starts_at = null;
-        $ends_at   = null;
-        $availability_until = null;
-
-        try {
-            $site_timezone  = new DateTimeZone($timezone_string);
-            $checkin_local  = new DateTime($booking['date_from'], $site_timezone);
-            $checkout_local = new DateTime($booking['date_to'], $site_timezone);
-            $checkin_local->setTime(15, 0, 0);
-            $checkout_local->setTime(11, 0, 0);
-
-            $adjusted_checkin = wp_loft_booking_apply_virtual_key_lead_time($checkin_local, $checkout_local, $site_timezone);
-
-            if (is_wp_error($adjusted_checkin)) {
-                throw new Exception($adjusted_checkin->get_error_message());
-            }
-
-            $checkin_local = $adjusted_checkin;
-
-            $checkin_utc  = clone $checkin_local;
-            $checkout_utc = clone $checkout_local;
-            $checkin_utc->setTimezone(new DateTimeZone('UTC'));
-            $checkout_utc->setTimezone(new DateTimeZone('UTC'));
-
-            $starts_at = $checkin_utc->format('Y-m-d\TH:i:s\Z');
-            $ends_at   = $checkout_utc->format('Y-m-d\TH:i:s\Z');
-            $availability_until = $checkout_local->format('Y-m-d H:i:s');
-        } catch (Exception $e) {
-            error_log('⚠️ Unable to prepare booking window for ButterflyMX storage: ' . $e->getMessage());
+            return;
         }
 
         // 🔐 Generar llave virtual con ButterflyMX

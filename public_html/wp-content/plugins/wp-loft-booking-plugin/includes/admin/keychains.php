@@ -1029,6 +1029,7 @@ function wp_loft_booking_save_keychain_data($booking_id, $unit_id, $keychain_id,
     $kc_table   = $wpdb->prefix . 'loft_keychains';
     $vk_table   = $wpdb->prefix . 'loft_virtual_keys';
     $link_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
+    $units_table = $wpdb->prefix . 'loft_units';
 
     $booking_fk = (is_numeric($booking_id) && (int) $booking_id > 0) ? (int) $booking_id : null;
     $unit_fk    = (is_numeric($unit_id) && (int) $unit_id > 0) ? (int) $unit_id : null;
@@ -1036,9 +1037,23 @@ function wp_loft_booking_save_keychain_data($booking_id, $unit_id, $keychain_id,
     $valid_from = gmdate('Y-m-d H:i:s', strtotime($start));
     $valid_until = gmdate('Y-m-d H:i:s', strtotime($end));
 
+    $unit_label = '';
+
+    if ($unit_fk) {
+        $unit_label = (string) $wpdb->get_var(
+            $wpdb->prepare("SELECT unit_name FROM {$units_table} WHERE id = %d", $unit_fk)
+        );
+    }
+
+    if ('' === $unit_label && $booking_fk) {
+        $unit_label = sprintf('Booking %d', $booking_fk);
+    } elseif ('' === $unit_label) {
+        $unit_label = sprintf('Keychain %d', (int) $keychain_id);
+    }
+
     $kc_data = [
         'keychain_id' => (int) $keychain_id,
-        'name'        => $booking_fk ? sprintf('Booking %d', $booking_fk) : sprintf('Keychain %d', (int) $keychain_id),
+        'name'        => $unit_label,
         'valid_from'  => $valid_from,
         'valid_until' => $valid_until,
     ];
