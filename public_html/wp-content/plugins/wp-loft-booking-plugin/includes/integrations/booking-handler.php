@@ -797,7 +797,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                         'dates_line'          => sprintf('Dates : %s → %s.', $checkin, $checkout),
                         'status_badge'        => 'Statut',
                         'transaction_badge'   => 'Transaction Stripe',
-                        'payment_intro'       => 'Paiement traité via Stripe. Pour l’entrée dans Sage, réutilisez le numéro de transaction comme référence unique.',
+                        'payment_intro'       => 'Paiement traité via Stripe. Pour l’entrée dans Sage, réutilisez le numéro de transaction suivant comme référence unique :',
                         'guest_label'         => 'Invité',
                         'email_label'         => 'Courriel',
                         'stay_label'          => 'Séjour',
@@ -845,6 +845,8 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                 ],
         ];
 
+        $copy = $sections['fr'];
+
         ob_start();
         ?>
         <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0f172a;">
@@ -856,20 +858,23 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                 <td style="padding:36px;background:linear-gradient(135deg,#0f172a,#0b1222);text-align:center;">
                                     <img src="https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png" alt="Loft 1325" style="max-width:220px;width:100%;height:auto;display:block;margin:0 auto 12px;">
                                     <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#cbd5e1;">Loft 1325 &middot; Val-d’Or</p>
-                                    <p style="margin:12px 0 0;font-size:17px;color:#f3f4f6;font-weight:700;">Reçu de paiement &bull; Payment Receipt</p>
-                                    <p style="margin:6px 0 0;font-size:13px;color:#e5e7eb;">Ici, vous vous sentez chez vous. &middot; Here, you feel at home.</p>
+                                    <p style="margin:12px 0 0;font-size:17px;color:#f3f4f6;font-weight:700;"><?php echo esc_html($copy['receipt_heading']); ?></p>
+                                    <p style="margin:6px 0 0;font-size:13px;color:#e5e7eb;"><?php echo esc_html($copy['tagline']); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding:28px 36px 8px;">
-                                    <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#475569;font-weight:800;">Reçu &ndash; Invoice</p>
-                                    <p style="margin:0 0 12px;font-size:24px;font-weight:800;color:#0f172a;">Séjour confirmé | Stay confirmed</p>
-                                    <p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#334155;">Réservation #<?php echo esc_html($booking_ref); ?> &middot; <?php echo esc_html($room_name); ?>.<br>Dates&nbsp;: <?php echo esc_html($checkin); ?> → <?php echo esc_html($checkout); ?>.</p>
+                                    <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#475569;font-weight:800;"><?php echo esc_html($copy['summary_label']); ?></p>
+                                    <p style="margin:0 0 12px;font-size:24px;font-weight:800;color:#0f172a;"><?php echo esc_html($copy['summary_title']); ?></p>
+                                    <p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#334155;">
+                                        <?php echo esc_html($copy['summary_line']); ?>.<br>
+                                        <?php echo esc_html($copy['dates_line']); ?>
+                                    </p>
                                     <div style="margin:12px 0 20px;display:flex;gap:12px;flex-wrap:wrap;">
-                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef08a;color:#854d0e;font-size:13px;font-weight:800;">Statut&nbsp;/ Status: <?php echo esc_html($payment_status_display); ?></span>
-                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef9c3;color:#854d0e;font-size:13px;font-weight:800;">Transaction Stripe: <?php echo esc_html($transaction_id); ?></span>
+                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef08a;color:#854d0e;font-size:13px;font-weight:800;"><?php echo esc_html($copy['status_badge']); ?>&nbsp;: <?php echo esc_html($payment_status_display); ?></span>
+                                        <span style="display:inline-block;padding:10px 14px;border-radius:12px;background-color:#fef9c3;color:#854d0e;font-size:13px;font-weight:800;"><?php echo esc_html($copy['transaction_badge']); ?>: <?php echo esc_html($transaction_id); ?></span>
                                     </div>
-                                    <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#334155;">Paiement traité via Stripe. Pour l’entrée dans Sage, réutilisez le numéro de transaction <strong><?php echo esc_html($transaction_id); ?></strong> comme référence unique.</p>
+                                    <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#334155;"><?php echo esc_html($copy['payment_intro']); ?> <strong><?php echo esc_html($transaction_id); ?></strong></p>
                                 </td>
                             </tr>
                             <tr>
@@ -880,12 +885,12 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                                 <div style="padding:18px;border:1px solid #e5e7eb;border-radius:16px;background-color:#f9fafb;">
                                                     <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;font-weight:700;">Invité</p>
                                                     <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;"><?php echo esc_html($guest_name); ?></p>
-                                                    <p style="margin:6px 0 0;font-size:14px;color:#374151;">Courriel / Email<br><strong><?php echo esc_html($booking['email'] ?? __('N/A', 'wp-loft-booking')); ?></strong></p>
+                                                    <p style="margin:6px 0 0;font-size:14px;color:#374151;">Courriel<br><strong><?php echo esc_html($booking['email'] ?? __('N/A', 'wp-loft-booking')); ?></strong></p>
                                                 </div>
                                             </td>
                                             <td style="width:50%;vertical-align:top;">
                                                 <div style="padding:18px;border:1px solid #e5e7eb;border-radius:16px;background-color:#f9fafb;">
-                                                    <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;font-weight:700;">Séjour / Stay</p>
+                                                    <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;font-weight:700;">Séjour</p>
                                                     <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;"><?php echo esc_html($room_name); ?></p>
                                                     <p style="margin:6px 0 0;font-size:14px;color:#374151;">Arrivée<br><strong><?php echo esc_html($checkin); ?></strong></p>
                                                     <p style="margin:6px 0 0;font-size:14px;color:#374151;">Départ<br><strong><?php echo esc_html($checkout); ?></strong></p>
@@ -899,22 +904,22 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                 <td style="padding:0 36px 16px;">
                                     
                                     <div style="padding:22px;border-radius:20px;background-color:#f8fafc;border:1px solid #e5e7eb;box-shadow:0 18px 34px rgba(15,23,42,0.08);color:#0f172a;">
-                                        <h3 style="margin:0 0 12px;font-size:17px;font-weight:900;color:#0f172a;">Détails du paiement &middot; Payment details</h3>
+                                        <h3 style="margin:0 0 12px;font-size:17px;font-weight:900;color:#0f172a;"><?php echo esc_html($copy['payment_details']); ?></h3>
                                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
                                             <tr>
-                                                <td style="padding:6px 0;color:#334155;font-weight:800;">Statut / Status</td>
+                                                <td style="padding:6px 0;color:#0f172a;font-weight:800;">Statut</td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($payment_status_display); ?></td>
                                             </tr>
                                             <tr>
-                                                <td style="padding:6px 0;color:#334155;font-weight:800;">Transaction (Stripe)</td>
+                                                <td style="padding:6px 0;color:#0f172a;font-weight:800;">Transaction Stripe</td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($transaction_id); ?></td>
                                             </tr>
                                             <tr>
-                                                <td style="padding:6px 0;color:#334155;font-weight:800;">Hébergement / Lodging (avant taxes)</td>
+                                                <td style="padding:6px 0;color:#0f172a;font-weight:800;"><?php echo esc_html($copy['lodging_label']); ?></td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency)); ?></td>
                                             </tr>
                                             <tr>
-                                                <td style="padding:6px 0;color:#334155;font-weight:800;">Services additionnels / Extras</td>
+                                                <td style="padding:6px 0;color:#0f172a;font-weight:800;"><?php echo esc_html($copy['extras_label']); ?></td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'] ?? 0, $currency)); ?></td>
                                             </tr>
                                         </table>
@@ -945,13 +950,13 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                                 </tr>
                                             <?php endforeach; ?>
                                             <tr>
-                                                <td style="padding:6px 0;color:#334155;font-weight:800;">Sous-total (avant taxes) / Subtotal (before taxes)</td>
+                                                <td style="padding:6px 0;color:#0f172a;font-weight:900;"><?php echo esc_html($copy['subtotal_label']); ?></td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;">
                                                     <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['subtotal'] ?? 0, $currency)); ?>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="padding:12px 0 0;font-size:15px;font-weight:900;color:#0f172a;border-top:1px solid #e5e7eb;">Total</td>
+                                                <td style="padding:12px 0 0;font-size:15px;font-weight:900;color:#0f172a;border-top:1px solid #e5e7eb;"><?php echo esc_html($copy['total_label']); ?></td>
                                                 <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#0f172a;text-align:right;border-top:1px solid #e5e7eb;">
                                                     <?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency)); ?>
                                                 </td>
@@ -963,10 +968,10 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                             <tr>
                                 <td style="padding:16px 32px 8px;">
                                     <div style="padding:18px;border:1px solid #e5e7eb;border-radius:16px;background-color:#f9fafb;">
-                                        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#0f172a;">Notes pour la comptabilité | Accounting notes</p>
+                                        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#0f172a;">Notes pour la comptabilité</p>
                                         <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">
-                                            <li>Référence Stripe / Stripe reference&nbsp;: <strong><?php echo esc_html($transaction_id); ?></strong></li>
-                                            <li>Code réservation / Booking ref&nbsp;: <strong><?php echo esc_html($booking_ref); ?></strong></li>
+                                            <li>Référence Stripe&nbsp;: <strong><?php echo esc_html($transaction_id); ?></strong></li>
+                                            <li>Code réservation&nbsp;: <strong><?php echo esc_html($booking_ref); ?></strong></li>
                                             <li>Utilisez ces deux identifiants dans Sage pour accélérer la saisie et l’appariement.</li>
                                         </ul>
                                     </div>
