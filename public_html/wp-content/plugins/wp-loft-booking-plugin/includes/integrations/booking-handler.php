@@ -1216,7 +1216,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                 'reference_fingerprint' => '• Receipt fingerprint: %s',
                 'reference_booking'     => '• Booking reference: %s',
                 'support_line'          => 'Support: reservation@loft1325.com · info@loft1325.com',
-                'tax_line'              => sprintf('Numéros de taxes : TPS %s · TVQ %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
+                'tax_line'              => sprintf('Tax numbers: GST %s · QST %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
                 'address_line'          => 'Address: 1325 3e Avenue, Val-d’Or, QC J9P 5P5',
         ]);
 
@@ -2041,9 +2041,9 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($guest_count_display_en); ?></td>
                                     </tr>
                                     <?php if (!empty($subtotal_display_en)) : ?>
-                                        <tr>
-                                            <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background-color:#f3f4f6;">Reservation breakdown</td>
-                                        </tr>
+                                    <tr>
+                                        <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background-color:#f3f4f6;">Reservation breakdown</td>
+                                    </tr>
                                         <tr>
                                             <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Subtotal<?php if (!empty($nightly_rate_display_en)) : ?> (<?php echo esc_html($night_display_en); ?> × <?php echo esc_html($nightly_rate_display_en); ?>)<?php endif; ?></td>
                                             <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($subtotal_display_en); ?></td>
@@ -2059,7 +2059,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                             <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;"><?php echo esc_html($total_display_en); ?></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></td>
+                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Tax numbers&nbsp;: GST <?php echo esc_html($tax_numbers['tps']); ?> &middot; QST <?php echo esc_html($tax_numbers['tvq']); ?></td>
                                         </tr>
                                     <?php endif; ?>
                                 </table>
@@ -2336,7 +2336,11 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Réservation</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> &middot; <?php echo esc_html($room_name); ?></td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
                                     <?php if (!empty($loft_number)) : ?>
                                         <tr>
@@ -2420,7 +2424,11 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Reservation</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> · <?php echo esc_html($room_name); ?></td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft</td>
+                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
                                     <?php if (!empty($loft_number)) : ?>
                                         <tr>
@@ -2483,7 +2491,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#0f172a;text-align:right;border-top:1px solid #e5e7eb;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
-                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
+                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Tax numbers&nbsp;: GST <?php echo esc_html($tax_numbers['tps']); ?> &middot; QST <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                 </div>
                                 <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">Stay dates: <?php echo esc_html($checkin); ?> &ndash; <?php echo esc_html($checkout); ?></p>
                                 <?php if (!empty($booking['coupon'])) : ?>
