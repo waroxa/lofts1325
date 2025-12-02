@@ -180,6 +180,49 @@ if (!function_exists('wp_loft_booking_format_unit_label')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_extract_loft_number_from_text')) {
+    /**
+     * Extract a loft number from a freeform label (e.g., "Loft 203").
+     *
+     * @param string $label Label to inspect.
+     * @return string Loft number or an empty string when none is found.
+     */
+    function wp_loft_booking_extract_loft_number_from_text($label)
+    {
+        if (preg_match('/\b([0-9]{1,4}[A-Z0-9]?)\b/u', (string) $label, $matches)) {
+            return strtoupper($matches[1]);
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('wp_loft_booking_get_loft_number')) {
+    /**
+     * Derive the loft number from booking metadata.
+     *
+     * @param array $booking Booking payload.
+     * @return string Loft number if available.
+     */
+    function wp_loft_booking_get_loft_number(array $booking)
+    {
+        $candidates = [
+            $booking['unit_name'] ?? '',
+            $booking['room_name'] ?? '',
+        ];
+
+        foreach ($candidates as $candidate) {
+            $number = wp_loft_booking_extract_loft_number_from_text($candidate);
+
+            if ('' !== $number) {
+                return $number;
+            }
+        }
+
+        return '';
+    }
+}
+
 if (!function_exists('wp_loft_booking_normalize_unit_label_for_lookup')) {
     /**
      * Create a canonical, lowercase label for loft matching.
@@ -759,10 +802,13 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
 {
         $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Invité', 'wp-loft-booking');
         $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '') ?: __('Votre loft', 'wp-loft-booking');
+        $loft_number = wp_loft_booking_get_loft_number($booking);
         $booking_ref = $booking['booking_id'] ?? $booking['room_id'] ?? __('N/A', 'wp-loft-booking');
         $checkin     = !empty($booking['date_from']) ? wp_date('Y-m-d', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
         $checkout    = !empty($booking['date_to']) ? wp_date('Y-m-d', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
         $currency    = $price_breakdown['currency'] ?? 'CAD';
+
+        $loft_suffix = '' !== $loft_number ? sprintf(' (Loft %s)', $loft_number) : '';
 
         $extras = $price_breakdown['extras'] ?? [];
         $taxes  = $price_breakdown['taxes'] ?? [];
@@ -793,7 +839,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                         'subheading'          => 'Séjour confirmé',
                         'summary_label'       => 'Reçu',
                         'summary_title'       => 'Séjour confirmé',
-                        'summary_line'        => sprintf('Réservation #%s · %s', $booking_ref, $room_name),
+                        'summary_line'        => sprintf('Réservation #%s · %s%s', $booking_ref, $room_name, $loft_suffix),
                         'dates_line'          => sprintf('Dates : %s → %s.', $checkin, $checkout),
                         'status_badge'        => 'Statut',
                         'transaction_badge'   => 'Transaction Stripe',
@@ -821,7 +867,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                         'subheading'          => 'Stay confirmed',
                         'summary_label'       => 'Invoice',
                         'summary_title'       => 'Stay confirmed',
-                        'summary_line'        => sprintf('Booking #%s · %s', $booking_ref, $room_name),
+                        'summary_line'        => sprintf('Booking #%s · %s%s', $booking_ref, $room_name, $loft_suffix),
                         'dates_line'          => sprintf('Dates: %s → %s.', $checkin, $checkout),
                         'status_badge'        => 'Status',
                         'transaction_badge'   => 'Stripe transaction',
@@ -892,6 +938,9 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                                 <div style="padding:18px;border:1px solid #e5e7eb;border-radius:16px;background-color:#f9fafb;">
                                                     <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;font-weight:700;">Séjour</p>
                                                     <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;"><?php echo esc_html($room_name); ?></p>
+                                                    <?php if (!empty($loft_number)) : ?>
+                                                        <p style="margin:6px 0 0;font-size:14px;color:#374151;">Numéro du loft<br><strong>Loft <?php echo esc_html($loft_number); ?></strong></p>
+                                                    <?php endif; ?>
                                                     <p style="margin:6px 0 0;font-size:14px;color:#374151;">Arrivée<br><strong><?php echo esc_html($checkin); ?></strong></p>
                                                     <p style="margin:6px 0 0;font-size:14px;color:#374151;">Départ<br><strong><?php echo esc_html($checkout); ?></strong></p>
                                                 </div>
@@ -1015,6 +1064,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         };
 
         $room_name       = wp_loft_booking_format_unit_label($booking['room_name'] ?? '') ?: __('Votre loft', 'wp-loft-booking');
+        $loft_number     = wp_loft_booking_get_loft_number($booking);
         $guest_name      = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Invité', 'wp-loft-booking');
         $booking_ref     = $booking['booking_id'] ?? $booking['room_id'] ?? __('N/A', 'wp-loft-booking');
         $currency        = $price_breakdown['currency'] ?? 'CAD';
@@ -1106,17 +1156,35 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                 $lines[] = '(' . $escape($copy['address_line']) . ') Tj';
         };
 
+        $booking_lines_fr = [
+                sprintf('• Numéro de réservation : %s', $booking_ref),
+                sprintf('• Loft : %s', $room_name),
+                sprintf('• Invité : %s', $guest_name),
+                sprintf('• Séjour : %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
+                sprintf('• Statut : %s', $payment_status_labels['fr']),
+        ];
+
+        if ('' !== $loft_number) {
+                array_splice($booking_lines_fr, 2, 0, sprintf('• Numéro du loft : %s', $loft_number));
+        }
+
+        $booking_lines_en = [
+                sprintf('• Booking #: %s', $booking_ref),
+                sprintf('• Loft: %s', $room_name),
+                sprintf('• Guest: %s', $guest_name),
+                sprintf('• Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
+                sprintf('• Status: %s', $payment_status_labels['en']),
+        ];
+
+        if ('' !== $loft_number) {
+                array_splice($booking_lines_en, 2, 0, sprintf('• Loft number: %s', $loft_number));
+        }
+
         $render_section([
                 'heading'               => 'Loft 1325 - Reçu de paiement',
                 'tagline'               => 'Expérience signature',
                 'booking_heading'       => 'Résumé de réservation',
-                'booking_lines'         => [
-                        sprintf('• Numéro de réservation : %s', $booking_ref),
-                        sprintf('• Loft : %s', $room_name),
-                        sprintf('• Invité : %s', $guest_name),
-                        sprintf('• Séjour : %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
-                        sprintf('• Statut : %s', $payment_status_labels['fr']),
-                ],
+                'booking_lines'         => $booking_lines_fr,
                 'payment_heading'       => 'Sommaire du paiement',
                 'lodging_line'          => '• Hébergement (avant taxes) : %s',
                 'extra_line'            => '• Supplément – %s : %s',
@@ -1127,7 +1195,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                 'reference_fingerprint' => '• Empreinte du reçu : %s',
                 'reference_booking'     => '• Réservation : %s',
                 'support_line'          => 'Support : reservation@loft1325.com · info@loft1325.com',
-                'tax_line'              => sprintf('TPS: %s · TVQ: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
+                'tax_line'              => sprintf('Numéros de taxes : TPS %s · TVQ %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
                 'address_line'          => 'Adresse: 1325 3e Avenue, Val-d’Or, QC J9P 5P5',
         ]);
 
@@ -1137,13 +1205,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                 'heading'               => 'Loft 1325 - Payment Receipt',
                 'tagline'               => 'Signature stay experience',
                 'booking_heading'       => 'Booking overview',
-                'booking_lines'         => [
-                        sprintf('• Booking #: %s', $booking_ref),
-                        sprintf('• Loft: %s', $room_name),
-                        sprintf('• Guest: %s', $guest_name),
-                        sprintf('• Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
-                        sprintf('• Status: %s', $payment_status_labels['en']),
-                ],
+                'booking_lines'         => $booking_lines_en,
                 'payment_heading'       => 'Payment summary',
                 'lodging_line'          => '• Lodging (before taxes): %s',
                 'extra_line'            => '• Extra – %s: %s',
@@ -1154,7 +1216,7 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
                 'reference_fingerprint' => '• Receipt fingerprint: %s',
                 'reference_booking'     => '• Booking reference: %s',
                 'support_line'          => 'Support: reservation@loft1325.com · info@loft1325.com',
-                'tax_line'              => sprintf('GST: %s · QST: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
+                'tax_line'              => sprintf('Numéros de taxes : TPS %s · TVQ %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
                 'address_line'          => 'Address: 1325 3e Avenue, Val-d’Or, QC J9P 5P5',
         ]);
 
@@ -1687,6 +1749,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $room_name = __('Votre loft', 'wp-loft-booking');
     }
 
+    $loft_number = wp_loft_booking_get_loft_number($booking);
+
     $format_with_locale = function (string $date_string, string $format, string $locale_fallback) {
         if ('' === $date_string) {
             return '';
@@ -1871,6 +1935,12 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Loft</td>
                                         <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($loft_number)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Numéro du loft</td>
+                                            <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;">Loft <?php echo esc_html($loft_number); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($checkin_fr); ?> &ndash; <?php echo esc_html($checkout_fr); ?></td>
@@ -1952,6 +2022,12 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Loft</td>
                                         <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($loft_number)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft number</td>
+                                            <td style="padding:16px 24px;font-size:15px;font-weight:600;color:#111827;">Loft <?php echo esc_html($loft_number); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;"><?php echo esc_html($checkin); ?> &ndash; <?php echo esc_html($checkout); ?></td>
@@ -1983,7 +2059,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                             <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;"><?php echo esc_html($total_display_en); ?></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Tax numbers: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></td>
+                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></td>
                                         </tr>
                                     <?php endif; ?>
                                 </table>
@@ -2262,6 +2338,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Réservation</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> &middot; <?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($loft_number)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Numéro du loft</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">Loft <?php echo esc_html($loft_number); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Nuits</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($night_display_fr); ?></td>
@@ -2340,6 +2422,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Reservation</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> · <?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($loft_number)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft number</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">Loft <?php echo esc_html($loft_number); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Nights</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($night_display_en); ?></td>
@@ -2395,7 +2483,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:#0f172a;text-align:right;border-top:1px solid #e5e7eb;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['total'], $currency)); ?></td>
                                         </tr>
                                     </table>
-                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Tax numbers: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
+                                    <p style="margin:10px 0 0;font-size:13px;color:#334155;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></p>
                                 </div>
                                 <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">Stay dates: <?php echo esc_html($checkin); ?> &ndash; <?php echo esc_html($checkout); ?></p>
                                 <?php if (!empty($booking['coupon'])) : ?>
