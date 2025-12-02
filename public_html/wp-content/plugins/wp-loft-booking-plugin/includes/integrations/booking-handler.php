@@ -2047,8 +2047,18 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#334155;font-weight:800;">Sous-total (avant taxes) / Subtotal (before taxes)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Sous-total (avant taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Subtotal (before taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;">
+                                                <?php echo esc_html($subtotal_display); ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:6px 0;font-size:14px;color:#e2e8f0;font-weight:600;">Subtotal (before taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#f9fafb;text-align:right;font-weight:700;"><?php echo esc_html($subtotal_display); ?></td>
                                         </tr>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
@@ -2431,8 +2441,8 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
-                                            <td style="padding:6px 0;font-size:14px;color:#334155;font-weight:800;">Sous-total (avant taxes) / Subtotal (before taxes)</td>
-                                            <td style="padding:6px 0;font-size:14px;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
+                                            <td style="padding:6px 0;font-size:14px;color:#b45309;font-weight:800;">Sous-total (avant taxes)</td>
+                                            <td style="padding:6px 0;font-size:14px;color:#78350f;text-align:right;font-weight:900;"><?php echo esc_html($subtotal_display); ?></td>
                                         </tr>
                                         <?php foreach ($price_breakdown['taxes'] as $tax) : ?>
                                             <tr>
