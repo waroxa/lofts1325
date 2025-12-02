@@ -57,25 +57,44 @@ if ( get_option('nd_booking_info_price_enable') == 1 ) {
 
                     $nd_booking_tot_info = 0;
                     $nd_booking_date_from_info = $nd_booking_date_from;
-                    for ($nd_booking_i_night_info = 1; $nd_booking_i_night_info <= nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to); $nd_booking_i_night_info++) {
+
+                    $nd_booking_loft_rule = nd_booking_find_loft_pricing_rule( $nd_booking_id );
+                    $nd_booking_loft_price = null;
+                    $nd_booking_long_stay_tier = null;
+                    $nd_booking_loft_nights = nd_booking_get_number_night($nd_booking_date_from,$nd_booking_date_to);
+
+                    if ( null !== $nd_booking_loft_rule ) {
+                        $nd_booking_loft_price = nd_booking_calculate_loft_pricing( $nd_booking_loft_rule, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
+                        $nd_booking_long_stay_tier = $nd_booking_loft_price['long_stay_tier'];
+                    }
+
+                    for ($nd_booking_i_night_info = 1; $nd_booking_i_night_info <= $nd_booking_loft_nights; $nd_booking_i_night_info++) {
 
                         //format
                         $nd_booking_date_from_info_new = new DateTime($nd_booking_date_from_info);
                         $nd_booking_date_from_info_v = date_format($nd_booking_date_from_info_new,'d M');
-                    
+
                         //middle content
+                        if ( null !== $nd_booking_loft_rule ) {
+                            $nd_booking_price_per_night = nd_booking_get_loft_nightly_rate( $nd_booking_loft_rule, $nd_booking_date_from_info, $nd_booking_long_stay_tier, $nd_booking_loft_nights );
+                        } else {
+                            $nd_booking_price_per_night = nd_booking_get_final_price($nd_booking_id,$nd_booking_date_from_info);
+                        }
+
+                        $nd_booking_effective_price = $nd_booking_price_per_night * $nd_booking_price_for_guests;
+
                         $nd_booking_shortcode_right_content .= '
 
                             <tr class="nd_booking_info_table_middle">
                                 <td>'.$nd_booking_date_from_info_v.'</td>
-                                <td>'.nd_booking_get_final_price($nd_booking_id,$nd_booking_date_from_info).' '.nd_booking_get_currency().'</td>
+                                <td>'.nd_booking_format_decimal( $nd_booking_price_per_night ).' '.nd_booking_get_currency().'</td>
                                 <td>'.$nd_booking_archive_form_guests.'</td>
-                                <td>'.nd_booking_get_final_price($nd_booking_id,$nd_booking_date_from_info)*$nd_booking_price_for_guests.' '.nd_booking_get_currency().'</td>
+                                <td>'.nd_booking_format_decimal( $nd_booking_effective_price ).' '.nd_booking_get_currency().'</td>
                             </tr>
 
                         ';
 
-                        $nd_booking_tot_info = $nd_booking_tot_info + nd_booking_get_final_price($nd_booking_id,$nd_booking_date_from_info)*$nd_booking_price_for_guests;
+                        $nd_booking_tot_info = $nd_booking_tot_info + $nd_booking_effective_price;
                         $nd_booking_date_from_info = date('m/d/Y', strtotime($nd_booking_date_from_info.' + 1 days'));
 
                     }
