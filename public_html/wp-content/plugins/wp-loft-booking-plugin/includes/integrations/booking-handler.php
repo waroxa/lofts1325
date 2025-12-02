@@ -1681,8 +1681,31 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $room_name = __('Votre loft', 'wp-loft-booking');
     }
 
-    $checkin  = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
-    $checkout = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+    $format_with_locale = function (string $date_string, string $format, string $locale_fallback) {
+        if ('' === $date_string) {
+            return '';
+        }
+
+        $timestamp = strtotime($date_string);
+        if (!$timestamp) {
+            return '';
+        }
+
+        $switched = switch_to_locale($locale_fallback);
+        $formatted = wp_date($format, $timestamp);
+        if ($switched) {
+            restore_previous_locale();
+        }
+
+        return $formatted;
+    };
+
+    $checkin  = !empty($booking['date_from'])
+        ? $format_with_locale($booking['date_from'], 'F j, Y', 'en_CA')
+        : __('N/A', 'wp-loft-booking');
+    $checkout = !empty($booking['date_to'])
+        ? $format_with_locale($booking['date_to'], 'F j, Y', 'en_CA')
+        : __('N/A', 'wp-loft-booking');
 
     $checkin_fr  = !empty($booking['date_from']) ? wp_date('j F Y', strtotime($booking['date_from'])) : __('N/D', 'wp-loft-booking');
     $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : __('N/D', 'wp-loft-booking');
@@ -2079,8 +2102,31 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
         $room_name = __('Votre loft', 'wp-loft-booking');
     }
 
-    $checkin  = !empty($booking['date_from']) ? wp_date('F j, Y', strtotime($booking['date_from'])) : __('N/A', 'wp-loft-booking');
-    $checkout = !empty($booking['date_to']) ? wp_date('F j, Y', strtotime($booking['date_to'])) : __('N/A', 'wp-loft-booking');
+    $format_with_locale = function (string $date_string, string $format, string $locale_fallback) {
+        if ('' === $date_string) {
+            return '';
+        }
+
+        $timestamp = strtotime($date_string);
+        if (!$timestamp) {
+            return '';
+        }
+
+        $switched = switch_to_locale($locale_fallback);
+        $formatted = wp_date($format, $timestamp);
+        if ($switched) {
+            restore_previous_locale();
+        }
+
+        return $formatted;
+    };
+
+    $checkin  = !empty($booking['date_from'])
+        ? $format_with_locale($booking['date_from'], 'F j, Y', 'en_CA')
+        : __('N/A', 'wp-loft-booking');
+    $checkout = !empty($booking['date_to'])
+        ? $format_with_locale($booking['date_to'], 'F j, Y', 'en_CA')
+        : __('N/A', 'wp-loft-booking');
 
     $checkin_fr  = !empty($booking['date_from']) ? wp_date('j F Y', strtotime($booking['date_from'])) : __('N/D', 'wp-loft-booking');
     $checkout_fr = !empty($booking['date_to']) ? wp_date('j F Y', strtotime($booking['date_to'])) : __('N/D', 'wp-loft-booking');
@@ -2091,7 +2137,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     }
 
     $purchase_date_fr = wp_date('j F Y \à H\hi', $booking_timestamp);
-    $purchase_date_en = wp_date('F j, Y \a\t g:i A', $booking_timestamp);
+    $purchase_date_en = $format_with_locale(date('c', $booking_timestamp), 'F j, Y \a\t g:i A', 'en_CA');
 
     $currency = !empty($booking['currency']) ? strtoupper($booking['currency']) : 'CAD';
 
@@ -2115,6 +2161,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     }
 
     $payment_status = !empty($booking['payment_status']) ? $booking['payment_status'] : __('Unknown', 'wp-loft-booking');
+    $payment_status_labels = wp_loft_booking_translate_payment_status($payment_status);
     $transaction_id = !empty($booking['transaction_id']) ? $booking['transaction_id'] : __('Not provided', 'wp-loft-booking');
 
     $virtual_key_success = !is_wp_error($virtual_key_result);
@@ -2190,7 +2237,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                 </table>
 
-                                <div style="margin:0 0 24px;padding:24px;background-color:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 16px 30px rgba(15,23,42,0.08);color:#0f172a;">
+                                <div style="margin:0 0 24px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;box-shadow:0 16px 30px rgba(15,23,42,0.08);color:#0f172a;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:900;color:#0f172a;">Détails du paiement · Payment details</h3>
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
@@ -2277,7 +2324,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                     </tr>
                                 </table>
 
-                                <div style="margin:0 0 24px;padding:24px;background-color:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 16px 30px rgba(15,23,42,0.08);color:#0f172a;">
+                                <div style="margin:0 0 24px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;box-shadow:0 16px 30px rgba(15,23,42,0.08);color:#0f172a;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#0f172a;">Payment details</h3>
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                         <tr>
