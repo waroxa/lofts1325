@@ -1741,32 +1741,32 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
 
     $building_entry_instructions_fr = [
         'Utilisez le code à 6 chiffres reçu par SMS ou courriel.',
-        'Composez le code sur l’interphone ou le clavier, puis appuyez sur 3 et sur la touche #.',
-        'Passez la porte intérieure et prenez l’ascenseur (porte devant vous) ou les escaliers.',
-        'Pour le matériel de déménagement, l’ascenseur se situe au 2e étage.',
-        'Pour toute demande d’assistance, appelez au 514-239-9080.',
+        'Composez le code sur l’interphone (ou clavier mural), puis appuyez sur 3 et sur la touche #.',
+        'Une fois à l’intérieur, traversez le hall et prenez l’ascenseur jusqu’au 2e étage.',
+        'Pour du matériel de déménagement, prenez l’ascenseur pour le 2e étage.',
+        'Pour toute assistance ou urgence, contactez le 514-239-9080.',
     ];
 
     $wayfinding_instructions_fr = [
-        'Entrée principale au <strong>1325 3e Avenue</strong> (façade Loft 1325 sombre et logo métallique).',
-        'Garez-vous derrière l’immeuble : suivez la 3e Avenue puis les panneaux «&nbsp;Loft 1325&nbsp;».',
-        'L’interphone est à droite de la porte vitrée (ou du Logo) ; ascenseur et escaliers juste à l’entrée.',
-        'Si la signalisation ne saute pas aux yeux, appelez&nbsp;: <strong>514-239-9080</strong> pour assistance.',
+        'Entrée principale au <strong>1325 3e Avenue</strong> (façade Loft 1325 sombre avec le logo métallique).',
+        'Garez-vous derrière l’immeuble en suivant la 3e Avenue et les panneaux « Loft 1325 ».',
+        'L’interphone est à droite de la porte vitrée (ou du logo) ; ascenseur et escaliers juste à l’entrée.',
+        'Si la signalisation n’est pas évidente, appelez le 514-239-9080 pour assistance.',
     ];
 
     $building_entry_instructions_en = [
         'Use the 6-digit code you received by SMS or email.',
-        'Enter the code on the intercom or keypad, press 3 and the # key.',
-        'Once inside, go through the lobby, take the elevator on the 2nd floor, and then take the 2nd floor.',
-        'For moving in and unloading, take the elevator to the 2nd floor.',
+        'Enter the code on the intercom (or keypad), then press 3 and the # key.',
+        'Once inside, cross the lobby, take the elevator on the 2nd floor, and then take the 2nd floor.',
+        'For moving items and unloading, take the elevator to the 2nd floor.',
         'For assistance or emergencies, please contact 514-239-9080.',
     ];
 
     $wayfinding_instructions_en = [
-        'Main entrance at <strong>1325 3e Avenue</strong> (dark Loft 1325 façade with metal logo).',
-        'Guest parking is behind the building—follow 3e Avenue and the “Loft 1325” signs.',
-        'The intercom is to the right of the glass door (or Logo); the elevator and stairs are immediately inside the entrance.',
-        'If signage isn’t obvious, call us at <strong>514-239-9080</strong> for guidance.',
+        'Main entrance at <strong>1325 3rd Avenue</strong> (dark Loft 1325 façade with metal logo).',
+        'Guest parking is behind the building—follow 3rd Avenue and the “Loft 1325” signs.',
+        'The intercom is located to the right of the glass door (or the logo), just inside the entrance, please use the intercom.',
+        'If the exterior signage isn’t obvious, call 514-239-9080 and we will help guide you.',
     ];
 
     $has_price_breakdown = is_array($price_breakdown) && !empty($price_breakdown);
@@ -1777,6 +1777,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $subtotal_display_fr = '';
     $subtotal_display_en = '';
     $taxes_for_display = [];
+    $nightly_rate_display_fr = '';
+    $nightly_rate_display_en = '';
 
     if ($has_price_breakdown && isset($price_breakdown['total'])) {
         $total_display_fr = wp_loft_booking_format_currency($price_breakdown['total'], $currency);
@@ -1785,10 +1787,26 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
         $subtotal_display_fr = wp_loft_booking_format_currency($price_breakdown['subtotal'] ?? 0, $currency);
         $subtotal_display_en = wp_loft_booking_format_currency($price_breakdown['subtotal'] ?? 0, $currency);
         $taxes_for_display = array_values($price_breakdown['taxes'] ?? []);
+        if ($night_count > 0 && isset($price_breakdown['subtotal'])) {
+            $nightly_rate_display_fr = wp_loft_booking_format_currency($price_breakdown['subtotal'] / $night_count, $currency);
+            $nightly_rate_display_en = $nightly_rate_display_fr;
+        }
     } elseif ($total !== __('Non disponible', 'wp-loft-booking')) {
         $total_display_fr = sprintf('%s CAD', $total);
         $total_display_en = sprintf('%s CAD', $total);
     }
+
+    $tax_numbers = wp_loft_booking_get_tax_registration_numbers();
+
+    $translate_tax_label_fr = static function ($label) {
+        $translations = [
+            'Lodging Tax' => 'Taxe sur l\'hébergement',
+            'GST'         => 'TPS',
+            'QST'         => 'TVQ',
+        ];
+
+        return $translations[$label] ?? $label;
+    };
 
     $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
     $website_url      = 'https://loft1325.com';
@@ -1867,29 +1885,27 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     </tr>
                                     <?php if (!empty($subtotal_display_fr)) : ?>
                                         <tr>
-                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Sous-total (avant taxes)</td>
+                                            <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background-color:#f3f4f6;">Détail de la réservation</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Sous-total<?php if (!empty($nightly_rate_display_fr)) : ?> (<?php echo esc_html($night_display_fr); ?> × <?php echo esc_html($nightly_rate_display_fr); ?>)<?php endif; ?></td>
                                             <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($subtotal_display_fr); ?></td>
                                         </tr>
-                                    <?php endif; ?>
-                                    <?php if (!empty($tax_total_display)) : ?>
+                                        <?php foreach ($taxes_for_display as $tax) : ?>
+                                            <?php $tax_label_fr = $translate_tax_label_fr($tax['label']); ?>
+                                            <tr>
+                                                <td style="padding:16px 24px;font-size:14px;color:#6b7280;"><?php echo esc_html($tax_label_fr); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%)</td>
+                                                <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
                                         <tr>
-                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Taxes</td>
-                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">
-                                                <?php echo esc_html($tax_total_display); ?>
-                                                <?php if (!empty($taxes_for_display)) : ?>
-                                                    <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
-                                                        <?php foreach ($taxes_for_display as $tax) : ?>
-                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%) &middot; <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </td>
+                                            <td style="padding:16px 24px;font-size:14px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;">Grand total de la réservation</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;"><?php echo esc_html($total_display_fr); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Numéros de taxes&nbsp;: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></td>
                                         </tr>
                                     <?php endif; ?>
-                                    <tr>
-                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Montant total (taxes incluses)</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_fr); ?></td>
-                                    </tr>
                                 </table>
                                 <div style="margin:28px 0;padding:24px;border-radius:18px;background-color:#eef2ff;border:1px solid #c7d2fe;color:#0f172a;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Accès et clé numérique</h3>
@@ -1905,9 +1921,9 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <?php endforeach; ?>
                                     </ol>
                                 </div>
-                                <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#fff7ed;border:1px solid #fb923c;">
-                                    <h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:#9a3412;">Repères pour nous trouver facilement</h3>
-                                    <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#7c2d12;">
+                                <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#e0f2fe;border:1px solid #bae6fd;">
+                                    <h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:#0f172a;">Repères pour nous trouver facilement</h3>
+                                    <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#0f172a;">
                                         <?php foreach ($wayfinding_instructions_fr as $instruction) : ?>
                                             <li><?php echo $instruction; ?></li>
                                         <?php endforeach; ?>
@@ -1920,10 +1936,9 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 </ul>
                                 <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">Votre pièce d’identité téléversée lors de la réservation est déjà enregistrée pour votre dossier.</p>
                                 <div style="margin:0 0 28px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées / Contact</h3>
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées</h3>
                                     <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Adresse</strong><br><?php echo esc_html($property_address); ?></p>
-                                    <p style="margin:0 0 6px;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
-                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
+                                    <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
                                 </div>
                                 <p style="margin:0 0 28px;font-size:14px;line-height:1.7;color:#4b5563;">Nous avons hâte de vous accueillir pour une expérience tout confort signée Loft 1325.</p>
                                 <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;">
@@ -1951,29 +1966,26 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     </tr>
                                     <?php if (!empty($subtotal_display_en)) : ?>
                                         <tr>
-                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Subtotal (before taxes)</td>
+                                            <td colspan="2" style="padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background-color:#f3f4f6;">Reservation breakdown</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Subtotal<?php if (!empty($nightly_rate_display_en)) : ?> (<?php echo esc_html($night_display_en); ?> × <?php echo esc_html($nightly_rate_display_en); ?>)<?php endif; ?></td>
                                             <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($subtotal_display_en); ?></td>
                                         </tr>
-                                    <?php endif; ?>
-                                    <?php if (!empty($tax_total_display)) : ?>
+                                        <?php foreach ($taxes_for_display as $tax) : ?>
+                                            <tr>
+                                                <td style="padding:16px 24px;font-size:14px;color:#6b7280;">&nbsp;<?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%)</td>
+                                                <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">&nbsp;<?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
                                         <tr>
-                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Taxes</td>
-                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">
-                                                <?php echo esc_html($tax_total_display); ?>
-                                                <?php if (!empty($taxes_for_display)) : ?>
-                                                    <div style="margin-top:6px;font-size:13px;color:#6b7280;font-weight:500;">
-                                                        <?php foreach ($taxes_for_display as $tax) : ?>
-                                                            <div><?php echo esc_html($tax['label']); ?> (<?php echo esc_html(wp_loft_booking_format_tax_rate($tax['rate'] ?? 0)); ?>%) · <?php echo esc_html(wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency)); ?></div>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </td>
+                                            <td style="padding:16px 24px;font-size:14px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;">Grand total</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:700;border-top:1px solid #e5e7eb;"><?php echo esc_html($total_display_en); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="padding:0 24px 16px;font-size:13px;color:#6b7280;font-weight:700;">Tax numbers: TPS <?php echo esc_html($tax_numbers['tps']); ?> &middot; TVQ <?php echo esc_html($tax_numbers['tvq']); ?></td>
                                         </tr>
                                     <?php endif; ?>
-                                    <tr>
-                                        <td style="padding:16px 24px;font-size:14px;color:#6b7280;border-bottom-left-radius:18px;">Total amount (taxes included)</td>
-                                        <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;border-bottom-right-radius:18px;"><?php echo esc_html($total_display_en); ?></td>
-                                    </tr>
                                 </table>
                                 <div style="margin:28px 0;padding:24px;border-radius:18px;background-color:#eef2ff;border:1px solid #c7d2fe;color:#0f172a;box-shadow:0 20px 40px rgba(15,23,42,0.08);">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Digital key &amp; access</h3>
@@ -1989,7 +2001,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                         <?php endforeach; ?>
                                     </ol>
                                 </div>
-                                <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#ecfeff;border:1px solid #06b6d4;">
+                                <div style="margin:0 0 24px;padding:18px;border-radius:16px;background-color:#e0f2fe;border:1px solid #bae6fd;">
                                     <h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:#0f172a;">Wayfinding to the lofts</h3>
                                     <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#0f172a;">
                                         <?php foreach ($wayfinding_instructions_en as $instruction) : ?>
@@ -2004,9 +2016,8 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                 </ul>
                                 <p style="margin:0 0 24px;font-size:13px;line-height:1.7;color:#6b7280;">The ID you uploaded during booking is already securely stored for your reservation record.</p>
                                 <div style="margin:0 0 28px;padding:24px;background-color:#e0f2fe;border:1px solid #bae6fd;border-radius:18px;">
-                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Coordonnées / Contact</h3>
-                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Adresse / Address</strong><br><?php echo esc_html($property_address); ?></p>
-                                    <p style="margin:0 0 6px;font-size:14px;line-height:1.7;color:#0f172a;">Besoin d’assistance&nbsp;? Écrivez-nous à <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a>.</p>
+                                    <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#0f172a;">Contact</h3>
+                                    <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#0f172a;"><strong>Address</strong><br><?php echo esc_html($property_address); ?></p>
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#0f172a;">Need assistance? Email us at <a href="mailto:<?php echo esc_attr($support_email); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;"><?php echo esc_html($support_email); ?></a> or visit <a href="<?php echo esc_url($website_url); ?>" style="color:#0f172a;text-decoration:underline;font-weight:600;">loft1325.com</a>.</p>
                                 </div>
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">We can’t wait to welcome you to your private retreat at Loft 1325.</p>
