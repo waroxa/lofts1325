@@ -938,7 +938,7 @@ function nd_booking_calculate_tax_breakdown( $base_amount ) {
 
         $qst_amount = 0.0;
         if ( $rates['qst'] > 0 ) {
-                $qst_amount = round( ( $base_amount + $gst_amount ) * $rates['qst'] / 100, 2 );
+                $qst_amount = round( $base_amount * $rates['qst'] / 100, 2 );
                 $taxes['qst'] = array(
                         'label'         => $labels['qst'],
                         'rate'          => $rates['qst'],
@@ -976,7 +976,7 @@ function nd_booking_calculate_tax_breakdown_from_total( $total_amount ) {
         $g = $rates['gst'] / 100;
         $q = $rates['qst'] / 100;
 
-        $denominator = 1 + $l + $g + $q + ( $g * $q );
+        $denominator = 1 + $l + $g + $q;
 
         if ( $denominator <= 0 ) {
                 $breakdown = nd_booking_calculate_tax_breakdown( $total_amount );
