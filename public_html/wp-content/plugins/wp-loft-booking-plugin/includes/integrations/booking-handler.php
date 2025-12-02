@@ -461,6 +461,112 @@ if (!function_exists('wp_loft_booking_record_virtual_key_log')) {
     }
 }
 
+if (!function_exists('wp_loft_booking_get_virtual_key_details')) {
+    /**
+     * Resolve persisted virtual key identifiers for a booking.
+     *
+     * @param array               $booking            Booking payload.
+     * @param array|WP_Error|null $virtual_key_result Result from the virtual key generator.
+     *
+     * @return array{
+     *   keychain_id:int|null,
+     *   virtual_keys:array,
+     *   loft_label:string
+     * }
+     */
+    function wp_loft_booking_get_virtual_key_details(array $booking, $virtual_key_result = null)
+    {
+        global $wpdb;
+
+        $details = [
+            'keychain_id'  => null,
+            'virtual_keys' => [],
+            'loft_label'   => '',
+        ];
+
+        $loft_number = wp_loft_booking_get_loft_number($booking);
+        $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
+
+        if (!empty($loft_number)) {
+            $details['loft_label'] = sprintf(__('Loft %s', 'wp-loft-booking'), $loft_number);
+        } elseif (!empty($room_name)) {
+            $details['loft_label'] = $room_name;
+        }
+
+        if (!is_wp_error($virtual_key_result) && is_array($virtual_key_result)) {
+            $details['keychain_id']  = isset($virtual_key_result['keychain_id']) ? (int) $virtual_key_result['keychain_id'] : null;
+            $details['virtual_keys'] = array_values(array_filter(array_map('strval', $virtual_key_result['virtual_key_ids'] ?? []), 'strlen'));
+        }
+
+        $booking_id = null;
+
+        if (isset($booking['id'])) {
+            $booking_id = (int) $booking['id'];
+        } elseif (isset($booking['booking_id'])) {
+            $booking_id = (int) $booking['booking_id'];
+        }
+
+        if ((!$details['keychain_id'] || empty($details['virtual_keys'])) && $booking_id) {
+            $table_name = $wpdb->prefix . 'loft_virtual_key_logs';
+            $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name)) === $table_name;
+
+            if ($table_exists) {
+                $log_entry = $wpdb->get_row(
+                    $wpdb->prepare(
+                        "SELECT keychain_id, virtual_key_ids FROM {$table_name} WHERE booking_id = %d ORDER BY created_at DESC LIMIT 1",
+                        $booking_id
+                    ),
+                    ARRAY_A
+                );
+
+                if ($log_entry) {
+                    if (!empty($log_entry['keychain_id'])) {
+                        $details['keychain_id'] = (int) $log_entry['keychain_id'];
+                    }
+
+                    if (!empty($log_entry['virtual_key_ids'])) {
+                        $decoded_keys = json_decode($log_entry['virtual_key_ids'], true);
+
+                        if (is_array($decoded_keys)) {
+                            $details['virtual_keys'] = array_values(array_filter(array_map('strval', $decoded_keys), 'strlen'));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $details;
+    }
+}
+
+if (!function_exists('wp_loft_booking_format_virtual_key_summary')) {
+    /**
+     * Format a human-readable virtual key summary.
+     *
+     * @param array  $details Virtual key details from wp_loft_booking_get_virtual_key_details().
+     * @param string $locale  Target locale code (fr|en).
+     */
+    function wp_loft_booking_format_virtual_key_summary(array $details, string $locale = 'fr')
+    {
+        $parts = [];
+
+        if (!empty($details['keychain_id'])) {
+            $parts[] = ('fr' === $locale ? 'Trousseau' : 'Keychain') . ' #' . (int) $details['keychain_id'];
+        }
+
+        if (!empty($details['virtual_keys'])) {
+            $label   = ('fr' === $locale ? (count($details['virtual_keys']) > 1 ? 'Clés' : 'Clé') : (count($details['virtual_keys']) > 1 ? 'Keys' : 'Key'));
+            $parts[] = sprintf('%s: %s', $label, implode(', ', $details['virtual_keys']));
+        }
+
+        if (!empty($details['loft_label'])) {
+            $parts[] = $details['loft_label'];
+        }
+
+        return implode(' · ', array_filter($parts));
+    }
+}
+
 /**
  * Build a normalized booking payload using ND Booking records and custom data.
  *
@@ -859,7 +965,7 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                         'accounting_booking'  => 'Code réservation :',
                         'accounting_hint'     => 'Utilisez ces deux identifiants dans Sage pour accélérer la saisie et l’appariement.',
                         'contact_heading'     => 'Contact',
-                        'tagline'             => 'Ici, vous vous sentez chez vous.',
+                        'tagline'             => 'Ici, vous vous sentez chez vous. | Here, you feel at home.',
                 ],
                 'en' => [
                         'locale_badge'        => 'English (Canada)',
@@ -1877,6 +1983,10 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
     $property_address = '1325 3e Avenue, Val-d’Or, QC, Canada';
 
     $virtual_key_success = !is_wp_error($virtual_key_result);
+    $virtual_key_details = wp_loft_booking_get_virtual_key_details($booking, $virtual_key_result);
+    $virtual_key_summary_fr = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'fr');
+    $virtual_key_summary_en = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'en');
+
     $virtual_key_message_fr = $virtual_key_success
         ? __('Votre clé virtuelle sera envoyée automatiquement par courriel et par SMS peu avant votre arrivée.', 'wp-loft-booking')
         : __('Nous n’avons pas pu créer votre clé virtuelle automatiquement. Un membre de notre équipe communiquera avec vous sous peu.', 'wp-loft-booking');
@@ -1920,7 +2030,7 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous. | Here, you feel at home.</p>
                             </td>
                         </tr>
                         <tr>
@@ -1982,6 +2092,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#111827;font-weight:600;letter-spacing:0.01em;">
                                         <?php echo esc_html($virtual_key_message_fr); ?>
                                     </p>
+                                    <?php if (!empty($virtual_key_summary_fr)) : ?>
+                                        <p style="margin:8px 0 0;font-size:13px;line-height:1.7;color:#1d4ed8;font-weight:600;">
+                                            <?php echo esc_html($virtual_key_summary_fr); ?>
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Instructions d'accès au bâtiment</h3>
@@ -2068,6 +2183,11 @@ function wp_loft_booking_send_confirmation_email($booking, $virtual_key_result, 
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#111827;font-weight:600;letter-spacing:0.01em;">
                                         <?php echo esc_html($virtual_key_message_en); ?>
                                     </p>
+                                    <?php if (!empty($virtual_key_summary_en)) : ?>
+                                        <p style="margin:8px 0 0;font-size:13px;line-height:1.7;color:#1d4ed8;font-weight:600;">
+                                            <?php echo esc_html($virtual_key_summary_en); ?>
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
                                 <div style="margin:0 0 24px;padding:24px;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:18px;">
                                     <h3 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">Building entry instructions</h3>
@@ -2270,6 +2390,9 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
     $transaction_id = !empty($booking['transaction_id']) ? $booking['transaction_id'] : __('Not provided', 'wp-loft-booking');
 
     $virtual_key_success = !is_wp_error($virtual_key_result);
+    $virtual_key_details = wp_loft_booking_get_virtual_key_details($booking, $virtual_key_result);
+    $virtual_key_summary_fr = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'fr');
+    $virtual_key_summary_en = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'en');
 
     $logo_url         = 'https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png';
     $property_address = '1325 3e Avenue, Val-d’Or, QC, Canada';
@@ -2312,7 +2435,7 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#1f2937);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#e5e7eb;">Ici, vous vous sentez chez vous. | Here, you feel at home.</p>
                             </td>
                         </tr>
                         <tr>
@@ -2324,8 +2447,6 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                 <?php if ($is_admin_invoice) : ?>
                                     <div style="margin:0 0 18px;padding:16px;border-radius:14px;background-color:#e0f2fe;border:1px solid #bae6fd;">
                                         <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;font-weight:700;">Nouvelle facture créée par Gestion Camisa.</p>
-                                        <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:#0f172a;">Merci de transmettre cette facture à l’équipe Comptabilité pour que Sonia puisse la saisir dans Sage.</p>
-                                        <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">Veuillez aussi confirmer que le numéro de loft apparaît bien dans la réservation ou sur la facture.</p>
                                         <p style="margin:0;font-size:14px;line-height:1.6;color:#0f172a;">A new invoice was created by Gestion Camisa.</p>
                                     </div>
                                 <?php endif; ?>
@@ -2342,6 +2463,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($virtual_key_summary_fr)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Clé numérique</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($virtual_key_summary_fr); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <?php if (!empty($loft_number)) : ?>
                                         <tr>
                                             <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Numéro du loft</td>
@@ -2430,6 +2557,12 @@ function wp_loft_booking_send_receipt_email($booking, $virtual_key_result, $is_m
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($virtual_key_summary_en)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Digital key</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($virtual_key_summary_en); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <?php if (!empty($loft_number)) : ?>
                                         <tr>
                                             <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Loft number</td>
@@ -2674,23 +2807,23 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
     $subtotal_display = wp_loft_booking_format_currency($price_breakdown['subtotal'] ?? 0, $currency);
 
     $virtual_key_success = !is_wp_error($virtual_key_result);
+    $virtual_key_details = wp_loft_booking_get_virtual_key_details($booking, $virtual_key_result);
+    $virtual_key_summary_fr = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'fr');
+    $virtual_key_summary_en = wp_loft_booking_format_virtual_key_summary($virtual_key_details, 'en');
+
     $virtual_key_message_fr = $virtual_key_success
-        ? sprintf(
-            __('Clé numérique générée (trousseau #%1$d, clés: %2$s).', 'wp-loft-booking'),
-            intval($virtual_key_result['keychain_id'] ?? 0),
-            implode(', ', array_map('strval', $virtual_key_result['virtual_key_ids'] ?? [])) ?: __('Aucune', 'wp-loft-booking')
-        )
+        ? ($virtual_key_summary_fr
+            ? sprintf(__('Clé numérique générée (%s).', 'wp-loft-booking'), $virtual_key_summary_fr)
+            : __('Clé numérique générée.', 'wp-loft-booking'))
         : sprintf(
             __('Échec de la génération de la clé numérique : %s', 'wp-loft-booking'),
             is_wp_error($virtual_key_result) ? $virtual_key_result->get_error_message() : __('Raison inconnue', 'wp-loft-booking')
         );
 
     $virtual_key_message_en = $virtual_key_success
-        ? sprintf(
-            __('Digital key created (keychain #%1$d, keys: %2$s).', 'wp-loft-booking'),
-            intval($virtual_key_result['keychain_id'] ?? 0),
-            implode(', ', array_map('strval', $virtual_key_result['virtual_key_ids'] ?? [])) ?: __('None', 'wp-loft-booking')
-        )
+        ? ($virtual_key_summary_en
+            ? sprintf(__('Digital key created (%s).', 'wp-loft-booking'), $virtual_key_summary_en)
+            : __('Digital key created.', 'wp-loft-booking'))
         : sprintf(
             __('Digital key creation failed: %s', 'wp-loft-booking'),
             is_wp_error($virtual_key_result) ? $virtual_key_result->get_error_message() : __('Unknown reason', 'wp-loft-booking')
@@ -2722,7 +2855,7 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                             <td style="padding:40px;background:linear-gradient(135deg,#0f172a,#0b1222);text-align:center;">
                                 <img src="<?php echo esc_url($logo_url); ?>" alt="Loft 1325" style="max-width:200px;width:100%;height:auto;display:block;margin:0 auto 16px;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#cbd5e1;font-weight:700;">Loft 1325</p>
-                                <p style="margin:12px 0 0;font-size:16px;color:#f3f4f6;font-weight:600;">Ici, vous vous sentez chez vous.</p>
+                                <p style="margin:12px 0 0;font-size:16px;color:#f3f4f6;font-weight:600;">Ici, vous vous sentez chez vous. | Here, you feel at home.</p>
                         </td>
                     </tr>
                     <tr>
@@ -2737,6 +2870,12 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Réservation</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> &middot; <?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($virtual_key_summary_fr)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Clé numérique</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($virtual_key_summary_fr); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;">Du <?php echo esc_html($checkin_fr); ?> au <?php echo esc_html($checkout_fr); ?></td>
@@ -2843,6 +2982,12 @@ function wp_loft_booking_send_admin_summary_email($booking, $virtual_key_result,
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;width:42%;">Reservation</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;">#<?php echo esc_html($booking['room_id']); ?> · <?php echo esc_html($room_name); ?></td>
                                     </tr>
+                                    <?php if (!empty($virtual_key_summary_en)) : ?>
+                                        <tr>
+                                            <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Digital key</td>
+                                            <td style="padding:16px 24px;font-size:15px;color:#111827;font-weight:600;"><?php echo esc_html($virtual_key_summary_en); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td style="padding:16px 24px;font-size:14px;color:#6b7280;">Dates</td>
                                         <td style="padding:16px 24px;font-size:15px;color:#111827;">From <?php echo esc_html($checkin); ?> to <?php echo esc_html($checkout); ?></td>
