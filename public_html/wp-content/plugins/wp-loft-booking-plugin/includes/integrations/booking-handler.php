@@ -741,6 +741,65 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
             $support_email = $admin_email;
         }
 
+        $sections = [
+                'fr' => [
+                        'locale_badge'        => 'Français (Canada)',
+                        'receipt_heading'     => 'Reçu de paiement',
+                        'subheading'          => 'Séjour confirmé',
+                        'summary_label'       => 'Reçu',
+                        'summary_title'       => 'Séjour confirmé',
+                        'summary_line'        => sprintf('Réservation #%s · %s', $booking_ref, $room_name),
+                        'dates_line'          => sprintf('Dates : %s → %s.', $checkin, $checkout),
+                        'status_badge'        => 'Statut',
+                        'transaction_badge'   => 'Transaction Stripe',
+                        'payment_intro'       => 'Paiement traité via Stripe. Pour l’entrée dans Sage, réutilisez le numéro de transaction comme référence unique.',
+                        'guest_label'         => 'Invité',
+                        'email_label'         => 'Courriel',
+                        'stay_label'          => 'Séjour',
+                        'arrival_label'       => 'Arrivée',
+                        'departure_label'     => 'Départ',
+                        'payment_details'     => 'Détails du paiement',
+                        'lodging_label'       => 'Hébergement (avant taxes)',
+                        'extras_label'        => 'Services additionnels',
+                        'subtotal_label'      => 'Sous-total (avant taxes)',
+                        'total_label'         => 'Total',
+                        'accounting_heading'  => 'Notes pour la comptabilité',
+                        'accounting_stripe'   => 'Référence Stripe :',
+                        'accounting_booking'  => 'Code réservation :',
+                        'accounting_hint'     => 'Utilisez ces deux identifiants dans Sage pour accélérer la saisie et l’appariement.',
+                        'contact_heading'     => 'Contact',
+                        'tagline'             => 'Ici, vous vous sentez chez vous.',
+                ],
+                'en' => [
+                        'locale_badge'        => 'English (Canada)',
+                        'receipt_heading'     => 'Payment Receipt',
+                        'subheading'          => 'Stay confirmed',
+                        'summary_label'       => 'Invoice',
+                        'summary_title'       => 'Stay confirmed',
+                        'summary_line'        => sprintf('Booking #%s · %s', $booking_ref, $room_name),
+                        'dates_line'          => sprintf('Dates: %s → %s.', $checkin, $checkout),
+                        'status_badge'        => 'Status',
+                        'transaction_badge'   => 'Stripe transaction',
+                        'payment_intro'       => 'Payment processed via Stripe. For Sage entry, reuse the transaction number as the unique reference.',
+                        'guest_label'         => 'Guest',
+                        'email_label'         => 'Email',
+                        'stay_label'          => 'Stay',
+                        'arrival_label'       => 'Check-in',
+                        'departure_label'     => 'Check-out',
+                        'payment_details'     => 'Payment details',
+                        'lodging_label'       => 'Lodging (before taxes)',
+                        'extras_label'        => 'Extras',
+                        'subtotal_label'      => 'Subtotal (before taxes)',
+                        'total_label'         => 'Total',
+                        'accounting_heading'  => 'Accounting notes',
+                        'accounting_stripe'   => 'Stripe reference:',
+                        'accounting_booking'  => 'Booking ref:',
+                        'accounting_hint'     => 'Use both identifiers in Sage to speed up entry and matching.',
+                        'contact_heading'     => 'Contact',
+                        'tagline'             => 'Here, you feel at home.',
+                ],
+        ];
+
         ob_start();
         ?>
         <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0f172a;">
@@ -813,7 +872,14 @@ function wp_loft_booking_render_invoice_html(array $booking, array $price_breakd
                                                 <td style="padding:6px 0;color:#334155;font-weight:800;">Services additionnels / Extras</td>
                                                 <td style="padding:6px 0;color:#0f172a;text-align:right;font-weight:900;"><?php echo esc_html(wp_loft_booking_format_currency($price_breakdown['extras_total'] ?? 0, $currency)); ?></td>
                                             </tr>
-                                            <?php if (!empty($extras)) : ?>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:0 36px 16px;">
+                                        <div style="padding:22px;border-radius:20px;background-color:#f8fafc;border:1px solid #e5e7eb;box-shadow:0 18px 34px rgba(15,23,42,0.08);color:#0f172a;">
+                                            <h3 style="margin:0 0 12px;font-size:17px;font-weight:900;color:#0f172a;"><?php echo esc_html($copy['payment_details']); ?></h3>
+                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
                                                 <tr>
                                                     <td colspan="2" style="padding:6px 0 0;">
                                                         <ul style="margin:6px 0 0;padding-left:18px;color:#475569;font-size:13px;">
@@ -904,89 +970,142 @@ function wp_loft_booking_render_invoice_pdf(array $booking, array $price_breakdo
         $transaction_id  = $booking['transaction_id'] ?? __('Not provided', 'wp-loft-booking');
         $tax_numbers     = wp_loft_booking_get_tax_registration_numbers();
 
+        $extras = $price_breakdown['extras'] ?? [];
+        usort($extras, function ($a, $b) {
+                return strcmp($a['title'] ?? '', $b['title'] ?? '');
+        });
+
+        $taxes = $price_breakdown['taxes'] ?? [];
+        usort($taxes, function ($a, $b) {
+                return strcmp($a['label'] ?? '', $b['label'] ?? '');
+        });
+
         $lines = [];
         $lines[] = 'BT';
         $lines[] = '/F1 18 Tf';
         $lines[] = '50 760 Td';
-	$lines[] = '(' . $escape('Loft 1325 · Payment Receipt / Reçu de paiement') . ') Tj';
-	$lines[] = '0 -18 Td';
-        $lines[] = '/F1 11 Tf';
-        $lines[] = '(' . $escape('Expérience signature · Signature stay experience') . ') Tj';
-        $lines[] = '0 -11 Td';
-        $lines[] = '/F1 10 Tf';
-        $lines[] = '(' . $escape('1325 3e Avenue, Val-d’Or, QC · reservation@loft1325.com · 514-239-9080') . ') Tj';
-        $lines[] = '0 -12 Td';
-        $lines[] = '(' . $escape(sprintf('TPS: %s · TVQ: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? '')) . ') Tj';
+
+        $render_section = function (array $copy) use (&$lines, $escape, $booking, $booking_ref, $currency, $extras, $guest_name, $price_breakdown, $room_name, $taxes, $payment_status, $transaction_id, $fingerprint) {
+                $lines[] = '(' . $escape($copy['heading']) . ') Tj';
+                $lines[] = '0 -18 Td';
+                $lines[] = '/F1 11 Tf';
+                $lines[] = '(' . $escape($copy['tagline']) . ') Tj';
+                $lines[] = '0 -11 Td';
+                $lines[] = '/F1 10 Tf';
+                $lines[] = '(' . $escape('1325 3e Avenue, Val-d’Or, QC · reservation@loft1325.com · 514-239-9080') . ') Tj';
+                $lines[] = '0 -12 Td';
+                $lines[] = '(' . $escape($copy['tax_line']) . ') Tj';
+
+                $lines[] = '0 -24 Td';
+                $lines[] = '/F1 12 Tf';
+                $lines[] = '(' . $escape($copy['booking_heading']) . ') Tj';
+                $lines[] = '0 -14 Td';
+                $lines[] = '/F1 10 Tf';
+
+                foreach ($copy['booking_lines'] as $line) {
+                        $lines[] = '(' . $escape($line) . ') Tj';
+                        $lines[] = '0 -12 Td';
+                }
+
+                $lines[] = '0 -18 Td';
+                $lines[] = '/F1 12 Tf';
+                $lines[] = '(' . $escape($copy['payment_heading']) . ') Tj';
+                $lines[] = '0 -14 Td';
+                $lines[] = '/F1 10 Tf';
+
+                $lines[] = '(' . $escape(sprintf($copy['lodging_line'], wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency))) . ') Tj';
+
+                foreach ($extras as $extra) {
+                        $lines[] = '0 -12 Td';
+                        $lines[] = '(' . $escape(sprintf($copy['extra_line'], $extra['title'], wp_loft_booking_format_currency($extra['price'] ?? 0, $currency))) . ') Tj';
+                }
+
+                $lines[] = '0 -16 Td';
+                $lines[] = '/F1 12 Tf';
+                $lines[] = '(' . $escape($copy['tax_heading']) . ') Tj';
+                $lines[] = '0 -14 Td';
+                $lines[] = '/F1 10 Tf';
+
+                foreach ($taxes as $tax) {
+                        $lines[] = '(' . $escape(sprintf('• %s (%s%%): %s', $tax['label'], wp_loft_booking_format_tax_rate($tax['rate'] ?? 0), wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency))) . ') Tj';
+                        $lines[] = '0 -12 Td';
+                }
+
+                $lines[] = '0 -16 Td';
+                $lines[] = '/F1 13 Tf';
+                $lines[] = '(' . $escape(sprintf($copy['total_line'], wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency))) . ') Tj';
+
+                $lines[] = '0 -20 Td';
+                $lines[] = '/F1 12 Tf';
+                $lines[] = '(' . $escape($copy['references_heading']) . ') Tj';
+                $lines[] = '0 -14 Td';
+                $lines[] = '/F1 10 Tf';
+                $lines[] = '(' . $escape(sprintf($copy['reference_transaction'], $transaction_id)) . ') Tj';
+                $lines[] = '0 -12 Td';
+                $lines[] = '(' . $escape(sprintf($copy['reference_fingerprint'], $fingerprint)) . ') Tj';
+                $lines[] = '0 -12 Td';
+                $lines[] = '(' . $escape(sprintf($copy['reference_booking'], $booking_ref)) . ') Tj';
+
+                $lines[] = '0 -18 Td';
+                $lines[] = '/F1 11 Tf';
+                $lines[] = '(' . $escape($copy['support_line']) . ') Tj';
+                $lines[] = '0 -12 Td';
+                $lines[] = '(' . $escape($copy['address_line']) . ') Tj';
+        };
+
+        $render_section([
+                'heading'               => 'Loft 1325 - Reçu de paiement',
+                'tagline'               => 'Expérience signature',
+                'booking_heading'       => 'Résumé de réservation',
+                'booking_lines'         => [
+                        sprintf('• Numéro de réservation : %s', $booking_ref),
+                        sprintf('• Loft : %s', $room_name),
+                        sprintf('• Invité : %s', $guest_name),
+                        sprintf('• Séjour : %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
+                        sprintf('• Statut : %s', $payment_status),
+                ],
+                'payment_heading'       => 'Sommaire du paiement',
+                'lodging_line'          => '• Hébergement (avant taxes) : %s',
+                'extra_line'            => '• Supplément – %s : %s',
+                'tax_heading'           => 'Taxes applicables',
+                'total_line'            => 'Total payé : %s',
+                'references_heading'    => 'Références comptables',
+                'reference_transaction' => '• Transaction Stripe (Sage) : %s',
+                'reference_fingerprint' => '• Empreinte du reçu : %s',
+                'reference_booking'     => '• Réservation : %s',
+                'support_line'          => 'Support : reservation@loft1325.com · info@loft1325.com',
+                'tax_line'              => sprintf('TPS: %s · TVQ: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
+                'address_line'          => 'Adresse: 1325 3e Avenue, Val-d’Or, QC J9P 5P5',
+        ]);
 
         $lines[] = '0 -26 Td';
-        $lines[] = '/F1 12 Tf';
-        $lines[] = '(' . $escape('Booking overview / Résumé de réservation') . ') Tj';
-	$lines[] = '0 -14 Td';
-	$lines[] = '/F1 10 Tf';
-	$lines[] = '(' . $escape(sprintf('• Booking #: %s', $booking_ref)) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Loft: %s', $room_name)) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Guest: %s', $guest_name)) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A')) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Status: %s', $payment_status)) . ') Tj';
 
-	$lines[] = '0 -20 Td';
-	$lines[] = '/F1 12 Tf';
-	$lines[] = '(' . $escape('Payment summary / Sommaire du paiement') . ') Tj';
-	$lines[] = '0 -14 Td';
-	$lines[] = '/F1 10 Tf';
-	$lines[] = '(' . $escape(sprintf('• Lodging (before taxes): %s', wp_loft_booking_format_currency($price_breakdown['lodging_subtotal'] ?? 0, $currency))) . ') Tj';
+        $render_section([
+                'heading'               => 'Loft 1325 - Payment Receipt',
+                'tagline'               => 'Signature stay experience',
+                'booking_heading'       => 'Booking overview',
+                'booking_lines'         => [
+                        sprintf('• Booking #: %s', $booking_ref),
+                        sprintf('• Loft: %s', $room_name),
+                        sprintf('• Guest: %s', $guest_name),
+                        sprintf('• Stay: %s → %s', $booking['date_from'] ?? 'N/A', $booking['date_to'] ?? 'N/A'),
+                        sprintf('• Status: %s', $payment_status),
+                ],
+                'payment_heading'       => 'Payment summary',
+                'lodging_line'          => '• Lodging (before taxes): %s',
+                'extra_line'            => '• Extra – %s: %s',
+                'tax_heading'           => 'Applicable taxes',
+                'total_line'            => 'Amount received: %s',
+                'references_heading'    => 'Accounting references',
+                'reference_transaction' => '• Stripe transaction (Sage ref): %s',
+                'reference_fingerprint' => '• Receipt fingerprint: %s',
+                'reference_booking'     => '• Booking reference: %s',
+                'support_line'          => 'Support: reservation@loft1325.com · info@loft1325.com',
+                'tax_line'              => sprintf('GST: %s · QST: %s', $tax_numbers['tps'] ?? '', $tax_numbers['tvq'] ?? ''),
+                'address_line'          => 'Address: 1325 3e Avenue, Val-d’Or, QC J9P 5P5',
+        ]);
 
-	$extras = $price_breakdown['extras'] ?? [];
-	usort($extras, function ($a, $b) {
-		return strcmp($a['title'] ?? '', $b['title'] ?? '');
-	});
-
-	foreach ($extras as $extra) {
-		$lines[] = '0 -12 Td';
-		$lines[] = '(' . $escape(sprintf('• Extra – %s: %s', $extra['title'], wp_loft_booking_format_currency($extra['price'] ?? 0, $currency))) . ') Tj';
-	}
-
-	$taxes = $price_breakdown['taxes'] ?? [];
-	usort($taxes, function ($a, $b) {
-		return strcmp($a['label'] ?? '', $b['label'] ?? '');
-	});
-
-	$lines[] = '0 -16 Td';
-	$lines[] = '/F1 12 Tf';
-	$lines[] = '(' . $escape('Taxes / Taxes applicables') . ') Tj';
-	$lines[] = '0 -14 Td';
-	$lines[] = '/F1 10 Tf';
-
-	foreach ($taxes as $tax) {
-        $lines[] = '(' . $escape(sprintf('• %s (%s%%): %s', $tax['label'], wp_loft_booking_format_tax_rate($tax['rate'] ?? 0), wp_loft_booking_format_currency($tax['amount'] ?? 0, $currency))) . ') Tj';
-		$lines[] = '0 -12 Td';
-	}
-
-	$lines[] = '0 -16 Td';
-	$lines[] = '/F1 13 Tf';
-	$lines[] = '(' . $escape(sprintf('Total payé / Amount received: %s', wp_loft_booking_format_currency($price_breakdown['total'] ?? 0, $currency))) . ') Tj';
-
-	$lines[] = '0 -20 Td';
-	$lines[] = '/F1 12 Tf';
-	$lines[] = '(' . $escape('Références comptables / Accounting references') . ') Tj';
-	$lines[] = '0 -14 Td';
-	$lines[] = '/F1 10 Tf';
-	$lines[] = '(' . $escape(sprintf('• Stripe transaction (Sage ref): %s', $transaction_id)) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Receipt fingerprint: %s', $fingerprint)) . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape(sprintf('• Booking reference: %s', $booking_ref)) . ') Tj';
-
-	$lines[] = '0 -18 Td';
-	$lines[] = '/F1 11 Tf';
-	$lines[] = '(' . $escape('Support: reservation@loft1325.com · info@loft1325.com') . ') Tj';
-	$lines[] = '0 -12 Td';
-	$lines[] = '(' . $escape('Adresse: 1325 3e Avenue, Val-d’Or, QC J9P 5P5') . ') Tj';
-	$lines[] = 'ET';
+        $lines[] = 'ET';
 
         $stream = implode("\n", $lines);
         $stream_length = strlen($stream);
