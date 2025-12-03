@@ -94,6 +94,8 @@ function wp_loft_booking_prepare_calendar_payload() {
             continue;
         }
 
+        $virtual_keys      = wp_loft_booking_get_virtual_key_details($booking);
+        $virtual_key_label = wp_loft_booking_format_virtual_key_summary($virtual_keys, 'en');
         $booking_id  = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) $row['id'];
         $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
         $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
@@ -106,15 +108,18 @@ function wp_loft_booking_prepare_calendar_payload() {
         $clean_status = wp_loft_booking_normalize_cleaning_status($status_data['status'] ?? 'pending');
 
         $bookings[] = [
-            'id'       => $booking_id,
-            'loft'     => $room_name ?: __('Loft', 'wp-loft-booking'),
-            'guest'    => $guest_name,
-            'start'    => $checkin,
-            'end'      => $checkout,
-            'nights'   => $nights,
-            'status'   => $payment ?: 'confirmed',
-            'amount'   => wp_loft_booking_format_currency($booking['total'] ?? 0, $currency),
-            'currency' => $currency,
+            'id'                => $booking_id,
+            'loft'              => $room_name ?: __('Loft', 'wp-loft-booking'),
+            'loft_label'        => $virtual_keys['loft_label'] ?? ($room_name ?: __('Loft', 'wp-loft-booking')),
+            'guest'             => $guest_name,
+            'start'             => $checkin,
+            'end'               => $checkout,
+            'nights'            => $nights,
+            'status'            => $payment ?: 'confirmed',
+            'amount'            => wp_loft_booking_format_currency($booking['total'] ?? 0, $currency),
+            'currency'          => $currency,
+            'virtual_keys'      => $virtual_keys['virtual_keys'] ?? [],
+            'virtual_key_label' => $virtual_key_label,
         ];
 
         $attention = wp_loft_booking_cleaning_needs_attention($checkout, $clean_status);

@@ -5,7 +5,7 @@
     const initial = settings.payload || {};
 
     const state = {
-        bookings: initial.bookings || [],
+        bookings: decorateBookings(initial.bookings || []),
         cleaning: initial.cleaning || [],
         today: initial.today || new Date().toISOString().slice(0, 10),
         view: {
@@ -16,6 +16,90 @@
     };
 
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    const colorPalette = [
+        '#2563eb',
+        '#f59e0b',
+        '#10b981',
+        '#f43f5e',
+        '#0ea5e9',
+        '#8b5cf6',
+        '#14b8a6',
+        '#e11d48',
+        '#6366f1',
+        '#22c55e',
+    ];
+
+    function loftColor(loftName) {
+        const name = (loftName || '').toLowerCase();
+        if (!name) return colorPalette[0];
+
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        return colorPalette[Math.abs(hash) % colorPalette.length];
+    }
+
+    function shadeColor(hex, percent) {
+        const num = parseInt(hex.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const r = (num >> 16) + amt;
+        const g = ((num >> 8) & 0x00ff) + amt;
+        const b = (num & 0x0000ff) + amt;
+        return (
+            '#' +
+            (
+                0x1000000 +
+                (r < 255 ? (r < 0 ? 0 : r) : 255) * 0x10000 +
+                (g < 255 ? (g < 0 ? 0 : g) : 255) * 0x100 +
+                (b < 255 ? (b < 0 ? 0 : b) : 255)
+            )
+                .toString(16)
+                .slice(1)
+        );
+    }
+
+    function decorateBookings(bookings) {
+        return (bookings || []).map((booking) => {
+            const loftLabel = booking.loft_label || booking.loft || '';
+            return {
+                ...booking,
+                color: booking.color || loftColor(loftLabel),
+                loft_label: loftLabel,
+            };
+        });
+    }
+
+    function expandBookingsAcrossStay(bookings) {
+        const expanded = [];
+
+        bookings.forEach((booking) => {
+            if (!booking.start || !booking.end) return;
+
+            const start = new Date(`${booking.start}T12:00:00`);
+            const end = new Date(`${booking.end}T12:00:00`);
+
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+
+            const totalNights = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) || 1);
+
+            for (let i = 0; i < totalNights; i++) {
+                const night = new Date(start);
+                night.setDate(start.getDate() + i);
+
+                expanded.push({
+                    ...booking,
+                    stay_length: totalNights,
+                    night_index: i + 1,
+                    day_key: toKey(night),
+                });
+            }
+        });
+
+        return expanded;
+    }
 
     function pad(num) {
         return num.toString().padStart(2, '0');
@@ -86,9 +170,10 @@
         const container = $(`#loft-${type}-calendar`);
         const viewDate = state.view[type];
         const days = buildMonth(viewDate);
+        const sourceEvents = type === 'bookings' ? expandBookingsAcrossStay(state.bookings) : state.cleaning;
         const eventsByDay = groupEvents(
-            type === 'bookings' ? state.bookings : state.cleaning,
-            (event) => (type === 'bookings' ? event.start : event.cleaning_date)
+            sourceEvents,
+            (event) => (type === 'bookings' ? event.day_key : event.cleaning_date)
         );
 
         const weekdayRow = dayLabels
@@ -106,12 +191,27 @@
                 const eventHtml = events
                     .map((event) => {
                         if (type === 'bookings') {
+                            const color = event.color || loftColor(event.loft_label || event.loft);
+                            const darker = shadeColor(color, -18);
+                            const keyLabel =
+                                event.virtual_key_label ||
+                                (event.virtual_keys && event.virtual_keys.length
+                                    ? event.virtual_keys.join(', ')
+                                    : 'Virtual key pending');
+                            const stayBadge = event.stay_length > 1
+                                ? `<span class="loft-calendar__pill loft-calendar__pill--subtle">Night ${event.night_index} of ${event.stay_length}</span>`
+                                : '';
+
                             return `
-                                <div class="loft-calendar__event" aria-label="Booking for ${event.guest}">
-                                    <h4>${event.loft}</h4>
-                                    <p>${event.guest}</p>
-                                    <p>${friendlyDate(event.start)} → ${friendlyDate(event.end)} · ${event.nights || 1} night(s)</p>
-                                    <p style="opacity:0.85;">${event.amount || ''} · ${event.status || ''}</p>
+                                <div class="loft-calendar__event" aria-label="Booking for ${event.guest}" style="background: linear-gradient(135deg, ${color}, ${darker}); border-left: 5px solid ${darker};">
+                                    <div class="loft-calendar__event-heading">
+                                        <span class="loft-calendar__pill">${event.loft_label || event.loft}</span>
+                                        ${stayBadge}
+                                    </div>
+                                    <p class="loft-calendar__event-title">${event.guest}</p>
+                                    <p class="loft-calendar__meta">${friendlyDate(event.start)} → ${friendlyDate(event.end)} · ${event.nights || event.stay_length || 1} night(s)</p>
+                                    <p class="loft-calendar__meta loft-calendar__meta--keys">🔑 ${keyLabel}</p>
+                                    <p class="loft-calendar__meta">${event.amount || ''} · ${event.status || ''}</p>
                                 </div>
                             `;
                         }
@@ -187,7 +287,7 @@
     }
 
     function refreshFromSnapshot(snapshot) {
-        state.bookings = snapshot.bookings || [];
+        state.bookings = decorateBookings(snapshot.bookings || []);
         state.cleaning = snapshot.cleaning || [];
         state.today = snapshot.today || state.today;
         renderCalendar('bookings');
