@@ -63,12 +63,12 @@ function wp_loft_booking_prepare_calendar_payload() {
     global $wpdb;
 
     $table        = $wpdb->prefix . 'nd_booking_booking';
-    $window_start = wp_date('Y-m-d', strtotime('-21 days', current_time('timestamp')));
-    $window_end   = wp_date('Y-m-d', strtotime('+180 days', current_time('timestamp')));
+    $window_start = wp_date('Y-m-d', strtotime('-2 years', current_time('timestamp')));
+    $window_end   = wp_date('Y-m-d', strtotime('+2 years', current_time('timestamp')));
 
     $rows = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT id FROM {$table} WHERE date_to >= %s AND date_from <= %s ORDER BY date_from ASC LIMIT 450",
+            "SELECT id FROM {$table} WHERE date_to >= %s AND date_from <= %s ORDER BY date_from ASC LIMIT 600",
             $window_start,
             $window_end
         ),
@@ -160,6 +160,10 @@ function wp_loft_booking_prepare_calendar_payload() {
         'cleaning'      => $cleaning,
         'summary'       => $summary,
         'status_labels' => wp_loft_booking_cleaning_status_labels(),
+        'window'        => [
+            'start' => $window_start,
+            'end'   => $window_end,
+        ],
     ];
 }
 
@@ -247,6 +251,9 @@ function loft_booking_google_calendar_page() {
                     <span class="loft-chip loft-chip--primary">📅 Upcoming bookings <strong><?php echo esc_html($payload['summary']['upcoming_bookings']); ?></strong></span>
                     <span class="loft-chip loft-chip--info">🧳 Arrivals today <strong><?php echo esc_html($payload['summary']['arrivals_today']); ?></strong></span>
                     <span class="loft-chip loft-chip--warning">🧹 Cleanings to approve <strong><?php echo esc_html($payload['summary']['pending_cleaning']); ?></strong></span>
+                    <?php if (!empty($payload['window']['start']) && !empty($payload['window']['end'])) : ?>
+                        <span class="loft-chip loft-chip--muted">📆 Showing <?php echo esc_html(wp_date('M Y', strtotime($payload['window']['start']))); ?> – <?php echo esc_html(wp_date('M Y', strtotime($payload['window']['end']))); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="loft-calendar__actions">
