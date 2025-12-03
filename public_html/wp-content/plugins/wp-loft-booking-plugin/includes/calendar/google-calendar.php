@@ -59,6 +59,20 @@ function wp_loft_booking_cleaning_needs_attention($cleaning_date, $status) {
     return $cleaning_ts <= strtotime('+3 days', $today);
 }
 
+function wp_loft_booking_normalize_date($raw_date) {
+    if (empty($raw_date)) {
+        return '';
+    }
+
+    $timestamp = strtotime($raw_date);
+
+    if (!$timestamp) {
+        return '';
+    }
+
+    return wp_date('Y-m-d', $timestamp);
+}
+
 function wp_loft_booking_prepare_calendar_payload() {
     global $wpdb;
 
@@ -96,15 +110,18 @@ function wp_loft_booking_prepare_calendar_payload() {
 
         $virtual_keys      = wp_loft_booking_get_virtual_key_details($booking);
         $virtual_key_label = wp_loft_booking_format_virtual_key_summary($virtual_keys, 'en');
-        $booking_id  = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) $row['id'];
-        $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
-        $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
-        $checkin     = $booking['date_from'] ?? '';
-        $checkout    = $booking['date_to'] ?? '';
-        $currency    = $booking['currency'] ?? 'CAD';
-        $payment     = strtolower((string) ($booking['payment_status'] ?? 'confirmed'));
-        $nights      = wp_loft_booking_calculate_nights($booking);
-        $status_data = $status_store[$booking_id] ?? [];
+        $booking_id   = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) $row['id'];
+        $room_name    = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
+        $guest_name   = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
+        $checkin      = wp_loft_booking_normalize_date($booking['date_from'] ?? '');
+        $checkout     = wp_loft_booking_normalize_date($booking['date_to'] ?? '');
+        $booking['date_from'] = $checkin;
+        $booking['date_to']   = $checkout;
+
+        $currency     = $booking['currency'] ?? 'CAD';
+        $payment      = strtolower((string) ($booking['payment_status'] ?? 'confirmed'));
+        $nights       = wp_loft_booking_calculate_nights($booking);
+        $status_data  = $status_store[$booking_id] ?? [];
         $clean_status = wp_loft_booking_normalize_cleaning_status($status_data['status'] ?? 'pending');
 
         $bookings[] = [
