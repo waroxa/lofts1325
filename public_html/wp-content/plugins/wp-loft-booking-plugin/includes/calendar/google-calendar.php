@@ -59,16 +59,30 @@ function wp_loft_booking_cleaning_needs_attention($cleaning_date, $status) {
     return $cleaning_ts <= strtotime('+3 days', $today);
 }
 
+function wp_loft_booking_normalize_date($raw_date) {
+    if (empty($raw_date)) {
+        return '';
+    }
+
+    $timestamp = strtotime($raw_date);
+
+    if (!$timestamp) {
+        return '';
+    }
+
+    return wp_date('Y-m-d', $timestamp);
+}
+
 function wp_loft_booking_prepare_calendar_payload() {
     global $wpdb;
 
     $table        = $wpdb->prefix . 'nd_booking_booking';
-    $window_start = wp_date('Y-m-d', strtotime('-21 days', current_time('timestamp')));
-    $window_end   = wp_date('Y-m-d', strtotime('+180 days', current_time('timestamp')));
+    $window_start = wp_date('Y-m-d', strtotime('-2 years', current_time('timestamp')));
+    $window_end   = wp_date('Y-m-d', strtotime('+2 years', current_time('timestamp')));
 
     $rows = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT id FROM {$table} WHERE date_to >= %s AND date_from <= %s ORDER BY date_from ASC LIMIT 450",
+            "SELECT id FROM {$table} WHERE date_to >= %s AND date_from <= %s ORDER BY date_from ASC LIMIT 600",
             $window_start,
             $window_end
         ),
@@ -96,15 +110,18 @@ function wp_loft_booking_prepare_calendar_payload() {
 
         $virtual_keys      = wp_loft_booking_get_virtual_key_details($booking);
         $virtual_key_label = wp_loft_booking_format_virtual_key_summary($virtual_keys, 'en');
-        $booking_id  = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) $row['id'];
-        $room_name   = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
-        $guest_name  = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
-        $checkin     = $booking['date_from'] ?? '';
-        $checkout    = $booking['date_to'] ?? '';
-        $currency    = $booking['currency'] ?? 'CAD';
-        $payment     = strtolower((string) ($booking['payment_status'] ?? 'confirmed'));
-        $nights      = wp_loft_booking_calculate_nights($booking);
-        $status_data = $status_store[$booking_id] ?? [];
+        $booking_id   = isset($booking['booking_id']) ? (int) $booking['booking_id'] : (int) $row['id'];
+        $room_name    = wp_loft_booking_format_unit_label($booking['room_name'] ?? '');
+        $guest_name   = trim(sprintf('%s %s', $booking['name'] ?? '', $booking['surname'] ?? '')) ?: __('Guest', 'wp-loft-booking');
+        $checkin      = wp_loft_booking_normalize_date($booking['date_from'] ?? '');
+        $checkout     = wp_loft_booking_normalize_date($booking['date_to'] ?? '');
+        $booking['date_from'] = $checkin;
+        $booking['date_to']   = $checkout;
+
+        $currency     = $booking['currency'] ?? 'CAD';
+        $payment      = strtolower((string) ($booking['payment_status'] ?? 'confirmed'));
+        $nights       = wp_loft_booking_calculate_nights($booking);
+        $status_data  = $status_store[$booking_id] ?? [];
         $clean_status = wp_loft_booking_normalize_cleaning_status($status_data['status'] ?? 'pending');
 
         $bookings[] = [
@@ -160,6 +177,10 @@ function wp_loft_booking_prepare_calendar_payload() {
         'cleaning'      => $cleaning,
         'summary'       => $summary,
         'status_labels' => wp_loft_booking_cleaning_status_labels(),
+        'window'        => [
+            'start' => $window_start,
+            'end'   => $window_end,
+        ],
     ];
 }
 
@@ -247,6 +268,9 @@ function loft_booking_google_calendar_page() {
                     <span class="loft-chip loft-chip--primary">📅 Upcoming bookings <strong><?php echo esc_html($payload['summary']['upcoming_bookings']); ?></strong></span>
                     <span class="loft-chip loft-chip--info">🧳 Arrivals today <strong><?php echo esc_html($payload['summary']['arrivals_today']); ?></strong></span>
                     <span class="loft-chip loft-chip--warning">🧹 Cleanings to approve <strong><?php echo esc_html($payload['summary']['pending_cleaning']); ?></strong></span>
+                    <?php if (!empty($payload['window']['start']) && !empty($payload['window']['end'])) : ?>
+                        <span class="loft-chip loft-chip--muted">📆 Showing <?php echo esc_html(wp_date('M Y', strtotime($payload['window']['start']))); ?> – <?php echo esc_html(wp_date('M Y', strtotime($payload['window']['end']))); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="loft-calendar__actions">
