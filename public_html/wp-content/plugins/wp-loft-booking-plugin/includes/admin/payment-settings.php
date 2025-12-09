@@ -49,10 +49,10 @@ function loft_booking_payment_settings()
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment_settings'])) {
         check_admin_referer('loft_booking_payment_settings');
 
-        $live_publishable = sanitize_text_field($_POST['stripe_publishable_key'] ?? '');
-        $live_secret      = sanitize_text_field($_POST['stripe_secret_key'] ?? '');
-        $test_publishable = sanitize_text_field($_POST['stripe_test_publishable_key'] ?? '');
-        $test_secret      = sanitize_text_field($_POST['stripe_test_secret_key'] ?? '');
+        $live_publishable = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
+        $live_secret      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
+        $test_publishable = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
+        $test_secret      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
         $test_mode        = !empty($_POST['stripe_test_mode']);
 
         update_option('stripe_publishable_key', $live_publishable);
@@ -61,8 +61,8 @@ function loft_booking_payment_settings()
         update_option('stripe_test_secret_key', $test_secret);
         update_option('stripe_test_mode', $test_mode);
 
-        update_option('stripe_checkout_message', sanitize_textarea_field($_POST['stripe_checkout_message'] ?? ''));
-        update_option('stripe_currency', sanitize_text_field($_POST['stripe_currency'] ?? 'CAD'));
+        update_option('stripe_checkout_message', sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? '')));
+        update_option('stripe_currency', sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD')));
 
         echo '<div class="updated"><p>Payment settings saved successfully.</p></div>';
     }

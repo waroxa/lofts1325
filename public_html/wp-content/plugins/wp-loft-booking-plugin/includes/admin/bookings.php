@@ -324,18 +324,18 @@ function wp_loft_booking_handle_booking_actions() {
     if (!empty($_POST['wp_loft_booking_admin_checkout'])) {
         check_admin_referer('wp_loft_booking_admin_checkout');
 
-        $first_name = sanitize_text_field($_POST['guest_first_name'] ?? '');
-        $last_name  = sanitize_text_field($_POST['guest_last_name'] ?? '');
-        $email      = sanitize_email($_POST['guest_email'] ?? '');
-        $phone      = sanitize_text_field($_POST['guest_phone'] ?? '');
-        $room_type  = sanitize_text_field($_POST['room_type'] ?? '');
-        $unit_id    = isset($_POST['preferred_unit_id']) ? absint($_POST['preferred_unit_id']) : 0;
-        $checkin    = sanitize_text_field($_POST['checkin_date'] ?? '');
-        $checkout   = sanitize_text_field($_POST['checkout_date'] ?? '');
-        $payment    = isset($_POST['payment_total']) ? floatval($_POST['payment_total']) : null;
-        $currency   = sanitize_text_field($_POST['payment_currency'] ?? 'CAD');
-        $status     = sanitize_text_field($_POST['payment_status'] ?? 'paid');
-        $txn_id     = sanitize_text_field($_POST['transaction_id'] ?? '');
+        $first_name = sanitize_text_field(wp_unslash($_POST['guest_first_name'] ?? ''));
+        $last_name  = sanitize_text_field(wp_unslash($_POST['guest_last_name'] ?? ''));
+        $email      = sanitize_email(wp_unslash($_POST['guest_email'] ?? ''));
+        $phone      = sanitize_text_field(wp_unslash($_POST['guest_phone'] ?? ''));
+        $room_type  = sanitize_text_field(wp_unslash($_POST['room_type'] ?? ''));
+        $unit_id    = isset($_POST['preferred_unit_id']) ? absint(wp_unslash($_POST['preferred_unit_id'])) : 0;
+        $checkin    = sanitize_text_field(wp_unslash($_POST['checkin_date'] ?? ''));
+        $checkout   = sanitize_text_field(wp_unslash($_POST['checkout_date'] ?? ''));
+        $payment    = isset($_POST['payment_total']) ? floatval(wp_unslash($_POST['payment_total'])) : null;
+        $currency   = sanitize_text_field(wp_unslash($_POST['payment_currency'] ?? 'CAD'));
+        $status     = sanitize_text_field(wp_unslash($_POST['payment_status'] ?? 'paid'));
+        $txn_id     = sanitize_text_field(wp_unslash($_POST['transaction_id'] ?? ''));
 
         if (!$email || !$room_type || !$checkin || !$checkout) {
             add_settings_error(
