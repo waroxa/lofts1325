@@ -9,6 +9,9 @@ $base      = MPHB()->settings()->emails()->getBaseColor();
 $base_text = \MPHB\Utils\ColorUtils::lightOrDark( $base, '#202020', '#ffffff' );
 $text      = MPHB()->settings()->emails()->getBodyTextColor();
 
+$header_bg   = '#f5f5f5';
+$header_text = '#000000';
+
 $bg_darker_10    = \MPHB\Utils\ColorUtils::hexDarker( $bg, 10 );
 $body_darker_10  = \MPHB\Utils\ColorUtils::hexDarker( $body, 10 );
 $base_lighter_20 = \MPHB\Utils\ColorUtils::hexLighter( $base, 20 );
@@ -31,9 +34,9 @@ border-radius: 3px !important;
 }
 
 #template_header {
-background-color: <?php echo esc_attr( $base ); ?>;
+background-color: <?php echo esc_attr( $header_bg ); ?>;
 border-radius: 3px 3px 0 0 !important;
-color: <?php echo esc_attr( $base_text ); ?>;
+color: <?php echo esc_attr( $header_text ); ?>;
 border-bottom: 0;
 font-weight: bold;
 line-height: 100%;
@@ -42,7 +45,8 @@ font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 }
 
 #template_header h1 {
-color: <?php echo esc_attr( $base_text ); ?>;
+color: <?php echo esc_attr( $header_text ); ?>;
+text-shadow: none;
 }
 
 #template_footer td {
@@ -104,6 +108,7 @@ color: <?php echo esc_attr( $base ); ?>;
 #header_wrapper {
 padding: 36px 48px;
 display: block;
+color: <?php echo esc_attr( $header_text ); ?>;
 }
 
 h1 {
