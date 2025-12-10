@@ -16,28 +16,44 @@ function loft_booking_payment_settings_page()
 }
 
 /**
+ * Fetch all Stripe settings with sensible defaults.
+ */
+function wp_loft_booking_get_stripe_settings()
+{
+    $settings = (array) get_option('wp_loft_booking_stripe_settings', []);
+
+    // Backward compatibility: fall back to legacy option names if the new array is empty.
+    $legacy_defaults = [
+        'live_publishable' => get_option('stripe_publishable_key', ''),
+        'live_secret'      => get_option('stripe_secret_key', ''),
+        'test_publishable' => get_option('stripe_test_publishable_key', ''),
+        'test_secret'      => get_option('stripe_test_secret_key', ''),
+        'test_mode'        => (bool) get_option('stripe_test_mode', false),
+        'checkout_message' => get_option('stripe_checkout_message', 'Simple and safe. Make payments with any type of credit card.'),
+        'currency'         => get_option('stripe_currency', 'CAD'),
+    ];
+
+    return wp_parse_args($settings, $legacy_defaults);
+}
+
+/**
  * Return the currently active Stripe keys based on the chosen environment.
  */
 function wp_loft_booking_get_active_stripe_keys()
 {
-    $test_mode = (bool) get_option('stripe_test_mode', false);
+    $settings = wp_loft_booking_get_stripe_settings();
 
-    $live_publishable = get_option('stripe_publishable_key', '');
-    $live_secret      = get_option('stripe_secret_key', '');
-    $test_publishable = get_option('stripe_test_publishable_key', '');
-    $test_secret      = get_option('stripe_test_secret_key', '');
-
-    if ($test_mode) {
+    if (!empty($settings['test_mode'])) {
         return [
-            'publishable' => $test_publishable,
-            'secret'      => $test_secret,
+            'publishable' => $settings['test_publishable'],
+            'secret'      => $settings['test_secret'],
             'mode'        => 'test',
         ];
     }
 
     return [
-        'publishable' => $live_publishable,
-        'secret'      => $live_secret,
+        'publishable' => $settings['live_publishable'],
+        'secret'      => $settings['live_secret'],
         'mode'        => 'live',
     ];
 }
@@ -48,33 +64,40 @@ function loft_booking_payment_settings()
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment_settings'])) {
         check_admin_referer('loft_booking_payment_settings');
 
-        $live_publishable = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
-        $live_secret      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
-        $test_publishable = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
-        $test_secret      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
-        $test_mode        = !empty($_POST['stripe_test_mode']);
+        $settings = wp_loft_booking_get_stripe_settings();
 
-        update_option('stripe_publishable_key', $live_publishable);
-        update_option('stripe_secret_key', $live_secret);
-        update_option('stripe_test_publishable_key', $test_publishable);
-        update_option('stripe_test_secret_key', $test_secret);
-        update_option('stripe_test_mode', $test_mode);
+        $settings['live_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
+        $settings['live_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
+        $settings['test_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
+        $settings['test_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
+        $settings['test_mode']        = !empty($_POST['stripe_test_mode']);
+        $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
+        $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
 
-        update_option('stripe_checkout_message', sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? '')));
-        update_option('stripe_currency', sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD')));
+        update_option('wp_loft_booking_stripe_settings', $settings, false);
+
+        // Keep legacy option names in sync for any existing integrations.
+        update_option('stripe_publishable_key', $settings['live_publishable']);
+        update_option('stripe_secret_key', $settings['live_secret']);
+        update_option('stripe_test_publishable_key', $settings['test_publishable']);
+        update_option('stripe_test_secret_key', $settings['test_secret']);
+        update_option('stripe_test_mode', (bool) $settings['test_mode']);
+        update_option('stripe_checkout_message', $settings['checkout_message']);
+        update_option('stripe_currency', $settings['currency']);
 
         echo '<div class="updated"><p>Payment settings saved successfully.</p></div>';
     }
 
     // Fetch Existing Settings
-    $stripe_publishable_key    = get_option('stripe_publishable_key', '');
-    $stripe_secret_key         = get_option('stripe_secret_key', '');
-    $stripe_test_publishable   = get_option('stripe_test_publishable_key', '');
-    $stripe_test_secret        = get_option('stripe_test_secret_key', '');
-    $stripe_test_mode          = (bool) get_option('stripe_test_mode', false);
+    $stripe_settings           = wp_loft_booking_get_stripe_settings();
+    $stripe_publishable_key    = $stripe_settings['live_publishable'];
+    $stripe_secret_key         = $stripe_settings['live_secret'];
+    $stripe_test_publishable   = $stripe_settings['test_publishable'];
+    $stripe_test_secret        = $stripe_settings['test_secret'];
+    $stripe_test_mode          = (bool) $stripe_settings['test_mode'];
     $active_keys               = wp_loft_booking_get_active_stripe_keys();
-    $stripe_checkout_message   = get_option('stripe_checkout_message', 'Simple and safe. Make payments with any type of credit card.');
-    $stripe_currency           = get_option('stripe_currency', 'CAD');
+    $stripe_checkout_message   = $stripe_settings['checkout_message'];
+    $stripe_currency           = $stripe_settings['currency'];
 
     // Render the Form
     ?>
