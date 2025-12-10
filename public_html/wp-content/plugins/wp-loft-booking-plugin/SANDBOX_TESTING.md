@@ -3,7 +3,7 @@
 Use this checklist to validate the full reservation purchase flow without charging real cards. The steps rely on the Payment Settings screen in the admin dashboard.
 
 ## 1) Enable test mode and keys
-1. Go to **Payment Settings** in the WP admin menu.
+1. Go to **Lofts 1325 ▸ Payment Settings** in the WP admin menu.
 2. Check **Enable Stripe test mode**.
 3. Enter your **test publishable** and **test secret** keys from the Stripe dashboard.
 4. Save changes and confirm that the Active mode banner shows **TEST**.

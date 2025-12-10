@@ -1,18 +1,17 @@
 <?php
 defined('ABSPATH') || exit;
 
-// Add Payment Settings Page to the Admin Menu
+// Add Payment Settings Page as a submenu under the main Loft Booking menu
 add_action('admin_menu', 'loft_booking_payment_settings_page');
 function loft_booking_payment_settings_page()
 {
-    add_menu_page(
+    add_submenu_page(
+        'wp_loft_booking',                   // Parent Slug
         'Payment Settings',                  // Page Title
-        'Payment Settings',                  // Menu Title
+        '💳 Payment Settings',               // Menu Title
         'manage_options',                    // Capability
         'loft-payment-settings',             // Menu Slug
-        'loft_booking_payment_settings',     // Callback Function
-        'dashicons-admin-generic',           // Icon
-        25                                   // Position
+        'loft_booking_payment_settings'      // Callback Function
     );
 }
 
