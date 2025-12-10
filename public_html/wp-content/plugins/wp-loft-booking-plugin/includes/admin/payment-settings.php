@@ -3,6 +3,8 @@ defined('ABSPATH') || exit;
 
 // Add Payment Settings Page as a submenu under the main Loft Booking menu
 add_action('admin_menu', 'loft_booking_payment_settings_page');
+add_action('admin_post_loft_booking_save_payment_settings', 'loft_booking_handle_payment_settings_save');
+
 function loft_booking_payment_settings_page()
 {
     add_submenu_page(
@@ -58,36 +60,44 @@ function wp_loft_booking_get_active_stripe_keys()
     ];
 }
 
-function loft_booking_payment_settings()
+/**
+ * Handle form submissions for the payment settings screen.
+ */
+function loft_booking_handle_payment_settings_save()
 {
-    // Save Settings if Form is Submitted
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment_settings'])) {
-        check_admin_referer('loft_booking_payment_settings');
-
-        $settings = wp_loft_booking_get_stripe_settings();
-
-        $settings['live_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
-        $settings['live_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
-        $settings['test_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
-        $settings['test_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
-        $settings['test_mode']        = !empty($_POST['stripe_test_mode']);
-        $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
-        $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
-
-        update_option('wp_loft_booking_stripe_settings', $settings, false);
-
-        // Keep legacy option names in sync for any existing integrations.
-        update_option('stripe_publishable_key', $settings['live_publishable']);
-        update_option('stripe_secret_key', $settings['live_secret']);
-        update_option('stripe_test_publishable_key', $settings['test_publishable']);
-        update_option('stripe_test_secret_key', $settings['test_secret']);
-        update_option('stripe_test_mode', (bool) $settings['test_mode']);
-        update_option('stripe_checkout_message', $settings['checkout_message']);
-        update_option('stripe_currency', $settings['currency']);
-
-        echo '<div class="updated"><p>Payment settings saved successfully.</p></div>';
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to update payment settings.', 'wp-loft-booking'));
     }
 
+    check_admin_referer('loft_booking_payment_settings');
+
+    $settings = wp_loft_booking_get_stripe_settings();
+
+    $settings['live_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
+    $settings['live_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
+    $settings['test_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
+    $settings['test_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
+    $settings['test_mode']        = !empty($_POST['stripe_test_mode']);
+    $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
+    $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
+
+    update_option('wp_loft_booking_stripe_settings', $settings, false);
+
+    // Keep legacy option names in sync for any existing integrations.
+    update_option('stripe_publishable_key', $settings['live_publishable']);
+    update_option('stripe_secret_key', $settings['live_secret']);
+    update_option('stripe_test_publishable_key', $settings['test_publishable']);
+    update_option('stripe_test_secret_key', $settings['test_secret']);
+    update_option('stripe_test_mode', (bool) $settings['test_mode']);
+    update_option('stripe_checkout_message', $settings['checkout_message']);
+    update_option('stripe_currency', $settings['currency']);
+
+    wp_safe_redirect(add_query_arg('settings-updated', 'true', admin_url('admin.php?page=loft-payment-settings')));
+    exit;
+}
+
+function loft_booking_payment_settings()
+{
     // Fetch Existing Settings
     $stripe_settings           = wp_loft_booking_get_stripe_settings();
     $stripe_publishable_key    = $stripe_settings['live_publishable'];
@@ -111,6 +121,10 @@ function loft_booking_payment_settings()
         </div>
 
         <div class="card" style="padding:16px;max-width:820px;">
+            <?php if (!empty($_GET['settings-updated'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>Payment settings saved successfully.</p></div>
+            <?php endif; ?>
+
             <h2 style="margin-top:0;">Stripe environment</h2>
             <table class="form-table" role="presentation">
                 <tr>
@@ -126,7 +140,8 @@ function loft_booking_payment_settings()
                 </tr>
             </table>
 
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="loft_booking_save_payment_settings">
                 <?php wp_nonce_field('loft_booking_payment_settings'); ?>
 
                 <table class="form-table" role="presentation">
