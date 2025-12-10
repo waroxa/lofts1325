@@ -81,75 +81,90 @@ function loft_booking_payment_settings()
     <div class="wrap">
         <h1>Payment Settings</h1>
         <p class="description">Choose which Stripe environment to use and store separate keys for live and test plans.</p>
+
         <div class="notice notice-info" style="padding:15px;margin:15px 0;">
-            <p style="margin:0 0 10px 0;"><strong>Sandbox testing:</strong> Enable test mode, use Stripe test keys, and run a full booking payment to confirm the checkout flow. See the checklist below before switching back to live keys.</p>
-            <ul style="margin:0 0 0 18px;list-style:disc;">
-                <li>Turn on <em>Enable Stripe test mode</em> and save your test keys.</li>
-                <li>Place a booking using the public form and pay with a Stripe test card (e.g., 4242 4242 4242 4242).</li>
-                <li>Verify the booking record, receipt email, and Stripe test dashboard payment all show the test amount.</li>
-                <li>Return here to switch back to live mode once checks pass.</li>
-            </ul>
+            <p style="margin:0 0 10px 0;"><strong>Sandbox testing:</strong> Enable test mode, enter your Stripe test keys, and run a booking with a Stripe test card (e.g., 4242 4242 4242 4242) to validate the full flow. Switch back to live mode after confirming emails and records.</p>
         </div>
-        <table class="form-table">
-            <tr>
-                <th scope="row">Active mode</th>
-                <td><strong><?php echo esc_html(strtoupper($active_keys['mode'])); ?></strong> (<?php echo $active_keys['mode'] === 'test' ? 'Test keys are used for new checkouts.' : 'Live keys are used for new checkouts.'; ?>)</td>
-            </tr>
-        </table>
-        <form method="post">
-            <?php wp_nonce_field('loft_booking_payment_settings'); ?>
-            <table class="form-table">
+
+        <div class="card" style="padding:16px;max-width:820px;">
+            <h2 style="margin-top:0;">Stripe environment</h2>
+            <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row"><label for="stripe_test_mode">Enable Stripe test mode</label></th>
+                    <th scope="row">Active mode</th>
                     <td>
-                        <label>
-                            <input type="checkbox" id="stripe_test_mode" name="stripe_test_mode" value="1" <?php checked($stripe_test_mode); ?>>
-                            Use test keys without replacing live keys.
-                        </label>
-                        <p class="description">When enabled, the test publishable/secret keys below are used instead of the live keys.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row" colspan="2"><h2 style="margin:0;">Live keys</h2></th>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_publishable_key">Live publishable key</label></th>
-                    <td><input type="text" id="stripe_publishable_key" name="stripe_publishable_key" class="regular-text" value="<?php echo esc_attr($stripe_publishable_key); ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_secret_key">Live secret key</label></th>
-                    <td><input type="text" id="stripe_secret_key" name="stripe_secret_key" class="regular-text" value="<?php echo esc_attr($stripe_secret_key); ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row" colspan="2"><h2 style="margin:0;">Test keys</h2></th>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_test_publishable_key">Test publishable key</label></th>
-                    <td><input type="text" id="stripe_test_publishable_key" name="stripe_test_publishable_key" class="regular-text" value="<?php echo esc_attr($stripe_test_publishable_key); ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_test_secret_key">Test secret key</label></th>
-                    <td><input type="text" id="stripe_test_secret_key" name="stripe_test_secret_key" class="regular-text" value="<?php echo esc_attr($stripe_test_secret_key); ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_checkout_message">Stripe Checkout Message</label></th>
-                    <td><textarea id="stripe_checkout_message" name="stripe_checkout_message" rows="4" class="large-text"><?php echo esc_textarea($stripe_checkout_message); ?></textarea></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="stripe_currency">Currency</label></th>
-                    <td>
-                        <select id="stripe_currency" name="stripe_currency">
-                            <option value="CAD" <?php selected($stripe_currency, 'CAD'); ?>>CAD</option>
-                            <option value="USD" <?php selected($stripe_currency, 'USD'); ?>>USD</option>
-                            <option value="EUR" <?php selected($stripe_currency, 'EUR'); ?>>EUR</option>
-                        </select>
+                        <span style="display:inline-block;padding:3px 8px;border-radius:999px;color:#fff;background:<?php echo $active_keys['mode'] === 'test' ? '#d63638' : '#2271b1'; ?>;font-weight:600;letter-spacing:0.02em;">
+                            <?php echo esc_html(strtoupper($active_keys['mode'])); ?>
+                        </span>
+                        <span style="margin-left:8px;">
+                            <?php echo $active_keys['mode'] === 'test' ? 'Sandbox keys are active for new checkouts.' : 'Live keys are active for new checkouts.'; ?>
+                        </span>
                     </td>
                 </tr>
             </table>
-            <p class="submit">
-                <input type="submit" name="save_payment_settings" id="save_payment_settings" class="button-primary" value="Save Changes">
-            </p>
-        </form>
+
+            <form method="post">
+                <?php wp_nonce_field('loft_booking_payment_settings'); ?>
+
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="stripe_test_mode">Enable Stripe test mode</label></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" id="stripe_test_mode" name="stripe_test_mode" value="1" <?php checked($stripe_test_mode); ?>>
+                                Use sandbox/test keys without replacing live keys.
+                            </label>
+                            <p class="description" style="margin-top:6px;">When enabled, the test publishable/secret keys below are used instead of the live keys so you can run purchase flows in Stripe’s test data view.</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <h2>Live keys</h2>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="stripe_publishable_key">Live publishable key</label></th>
+                        <td><input type="text" id="stripe_publishable_key" name="stripe_publishable_key" class="regular-text" value="<?php echo esc_attr($stripe_publishable_key); ?>" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="stripe_secret_key">Live secret key</label></th>
+                        <td><input type="text" id="stripe_secret_key" name="stripe_secret_key" class="regular-text" value="<?php echo esc_attr($stripe_secret_key); ?>" /></td>
+                    </tr>
+                </table>
+
+                <h2>Sandbox / test keys</h2>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="stripe_test_publishable_key">Test publishable key</label></th>
+                        <td><input type="text" id="stripe_test_publishable_key" name="stripe_test_publishable_key" class="regular-text" value="<?php echo esc_attr($stripe_test_publishable_key); ?>" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="stripe_test_secret_key">Test secret key</label></th>
+                        <td><input type="text" id="stripe_test_secret_key" name="stripe_test_secret_key" class="regular-text" value="<?php echo esc_attr($stripe_test_secret_key); ?>" /></td>
+                    </tr>
+                </table>
+
+                <h2>Checkout display</h2>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="stripe_checkout_message">Stripe Checkout Message</label></th>
+                        <td><textarea id="stripe_checkout_message" name="stripe_checkout_message" rows="4" class="large-text"><?php echo esc_textarea($stripe_checkout_message); ?></textarea></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="stripe_currency">Currency</label></th>
+                        <td>
+                            <select id="stripe_currency" name="stripe_currency">
+                                <option value="CAD" <?php selected($stripe_currency, 'CAD'); ?>>CAD</option>
+                                <option value="USD" <?php selected($stripe_currency, 'USD'); ?>>USD</option>
+                                <option value="EUR" <?php selected($stripe_currency, 'EUR'); ?>>EUR</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="submit">
+                    <input type="submit" name="save_payment_settings" id="save_payment_settings" class="button-primary" value="Save Changes">
+                </p>
+            </form>
+        </div>
     </div>
     <?php
 }
