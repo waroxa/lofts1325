@@ -43,10 +43,14 @@ function wp_loft_booking_bookings_page() {
         <h1>Manage Bookings</h1>
         <?php settings_errors('wp_loft_booking_bookings'); ?>
 
-        <p class="description" style="margin-bottom:8px;">
-            <strong>New:</strong> Use the sandbox checkout below to trigger the full flow without the public form.
-            <a href="#admin-sandbox-checkout">Jump to admin sandbox</a>
-        </p>
+        <div class="notice notice-info inline" style="margin:10px 0 18px;">
+            <p style="margin:8px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <strong>Sandbox checkout available:</strong>
+                <span>Trigger the full booking flow (payment, emails, calendars, keys) directly from the dashboard.</span>
+                <a class="button button-primary" href="#admin-sandbox-checkout">Open admin sandbox form</a>
+            </p>
+            <p class="description" style="margin:0;">Tip: turn on Stripe test mode in Payment Settings to keep sandbox charges separated from live payments.</p>
+        </div>
 
         <h2 id="admin-sandbox-checkout">Simulate checkout (admin sandbox)</h2>
         <p>Build a booking with your own dates and prices and run the full automation (emails, calendar, keys). Use test mode in Payment Settings for sandbox payments.</p>
