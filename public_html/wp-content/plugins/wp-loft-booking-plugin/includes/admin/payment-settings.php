@@ -1,18 +1,17 @@
 <?php
 defined('ABSPATH') || exit;
 
-// Add Payment Settings Page to the Admin Menu
+// Add Payment Settings Page as a submenu under the main Loft Booking menu
 add_action('admin_menu', 'loft_booking_payment_settings_page');
 function loft_booking_payment_settings_page()
 {
-    add_menu_page(
+    add_submenu_page(
+        'wp_loft_booking',                   // Parent Slug
         'Payment Settings',                  // Page Title
-        'Payment Settings',                  // Menu Title
+        '💳 Payment Settings',               // Menu Title
         'manage_options',                    // Capability
         'loft-payment-settings',             // Menu Slug
-        'loft_booking_payment_settings',     // Callback Function
-        'dashicons-admin-generic',           // Icon
-        25                                   // Position
+        'loft_booking_payment_settings'      // Callback Function
     );
 }
 
@@ -82,6 +81,15 @@ function loft_booking_payment_settings()
     <div class="wrap">
         <h1>Payment Settings</h1>
         <p class="description">Choose which Stripe environment to use and store separate keys for live and test plans.</p>
+        <div class="notice notice-info" style="padding:15px;margin:15px 0;">
+            <p style="margin:0 0 10px 0;"><strong>Sandbox testing:</strong> Enable test mode, use Stripe test keys, and run a full booking payment to confirm the checkout flow. See the checklist below before switching back to live keys.</p>
+            <ul style="margin:0 0 0 18px;list-style:disc;">
+                <li>Turn on <em>Enable Stripe test mode</em> and save your test keys.</li>
+                <li>Place a booking using the public form and pay with a Stripe test card (e.g., 4242 4242 4242 4242).</li>
+                <li>Verify the booking record, receipt email, and Stripe test dashboard payment all show the test amount.</li>
+                <li>Return here to switch back to live mode once checks pass.</li>
+            </ul>
+        </div>
         <table class="form-table">
             <tr>
                 <th scope="row">Active mode</th>
