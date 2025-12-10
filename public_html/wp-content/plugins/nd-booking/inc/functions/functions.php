@@ -364,8 +364,33 @@ function nd_booking_get_loft_nightly_rate( array $rule, $date, ?array $long_stay
         return nd_booking_get_loft_seasonal_rate( $rule, $date );
 }
 
+function nd_booking_calculate_airbnb_style_discount( $base_total, $night_count ) {
+        $weekly_percent  = min( 100, max( 0, floatval( get_option( 'nd_booking_airbnb_weekly_discount', 0 ) ) ) );
+        $monthly_percent = min( 100, max( 0, floatval( get_option( 'nd_booking_airbnb_monthly_discount', 0 ) ) ) );
+
+        $discount = array(
+                'amount'  => 0.0,
+                'percent' => 0.0,
+                'label'   => '',
+        );
+
+        if ( $night_count >= 28 && $monthly_percent > 0 ) {
+                $discount['percent'] = $monthly_percent;
+                $discount['label']   = __( 'Monthly discount', 'nd-booking' );
+        } elseif ( $night_count >= 7 && $weekly_percent > 0 ) {
+                $discount['percent'] = $weekly_percent;
+                $discount['label']   = __( 'Weekly discount', 'nd-booking' );
+        }
+
+        if ( $discount['percent'] > 0 ) {
+                $discount['amount'] = round( $base_total * ( $discount['percent'] / 100 ), 2 );
+        }
+
+        return $discount;
+}
+
 /**
- * Calculate loft pricing (including seasonal and long-stay tiers) for a date range.
+ * Calculate loft pricing (including seasonal rates and Airbnb-style discounts) for a date range.
  *
  * @param array  $rule        Pricing rule payload.
  * @param string $date_from   Arrival date (Y/m/d or Y-m-d).
@@ -383,34 +408,46 @@ function nd_booking_calculate_loft_pricing( array $rule, $date_from, $date_to, $
                         'nightly_rate'   => 0.0,
                         'night_count'    => 0,
                         'long_stay_tier' => null,
+                        'discount'       => null,
                 );
         }
-
-        $long_stay_tier = nd_booking_get_loft_long_stay_tier( $rule, $night_count );
 
         $running_total = 0.0;
         $current_date  = $date_from;
 
         for ( $index = 1; $index <= $night_count; $index++ ) {
-                $running_total += nd_booking_get_loft_nightly_rate( $rule, $current_date, $long_stay_tier, $night_count );
+                $running_total += nd_booking_get_loft_seasonal_rate( $rule, $current_date );
                 $current_date   = date( 'Y/m/d', strtotime( $current_date . ' + 1 days' ) );
         }
 
-        $base_total = ( null !== $long_stay_tier && isset( $long_stay_tier['flat_total'] ) )
-                ? (float) $long_stay_tier['flat_total']
-                : $running_total;
-
         if ( get_option( 'nd_booking_price_guests' ) == 1 ) {
-                $base_total = $base_total * max( 1, (int) $guest_count );
+                $running_total = $running_total * max( 1, (int) $guest_count );
         }
 
-        $effective_nightly_rate = $night_count > 0 ? $base_total / $night_count : 0.0;
+        $discount = nd_booking_calculate_airbnb_style_discount( $running_total, $night_count );
+
+        if ( $discount['amount'] > 0 ) {
+                $running_total = max( 0.0, $running_total - $discount['amount'] );
+        }
+
+        $effective_nightly_rate = $night_count > 0 ? $running_total / $night_count : 0.0;
+        $long_stay_tier         = null;
+
+        if ( $discount['amount'] > 0 ) {
+                $long_stay_tier = array(
+                        'nightly_rate'     => $effective_nightly_rate,
+                        'discount_amount'  => $discount['amount'],
+                        'discount_percent' => $discount['percent'],
+                        'label'            => $discount['label'],
+                );
+        }
 
         return array(
-                'total'          => round( $base_total, 2 ),
+                'total'          => round( $running_total, 2 ),
                 'nightly_rate'   => round( $effective_nightly_rate, 2 ),
                 'night_count'    => (int) $night_count,
                 'long_stay_tier' => $long_stay_tier,
+                'discount'       => $discount,
         );
 }
 

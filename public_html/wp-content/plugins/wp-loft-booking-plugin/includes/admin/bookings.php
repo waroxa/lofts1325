@@ -3,15 +3,25 @@ defined('ABSPATH') || exit;
 
 add_action('admin_init', 'wp_loft_booking_handle_bulk_receipts');
 add_action('admin_init', 'wp_loft_booking_handle_booking_actions');
+add_action('wp_ajax_wplb_admin_price_preview', 'wp_loft_booking_admin_price_preview');
 
 function wp_loft_booking_bookings_page() {
     global $wpdb;
 
     $selected_loft = isset($_GET['loft_id']) ? absint($_GET['loft_id']) : 0;
     $lofts         = $wpdb->get_results("SELECT id, name AS unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY name ASC");
-    $loft_types    = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}loft_types ORDER BY name ASC");
+    $nd_rooms      = get_posts([
+        'post_type'      => 'nd_booking_cpt_1',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
     $units         = $wpdb->get_results("SELECT id, unit_name, status FROM {$wpdb->prefix}loft_units ORDER BY unit_name ASC");
     $default_currency = get_option('stripe_currency', 'CAD');
+    $discount_settings = [
+        'weekly'  => (float) get_option('nd_booking_airbnb_weekly_discount', 0),
+        'monthly' => (float) get_option('nd_booking_airbnb_monthly_discount', 0),
+    ];
     $settings      = wp_loft_booking_get_auto_send_settings();
     $templates     = wp_loft_booking_default_template_keys();
     $booking_id    = isset($_GET['booking_id']) ? absint($_GET['booking_id']) : 0;
@@ -77,15 +87,24 @@ function wp_loft_booking_bookings_page() {
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="room_type">Loft type</label></th>
+                    <th scope="row"><label for="room_id">Room</label></th>
                     <td>
-                        <select name="room_type" id="room_type" required>
-                            <option value="">Select a loft type…</option>
-                            <?php foreach ($loft_types as $type) : ?>
-                                <option value="<?php echo esc_attr(strtoupper($type->name)); ?>"><?php echo esc_html($type->name); ?></option>
+                        <select name="room_id" id="room_id" required>
+                            <option value="">Select a room…</option>
+                            <?php foreach ($nd_rooms as $room) : ?>
+                                <option value="<?php echo esc_attr($room->ID); ?>">
+                                    <?php echo esc_html($room->post_title); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
-                        <p class="description">We match the first available unit whose label contains this type (e.g. "(STUDIO)").</p>
+                        <p class="description">Pulls availability and rates from ND Booking rooms instead of legacy loft types.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="guest_count">Guests</label></th>
+                    <td>
+                        <input type="number" name="guest_count" id="guest_count" value="1" min="1" style="width:100px;" />
+                        <p class="description">Used when per-guest pricing is enabled for the selected room.</p>
                     </td>
                 </tr>
                 <tr>
@@ -108,6 +127,23 @@ function wp_loft_booking_bookings_page() {
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row">Live price preview</th>
+                    <td>
+                        <input type="hidden" id="wplb_price_nonce" value="<?php echo esc_attr(wp_create_nonce('wplb_admin_price')); ?>" />
+                        <div id="wplb_price_summary" class="notice notice-alt" style="padding:12px;max-width:560px;">
+                            <p style="margin:0 0 6px 0;"><strong>Subtotal:</strong> <span data-field="subtotal">—</span></p>
+                            <p style="margin:0 0 6px 0;"><strong>Discount:</strong> <span data-field="discount">—</span></p>
+                            <p style="margin:0 0 6px 0;"><strong>Taxes:</strong> <span data-field="taxes">—</span></p>
+                            <p style="margin:0;"><strong>Total:</strong> <span data-field="total">—</span></p>
+                            <p class="description" style="margin:8px 0 0 0;">Totals mirror the front-end checkout (including Airbnb-style weekly/monthly discounts and tax breakdowns).</p>
+                        </div>
+                        <p style="margin-top:10px;">
+                            <button type="button" class="button" id="wplb_refresh_price">Refresh totals</button>
+                            <span id="wplb_price_status" style="margin-left:8px; color:#555; display:inline-block;"></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row"><label for="payment_total">Charge total</label></th>
                     <td>
                         <input type="number" step="0.01" min="0" name="payment_total" id="payment_total" placeholder="0.00" style="width:140px;">
@@ -116,7 +152,7 @@ function wp_loft_booking_bookings_page() {
                             <option value="USD" <?php selected($default_currency, 'USD'); ?>>USD</option>
                             <option value="EUR" <?php selected($default_currency, 'EUR'); ?>>EUR</option>
                         </select>
-                        <p class="description">Use any amount to mirror the checkout total you want to test.</p>
+                        <p class="description">Auto-fills from the ND Booking calculation above; override manually if you need to test a custom amount.</p>
                     </td>
                 </tr>
                 <tr>
@@ -132,6 +168,30 @@ function wp_loft_booking_bookings_page() {
                 </tr>
             </table>
             <p><button type="submit" class="button button-primary">Run test checkout</button></p>
+        </form>
+
+        <h2>Airbnb-style discounts</h2>
+        <p>Control the weekly and monthly discount percentages that mirror Airbnb’s flexible pricing rules. Set the values to 0% to disable discounts entirely.</p>
+        <form method="post" style="margin-bottom:24px;">
+            <?php wp_nonce_field('wp_loft_booking_update_airbnb_discounts'); ?>
+            <input type="hidden" name="wp_loft_booking_update_airbnb_discounts" value="1">
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><label for="weekly_discount">Weekly discount (%)</label></th>
+                    <td>
+                        <input type="number" id="weekly_discount" name="weekly_discount" min="0" max="100" step="0.01" value="<?php echo esc_attr($discount_settings['weekly']); ?>" style="width:120px;">%
+                        <p class="description">Applies when the stay is 7 nights or longer.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="monthly_discount">Monthly discount (%)</label></th>
+                    <td>
+                        <input type="number" id="monthly_discount" name="monthly_discount" min="0" max="100" step="0.01" value="<?php echo esc_attr($discount_settings['monthly']); ?>" style="width:120px;">%
+                        <p class="description">Applies when the stay is 28 nights or longer.</p>
+                    </td>
+                </tr>
+            </table>
+            <p><button type="submit" class="button button-primary">Save Airbnb-style discounts</button></p>
         </form>
 
         <h2>Automatic sends</h2>
@@ -299,6 +359,113 @@ function wp_loft_booking_bookings_page() {
             </p>
             <p class="description">This will regenerate the detailed receipt email for every booking in the system and copy internal recipients.</p>
         </form>
+        <script>
+            (function ($) {
+                const $room     = $('#room_id');
+                const $checkin  = $('input[name="checkin_date"]');
+                const $checkout = $('input[name="checkout_date"]');
+                const $guests   = $('#guest_count');
+                const $total    = $('#payment_total');
+                const $status   = $('#wplb_price_status');
+                const nonce     = $('#wplb_price_nonce').val();
+                const $summary  = $('#wplb_price_summary');
+
+                const fields = {
+                    subtotal: $summary.find('[data-field="subtotal"]'),
+                    discount: $summary.find('[data-field="discount"]'),
+                    taxes: $summary.find('[data-field="taxes"]'),
+                    total: $summary.find('[data-field="total"]'),
+                };
+
+                function formatMoney(value, currency) {
+                    const number = Number.parseFloat(value || 0);
+
+                    try {
+                        return new Intl.NumberFormat(undefined, {
+                            style: 'currency',
+                            currency: currency || 'CAD',
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        }).format(number);
+                    } catch (e) {
+                        return (number || 0).toFixed(2) + ' ' + (currency || 'CAD');
+                    }
+                }
+
+                function buildTaxLine(taxes, currency) {
+                    if (!taxes || typeof taxes !== 'object') {
+                        return formatMoney(0, currency);
+                    }
+
+                    const parts = Object.values(taxes).map(function (tax) {
+                        const label = tax.label || 'Tax';
+                        return label + ': ' + formatMoney(tax.amount || 0, currency);
+                    });
+
+                    return parts.length ? parts.join(' · ') : formatMoney(0, currency);
+                }
+
+                function updateSummary(data) {
+                    const currency = data.currency || 'CAD';
+                    const discountAmount = data.discount && data.discount.amount ? parseFloat(data.discount.amount) : 0;
+                    const discountLabel = data.discount && data.discount.label ? ' (' + data.discount.label + ')' : '';
+
+                    fields.subtotal.text(formatMoney(data.subtotal || 0, currency));
+                    fields.discount.text(discountAmount > 0 ? formatMoney(discountAmount, currency) + discountLabel : '<?php echo esc_js(__('None', 'wp-loft-booking')); ?>');
+                    fields.taxes.text(buildTaxLine(data.taxes, currency));
+                    fields.total.text(formatMoney(data.total || 0, currency));
+
+                    if (data.total) {
+                        $total.val(Number.parseFloat(data.total).toFixed(2));
+                    }
+                }
+
+                function buildPayload() {
+                    return {
+                        action: 'wplb_admin_price_preview',
+                        nonce: nonce,
+                        room_id: $room.val(),
+                        checkin: $checkin.val(),
+                        checkout: $checkout.val(),
+                        guests: $guests.val(),
+                    };
+                }
+
+                function refreshPrice(manualTrigger) {
+                    if (!$room.val() || !$checkin.val() || !$checkout.val()) {
+                        if (manualTrigger) {
+                            $status.text('<?php echo esc_js(__('Select a room and stay dates to preview pricing.', 'wp-loft-booking')); ?>');
+                        }
+                        return;
+                    }
+
+                    $status.text('<?php echo esc_js(__('Calculating…', 'wp-loft-booking')); ?>');
+
+                    $.post(ajaxurl, buildPayload())
+                        .done(function (response) {
+                            if (response && response.success && response.data) {
+                                updateSummary(response.data);
+                                $status.text('<?php echo esc_js(__('Totals updated from ND Booking.', 'wp-loft-booking')); ?>');
+                            } else {
+                                const message = response && response.data && response.data.message ? response.data.message : '<?php echo esc_js(__('Unable to calculate the total.', 'wp-loft-booking')); ?>';
+                                $status.text(message);
+                            }
+                        })
+                        .fail(function () {
+                            $status.text('<?php echo esc_js(__('Price lookup failed. Please try again.', 'wp-loft-booking')); ?>');
+                        });
+                }
+
+                $('#wplb_refresh_price').on('click', function (event) {
+                    event.preventDefault();
+                    refreshPrice(true);
+                });
+
+                $room.add($checkin).add($checkout).add($guests).on('change blur', function () {
+                    refreshPrice(false);
+                });
+            })(jQuery);
+        </script>
     </div>
     <?php
 }
@@ -333,6 +500,26 @@ function wp_loft_booking_handle_booking_actions() {
         return;
     }
 
+    if (!empty($_POST['wp_loft_booking_update_airbnb_discounts'])) {
+        check_admin_referer('wp_loft_booking_update_airbnb_discounts');
+
+        $weekly  = isset($_POST['weekly_discount']) ? floatval(wp_unslash($_POST['weekly_discount'])) : 0;
+        $monthly = isset($_POST['monthly_discount']) ? floatval(wp_unslash($_POST['monthly_discount'])) : 0;
+
+        $weekly  = min(100, max(0, $weekly));
+        $monthly = min(100, max(0, $monthly));
+
+        update_option('nd_booking_airbnb_weekly_discount', $weekly);
+        update_option('nd_booking_airbnb_monthly_discount', $monthly);
+
+        add_settings_error(
+            'wp_loft_booking_bookings',
+            'airbnb_discounts_saved',
+            __('Airbnb-style discounts saved.', 'wp-loft-booking'),
+            'updated'
+        );
+    }
+
     if (!empty($_POST['wp_loft_booking_admin_checkout'])) {
         check_admin_referer('wp_loft_booking_admin_checkout');
 
@@ -340,7 +527,9 @@ function wp_loft_booking_handle_booking_actions() {
         $last_name  = sanitize_text_field(wp_unslash($_POST['guest_last_name'] ?? ''));
         $email      = sanitize_email(wp_unslash($_POST['guest_email'] ?? ''));
         $phone      = sanitize_text_field(wp_unslash($_POST['guest_phone'] ?? ''));
-        $room_type  = sanitize_text_field(wp_unslash($_POST['room_type'] ?? ''));
+        $room_id    = isset($_POST['room_id']) ? absint(wp_unslash($_POST['room_id'])) : 0;
+        $room_post  = $room_id ? get_post($room_id) : null;
+        $room_type  = $room_post ? sanitize_text_field($room_post->post_title) : '';
         $unit_id    = isset($_POST['preferred_unit_id']) ? absint(wp_unslash($_POST['preferred_unit_id'])) : 0;
         $checkin    = sanitize_text_field(wp_unslash($_POST['checkin_date'] ?? ''));
         $checkout   = sanitize_text_field(wp_unslash($_POST['checkout_date'] ?? ''));
@@ -348,16 +537,36 @@ function wp_loft_booking_handle_booking_actions() {
         $currency   = sanitize_text_field(wp_unslash($_POST['payment_currency'] ?? 'CAD'));
         $status     = sanitize_text_field(wp_unslash($_POST['payment_status'] ?? 'paid'));
         $txn_id     = sanitize_text_field(wp_unslash($_POST['transaction_id'] ?? ''));
+        $guest_count = isset($_POST['guest_count']) ? max(1, absint(wp_unslash($_POST['guest_count']))) : 1;
 
-        if (!$email || !$room_type || !$checkin || !$checkout) {
+        if (!$email || !$room_id || !$checkin || !$checkout) {
             add_settings_error(
                 'wp_loft_booking_bookings',
                 'admin_checkout_missing',
-                __('Email, loft type, and stay dates are required for the admin checkout.', 'wp-loft-booking'),
+                __('Email, room, and stay dates are required for the admin checkout.', 'wp-loft-booking'),
                 'error'
             );
 
             return;
+        }
+
+        if (!$unit_id && $room_type) {
+            $matched_unit = wp_loft_booking_find_unit_by_label($room_type);
+            if (!empty($matched_unit['id'])) {
+                $unit_id = (int) $matched_unit['id'];
+            }
+        }
+
+        if (null === $payment || $payment <= 0) {
+            $preview = wp_loft_booking_calculate_price_summary($room_id, $checkin, $checkout, $guest_count);
+
+            if (!empty($preview['subtotal'])) {
+                $tax_breakdown = function_exists('nd_booking_calculate_tax_breakdown')
+                    ? nd_booking_calculate_tax_breakdown($preview['subtotal'])
+                    : ['total' => $preview['subtotal']];
+
+                $payment = isset($tax_breakdown['total']) ? (float) $tax_breakdown['total'] : (float) $preview['subtotal'];
+            }
         }
 
         $result = wp_loft_booking_process_booking(
@@ -373,7 +582,8 @@ function wp_loft_booking_handle_booking_actions() {
             $currency,
             $status ?: 'paid',
             $txn_id,
-            $unit_id ?: null
+            $unit_id ?: null,
+            $guest_count
         );
 
         if (is_wp_error($result)) {
@@ -602,6 +812,118 @@ function wp_loft_booking_handle_booking_actions() {
     }
 }
 
+function wp_loft_booking_calculate_price_summary($room_id, $checkin, $checkout, $guest_count = 1)
+{
+    $summary = [
+        'subtotal'     => 0.0,
+        'nightly_rate' => 0.0,
+        'nights'       => 0,
+        'discount'     => [
+            'amount'  => 0.0,
+            'percent' => 0.0,
+            'label'   => '',
+        ],
+    ];
+
+    if ($room_id && function_exists('nd_booking_find_loft_pricing_rule') && function_exists('nd_booking_calculate_loft_pricing')) {
+        $rule = nd_booking_find_loft_pricing_rule($room_id);
+
+        if (!empty($rule)) {
+            $pricing = nd_booking_calculate_loft_pricing($rule, $checkin, $checkout, $guest_count);
+
+            $summary['subtotal']     = isset($pricing['total']) ? (float) $pricing['total'] : 0.0;
+            $summary['nightly_rate'] = isset($pricing['nightly_rate']) ? (float) $pricing['nightly_rate'] : 0.0;
+            $summary['nights']       = isset($pricing['night_count']) ? (int) $pricing['night_count'] : 0;
+
+            if (!empty($pricing['discount']) && is_array($pricing['discount'])) {
+                $summary['discount'] = array_merge($summary['discount'], $pricing['discount']);
+            } elseif (!empty($pricing['long_stay_tier']['discount_amount'])) {
+                $summary['discount'] = array_merge(
+                    $summary['discount'],
+                    [
+                        'amount'  => (float) $pricing['long_stay_tier']['discount_amount'],
+                        'percent' => (float) ($pricing['long_stay_tier']['discount_percent'] ?? 0.0),
+                        'label'   => $pricing['long_stay_tier']['label'] ?? '',
+                    ]
+                );
+            }
+        }
+    }
+
+    if (0 === $summary['subtotal'] && function_exists('nd_booking_get_number_night') && function_exists('nd_booking_get_final_price')) {
+        $nights = max(0, (int) nd_booking_get_number_night($checkin, $checkout));
+        $summary['nights'] = $nights;
+
+        $date_cursor = $checkin;
+        for ($index = 0; $index < $nights; $index++) {
+            $summary['subtotal'] += (float) nd_booking_get_final_price($room_id, $date_cursor);
+            $date_cursor          = date('Y/m/d', strtotime($date_cursor . ' + 1 days'));
+        }
+
+        if (get_option('nd_booking_price_guests') == 1) {
+            $summary['subtotal'] *= max(1, (int) $guest_count);
+        }
+
+        if ($summary['nights'] > 0) {
+            $summary['nightly_rate'] = round($summary['subtotal'] / $summary['nights'], 2);
+        }
+    }
+
+    $summary['subtotal']     = round($summary['subtotal'], 2);
+    $summary['nightly_rate'] = round($summary['nightly_rate'], 2);
+
+    return $summary;
+}
+
+function wp_loft_booking_admin_price_preview()
+{
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => __('Unauthorized request.', 'wp-loft-booking')], 403);
+    }
+
+    $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+
+    if (!wp_verify_nonce($nonce, 'wplb_admin_price')) {
+        wp_send_json_error(['message' => __('Invalid request. Please refresh and try again.', 'wp-loft-booking')], 400);
+    }
+
+    $room_id = isset($_POST['room_id']) ? absint(wp_unslash($_POST['room_id'])) : 0;
+    $checkin = isset($_POST['checkin']) ? sanitize_text_field(wp_unslash($_POST['checkin'])) : '';
+    $checkout = isset($_POST['checkout']) ? sanitize_text_field(wp_unslash($_POST['checkout'])) : '';
+    $guests = isset($_POST['guests']) ? max(1, absint(wp_unslash($_POST['guests']))) : 1;
+
+    if (!$room_id || '' === $checkin || '' === $checkout) {
+        wp_send_json_error(['message' => __('Room, check-in, and check-out are required.', 'wp-loft-booking')], 400);
+    }
+
+    $summary = wp_loft_booking_calculate_price_summary($room_id, $checkin, $checkout, $guests);
+
+    if (empty($summary['nights'])) {
+        wp_send_json_error(['message' => __('Unable to calculate pricing for the provided room and dates.', 'wp-loft-booking')]);
+    }
+
+    $tax_breakdown = function_exists('nd_booking_calculate_tax_breakdown')
+        ? nd_booking_calculate_tax_breakdown($summary['subtotal'])
+        : [
+            'taxes'     => [],
+            'total_tax' => 0.0,
+            'total'     => $summary['subtotal'],
+        ];
+
+    $response = [
+        'subtotal'     => $summary['subtotal'],
+        'discount'     => $summary['discount'],
+        'nights'       => $summary['nights'],
+        'nightly_rate' => $summary['nightly_rate'],
+        'tax_total'    => isset($tax_breakdown['total_tax']) ? (float) $tax_breakdown['total_tax'] : 0.0,
+        'taxes'        => $tax_breakdown['taxes'] ?? [],
+        'total'        => isset($tax_breakdown['total']) ? (float) $tax_breakdown['total'] : $summary['subtotal'],
+        'currency'     => get_option('stripe_currency', 'CAD'),
+    ];
+
+    wp_send_json_success($response);
+}
+
 function wp_loft_booking_handle_bulk_receipts() {
     if (!current_user_can('manage_options')) {
         return;
@@ -757,7 +1079,8 @@ function wp_loft_booking_process_booking(
     $currency = '',
     $payment_status = 'paid',
     $transaction_id = '',
-    $preferred_unit_id = null
+    $preferred_unit_id = null,
+    $guest_count = 1
 ) {
     global $wpdb;
 
@@ -896,6 +1219,7 @@ function wp_loft_booking_process_booking(
             'transaction_id' => $transaction_id,
             'total'          => $payment_total,
             'created_at'     => current_time('mysql'),
+            'guests'         => max(1, (int) $guest_count),
         ]
     );
 
