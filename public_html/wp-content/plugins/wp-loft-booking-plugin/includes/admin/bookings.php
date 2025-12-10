@@ -43,7 +43,12 @@ function wp_loft_booking_bookings_page() {
         <h1>Manage Bookings</h1>
         <?php settings_errors('wp_loft_booking_bookings'); ?>
 
-        <h2>Simulate checkout (admin sandbox)</h2>
+        <p class="description" style="margin-bottom:8px;">
+            <strong>New:</strong> Use the sandbox checkout below to trigger the full flow without the public form.
+            <a href="#admin-sandbox-checkout">Jump to admin sandbox</a>
+        </p>
+
+        <h2 id="admin-sandbox-checkout">Simulate checkout (admin sandbox)</h2>
         <p>Build a booking with your own dates and prices and run the full automation (emails, calendar, keys). Use test mode in Payment Settings for sandbox payments.</p>
         <form method="post" style="margin-bottom:24px;">
             <?php wp_nonce_field('wp_loft_booking_admin_checkout'); ?>
