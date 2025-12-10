@@ -42,6 +42,9 @@ function wp_loft_booking_bookings_page() {
     <div class="wrap">
         <h1>Manage Bookings</h1>
         <?php settings_errors('wp_loft_booking_bookings'); ?>
+        <script>
+            console.log('Bookings admin screen loaded.');
+        </script>
 
         <div class="notice notice-info inline" style="margin:10px 0 18px;">
             <p style="margin:8px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">

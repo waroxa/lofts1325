@@ -80,6 +80,7 @@ function loft_booking_payment_settings()
     ?>
     <div class="wrap">
         <h1>Payment Settings</h1>
+        <p class="description" style="font-weight:600;">Hello World</p>
         <p class="description">Choose which Stripe environment to use and store separate keys for live and test plans.</p>
 
         <div class="notice notice-info" style="padding:15px;margin:15px 0;">
