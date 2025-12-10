@@ -9,6 +9,9 @@ function wp_loft_booking_bookings_page() {
 
     $selected_loft = isset($_GET['loft_id']) ? absint($_GET['loft_id']) : 0;
     $lofts         = $wpdb->get_results("SELECT id, name AS unit_name FROM {$wpdb->prefix}loft_lofts ORDER BY name ASC");
+    $loft_types    = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}loft_types ORDER BY name ASC");
+    $units         = $wpdb->get_results("SELECT id, unit_name, status FROM {$wpdb->prefix}loft_units ORDER BY unit_name ASC");
+    $default_currency = get_option('stripe_currency', 'CAD');
     $settings      = wp_loft_booking_get_auto_send_settings();
     $templates     = wp_loft_booking_default_template_keys();
     $booking_id    = isset($_GET['booking_id']) ? absint($_GET['booking_id']) : 0;
@@ -39,6 +42,90 @@ function wp_loft_booking_bookings_page() {
     <div class="wrap">
         <h1>Manage Bookings</h1>
         <?php settings_errors('wp_loft_booking_bookings'); ?>
+
+        <p class="description" style="margin-bottom:8px;">
+            <strong>New:</strong> Use the sandbox checkout below to trigger the full flow without the public form.
+            <a href="#admin-sandbox-checkout">Jump to admin sandbox</a>
+        </p>
+
+        <h2 id="admin-sandbox-checkout">Simulate checkout (admin sandbox)</h2>
+        <p>Build a booking with your own dates and prices and run the full automation (emails, calendar, keys). Use test mode in Payment Settings for sandbox payments.</p>
+        <form method="post" style="margin-bottom:24px;">
+            <?php wp_nonce_field('wp_loft_booking_admin_checkout'); ?>
+            <input type="hidden" name="wp_loft_booking_admin_checkout" value="1">
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><label for="guest_first_name">Guest name</label></th>
+                    <td>
+                        <input type="text" name="guest_first_name" id="guest_first_name" placeholder="First name" style="width:180px;" />
+                        <input type="text" name="guest_last_name" id="guest_last_name" placeholder="Last name" style="width:180px;" />
+                        <p class="description">Names are used on the emails and keychains.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="guest_email">Guest contact</label></th>
+                    <td>
+                        <input type="email" name="guest_email" id="guest_email" class="regular-text" placeholder="guest@example.com" required />
+                        <input type="tel" name="guest_phone" id="guest_phone" class="regular-text" placeholder="Phone (optional)" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="room_type">Loft type</label></th>
+                    <td>
+                        <select name="room_type" id="room_type" required>
+                            <option value="">Select a loft type…</option>
+                            <?php foreach ($loft_types as $type) : ?>
+                                <option value="<?php echo esc_attr(strtoupper($type->name)); ?>"><?php echo esc_html($type->name); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description">We match the first available unit whose label contains this type (e.g. "(STUDIO)").</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="preferred_unit_id">Preferred unit (optional)</label></th>
+                    <td>
+                        <select name="preferred_unit_id" id="preferred_unit_id">
+                            <option value="">Let the system pick</option>
+                            <?php foreach ($units as $unit) : ?>
+                                <option value="<?php echo esc_attr($unit->id); ?>"><?php echo esc_html($unit->unit_name); ?> <?php echo $unit->status ? '(' . esc_html($unit->status) . ')' : ''; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description">If provided, this exact unit will be reserved for the test booking.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Stay dates</th>
+                    <td>
+                        <label>Check-in <input type="date" name="checkin_date" required></label>
+                        <label style="margin-left:12px;">Check-out <input type="date" name="checkout_date" required></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="payment_total">Charge total</label></th>
+                    <td>
+                        <input type="number" step="0.01" min="0" name="payment_total" id="payment_total" placeholder="0.00" style="width:140px;">
+                        <select name="payment_currency" id="payment_currency">
+                            <option value="CAD" <?php selected($default_currency, 'CAD'); ?>>CAD</option>
+                            <option value="USD" <?php selected($default_currency, 'USD'); ?>>USD</option>
+                            <option value="EUR" <?php selected($default_currency, 'EUR'); ?>>EUR</option>
+                        </select>
+                        <p class="description">Use any amount to mirror the checkout total you want to test.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="payment_status">Payment status</label></th>
+                    <td>
+                        <select name="payment_status" id="payment_status">
+                            <option value="paid">Paid</option>
+                            <option value="processing">Processing</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <input type="text" name="transaction_id" id="transaction_id" class="regular-text" placeholder="Test transaction ID (optional)">
+                    </td>
+                </tr>
+            </table>
+            <p><button type="submit" class="button button-primary">Run test checkout</button></p>
+        </form>
 
         <h2>Automatic sends</h2>
         <p>Toggle per-loft automation for each template. Global settings apply unless a loft override is provided.</p>
@@ -237,6 +324,66 @@ function wp_loft_booking_handle_booking_actions() {
 
     if (!current_user_can('manage_options')) {
         return;
+    }
+
+    if (!empty($_POST['wp_loft_booking_admin_checkout'])) {
+        check_admin_referer('wp_loft_booking_admin_checkout');
+
+        $first_name = sanitize_text_field(wp_unslash($_POST['guest_first_name'] ?? ''));
+        $last_name  = sanitize_text_field(wp_unslash($_POST['guest_last_name'] ?? ''));
+        $email      = sanitize_email(wp_unslash($_POST['guest_email'] ?? ''));
+        $phone      = sanitize_text_field(wp_unslash($_POST['guest_phone'] ?? ''));
+        $room_type  = sanitize_text_field(wp_unslash($_POST['room_type'] ?? ''));
+        $unit_id    = isset($_POST['preferred_unit_id']) ? absint(wp_unslash($_POST['preferred_unit_id'])) : 0;
+        $checkin    = sanitize_text_field(wp_unslash($_POST['checkin_date'] ?? ''));
+        $checkout   = sanitize_text_field(wp_unslash($_POST['checkout_date'] ?? ''));
+        $payment    = isset($_POST['payment_total']) ? floatval(wp_unslash($_POST['payment_total'])) : null;
+        $currency   = sanitize_text_field(wp_unslash($_POST['payment_currency'] ?? 'CAD'));
+        $status     = sanitize_text_field(wp_unslash($_POST['payment_status'] ?? 'paid'));
+        $txn_id     = sanitize_text_field(wp_unslash($_POST['transaction_id'] ?? ''));
+
+        if (!$email || !$room_type || !$checkin || !$checkout) {
+            add_settings_error(
+                'wp_loft_booking_bookings',
+                'admin_checkout_missing',
+                __('Email, loft type, and stay dates are required for the admin checkout.', 'wp-loft-booking'),
+                'error'
+            );
+
+            return;
+        }
+
+        $result = wp_loft_booking_process_booking(
+            $email,
+            $room_type,
+            $checkin,
+            $checkout,
+            $first_name ?: 'Guest',
+            $last_name ?: 'Booking',
+            0,
+            $phone,
+            $payment,
+            $currency,
+            $status ?: 'paid',
+            $txn_id,
+            $unit_id ?: null
+        );
+
+        if (is_wp_error($result)) {
+            add_settings_error(
+                'wp_loft_booking_bookings',
+                'admin_checkout_error',
+                $result->get_error_message(),
+                'error'
+            );
+        } else {
+            add_settings_error(
+                'wp_loft_booking_bookings',
+                'admin_checkout_success',
+                __('Admin checkout triggered. Emails, calendar events, and virtual keys are being generated.', 'wp-loft-booking'),
+                'updated'
+            );
+        }
     }
 
     if (!empty($_POST['wp_loft_booking_update_autosend'])) {
@@ -602,21 +749,49 @@ function wp_loft_booking_process_booking(
     $payment_total = null,
     $currency = '',
     $payment_status = 'paid',
-    $transaction_id = ''
+    $transaction_id = '',
+    $preferred_unit_id = null
 ) {
     global $wpdb;
 
     $room_type = strtoupper($room_type);
 
-    $loft = find_first_available_loft_unit($room_type);
+    $loft = null;
+
+    if (!empty($preferred_unit_id)) {
+        $units_table = $wpdb->prefix . 'loft_units';
+        $loft = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$units_table} WHERE id = %d",
+                (int) $preferred_unit_id
+            )
+        );
+
+        if ($loft) {
+            $wpdb->update(
+                $units_table,
+                ['status' => 'Reserved'],
+                ['id' => $loft->id],
+                ['%s'],
+                ['%d']
+            );
+        }
+    }
+
+    if (!$loft) {
+        $loft = find_first_available_loft_unit($room_type);
+    }
+
     if (!$loft) {
         error_log('❌ No matching loft available.');
-        return;
+
+        return new WP_Error('no_loft_available', __('No matching loft is available for the selected type/unit.', 'wp-loft-booking'));
     }
 
     if (!$loft->unit_id_api) {
         error_log("❌ Missing unit_id_api for {$loft->unit_name}");
-        return;
+
+        return new WP_Error('missing_unit_api', __('The selected unit is missing a ButterflyMX unit ID.', 'wp-loft-booking'));
     }
 
     $full_name = trim(sprintf('%s %s', $first_name, $last_name));
@@ -634,7 +809,8 @@ function wp_loft_booking_process_booking(
         $checkout_local = new DateTime($checkout, new DateTimeZone($timezone_string));
     } catch (Exception $e) {
         error_log('❌ Unable to parse booking dates for ButterflyMX keychain: ' . $e->getMessage());
-        return;
+
+        return new WP_Error('invalid_dates', __('Check-in or check-out date could not be parsed.', 'wp-loft-booking'));
     }
 
     $checkin_local->setTime(15, 0, 0);
@@ -735,4 +911,6 @@ function wp_loft_booking_process_booking(
     }
 
     error_log('✅ Booking automation completed.');
+
+    return $booking_payload;
 }
