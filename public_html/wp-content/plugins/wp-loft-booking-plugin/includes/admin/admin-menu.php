@@ -13,9 +13,6 @@ function wp_loft_booking_admin_menu() {
     add_submenu_page('wp_loft_booking', 'Email Deliverability', '📧 Email Deliverability', 'manage_options', 'wp_loft_booking_email_settings', 'wp_loft_booking_email_settings_page');
     add_submenu_page('wp_loft_booking', 'Transactional Emails', '📨 Email Templates', 'manage_options', 'wp_loft_booking_email_templates', 'wp_loft_booking_email_templates_page');
     add_submenu_page('wp_loft_booking', 'Email Jobs', '📑 Email Jobs', 'manage_options', 'wp_loft_booking_email_jobs', 'wp_loft_booking_email_jobs_page');
-    add_menu_page('Loft Types', 'Loft Types', 'manage_options', 'wp_loft_booking_loft_types', '', '', 7);
-    add_submenu_page('wp_loft_booking', 'Loft Types', 'All Loft Types', 'manage_options', 'loft-types', 'wp_loft_types_admin_page');
-    add_submenu_page('wp_loft_booking', 'Add/Edit Loft Type', 'Add Loft Type', 'manage_options', 'add-edit-loft-type', 'wp_add_edit_loft_type_page');
     add_submenu_page('wp_loft_booking', 'Manual Token Refresh', 'Token Refresh', 'manage_options', 'wp_loft_booking_manual_token_refresh', 'wp_loft_booking_manual_token_refresh_page');
     add_submenu_page(
     'wp_loft_booking',
