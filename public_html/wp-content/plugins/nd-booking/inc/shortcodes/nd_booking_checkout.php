@@ -671,9 +671,27 @@ function nd_booking_shortcode_checkout() {
                 //stripe data
                 $nd_booking_amount = $nd_booking_booking_form_final_price*100;
                 $nd_booking_currency = get_option('nd_booking_stripe_currency');
+                $nd_booking_stripe_secret_key = get_option('nd_booking_stripe_secret_key');
+
+                if ( function_exists( 'wp_loft_booking_get_stripe_settings' ) ) {
+                    $nd_booking_stripe_settings = wp_loft_booking_get_stripe_settings();
+                    if ( ! empty( $nd_booking_stripe_settings['currency'] ) ) {
+                        $nd_booking_currency = $nd_booking_stripe_settings['currency'];
+                    }
+                }
+
+                if ( function_exists( 'wp_loft_booking_get_active_stripe_keys' ) ) {
+                    $nd_booking_active_keys = wp_loft_booking_get_active_stripe_keys();
+                    if ( ! empty( $nd_booking_active_keys['secret'] ) ) {
+                        $nd_booking_stripe_secret_key = $nd_booking_active_keys['secret'];
+                    }
+                }
+
+                if ( empty( $nd_booking_stripe_secret_key ) ) {
+                    $nd_booking_stripe_secret_key = get_option('stripe_secret_key');
+                }
                 $nd_booking_description = $nd_booking_checkout_form_post_title.' - '.$nd_booking_booking_form_name.' '.$nd_booking_booking_form_surname.' - '.$nd_booking_booking_form_date_from.' '.$nd_booking_booking_form_date_to;
                 $nd_booking_source = $nd_booking_stripe_token;
-                $nd_booking_stripe_secret_key = get_option('nd_booking_stripe_secret_key');
                 $nd_booking_url = 'https://api.stripe.com/v1/charges';
 
 

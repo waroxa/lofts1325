@@ -1,6 +1,19 @@
 <?php
 wp_enqueue_script( 'jquery-ui-tabs' );
 
+$nd_booking_publishable_key = get_option( 'nd_booking_stripe_public_key' );
+
+if ( function_exists( 'wp_loft_booking_get_active_stripe_keys' ) ) {
+    $nd_booking_active_keys = wp_loft_booking_get_active_stripe_keys();
+    if ( ! empty( $nd_booking_active_keys['publishable'] ) ) {
+        $nd_booking_publishable_key = $nd_booking_active_keys['publishable'];
+    }
+}
+
+if ( empty( $nd_booking_publishable_key ) ) {
+    $nd_booking_publishable_key = get_option( 'stripe_publishable_key' );
+}
+
 $nd_booking_shortcode_right_content .= '
     <div class="section loft-section-payment">
         <h3><span class="section-icon" aria-hidden="true">💳</span> ' . esc_html__( 'Détails de paiement', 'nd-booking' ) . '</h3>
@@ -44,7 +57,7 @@ $nd_booking_shortcode_right_content .= '
                 </form>
                 <script type="text/javascript">
                     (function($) {
-                        var stripe = Stripe("' . esc_js( get_option( 'nd_booking_stripe_public_key' ) ) . '");
+                        var stripe = Stripe("' . esc_js( $nd_booking_publishable_key ) . '");
                         var elements = stripe.elements();
                         var style = {
                             base: {
