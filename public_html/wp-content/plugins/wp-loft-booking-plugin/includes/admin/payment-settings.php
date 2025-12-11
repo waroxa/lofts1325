@@ -73,10 +73,24 @@ function loft_booking_handle_payment_settings_save()
 
     $settings = wp_loft_booking_get_stripe_settings();
 
-    $settings['live_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key'] ?? ''));
-    $settings['live_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_secret_key'] ?? ''));
-    $settings['test_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key'] ?? ''));
-    $settings['test_secret']      = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key'] ?? ''));
+    // Only overwrite stored keys if the form actually submitted values for them. This prevents
+    // accidental erasure when a security layer strips fields or a browser autofill omits them.
+    if (isset($_POST['stripe_publishable_key'])) {
+        $settings['live_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_publishable_key']));
+    }
+
+    if (isset($_POST['stripe_secret_key'])) {
+        $settings['live_secret'] = sanitize_text_field(wp_unslash($_POST['stripe_secret_key']));
+    }
+
+    if (isset($_POST['stripe_test_publishable_key'])) {
+        $settings['test_publishable'] = sanitize_text_field(wp_unslash($_POST['stripe_test_publishable_key']));
+    }
+
+    if (isset($_POST['stripe_test_secret_key'])) {
+        $settings['test_secret'] = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key']));
+    }
+
     $settings['test_mode']        = !empty($_POST['stripe_test_mode']);
     $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
     $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
