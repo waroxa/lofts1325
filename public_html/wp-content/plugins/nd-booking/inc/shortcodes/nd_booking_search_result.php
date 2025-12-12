@@ -423,8 +423,11 @@ function nd_booking_shortcode_search_results() {
     //default price range
     if ( get_option('nd_booking_price_range_default_value') == '' ) { $nd_booking_price_range_default_value = 300; }else{ $nd_booking_price_range_default_value = get_option('nd_booking_price_range_default_value'); }
     $nd_booking_archive_form_max_price_for_day = $nd_booking_price_range_default_value;
+    $nd_booking_has_price_filter = false;
+
     if ( isset( $_GET['nd_booking_archive_form_max_price_for_day'] ) && $_GET['nd_booking_archive_form_max_price_for_day'] !== '' ) {
         $nd_booking_archive_form_max_price_for_day = sanitize_text_field( $_GET['nd_booking_archive_form_max_price_for_day'] );
+        $nd_booking_has_price_filter = true;
     }
     
 
@@ -462,28 +465,33 @@ function nd_booking_shortcode_search_results() {
     //prepare query
     $nd_booking_paged = ( get_query_var('paged') ) ? get_query_var('paged') : 1 ;
 
+    $nd_booking_meta_query = array(
+        array(
+            'key'     => 'nd_booking_meta_box_max_people',
+            'type' => 'numeric',
+            'value'   => $nd_booking_archive_form_guests,
+            'compare' => '>=',
+        ),
+        array(
+            'key' => 'nd_booking_meta_box_branches',
+            'value'   => $nd_booking_archive_form_branches_value,
+            'compare' => $nd_booking_archive_form_branches_compare,
+        ),
+    );
+
+    if ( $nd_booking_has_price_filter ) {
+        $nd_booking_meta_query[] = array(
+            'key'     => 'nd_booking_meta_box_min_price',
+            'type' => 'numeric',
+            'value'   => $nd_booking_archive_form_max_price_for_day,
+            'compare' => '<=',
+        );
+    }
+
     $args = array(
         'post_type' => 'nd_booking_cpt_1',
         'posts_per_page' => $nd_booking_qnt_posts_per_page,
-        'meta_query' => array(
-            array(
-                'key'     => 'nd_booking_meta_box_max_people',
-                'type' => 'numeric',
-                'value'   => $nd_booking_archive_form_guests,
-                'compare' => '>=',
-            ),
-            array(
-                'key'     => 'nd_booking_meta_box_min_price',
-                'type' => 'numeric',
-                'value'   => $nd_booking_archive_form_max_price_for_day,
-                'compare' => '<=',
-            ),
-            array(
-                'key' => 'nd_booking_meta_box_branches',
-                'value'   => $nd_booking_archive_form_branches_value,
-                'compare' => $nd_booking_archive_form_branches_compare,
-            ),
-        ),
+        'meta_query' => $nd_booking_meta_query,
         'paged' => $nd_booking_paged
     );
     $the_query = new WP_Query( $args );
@@ -1293,6 +1301,7 @@ function nd_booking_sorting_php() {
     $nd_booking_date_to = sanitize_text_field($_GET['nd_booking_archive_form_date_range_to']);
     $nd_booking_archive_form_guests = sanitize_text_field($_GET['nd_booking_archive_form_guests']);
     $nd_booking_archive_form_max_price_for_day = sanitize_text_field($_GET['nd_booking_archive_form_max_price_for_day']);
+    $nd_booking_has_price_filter = ( '' !== $nd_booking_archive_form_max_price_for_day );
     $nd_booking_archive_form_services = sanitize_text_field($_GET['nd_booking_archive_form_services']);
     $nd_booking_archive_form_additional_services = sanitize_text_field($_GET['nd_booking_archive_form_additional_services']);
     $nd_booking_search_filter_layout = sanitize_text_field($_GET['nd_booking_search_filter_layout']);
@@ -1321,42 +1330,48 @@ function nd_booking_sorting_php() {
     }
 
 
+    $nd_booking_meta_query = array(
+        array(
+            'key'     => 'nd_booking_meta_box_max_people',
+            'type' => 'numeric',
+            'value'   => $nd_booking_archive_form_guests,
+            'compare' => '>=',
+        ),
+        array(
+            'key' => 'nd_booking_meta_box_branches',
+            'type' => 'numeric',
+            'value'   => $nd_booking_archive_form_branches_value,
+            'compare' => $nd_booking_archive_form_branches_compare,
+        ),
+    );
+
+    if ( $nd_booking_has_price_filter ) {
+        $nd_booking_meta_query[] = array(
+            'key'     => 'nd_booking_meta_box_min_price',
+            'type' => 'numeric',
+            'value'   => $nd_booking_archive_form_max_price_for_day,
+            'compare' => '<=',
+        );
+    }
+
     $args = array(
         'post_type' => 'nd_booking_cpt_1',
         'posts_per_page' => $nd_booking_qnt_posts_per_page,
         'orderby' => $nd_booking_orderby,
         'meta_key' => $nd_booking_search_filter_options_meta_key,
         'order' => $nd_booking_order,
-        'meta_query' => array(
-            array(
-                'key'     => 'nd_booking_meta_box_max_people',
-                'type' => 'numeric',
-                'value'   => $nd_booking_archive_form_guests,
-                'compare' => '>=',
-            ),
-            array(
-                    'key'     => 'nd_booking_meta_box_min_price',
-                    'type' => 'numeric',
-                    'value'   => $nd_booking_archive_form_max_price_for_day,
-                    'compare' => '<=',
-                ),
-            array(
-                'key' => 'nd_booking_meta_box_branches',
-                'type' => 'numeric',
-                'value'   => $nd_booking_archive_form_branches_value,
-                'compare' => $nd_booking_archive_form_branches_compare,
-            ),
-        ),
+        'meta_query' => $nd_booking_meta_query,
         'paged' => $nd_booking_paged
     );
 
     //START add new service to args
     $nd_booking_services_array = explode(',', $nd_booking_archive_form_services );
+    $nd_booking_meta_query_base_count = count( $args['meta_query'] );
 
     for ($nd_booking_services_i = 0; $nd_booking_services_i < count($nd_booking_services_array)-1; $nd_booking_services_i++) {
-        
+
         $nd_booking_service_slug = get_post_field( 'post_name', $nd_booking_services_array[$nd_booking_services_i] );
-        $nd_booking_add_new_service_to_meta_query_position = 3+$nd_booking_services_i;
+        $nd_booking_add_new_service_to_meta_query_position = $nd_booking_meta_query_base_count + $nd_booking_services_i;
         
         $args['meta_query'][$nd_booking_add_new_service_to_meta_query_position] = array(
             'key' => 'nd_booking_meta_box_normal_services',
@@ -1368,7 +1383,7 @@ function nd_booking_sorting_php() {
     //END
 
     //START add new additional service to args
-    $nd_booking_start_array_position_for_additional_services = 3+count($nd_booking_services_array)-1;
+    $nd_booking_start_array_position_for_additional_services = count( $args['meta_query'] );
     $nd_booking_additional_services_array = explode(',', $nd_booking_archive_form_additional_services );
 
     for ($nd_booking_additional_services_i = 0; $nd_booking_additional_services_i < count($nd_booking_additional_services_array)-1; $nd_booking_additional_services_i++) {
