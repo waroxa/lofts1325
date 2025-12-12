@@ -675,3 +675,35 @@
         align-self: center;
     }
 }
+
+/* Improve CTA contrast across Elementor and ND Booking buttons */
+.elementor-button,
+.elementor-button:visited,
+.nd_booking_button,
+.nd_booking_section .nd_booking_button,
+[id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__btn {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #0f172a !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.elementor-button .elementor-button-text,
+.elementor-button span,
+.nd_booking_button .nd_options_first_font,
+.nd_booking_button .nd_options_second_font,
+[id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__btn span {
+    color: #ffffff !important;
+}
+
+.elementor-button:hover,
+.elementor-button:focus,
+.nd_booking_button:hover,
+.nd_booking_button:focus,
+[id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__btn:hover,
+[id^="nd_booking_search_cpt_"][id$="_content"] .loft-search-card__btn:focus {
+    background: #0b1323 !important;
+    color: #ffffff !important;
+    border-color: #0b1323 !important;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
