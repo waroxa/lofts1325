@@ -263,7 +263,16 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
         public function get_mobile_search_form_markup() {
             $this->enqueue_search_dependencies();
 
-            $action = function_exists( 'nd_booking_search_page' ) ? nd_booking_search_page() : home_url( '/' );
+            $action = '';
+
+            if ( function_exists( 'nd_booking_search_page' ) ) {
+                $action = nd_booking_search_page();
+            }
+
+            if ( ! $action ) {
+                $archive_link = get_post_type_archive_link( 'nd_booking_cpt_1' );
+                $action       = $archive_link ? $archive_link : home_url( '/' );
+            }
 
             $check_in_ts  = current_time( 'timestamp' );
             $check_out_ts = $check_in_ts + DAY_IN_SECONDS;
@@ -334,6 +343,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="" />
                 <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="" />
                 <input type="hidden" id="nd_booking_archive_form_branch_stars" name="nd_booking_archive_form_branch_stars" value="" />
+                <input type="hidden" name="post_type" value="nd_booking_cpt_1" />
             </form>
             <?php
 
