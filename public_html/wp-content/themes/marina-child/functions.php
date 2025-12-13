@@ -674,3 +674,18 @@ function marina_child_translate_booking_alerts( $translation, $text, $domain ) {
     return $translation;
 }
 add_filter( 'gettext', 'marina_child_translate_booking_alerts', 10, 3 );
+
+/**
+ * Prevent search submissions from resolving as 404s so results can render.
+ */
+function marina_child_prevent_search_404() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    if ( is_search() && is_404() ) {
+        status_header( 200 );
+        $GLOBALS['wp_query']->is_404 = false;
+    }
+}
+add_action( 'template_redirect', 'marina_child_prevent_search_404', 9 );
