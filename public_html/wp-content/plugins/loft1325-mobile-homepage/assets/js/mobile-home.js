@@ -302,23 +302,62 @@
 
         updateNightsDisplay();
 
-        if (submitButton) {
-            submitButton.addEventListener('click', function (event) {
-                event.preventDefault();
+        function buildSearchUrl() {
+            var action = form.getAttribute('action') || window.location.href;
+            var url = null;
 
-                if (guestInput) {
-                    guestInput.value = clampGuests(guestInput.value);
-                }
+            try {
+                url = new URL(action, window.location.origin);
+            } catch (error) {
+                url = null;
+            }
 
-                form.submit();
-            });
+            var params = new URLSearchParams();
+
+            if (checkInInput && checkInInput.value) {
+                params.set('nd_booking_archive_form_date_range_from', checkInInput.value);
+            }
+
+            if (checkOutInput && checkOutInput.value) {
+                params.set('nd_booking_archive_form_date_range_to', checkOutInput.value);
+            }
+
+            if (guestInput && guestInput.value) {
+                params.set('nd_booking_archive_form_guests', guestInput.value);
+            }
+
+            if (url) {
+                params.forEach(function (value, key) {
+                    url.searchParams.set(key, value);
+                });
+
+                return url.toString();
+            }
+
+            var query = params.toString();
+            return query ? action + (action.indexOf('?') === -1 ? '?' : '&') + query : action;
         }
 
-        form.addEventListener('submit', function () {
+        function handleSubmit(event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+
             if (guestInput) {
                 guestInput.value = clampGuests(guestInput.value);
             }
-        });
+
+            var destination = buildSearchUrl();
+            if (destination) {
+                window.location.assign(destination);
+            }
+        }
+
+        if (submitButton) {
+            submitButton.addEventListener('click', handleSubmit);
+        }
+
+        form.addEventListener('submit', handleSubmit);
     }
 
     ready(function () {
