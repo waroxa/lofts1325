@@ -339,11 +339,6 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                     </div>
                 </div>
 
-                <input type="hidden" id="nd_booking_archive_form_branches" name="nd_booking_archive_form_branches" value="" />
-                <input type="hidden" id="nd_booking_archive_form_max_price_for_day" name="nd_booking_archive_form_max_price_for_day" value="" />
-                <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="" />
-                <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="" />
-                <input type="hidden" id="nd_booking_archive_form_branch_stars" name="nd_booking_archive_form_branch_stars" value="" />
             </form>
             <?php
 
