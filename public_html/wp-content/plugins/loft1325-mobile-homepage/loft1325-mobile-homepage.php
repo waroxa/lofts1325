@@ -344,7 +344,6 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 <input type="hidden" id="nd_booking_archive_form_services" name="nd_booking_archive_form_services" value="" />
                 <input type="hidden" id="nd_booking_archive_form_additional_services" name="nd_booking_archive_form_additional_services" value="" />
                 <input type="hidden" id="nd_booking_archive_form_branch_stars" name="nd_booking_archive_form_branch_stars" value="" />
-                <input type="hidden" name="post_type" value="nd_booking_cpt_1" />
             </form>
             <?php
 
@@ -364,10 +363,6 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 return;
             }
 
-            if ( ! isset( $_GET['post_type'] ) || 'nd_booking_cpt_1' !== $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                return;
-            }
-
             $target = '';
 
             if ( function_exists( 'nd_booking_search_page' ) ) {
@@ -382,11 +377,23 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 return;
             }
 
-            $query_string = isset( $_SERVER['QUERY_STRING'] ) ? ltrim( (string) $_SERVER['QUERY_STRING'], '?' ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+            $query_args = isset( $_GET ) ? (array) wp_unslash( $_GET ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            unset( $query_args['post_type'] );
 
-            if ( ! $query_string && ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                $query_string = http_build_query( wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $has_search_params = isset( $query_args['nd_booking_archive_form_date_range_from'] ) || isset( $query_args['nd_booking_archive_form_date_range_to'] ) || isset( $query_args['nd_booking_archive_form_guests'] );
+
+            if ( ! $has_search_params ) {
+                return;
             }
+
+            $query_args = array_filter(
+                $query_args,
+                static function ( $value ) {
+                    return '' !== $value && null !== $value;
+                }
+            );
+
+            $query_string = http_build_query( $query_args );
 
             $redirect_url = $target;
 
