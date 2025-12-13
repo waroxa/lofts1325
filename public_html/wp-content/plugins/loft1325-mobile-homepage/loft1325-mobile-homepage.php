@@ -67,6 +67,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
             add_filter( 'body_class', array( $this, 'filter_body_class' ) );
             add_action( 'customize_register', array( $this, 'register_customizer_settings' ) );
+            add_action( 'template_redirect', array( $this, 'redirect_mobile_search_requests' ) );
         }
 
         /**
@@ -348,6 +349,53 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             <?php
 
             return trim( ob_get_clean() );
+        }
+
+        /**
+         * When the mobile homepage handles ND Booking search requests, forward them to the
+         * standard search results endpoint so visitors see the same results as desktop.
+         */
+        public function redirect_mobile_search_requests() {
+            if ( is_admin() ) {
+                return;
+            }
+
+            if ( ! $this->should_use_mobile_layout() ) {
+                return;
+            }
+
+            if ( ! isset( $_GET['post_type'] ) || 'nd_booking_cpt_1' !== $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                return;
+            }
+
+            $target = '';
+
+            if ( function_exists( 'nd_booking_search_page' ) ) {
+                $target = nd_booking_search_page();
+            }
+
+            if ( ! $target ) {
+                $target = get_post_type_archive_link( 'nd_booking_cpt_1' );
+            }
+
+            if ( ! $target ) {
+                return;
+            }
+
+            $query_string = isset( $_SERVER['QUERY_STRING'] ) ? ltrim( (string) $_SERVER['QUERY_STRING'], '?' ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+
+            if ( ! $query_string && ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                $query_string = http_build_query( wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            }
+
+            $redirect_url = $target;
+
+            if ( $query_string ) {
+                $redirect_url .= ( false === strpos( $target, '?' ) ? '?' : '&' ) . $query_string;
+            }
+
+            wp_safe_redirect( $redirect_url );
+            exit;
         }
 
         /**
