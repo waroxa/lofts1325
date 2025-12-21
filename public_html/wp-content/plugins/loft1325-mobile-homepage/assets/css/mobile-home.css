@@ -383,15 +383,57 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
 }
 
 .loft1325-mobile-home__btn--secondary {
-    background: #0f172a;
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: #0F2A44;
+    color: #FFFFFF !important;
+    border: 1px solid #0F2A44;
+    opacity: 1 !important;
+    filter: none;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary,
+.loft1325-mobile-home__btn--secondary {
+    background: #0F2A44;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    border-color: #0F2A44;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary *,
+.loft1325-mobile-home__btn--secondary * {
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    filter: none;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary:hover,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary:focus,
 .loft1325-mobile-home__btn--secondary:hover,
 .loft1325-mobile-home__btn--secondary:focus {
-    background: #0b1220;
+    background: #0b2036;
+    color: #FFFFFF !important;
+    border-color: #0b2036;
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.22);
+    outline: 2px solid #FFFFFF;
+    outline-offset: 2px;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary:active,
+.loft1325-mobile-home__btn--secondary:active {
+    background: #091b2d;
+    color: #FFFFFF !important;
+    border-color: #091b2d;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--secondary:disabled,
+.loft1325-mobile-home__btn--secondary:disabled {
+    background: #94A3B8;
+    color: #FFFFFF !important;
+    border-color: #94A3B8;
+    opacity: 1 !important;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .loft1325-mobile-home__btn--ghost,
