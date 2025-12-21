@@ -82,23 +82,24 @@
             return;
         }
 
-        var dataset = searchCard.dataset || {};
-        var guestsSingular = dataset.guestsSingular || 'invité';
-        var guestsPlural = dataset.guestsPlural || 'invités';
-        var nightsSingular = dataset.nightsSingular || 'nuit';
-        var nightsPlural = dataset.nightsPlural || 'nuits';
-
         var checkInInput = form.querySelector('#nd_booking_archive_form_date_range_from');
         var checkOutInput = form.querySelector('#nd_booking_archive_form_date_range_to');
-        var guestInput = form.querySelector('#nd_booking_archive_form_guests');
-        var guestDisplay = form.querySelector('#loft_search_guest_display');
-        var nightsDisplay = form.querySelector('#nd_booking_nights_display');
-        var guestButtons = form.querySelectorAll('.loft-search-toolbar__guest-btn');
-        var dateControls = form.querySelectorAll('.loft-search-toolbar__control--date');
+        var totalGuestsInput = form.querySelector('#nd_booking_archive_form_guests');
+        var adultInput = form.querySelector('#loft_booking_adults');
+        var childInput = form.querySelector('#loft_booking_children');
+        var dateDisplay = form.querySelector('#loft_booking_date_display');
+        var dateTrigger = form.querySelector('#loft_booking_date_trigger');
+        var guestGroups = form.querySelectorAll('[data-guest-group]');
+        var promoToggle = form.querySelector('[data-promo-toggle]');
+        var promoField = form.querySelector('[data-promo-field]');
+        var promoInput = form.querySelector('#loft_booking_coupon');
+        var promoCheckoutInput = form.querySelector('#loft_booking_coupon_checkout');
         var submitButton = form.querySelector('.loft-search-toolbar__submit');
 
-        var MIN_GUESTS = 1;
-        var MAX_GUESTS = 12;
+        var MIN_ADULTS = 1;
+        var MAX_ADULTS = 10;
+        var MIN_CHILDREN = 0;
+        var MAX_CHILDREN = 10;
         var ONE_DAY = 86400000;
 
         function parseDate(value) {
@@ -138,88 +139,103 @@
             return month + '/' + day + '/' + year;
         }
 
-        function clampGuests(value) {
+        function clampAdults(value) {
             var parsed = parseInt(value, 10);
-            if (isNaN(parsed) || parsed < MIN_GUESTS) {
-                parsed = MIN_GUESTS;
+            if (isNaN(parsed) || parsed < MIN_ADULTS) {
+                parsed = MIN_ADULTS;
             }
-            if (parsed > MAX_GUESTS) {
-                parsed = MAX_GUESTS;
+            if (parsed > MAX_ADULTS) {
+                parsed = MAX_ADULTS;
             }
             return parsed;
         }
 
-        function formatGuests(value) {
-            return value + ' ' + (value === 1 ? guestsSingular : guestsPlural);
+        function clampChildren(value) {
+            var parsed = parseInt(value, 10);
+            if (isNaN(parsed) || parsed < MIN_CHILDREN) {
+                parsed = MIN_CHILDREN;
+            }
+            if (parsed > MAX_CHILDREN) {
+                parsed = MAX_CHILDREN;
+            }
+            return parsed;
         }
 
-        function formatNights(value) {
-            return value + ' ' + (value === 1 ? nightsSingular : nightsPlural);
+        function updateTotalGuests() {
+            if (!totalGuestsInput || !adultInput || !childInput) {
+                return;
+            }
+            var adults = clampAdults(adultInput.value);
+            var children = clampChildren(childInput.value);
+            totalGuestsInput.value = adults + children;
         }
 
-        function updateGuestDisplay() {
-            if (!guestInput || !guestDisplay) {
+        function updateGuestGroupDisplay(group) {
+            if (!group) {
+                return;
+            }
+            var valueEl = group.querySelector('.loft-search-toolbar__guests-value');
+            var hiddenInput = group.querySelector('input[type=\"hidden\"]');
+            var direction = group.getAttribute('data-guest-group');
+
+            if (!valueEl || !hiddenInput) {
                 return;
             }
 
-            var current = clampGuests(guestInput.value);
-            guestInput.value = current;
-            guestDisplay.textContent = formatGuests(current);
+            var value = direction === 'children' ? clampChildren(hiddenInput.value) : clampAdults(hiddenInput.value);
+            hiddenInput.value = value;
+            valueEl.textContent = value;
         }
 
-        function adjustGuests(direction) {
-            if (!guestInput) {
+        function adjustGroup(group, direction) {
+            if (!group) {
                 return;
             }
-
-            var value = clampGuests(guestInput.value);
+            var input = group.querySelector('input[type=\"hidden\"]');
+            if (!input) {
+                return;
+            }
+            var isChildren = group.getAttribute('data-guest-group') === 'children';
+            var current = isChildren ? clampChildren(input.value) : clampAdults(input.value);
             if (direction === 'up') {
-                value = Math.min(MAX_GUESTS, value + 1);
-            } else if (direction === 'down') {
-                value = Math.max(MIN_GUESTS, value - 1);
+                current = current + 1;
+                current = isChildren ? clampChildren(current) : clampAdults(current);
+            } else {
+                current = current - 1;
+                current = isChildren ? clampChildren(current) : clampAdults(current);
             }
-            guestInput.value = value;
-            updateGuestDisplay();
+            input.value = current;
+            updateGuestGroupDisplay(group);
+            updateTotalGuests();
         }
 
-        Array.prototype.forEach.call(guestButtons, function (button) {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                var direction = button.getAttribute('data-direction');
-                adjustGuests(direction === 'down' ? 'down' : 'up');
+        Array.prototype.forEach.call(guestGroups, function (group) {
+            var buttons = group.querySelectorAll('.loft-search-toolbar__guest-btn');
+            Array.prototype.forEach.call(buttons, function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var dir = button.getAttribute('data-direction') === 'down' ? 'down' : 'up';
+                    adjustGroup(group, dir);
+                });
             });
+            updateGuestGroupDisplay(group);
         });
 
-        updateGuestDisplay();
+        updateTotalGuests();
 
-        function updateNightsDisplay() {
-            if (!nightsDisplay || !checkInInput) {
+        function updateDateDisplay() {
+            if (!dateDisplay) {
                 return;
             }
+            var placeholder = dateDisplay.getAttribute('data-placeholder') || '';
+            var start = parseDate(checkInInput ? checkInInput.value : '');
+            var end = parseDate(checkOutInput ? checkOutInput.value : '');
 
-            var start = parseDate(checkInInput.value);
-            var end = checkOutInput ? parseDate(checkOutInput.value) : null;
-
-            if (!start) {
-                nightsDisplay.textContent = '—';
-                return;
+            if (start && end) {
+                dateDisplay.textContent = formatDateForInput(start) + ' - ' + formatDateForInput(end);
+            } else {
+                dateDisplay.textContent = placeholder;
             }
-
-            if (!end || end <= start) {
-                end = new Date(start.getTime() + ONE_DAY);
-
-                if (checkOutInput) {
-                    checkOutInput.value = formatDateForInput(end);
-                }
-
-                if (window.jQuery && typeof window.jQuery.fn.datepicker === 'function' && checkOutInput) {
-                    window.jQuery(checkOutInput).datepicker('setDate', end);
-                    window.jQuery(checkOutInput).datepicker('option', 'minDate', end);
-                }
-            }
-
-            var nights = Math.max(1, Math.round((end - start) / ONE_DAY));
-            nightsDisplay.textContent = formatNights(nights);
         }
 
         var $ = window.jQuery;
@@ -243,7 +259,7 @@
                             }
                         }
 
-                        updateNightsDisplay();
+                        updateDateDisplay();
                     }
                 });
             }
@@ -256,7 +272,7 @@
                     firstDay: 0,
                     numberOfMonths: 1,
                     onClose: function () {
-                        updateNightsDisplay();
+                        updateDateDisplay();
                     }
                 });
             }
@@ -269,38 +285,47 @@
                 }
             }
 
-            Array.prototype.forEach.call(dateControls, function (control) {
-                control.addEventListener('click', function () {
-                    var input = control.querySelector('.loft-search-toolbar__input');
-                    if (input) {
-                        $(input).datepicker('show');
-                    }
+            if (dateTrigger && checkInInput) {
+                dateTrigger.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    $(checkInInput).datepicker('show');
                 });
-            });
+            }
         } else {
-            Array.prototype.forEach.call(dateControls, function (control) {
-                control.addEventListener('click', function () {
-                    var input = control.querySelector('.loft-search-toolbar__input');
-                    if (input) {
-                        input.focus();
-                    }
+            if (dateTrigger && checkInInput) {
+                dateTrigger.addEventListener('click', function () {
+                    checkInInput.focus();
                 });
-            });
+            }
         }
 
         if (checkInInput) {
-            checkInInput.addEventListener('change', updateNightsDisplay);
+            checkInInput.addEventListener('change', updateDateDisplay);
         }
 
         if (checkOutInput) {
-            checkOutInput.addEventListener('change', updateNightsDisplay);
+            checkOutInput.addEventListener('change', updateDateDisplay);
         }
 
-        if (guestInput) {
-            guestInput.addEventListener('change', updateGuestDisplay);
+        updateDateDisplay();
+
+        if (promoToggle && promoField) {
+            promoToggle.addEventListener('click', function (event) {
+                event.preventDefault();
+                var isHidden = promoField.hasAttribute('hidden');
+                if (isHidden) {
+                    promoField.removeAttribute('hidden');
+                } else {
+                    promoField.setAttribute('hidden', 'hidden');
+                }
+            });
         }
 
-        updateNightsDisplay();
+        if (promoInput && promoCheckoutInput) {
+            promoInput.addEventListener('input', function () {
+                promoCheckoutInput.value = promoInput.value;
+            });
+        }
 
         function buildSearchUrl() {
             var action = form.getAttribute('action') || window.location.href;
@@ -322,8 +347,21 @@
                 params.set('nd_booking_archive_form_date_range_to', checkOutInput.value);
             }
 
-            if (guestInput && guestInput.value) {
-                params.set('nd_booking_archive_form_guests', guestInput.value);
+            if (totalGuestsInput && totalGuestsInput.value) {
+                params.set('nd_booking_archive_form_guests', totalGuestsInput.value);
+            }
+
+            if (adultInput && adultInput.value) {
+                params.set('nd_booking_archive_form_adults', adultInput.value);
+            }
+
+            if (childInput && childInput.value) {
+                params.set('nd_booking_archive_form_children', childInput.value);
+            }
+
+            if (promoInput && promoInput.value) {
+                params.set('nd_booking_booking_form_coupon', promoInput.value);
+                params.set('nd_booking_checkout_form_coupon', promoInput.value);
             }
 
             if (url) {
@@ -343,9 +381,7 @@
                 event.preventDefault();
             }
 
-            if (guestInput) {
-                guestInput.value = clampGuests(guestInput.value);
-            }
+            updateTotalGuests();
 
             var destination = buildSearchUrl();
             if (destination) {
