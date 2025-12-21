@@ -241,6 +241,9 @@
             if (!Array.isArray(dates)) {
                 return;
             }
+            var placeholder = dateDisplay.getAttribute('data-placeholder') || '';
+            var start = parseDate(checkInInput ? checkInInput.value : '');
+            var end = parseDate(checkOutInput ? checkOutInput.value : '');
 
             var start = dates[0] ? new Date(dates[0]) : null;
             var end = dates[1] ? new Date(dates[1]) : null;
