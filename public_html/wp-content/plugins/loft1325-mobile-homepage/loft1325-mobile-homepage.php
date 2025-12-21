@@ -178,6 +178,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $version    = file_exists( $style_path ) ? (string) filemtime( $style_path ) : '1.0.0';
 
             wp_enqueue_style( 'loft1325-mobile-home', $style_uri, array(), $version );
+            wp_enqueue_style( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css', array(), '4.6.13' );
 
             $fonts_url = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
             wp_enqueue_style( 'loft1325-mobile-home-fonts', $fonts_url, array(), null );
@@ -186,7 +187,10 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $script_uri  = plugin_dir_url( __FILE__ ) . 'assets/js/mobile-home.js';
             $script_ver  = file_exists( $script_path ) ? (string) filemtime( $script_path ) : '1.0.0';
 
-            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array( 'jquery', 'jquery-ui-datepicker' ), $script_ver, true );
+            wp_enqueue_script( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js', array(), '4.6.13', true );
+            wp_enqueue_script( 'flatpickr-range-plugin', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/rangePlugin.js', array( 'flatpickr' ), '4.6.13', true );
+
+            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array( 'jquery', 'jquery-ui-datepicker', 'flatpickr', 'flatpickr-range-plugin' ), $script_ver, true );
 
             $this->enqueue_search_dependencies();
         }
@@ -275,67 +279,94 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 $action       = $archive_link ? $archive_link : home_url( '/' );
             }
 
-            $check_in_ts  = current_time( 'timestamp' );
-            $check_out_ts = $check_in_ts + DAY_IN_SECONDS;
+            $check_in_ts     = current_time( 'timestamp' );
+            $check_out_ts    = $check_in_ts + DAY_IN_SECONDS;
+            $check_in_value  = '';
+            $check_out_value = '';
 
-            $check_in_value  = wp_date( 'm/d/Y', $check_in_ts );
-            $check_out_value = wp_date( 'm/d/Y', $check_out_ts );
+            $default_adults   = 2;
+            $default_children = 0;
+            $language         = $this->get_current_language();
 
-            $default_guests = 1;
-            $default_nights = max( 1, (int) round( ( $check_out_ts - $check_in_ts ) / DAY_IN_SECONDS ) );
-            $language       = $this->get_current_language();
-
-            $arrival_label      = $this->localize_label( 'Arrivée', 'Arrival' );
-            $departure_label    = $this->localize_label( 'Départ', 'Departure' );
-            $guests_label_title = $this->localize_label( 'Invités', 'Guests' );
-            $decrease_guests    = $this->localize_label( 'Diminuer le nombre d’invités', 'Decrease guest count' );
-            $increase_guests    = $this->localize_label( 'Augmenter le nombre d’invités', 'Increase guest count' );
-            $nights_title       = $this->localize_label( 'Nuits', 'Nights' );
-
-            if ( 'en' === $language ) {
-                $nights_label = sprintf( _n( '%s night', '%s nights', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
-                $guests_label = sprintf( _n( '%s guest', '%s guests', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
-            } else {
-                $nights_label = sprintf( _n( '%s nuit', '%s nuits', $default_nights, 'nd-booking' ), number_format_i18n( $default_nights ) );
-                $guests_label = sprintf( _n( '%s invité', '%s invités', $default_guests, 'nd-booking' ), number_format_i18n( $default_guests ) );
-            }
+            $dates_label      = $this->localize_label( 'Dates', 'Dates' );
+            $date_placeholder = $this->localize_label( 'Sélectionner les dates', 'Select dates' );
+            $adults_label     = $this->localize_label( 'Adultes', 'Adults' );
+            $children_label   = $this->localize_label( 'Enfants (0–18 ans)', 'Children (0–18 yrs)' );
+            $promo_label      = $this->localize_label( 'Code promotionnel', 'Promotional code' );
+            $add_promo_label  = $this->localize_label( 'Ajouter un code promotionnel', 'Add promotional code' );
+            $promo_placeholder = $this->localize_label( 'Entrez votre code', 'Enter your code' );
+            $language_attr    = ( 'en' === $language ) ? 'en' : 'fr';
 
             ob_start();
             ?>
-            <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form" action="<?php echo esc_url( $action ); ?>" method="get">
+            <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form loft-search-toolbar__form--card" action="<?php echo esc_url( $action ); ?>" method="get" data-language="<?php echo esc_attr( $language_attr ); ?>">
                 <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
-                    <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                        <label for="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__label"><?php echo esc_html( $arrival_label ); ?></label>
-                        <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
-                            <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_in_value ); ?>" autocomplete="off" readonly />
+                    <div class="loft-booking-card">
+                        <div class="loft-search-toolbar__field loft-search-toolbar__field--date-range" data-date-field>
+                            <label class="loft-search-toolbar__label" for="loft_booking_date_range"><?php echo esc_html( $dates_label ); ?></label>
+                            <div class="loft-booking-card__date-input">
+                                <input
+                                    type="text"
+                                    id="loft_booking_date_range"
+                                    class="loft-booking-card__input loft-booking-card__input--date"
+                                    placeholder="<?php echo esc_attr( $date_placeholder ); ?>"
+                                    autocomplete="off"
+                                    readonly
+                                    aria-label="<?php echo esc_attr( $dates_label ); ?>"
+                                />
+                                <button type="button" class="loft-booking-card__clear" aria-label="<?php echo esc_attr( $this->localize_label( 'Effacer la plage de dates', 'Clear date range' ) ); ?>" data-date-clear>&times;</button>
+                                <span class="loft-booking-card__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                                        <rect x="4" y="5" width="16" height="16" rx="2"></rect>
+                                        <line x1="16" y1="3" x2="16" y2="7"></line>
+                                        <line x1="8" y1="3" x2="8" y2="7"></line>
+                                        <line x1="4" y1="11" x2="20" y2="11"></line>
+                                    </svg>
+                                </span>
+                            </div>
+                            <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-booking-card__hidden-input loft-search-toolbar__input" value="<?php echo esc_attr( $check_in_value ); ?>" autocomplete="off" readonly />
+                            <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-booking-card__hidden-input loft-search-toolbar__input" value="<?php echo esc_attr( $check_out_value ); ?>" autocomplete="off" readonly />
                         </div>
-                    </div>
 
-                    <div class="loft-search-toolbar__field loft-search-toolbar__field--date">
-                        <label for="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__label"><?php echo esc_html( $departure_label ); ?></label>
-                        <div class="loft-search-toolbar__control loft-search-toolbar__control--date loft-search-toolbar__group">
-                            <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-search-toolbar__input" value="<?php echo esc_attr( $check_out_value ); ?>" autocomplete="off" readonly />
+                        <div class="loft-booking-card__grid">
+                            <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
+                                <label class="loft-search-toolbar__label" for="loft_booking_adults"><?php echo esc_html( $adults_label ); ?></label>
+                                <div class="loft-search-toolbar__control loft-search-toolbar__control--guests loft-search-toolbar__group loft-search-toolbar__guests" data-guest-group="adults">
+                                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php echo esc_attr( $this->localize_label( 'Diminuer le nombre d’adultes', 'Decrease adult count' ) ); ?>">−</button>
+                                    <span class="loft-search-toolbar__guests-value" id="loft_booking_adults_value"><?php echo esc_html( $default_adults ); ?></span>
+                                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php echo esc_attr( $this->localize_label( 'Augmenter le nombre d’adultes', 'Increase adult count' ) ); ?>">+</button>
+                                    <input type="hidden" id="loft_booking_adults" name="nd_booking_archive_form_adults" value="<?php echo esc_attr( $default_adults ); ?>" />
+                                </div>
+                            </div>
+
+                            <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
+                                <label class="loft-search-toolbar__label" for="loft_booking_children"><?php echo esc_html( $children_label ); ?></label>
+                                <div class="loft-search-toolbar__control loft-search-toolbar__control--guests loft-search-toolbar__group loft-search-toolbar__guests" data-guest-group="children">
+                                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php echo esc_attr( $this->localize_label( 'Diminuer le nombre d’enfants', 'Decrease child count' ) ); ?>">−</button>
+                                    <span class="loft-search-toolbar__guests-value" id="loft_booking_children_value"><?php echo esc_html( $default_children ); ?></span>
+                                    <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php echo esc_attr( $this->localize_label( 'Augmenter le nombre d’enfants', 'Increase child count' ) ); ?>">+</button>
+                                    <input type="hidden" id="loft_booking_children" name="nd_booking_archive_form_children" value="<?php echo esc_attr( $default_children ); ?>" />
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="loft-search-toolbar__field loft-search-toolbar__field--guests">
-                        <label class="loft-search-toolbar__label" for="nd_booking_archive_form_guests"><?php echo esc_html( $guests_label_title ); ?></label>
-                        <div class="loft-search-toolbar__control loft-search-toolbar__control--guests loft-search-toolbar__group loft-search-toolbar__guests">
-                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="down" aria-label="<?php echo esc_attr( $decrease_guests ); ?>">−</button>
-                            <span class="loft-search-toolbar__guests-value" id="loft_search_guest_display"><?php echo esc_html( $guests_label ); ?></span>
-                            <button type="button" class="loft-search-toolbar__guest-btn" data-direction="up" aria-label="<?php echo esc_attr( $increase_guests ); ?>">+</button>
+                        <div class="loft-booking-card__promo">
+                            <button type="button" class="loft-booking-card__promo-toggle" data-promo-toggle>
+                                <span class="loft-booking-card__promo-icon" aria-hidden="true">+</span>
+                                <span class="loft-booking-card__promo-text"><?php echo esc_html( $add_promo_label ); ?></span>
+                            </button>
+                            <div class="loft-booking-card__promo-field" data-promo-field hidden>
+                                <label class="loft-search-toolbar__label" for="loft_booking_coupon"><?php echo esc_html( $promo_label ); ?></label>
+                                <input type="text" id="loft_booking_coupon" name="nd_booking_booking_form_coupon" class="loft-booking-card__text" placeholder="<?php echo esc_attr( $promo_placeholder ); ?>" autocomplete="off" />
+                                <input type="hidden" id="loft_booking_coupon_checkout" name="nd_booking_checkout_form_coupon" value="" />
+                            </div>
                         </div>
-                        <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $default_guests ); ?>" />
-                    </div>
 
-                    <div class="loft-search-toolbar__field loft-search-toolbar__field--summary">
-                        <span class="loft-search-toolbar__label"><?php echo esc_html( $nights_title ); ?></span>
-                        <div class="loft-search-toolbar__summary loft-search-toolbar__group loft-search-toolbar__nights" id="nd_booking_nights_display"><?php echo esc_html( $nights_label ); ?></div>
-                    </div>
+                        <input type="hidden" id="nd_booking_archive_form_guests" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $default_adults + $default_children ); ?>" />
 
-                    <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
-                        <span class="loft-search-toolbar__label">&nbsp;</span>
-                        <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php echo esc_html( $this->get_string( 'search_submit_label' ) ); ?></button>
+                        <div class="loft-search-toolbar__field loft-search-toolbar__field--actions">
+                            <button type="button" class="loft-search-card__btn loft-search-card__btn--primary loft-search-toolbar__submit"><?php echo esc_html( $this->get_string( 'search_submit_label' ) ); ?></button>
+                        </div>
                     </div>
                 </div>
 
