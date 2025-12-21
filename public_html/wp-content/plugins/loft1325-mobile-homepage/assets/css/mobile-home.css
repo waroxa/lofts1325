@@ -311,27 +311,75 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 }
 
 .loft1325-mobile-home__btn--primary {
-    background-color: #1F2937;
-    color: #FFFFFF;
+    background-color: #0F2A44;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    filter: none;
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary,
+.loft1325-mobile-home__btn--primary {
+    background-color: #0F2A44;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary *,
+.loft1325-mobile-home__btn--primary * {
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    filter: none;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary:hover,
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary:focus,
 .loft1325-mobile-home__btn--primary:hover,
 .loft1325-mobile-home__btn--primary:focus {
-    background-color: #111827;
+    background-color: #0b2036;
+    color: #FFFFFF !important;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+    outline: 2px solid #FFFFFF;
+    outline-offset: 2px;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary:active,
+.loft1325-mobile-home__btn--primary:active {
+    background-color: #091b2d;
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__btn--primary:disabled,
+.loft1325-mobile-home__btn--primary:disabled {
+    background-color: #94A3B8;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .loft1325-mobile-home__btn--ghost {
     background-color: transparent;
     color: #0f172a !important;
-    border-color: rgba(15, 23, 42, 0.3);
+    border-color: rgba(15, 23, 42, 0.48);
+    opacity: 1 !important;
 }
 
 .loft1325-mobile-home__btn--ghost:hover,
 .loft1325-mobile-home__btn--ghost:focus {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #FFFFFF;
+    background-color: rgba(15, 42, 68, 0.08);
+    color: #0F2A44 !important;
+    border-color: #0F2A44;
+    outline: 2px solid #0F2A44;
+    outline-offset: 2px;
+}
+
+.loft1325-mobile-home__btn--ghost:disabled {
+    color: #475569 !important;
+    border-color: #94A3B8;
+    opacity: 1 !important;
+    cursor: not-allowed;
 }
 
 .loft1325-mobile-home__btn--secondary {
