@@ -178,6 +178,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $version    = file_exists( $style_path ) ? (string) filemtime( $style_path ) : '1.0.0';
 
             wp_enqueue_style( 'loft1325-mobile-home', $style_uri, array(), $version );
+            wp_enqueue_style( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css', array(), '4.6.13' );
 
             $fonts_url = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
             wp_enqueue_style( 'loft1325-mobile-home-fonts', $fonts_url, array(), null );
@@ -186,7 +187,10 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $script_uri  = plugin_dir_url( __FILE__ ) . 'assets/js/mobile-home.js';
             $script_ver  = file_exists( $script_path ) ? (string) filemtime( $script_path ) : '1.0.0';
 
-            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array( 'jquery', 'jquery-ui-datepicker' ), $script_ver, true );
+            wp_enqueue_script( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js', array(), '4.6.13', true );
+            wp_enqueue_script( 'flatpickr-range-plugin', 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/rangePlugin.js', array( 'flatpickr' ), '4.6.13', true );
+
+            wp_enqueue_script( 'loft1325-mobile-home', $script_uri, array( 'jquery', 'jquery-ui-datepicker', 'flatpickr', 'flatpickr-range-plugin' ), $script_ver, true );
 
             $this->enqueue_search_dependencies();
         }
@@ -291,16 +295,26 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             $promo_label      = $this->localize_label( 'Code promotionnel', 'Promotional code' );
             $add_promo_label  = $this->localize_label( 'Ajouter un code promotionnel', 'Add promotional code' );
             $promo_placeholder = $this->localize_label( 'Entrez votre code', 'Enter your code' );
+            $language_attr    = ( 'en' === $language ) ? 'en' : 'fr';
 
             ob_start();
             ?>
-            <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form loft-search-toolbar__form--card" action="<?php echo esc_url( $action ); ?>" method="get">
+            <form id="nd_booking_search_cpt_1_form_sidebar" class="loft-search-toolbar__form loft-search-toolbar__form--card" action="<?php echo esc_url( $action ); ?>" method="get" data-language="<?php echo esc_attr( $language_attr ); ?>">
                 <div id="nd_booking_search_main_bg" class="loft-search-toolbar nd_booking_search_form">
                     <div class="loft-booking-card">
-                        <div class="loft-search-toolbar__field loft-search-toolbar__field--date-range">
-                            <label class="loft-search-toolbar__label" for="loft_booking_date_display"><?php echo esc_html( $dates_label ); ?></label>
-                            <button type="button" class="loft-booking-card__input loft-booking-card__input--date" id="loft_booking_date_trigger" aria-label="<?php echo esc_attr( $dates_label ); ?>">
-                                <span id="loft_booking_date_display" class="loft-booking-card__value" data-placeholder="<?php echo esc_attr( $date_placeholder ); ?>"><?php echo esc_html( $date_placeholder ); ?></span>
+                        <div class="loft-search-toolbar__field loft-search-toolbar__field--date-range" data-date-field>
+                            <label class="loft-search-toolbar__label" for="loft_booking_date_range"><?php echo esc_html( $dates_label ); ?></label>
+                            <div class="loft-booking-card__date-input">
+                                <input
+                                    type="text"
+                                    id="loft_booking_date_range"
+                                    class="loft-booking-card__input loft-booking-card__input--date"
+                                    placeholder="<?php echo esc_attr( $date_placeholder ); ?>"
+                                    autocomplete="off"
+                                    readonly
+                                    aria-label="<?php echo esc_attr( $dates_label ); ?>"
+                                />
+                                <button type="button" class="loft-booking-card__clear" aria-label="<?php echo esc_attr( $this->localize_label( 'Effacer la plage de dates', 'Clear date range' ) ); ?>" data-date-clear>&times;</button>
                                 <span class="loft-booking-card__icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
                                         <rect x="4" y="5" width="16" height="16" rx="2"></rect>
@@ -309,7 +323,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                                         <line x1="4" y1="11" x2="20" y2="11"></line>
                                     </svg>
                                 </span>
-                            </button>
+                            </div>
                             <input type="text" id="nd_booking_archive_form_date_range_from" name="nd_booking_archive_form_date_range_from" class="loft-booking-card__hidden-input loft-search-toolbar__input" value="<?php echo esc_attr( $check_in_value ); ?>" autocomplete="off" readonly />
                             <input type="text" id="nd_booking_archive_form_date_range_to" name="nd_booking_archive_form_date_range_to" class="loft-booking-card__hidden-input loft-search-toolbar__input" value="<?php echo esc_attr( $check_out_value ); ?>" autocomplete="off" readonly />
                         </div>

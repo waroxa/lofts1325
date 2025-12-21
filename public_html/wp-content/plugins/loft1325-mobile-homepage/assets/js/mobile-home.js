@@ -87,14 +87,18 @@
         var totalGuestsInput = form.querySelector('#nd_booking_archive_form_guests');
         var adultInput = form.querySelector('#loft_booking_adults');
         var childInput = form.querySelector('#loft_booking_children');
-        var dateDisplay = form.querySelector('#loft_booking_date_display');
-        var dateTrigger = form.querySelector('#loft_booking_date_trigger');
+        var dateInput = form.querySelector('#loft_booking_date_range');
+        var dateClear = form.querySelector('[data-date-clear]');
         var guestGroups = form.querySelectorAll('[data-guest-group]');
         var promoToggle = form.querySelector('[data-promo-toggle]');
         var promoField = form.querySelector('[data-promo-field]');
         var promoInput = form.querySelector('#loft_booking_coupon');
         var promoCheckoutInput = form.querySelector('#loft_booking_coupon_checkout');
         var submitButton = form.querySelector('.loft-search-toolbar__submit');
+        var language = (form.getAttribute('data-language') || 'fr').toLowerCase() === 'en' ? 'en' : 'fr';
+        var overlay = document.createElement('div');
+        overlay.className = 'loft-datepicker-overlay';
+        document.body.appendChild(overlay);
 
         var MIN_ADULTS = 1;
         var MAX_ADULTS = 10;
@@ -223,91 +227,130 @@
 
         updateTotalGuests();
 
-        function updateDateDisplay() {
-            if (!dateDisplay) {
+        function formatDisplayRange(start, end) {
+            var locale = language === 'en' ? 'en-CA' : 'fr-CA';
+            var formatter = new Intl.DateTimeFormat(locale, {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            return formatter.format(start) + ' – ' + formatter.format(end);
+        }
+
+        function updateDateFields(dates) {
+            if (!Array.isArray(dates)) {
                 return;
             }
             var placeholder = dateDisplay.getAttribute('data-placeholder') || '';
             var start = parseDate(checkInInput ? checkInInput.value : '');
             var end = parseDate(checkOutInput ? checkOutInput.value : '');
 
+            var start = dates[0] ? new Date(dates[0]) : null;
+            var end = dates[1] ? new Date(dates[1]) : null;
+
+            if (start && end && end < start) {
+                var temp = start;
+                start = end;
+                end = temp;
+            }
+
             if (start && end) {
-                dateDisplay.textContent = formatDateForInput(start) + ' - ' + formatDateForInput(end);
+                if (checkInInput) {
+                    checkInInput.value = formatDateForInput(start);
+                }
+                if (checkOutInput) {
+                    checkOutInput.value = formatDateForInput(end);
+                }
+                if (dateInput) {
+                    dateInput.value = formatDisplayRange(start, end);
+                    dateInput.setAttribute('data-has-value', 'true');
+                }
             } else {
-                dateDisplay.textContent = placeholder;
-            }
-        }
-
-        var $ = window.jQuery;
-        if ($ && typeof $.fn.datepicker === 'function') {
-            if (checkInInput) {
-                $(checkInInput).datepicker({
-                    defaultDate: '+0',
-                    minDate: 0,
-                    dateFormat: 'mm/dd/yy',
-                    firstDay: 0,
-                    numberOfMonths: 1,
-                    onClose: function (selectedDate) {
-                        var parsed = parseDate(selectedDate);
-                        if (parsed && checkOutInput) {
-                            var minCheckout = new Date(parsed.getTime() + ONE_DAY);
-                            $(checkOutInput).datepicker('option', 'minDate', minCheckout);
-
-                            var currentCheckout = $(checkOutInput).datepicker('getDate');
-                            if (!currentCheckout || currentCheckout <= parsed) {
-                                $(checkOutInput).datepicker('setDate', minCheckout);
-                            }
-                        }
-
-                        updateDateDisplay();
-                    }
-                });
-            }
-
-            if (checkOutInput) {
-                $(checkOutInput).datepicker({
-                    defaultDate: '+1',
-                    minDate: '+1d',
-                    dateFormat: 'mm/dd/yy',
-                    firstDay: 0,
-                    numberOfMonths: 1,
-                    onClose: function () {
-                        updateDateDisplay();
-                    }
-                });
-            }
-
-            if (checkInInput && checkOutInput) {
-                var initialStart = parseDate(checkInInput.value);
-                if (initialStart) {
-                    var initialMinCheckout = new Date(initialStart.getTime() + ONE_DAY);
-                    $(checkOutInput).datepicker('option', 'minDate', initialMinCheckout);
+                if (checkInInput) {
+                    checkInInput.value = '';
+                }
+                if (checkOutInput) {
+                    checkOutInput.value = '';
+                }
+                if (dateInput) {
+                    dateInput.value = '';
+                    dateInput.setAttribute('data-has-value', 'false');
                 }
             }
+        }
 
-            if (dateTrigger && checkInInput) {
-                dateTrigger.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    $(checkInInput).datepicker('show');
-                });
+        var fpInstance = null;
+        if (window.flatpickr && dateInput) {
+            var isMobileViewport = window.matchMedia('(max-width: 480px)').matches;
+
+            fpInstance = window.flatpickr(dateInput, {
+                mode: 'range',
+                dateFormat: 'm/d/Y',
+                minDate: 'today',
+                defaultDate: [],
+                monthSelectorType: 'static',
+                clickOpens: true,
+                inline: false,
+                static: false,
+                locale: language === 'en' ? 'default' : 'fr',
+                onOpen: function (selectedDates, dateStr, instance) {
+                    var calendar = instance && instance.calendarContainer;
+                    if (!calendar) return;
+                    if (isMobileViewport) {
+                        calendar.classList.add('flatpickr-bottom-sheet');
+                        document.body.classList.add('loft-datepicker-open');
+                        overlay.classList.add('is-visible');
+                    } else {
+                        calendar.classList.remove('flatpickr-bottom-sheet');
+                        document.body.classList.remove('loft-datepicker-open');
+                        overlay.classList.remove('is-visible');
+                    }
+                },
+                onClose: function () {
+                    document.body.classList.remove('loft-datepicker-open');
+                    overlay.classList.remove('is-visible');
+                },
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2 && selectedDates[1] < selectedDates[0]) {
+                        var swapped = [selectedDates[1], selectedDates[0]];
+                        instance.setDate(swapped, false);
+                        selectedDates = swapped;
+                    }
+                    updateDateFields(selectedDates);
+                    if (!isMobileViewport && selectedDates.length === 2) {
+                        instance.close();
+                    }
+                }
+            });
+        }
+
+        if (dateClear && fpInstance) {
+            dateClear.addEventListener('click', function (event) {
+                event.preventDefault();
+                fpInstance.clear();
+                updateDateFields([]);
+            });
+        }
+
+        overlay.addEventListener('click', function () {
+            if (fpInstance) {
+                fpInstance.close();
             }
-        } else {
-            if (dateTrigger && checkInInput) {
-                dateTrigger.addEventListener('click', function () {
-                    checkInInput.focus();
-                });
-            }
-        }
+        });
 
-        if (checkInInput) {
-            checkInInput.addEventListener('change', updateDateDisplay);
+        var initialDates = [];
+        var initialStart = parseDate(checkInInput ? checkInInput.value : '');
+        var initialEnd = parseDate(checkOutInput ? checkOutInput.value : '');
+        if (initialStart) {
+            initialDates.push(initialStart);
         }
-
-        if (checkOutInput) {
-            checkOutInput.addEventListener('change', updateDateDisplay);
+        if (initialEnd) {
+            initialDates.push(initialEnd);
         }
-
-        updateDateDisplay();
+        if (fpInstance && initialDates.length) {
+            fpInstance.setDate(initialDates, false);
+        }
+        updateDateFields(initialDates);
 
         if (promoToggle && promoField) {
             promoToggle.addEventListener('click', function (event) {

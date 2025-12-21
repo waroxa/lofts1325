@@ -1590,7 +1590,7 @@ body.loft1325-mobile-home-active .loft-search-toolbar__form--card .nd_booking_se
 }
 
 body.loft1325-mobile-home-active .loft-booking-card {
-    width: 380px;
+    width: min(420px, 100%);
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
@@ -1641,6 +1641,35 @@ body.loft1325-mobile-home-active .loft-booking-card__input:focus-visible {
 body.loft1325-mobile-home-active .loft-booking-card__value {
     flex: 1 1 auto;
     color: #3a3a3a;
+}
+
+body.loft1325-mobile-home-active .loft-booking-card__date-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+body.loft1325-mobile-home-active .loft-booking-card__clear {
+    position: absolute;
+    right: 34px;
+    background: transparent;
+    border: none;
+    color: #8a8a8a;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: none;
+}
+
+body.loft1325-mobile-home-active .loft-booking-card__clear:is(:hover, :focus-visible) {
+    color: #444;
+}
+
+body.loft1325-mobile-home-active .loft-booking-card__input:not(:placeholder-shown) ~ .loft-booking-card__clear,
+body.loft1325-mobile-home-active .loft-booking-card__input[data-has-value="true"] ~ .loft-booking-card__clear,
+body.loft1325-mobile-home-active .loft-booking-card__input:not([value=""]) ~ .loft-booking-card__clear {
+    display: inline-flex;
 }
 
 body.loft1325-mobile-home-active .loft-booking-card__icon {
@@ -1759,9 +1788,9 @@ body.loft1325-mobile-home-active .loft-booking-card .loft-search-toolbar__submit
     border: none;
     color: #ffffff !important;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0;
-    text-transform: none;
+    text-transform: uppercase;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
     transition: background 0.12s ease;
 }
@@ -1770,4 +1799,142 @@ body.loft1325-mobile-home-active .loft-booking-card .loft-search-toolbar__submit
 body.loft1325-mobile-home-active .loft-booking-card .loft-search-toolbar__submit:focus-visible {
     background: #6aa0b2 !important;
     outline: none;
+}
+
+/* Flatpickr premium styling */
+.flatpickr-calendar {
+    border: none;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.16);
+    border-radius: 16px;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    padding: 6px 8px 10px;
+}
+
+.flatpickr-months .flatpickr-month {
+    background: transparent;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 6px 8px;
+}
+
+.flatpickr-current-month {
+    padding: 6px 0;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.flatpickr-weekdaycontainer span {
+    color: #7b7b7b;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.flatpickr-day {
+    border-radius: 10px;
+    height: 40px;
+    line-height: 40px;
+    font-weight: 600;
+    color: #2f2f2f;
+    border: none;
+    transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.flatpickr-day:hover {
+    background: rgba(118, 177, 196, 0.18);
+}
+
+.flatpickr-day.today {
+    border: 1px solid rgba(118, 177, 196, 0.5);
+    color: #2f2f2f;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: #76b1c4;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(118, 177, 196, 0.35);
+}
+
+.flatpickr-day.inRange {
+    background: rgba(118, 177, 196, 0.18);
+    color: #1f2937;
+}
+
+.flatpickr-day.disabled,
+.flatpickr-day.disabled:hover {
+    color: #c3c7cf;
+    background: transparent;
+    cursor: not-allowed;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    top: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: #111827;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    background: rgba(118, 177, 196, 0.16);
+}
+
+.flatpickr-bottom-sheet {
+    position: fixed !important;
+    left: 50% !important;
+    transform: translate(-50%, 0) !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 540px !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 9999 !important;
+    margin: 0 !important;
+}
+
+body.loft-datepicker-open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9998;
+}
+
+.loft-datepicker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.loft-datepicker-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 480px) {
+    body.loft1325-mobile-home-active .loft-booking-card {
+        padding: 18px 16px 18px;
+        gap: 12px;
+    }
+
+    body.loft1325-mobile-home-active .loft-booking-card__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .flatpickr-day {
+        height: 44px;
+        line-height: 44px;
+    }
 }
