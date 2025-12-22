@@ -207,23 +207,39 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 		}
 
 		/**
-		 * Get the booking URL for the room.
-		 *
-		 * @param int $post_id Room post ID.
-		 *
-		 * @return string
-		 */
-		public function get_booking_url( $post_id ) {
-			$base = 'https://loft1325.com/nd-booking-pages/nd-booking-page/';
+	 * Get the booking URL for the room.
+	 *
+	 * @param int $post_id Room post ID.
+	 *
+	 * @return string
+	 */
+	public function get_booking_url( $post_id ) {
+		$language  = $this->get_current_language();
+		$permalink = get_permalink( $post_id );
 
-			return add_query_arg(
-				array(
-					'room'    => get_post_field( 'post_name', $post_id ),
-					'room_id' => absint( $post_id ),
-				),
-				$base
-			);
+		if ( function_exists( 'trp_get_url_for_language' ) && $permalink ) {
+			$permalink = trp_get_url_for_language( $permalink, $language );
 		}
+
+			$params         = array();
+			$allowed_params = array(
+				'nd_booking_archive_form_date_range_from',
+				'nd_booking_archive_form_date_range_to',
+				'nd_booking_archive_form_guests',
+				'nd_booking_archive_form_children',
+				'nd_booking_booking_form_coupon',
+				'nd_booking_checkout_form_coupon',
+			);
+			$allowed_params = array_merge( $allowed_params, array( 'lang' ) ); // keep language continuity.
+
+			foreach ( $allowed_params as $param ) {
+				if ( isset( $_GET[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$params[ $param ] = sanitize_text_field( wp_unslash( (string) $_GET[ $param ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				}
+			}
+
+		return $params ? add_query_arg( $params, $permalink ) : $permalink;
+	}
 
 		/**
 		 * Assemble key room details.

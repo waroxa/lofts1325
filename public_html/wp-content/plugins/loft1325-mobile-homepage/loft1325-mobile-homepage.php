@@ -265,28 +265,32 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          *
          * @return string
          */
-        public function get_mobile_search_form_markup() {
-            $this->enqueue_search_dependencies();
+		public function get_mobile_search_form_markup() {
+			$this->enqueue_search_dependencies();
 
-            $action = '';
+			$action = '';
+			$language = $this->get_current_language();
 
-            if ( function_exists( 'nd_booking_search_page' ) ) {
-                $action = nd_booking_search_page();
-            }
+			if ( function_exists( 'nd_booking_search_page' ) ) {
+				$action = nd_booking_search_page();
+			}
 
-            if ( ! $action ) {
-                $archive_link = get_post_type_archive_link( 'nd_booking_cpt_1' );
-                $action       = $archive_link ? $archive_link : home_url( '/' );
-            }
+			if ( ! $action ) {
+				$archive_link = get_post_type_archive_link( 'nd_booking_cpt_1' );
+				$action       = $archive_link ? $archive_link : home_url( '/' );
+			}
 
-            $check_in_ts     = current_time( 'timestamp' );
-            $check_out_ts    = $check_in_ts + DAY_IN_SECONDS;
-            $check_in_value  = '';
-            $check_out_value = '';
+			if ( function_exists( 'trp_get_url_for_language' ) ) {
+				$action = trp_get_url_for_language( $action, $language );
+			}
 
-            $default_adults   = 2;
-            $default_children = 0;
-            $language         = $this->get_current_language();
+			$check_in_ts     = current_time( 'timestamp' );
+			$check_out_ts    = $check_in_ts + DAY_IN_SECONDS;
+			$check_in_value  = '';
+			$check_out_value = '';
+
+			$default_adults   = 2;
+			$default_children = 0;
 
             $dates_label      = $this->localize_label( 'Dates', 'Dates' );
             $date_placeholder = $this->localize_label( 'Sélectionner les dates', 'Select dates' );
@@ -391,17 +395,23 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
 
             $target = '';
 
-            if ( function_exists( 'nd_booking_search_page' ) ) {
-                $target = nd_booking_search_page();
-            }
+			if ( function_exists( 'nd_booking_search_page' ) ) {
+				$target = nd_booking_search_page();
+			}
 
-            if ( ! $target ) {
-                $target = get_post_type_archive_link( 'nd_booking_cpt_1' );
-            }
+			if ( ! $target ) {
+				$target = get_post_type_archive_link( 'nd_booking_cpt_1' );
+			}
 
-            if ( ! $target ) {
-                return;
-            }
+			if ( ! $target ) {
+				return;
+			}
+
+			$language = $this->get_current_language();
+
+			if ( function_exists( 'trp_get_url_for_language' ) ) {
+				$target = trp_get_url_for_language( $target, $language );
+			}
 
             $query_args = isset( $_GET ) ? (array) wp_unslash( $_GET ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             unset( $query_args['post_type'] );

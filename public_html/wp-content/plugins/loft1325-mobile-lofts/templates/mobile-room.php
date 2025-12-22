@@ -7,6 +7,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+$post = get_post();
+if ( have_posts() ) {
+	the_post();
+}
+
 $plugin         = Loft1325_Mobile_Lofts::instance();
 $room_id        = get_the_ID();
 $room_data      = $plugin->get_room_data( $room_id );
