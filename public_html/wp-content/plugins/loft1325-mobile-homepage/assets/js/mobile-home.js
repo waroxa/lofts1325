@@ -239,11 +239,8 @@
 
         function updateDateFields(dates) {
             if (!Array.isArray(dates)) {
-                return;
+                dates = [];
             }
-            var placeholder = dateDisplay.getAttribute('data-placeholder') || '';
-            var start = parseDate(checkInInput ? checkInInput.value : '');
-            var end = parseDate(checkOutInput ? checkOutInput.value : '');
 
             var start = dates[0] ? new Date(dates[0]) : null;
             var end = dates[1] ? new Date(dates[1]) : null;
@@ -252,6 +249,14 @@
                 var temp = start;
                 start = end;
                 end = temp;
+            }
+
+            if (!start && checkInInput && checkInInput.value) {
+                start = parseDate(checkInInput.value);
+            }
+
+            if (!end && checkOutInput && checkOutInput.value) {
+                end = parseDate(checkOutInput.value);
             }
 
             if (start && end) {
