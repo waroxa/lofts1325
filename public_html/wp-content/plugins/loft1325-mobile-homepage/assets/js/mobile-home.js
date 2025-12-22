@@ -286,7 +286,54 @@
 
         var fpInstance = null;
         if (window.flatpickr && dateInput) {
-            var isMobileViewport = window.matchMedia('(max-width: 480px)').matches;
+            var mobileQuery = window.matchMedia('(max-width: 480px)');
+
+            function isMobileViewport() {
+                return mobileQuery && mobileQuery.matches;
+            }
+
+            function setOverlayVisibility(isVisible) {
+                if (isVisible) {
+                    document.body.classList.add('loft-datepicker-open');
+                    overlay.classList.add('is-visible');
+                } else {
+                    document.body.classList.remove('loft-datepicker-open');
+                    overlay.classList.remove('is-visible');
+                }
+            }
+
+            function applyCalendarLayout(instance) {
+                var calendar = instance && instance.calendarContainer;
+                if (!calendar) {
+                    return;
+                }
+
+                if (isMobileViewport()) {
+                    calendar.classList.add('flatpickr-bottom-sheet');
+                    setOverlayVisibility(true);
+                } else {
+                    calendar.classList.remove('flatpickr-bottom-sheet');
+                    setOverlayVisibility(false);
+                }
+            }
+
+            if (mobileQuery) {
+                var handleMobileChange = function () {
+                    if (!fpInstance) {
+                        return;
+                    }
+                    var shouldShowOverlay = fpInstance.isOpen && isMobileViewport();
+                    applyCalendarLayout(fpInstance);
+                    if (!shouldShowOverlay) {
+                        setOverlayVisibility(false);
+                    }
+                };
+                if (mobileQuery.addEventListener) {
+                    mobileQuery.addEventListener('change', handleMobileChange);
+                } else if (mobileQuery.addListener) {
+                    mobileQuery.addListener(handleMobileChange);
+                }
+            }
 
             fpInstance = window.flatpickr(dateInput, {
                 mode: 'range',
@@ -299,21 +346,10 @@
                 static: false,
                 locale: language === 'en' ? 'default' : 'fr',
                 onOpen: function (selectedDates, dateStr, instance) {
-                    var calendar = instance && instance.calendarContainer;
-                    if (!calendar) return;
-                    if (isMobileViewport) {
-                        calendar.classList.add('flatpickr-bottom-sheet');
-                        document.body.classList.add('loft-datepicker-open');
-                        overlay.classList.add('is-visible');
-                    } else {
-                        calendar.classList.remove('flatpickr-bottom-sheet');
-                        document.body.classList.remove('loft-datepicker-open');
-                        overlay.classList.remove('is-visible');
-                    }
+                    applyCalendarLayout(instance);
                 },
                 onClose: function () {
-                    document.body.classList.remove('loft-datepicker-open');
-                    overlay.classList.remove('is-visible');
+                    setOverlayVisibility(false);
                 },
                 onChange: function (selectedDates, dateStr, instance) {
                     if (selectedDates.length === 2 && selectedDates[1] < selectedDates[0]) {
@@ -322,7 +358,7 @@
                         selectedDates = swapped;
                     }
                     updateDateFields(selectedDates);
-                    if (!isMobileViewport && selectedDates.length === 2) {
+                    if (!isMobileViewport() && selectedDates.length === 2) {
                         instance.close();
                     }
                 }
