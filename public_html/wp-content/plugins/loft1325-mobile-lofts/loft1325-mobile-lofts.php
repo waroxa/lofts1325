@@ -182,6 +182,8 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 
 			if ( function_exists( 'trp_get_current_language' ) ) {
 				$language = (string) trp_get_current_language();
+			} elseif ( isset( $_GET['lang'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$language = (string) wp_unslash( $_GET['lang'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			} else {
 				$language = function_exists( 'determine_locale' ) ? (string) determine_locale() : get_locale();
 			}
