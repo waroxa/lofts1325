@@ -1811,16 +1811,25 @@ body.loft1325-mobile-home-active .loft-booking-card .loft-search-toolbar__submit
     font-weight: 700;
     border-radius: 12px;
     padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .flatpickr-current-month {
     padding: 6px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .flatpickr-current-month .flatpickr-monthDropdown-months,
 .flatpickr-current-month input.cur-year {
     font-weight: 700;
     font-size: 15px;
+    width: auto;
+    min-width: 72px;
 }
 
 .flatpickr-weekdaycontainer span {
