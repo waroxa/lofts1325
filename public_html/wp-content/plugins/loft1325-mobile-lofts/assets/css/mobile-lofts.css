@@ -3,6 +3,7 @@ body.loft1325-mobile-lofts-active {
 	font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 	background: radial-gradient(circle at 20% 20%, rgba(118, 177, 196, 0.2), transparent 40%), radial-gradient(circle at 80% 10%, rgba(80, 104, 150, 0.18), transparent 35%), #0f1620;
 	color: #0f172a;
+	overflow-x: hidden;
 }
 
 body.loft1325-mobile-lofts-active a {
@@ -13,13 +14,16 @@ body.loft1325-mobile-lofts-active a {
 .loft1325-mobile-loft__backdrop {
 	min-height: 100vh;
 	background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+	overflow-x: hidden;
 }
 
 .loft1325-mobile-loft {
 	max-width: 540px;
 	margin: 0 auto;
-	padding: 1.25rem 1.1rem 5.25rem;
+	width: min(540px, 100%);
+	padding: 1.25rem 1.25rem 5.25rem;
 	position: relative;
+	box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__topbar {
@@ -27,8 +31,16 @@ body.loft1325-mobile-lofts-active a {
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.75rem;
+	flex-wrap: wrap;
 	margin-bottom: 0.85rem;
 	color: #e7eff5;
+}
+
+.loft1325-mobile-loft__topbar-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	white-space: nowrap;
 }
 
 .loft1325-mobile-loft__crumb {
@@ -56,10 +68,31 @@ body.loft1325-mobile-lofts-active a {
 	letter-spacing: 0.02em;
 }
 
+.loft1325-mobile-loft__lang-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.45rem 0.75rem;
+	border-radius: 999px;
+	background: rgba(15, 23, 42, 0.5);
+	color: #f8fbff;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	border: 1px solid rgba(118, 177, 196, 0.45);
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.loft1325-mobile-loft__lang-switch .dashicons {
+	font-size: 16px;
+	margin-top: -1px;
+}
+
 .loft1325-mobile-loft__hero {
 	display: grid;
 	gap: 0.85rem;
 	margin-bottom: 1.15rem;
+	overflow: hidden;
 }
 
 .loft1325-mobile-loft__slider {
@@ -68,6 +101,8 @@ body.loft1325-mobile-lofts-active a {
 	overflow: hidden;
 	box-shadow: 0 25px 45px rgba(10, 20, 40, 0.35), 0 12px 24px rgba(0, 0, 0, 0.25);
 	background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__slider-track {
@@ -76,6 +111,7 @@ body.loft1325-mobile-lofts-active a {
 	grid-auto-columns: 100%;
 	transition: transform 0.5s ease;
 	width: 100%;
+	max-width: 100%;
 }
 
 .loft1325-mobile-loft__slide {
@@ -284,16 +320,17 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__btn--primary {
-	background: linear-gradient(135deg, #0f172a, #193954);
-	color: #fff;
-	box-shadow: 0 16px 30px rgba(25, 57, 84, 0.35);
-	border-color: rgba(255, 255, 255, 0.08);
+	background: linear-gradient(135deg, #0f1f3a, #1c4a73);
+	color: #f7fbff !important;
+	box-shadow: 0 18px 32px rgba(12, 27, 48, 0.45);
+	border-color: rgba(255, 255, 255, 0.16);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .loft1325-mobile-loft__btn--primary:hover,
 .loft1325-mobile-loft__btn--primary:focus-visible {
 	transform: translateY(-1px);
-	box-shadow: 0 18px 34px rgba(25, 57, 84, 0.45);
+	box-shadow: 0 20px 36px rgba(12, 27, 48, 0.5);
 }
 
 .loft1325-mobile-loft__btn--ghost {

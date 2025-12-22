@@ -15,6 +15,9 @@ $booking_url    = $plugin->get_booking_url( $room_id );
 $language       = $plugin->get_current_language();
 $archive_url    = get_post_type_archive_link( 'nd_booking_cpt_1' );
 $archive_url    = $archive_url ? $archive_url : home_url( '/' );
+$toggle_language = ( 'en' === $language ) ? 'fr' : 'en';
+$toggle_label   = ( 'en' === $language ) ? 'FR' : 'EN';
+$toggle_url     = add_query_arg( 'lang', $toggle_language );
 $per_night      = $plugin->localize_label( 'par nuit', 'per night' );
 $cta_label      = $plugin->localize_label( 'Réserver maintenant', 'Reserve now' );
 $details_label  = $plugin->localize_label( 'Voir les détails', 'View details' );
@@ -40,7 +43,13 @@ get_header();
 				<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
 				<?php echo esc_html( $plugin->localize_label( 'Retour aux lofts', 'Back to lofts' ) ); ?>
 			</a>
-			<span class="loft1325-mobile-loft__pill"><?php echo esc_html( $pill_label ); ?></span>
+			<div class="loft1325-mobile-loft__topbar-actions">
+				<a class="loft1325-mobile-loft__lang-switch" href="<?php echo esc_url( $toggle_url ); ?>">
+					<span aria-hidden="true" class="dashicons dashicons-translation"></span>
+					<?php echo esc_html( $toggle_label ); ?>
+				</a>
+				<span class="loft1325-mobile-loft__pill"><?php echo esc_html( $pill_label ); ?></span>
+			</div>
 		</header>
 
 		<section class="loft1325-mobile-loft__hero" aria-label="<?php the_title_attribute(); ?>">
