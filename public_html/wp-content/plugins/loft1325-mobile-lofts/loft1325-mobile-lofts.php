@@ -70,19 +70,16 @@ add_action( 'admin_notices', array( $this, 'maybe_show_dependency_notice' ) );
 }
 
 /**
- * Validate plugin dependencies before running any front-end logic.
- */
-public function evaluate_dependencies() {
-$nd_booking_active = post_type_exists( 'nd_booking_cpt_1' );
+     * Validate plugin dependencies before running any front-end logic.
+     *
+     * @return bool
+     */
+    public function evaluate_dependencies() {
+        $nd_booking_active       = post_type_exists( 'nd_booking_cpt_1' );
+        $this->dependencies_ready = $nd_booking_active;
 
-if ( ! $nd_booking_active ) {
-$this->dependencies_ready = false;
-
-return;
-}
-
-$this->dependencies_ready = true;
-}
+        return $this->dependencies_ready;
+    }
 
 		/**
 		 * Load translations.
@@ -108,9 +105,9 @@ if ( is_admin() || is_feed() || is_embed() ) {
 return false;
 }
 
-if ( ! $this->dependencies_ready ) {
-return false;
-}
+        if ( ! $this->dependencies_ready && ! $this->evaluate_dependencies() ) {
+            return false;
+        }
 
 if ( ! is_singular( 'nd_booking_cpt_1' ) ) {
 return false;
