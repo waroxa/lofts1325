@@ -60,7 +60,8 @@ private $dependencies_ready = false;
  */
 private function __construct() {
 add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-add_action( 'init', array( $this, 'evaluate_dependencies' ), 5 );
+        // Run dependency checks after ND Booking registers its post types.
+        add_action( 'init', array( $this, 'evaluate_dependencies' ), 20 );
 add_action( 'init', array( $this, 'register_image_sizes' ) );
 add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
