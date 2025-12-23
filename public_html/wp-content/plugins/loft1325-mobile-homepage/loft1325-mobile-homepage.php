@@ -152,15 +152,17 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 return false;
             }
 
-            if ( apply_filters( 'loft1325_mobile_home_force_layout', false ) ) {
-                return true;
-            }
-
             if ( isset( $_GET['loft1325_mobile_preview'] ) && '1' === $_GET['loft1325_mobile_preview'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 return true;
             }
 
-            return wp_is_mobile();
+            $is_mobile_request = wp_is_mobile();
+
+            if ( ! $is_mobile_request ) {
+                return false;
+            }
+
+            return (bool) apply_filters( 'loft1325_mobile_home_force_layout', true );
         }
 
         /**
