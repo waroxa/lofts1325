@@ -213,33 +213,36 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 	 *
 	 * @return string
 	 */
-	public function get_booking_url( $post_id ) {
-		$language  = $this->get_current_language();
-		$permalink = get_permalink( $post_id );
+        public function get_booking_url( $post_id ) {
+                $language          = $this->get_current_language();
+                $booking_page_slug = trailingslashit( home_url( '/nd-booking-pages/nd-booking-page/' ) );
 
-		if ( function_exists( 'trp_get_url_for_language' ) && $permalink ) {
-			$permalink = trp_get_url_for_language( $permalink, $language );
-		}
+                if ( function_exists( 'trp_get_url_for_language' ) && $booking_page_slug ) {
+                        $booking_page_slug = trp_get_url_for_language( $booking_page_slug, $language );
+                }
 
-			$params         = array();
-			$allowed_params = array(
-				'nd_booking_archive_form_date_range_from',
-				'nd_booking_archive_form_date_range_to',
-				'nd_booking_archive_form_guests',
-				'nd_booking_archive_form_children',
-				'nd_booking_booking_form_coupon',
-				'nd_booking_checkout_form_coupon',
-			);
-			$allowed_params = array_merge( $allowed_params, array( 'lang' ) ); // keep language continuity.
+                        $params         = array(
+                                'room_id' => $post_id,
+                                'room'    => get_post_field( 'post_name', $post_id ),
+                        );
+                        $allowed_params = array(
+                                'nd_booking_archive_form_date_range_from',
+                                'nd_booking_archive_form_date_range_to',
+                                'nd_booking_archive_form_guests',
+                                'nd_booking_archive_form_children',
+                                'nd_booking_booking_form_coupon',
+                                'nd_booking_checkout_form_coupon',
+                        );
+                        $allowed_params = array_merge( $allowed_params, array( 'lang' ) ); // keep language continuity.
 
-			foreach ( $allowed_params as $param ) {
-				if ( isset( $_GET[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					$params[ $param ] = sanitize_text_field( wp_unslash( (string) $_GET[ $param ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				}
-			}
+                        foreach ( $allowed_params as $param ) {
+                                if ( isset( $_GET[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                                        $params[ $param ] = sanitize_text_field( wp_unslash( (string) $_GET[ $param ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                                }
+                        }
 
-		return $params ? add_query_arg( $params, $permalink ) : $permalink;
-	}
+                return add_query_arg( $params, $booking_page_slug );
+        }
 
 		/**
 		 * Assemble key room details.
