@@ -43,6 +43,13 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
         private $current_language = null;
 
         /**
+         * Tracks whether required booking dependencies are available.
+         *
+         * @var bool
+         */
+        private $dependencies_ready = false;
+
+        /**
          * Initialize singleton instance.
          *
          * @return Loft1325_Mobile_Homepage
@@ -60,6 +67,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          */
         private function __construct() {
             add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+            add_action( 'init', array( $this, 'evaluate_dependencies' ), 5 );
             add_action( 'init', array( $this, 'register_feature_post_type' ) );
             add_action( 'init', array( $this, 'register_image_sizes' ) );
             add_filter( 'query_vars', array( $this, 'register_preview_query_var' ) );
@@ -68,6 +76,21 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             add_filter( 'body_class', array( $this, 'filter_body_class' ) );
             add_action( 'customize_register', array( $this, 'register_customizer_settings' ) );
             add_action( 'template_redirect', array( $this, 'redirect_mobile_search_requests' ) );
+            add_action( 'admin_notices', array( $this, 'maybe_show_dependency_notice' ) );
+        }
+
+        /**
+         * Validate plugin dependencies before running any front-end logic.
+         */
+        public function evaluate_dependencies() {
+            $nd_booking_active = post_type_exists( 'nd_booking_cpt_1' );
+
+            if ( ! $nd_booking_active ) {
+                $this->dependencies_ready = false;
+                return;
+            }
+
+            $this->dependencies_ready = true;
         }
 
         /**
@@ -145,6 +168,10 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          */
         public function should_use_mobile_layout() {
             if ( is_admin() || is_feed() || is_embed() ) {
+                return false;
+            }
+
+            if ( ! $this->dependencies_ready ) {
                 return false;
             }
 
@@ -903,6 +930,17 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                     )
                 )
             );
+        }
+
+        /**
+         * Surface a helpful admin notice when dependencies are missing.
+         */
+        public function maybe_show_dependency_notice() {
+            if ( $this->dependencies_ready || ! current_user_can( 'activate_plugins' ) ) {
+                return;
+            }
+
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'Loft1325 Mobile Homepage needs the ND Booking plugin active to render properly. Please activate ND Booking before enabling the mobile experience.', 'loft1325-mobile-home' ) . '</p></div>';
         }
     }
 }
