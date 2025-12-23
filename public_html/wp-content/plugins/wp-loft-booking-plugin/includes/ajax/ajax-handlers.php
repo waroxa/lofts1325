@@ -70,12 +70,53 @@ function wp_loft_booking_sync_units_only() {
     error_log("🔄 Starting sync with token: $token");
     error_log("🌐 Using API base URL: $api_base_url");
 
-    // Clear all loft_units
-    $wpdb->query("DELETE FROM $units_table");
-
     $now = current_time('mysql');
     $new_units_count = 0;
     $summary = ['SIMPLE' => 0, 'DOUBLE' => 0, 'PENTHOUSE' => 0];
+    $prepared_units = [];
+
+    $fetch_units_for_building = static function( $building_id ) use ( $api_base_url, $token ) {
+        $all_units = [];
+        $page      = 1;
+        $per_page  = 100;
+
+        do {
+            $url = sprintf(
+                '%s/units?q[building_id_eq]=%d&page=%d&per_page=%d',
+                $api_base_url,
+                (int) $building_id,
+                $page,
+                $per_page
+            );
+
+            $response = wp_remote_get($url, [
+                'headers' => ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json']
+            ]);
+
+            if (is_wp_error($response)) {
+                return $response;
+            }
+
+            $units_data = json_decode(wp_remote_retrieve_body($response), true);
+            if (!isset($units_data['data']) || !is_array($units_data['data'])) {
+                break;
+            }
+
+            $batch_count = count($units_data['data']);
+            $all_units   = array_merge($all_units, $units_data['data']);
+
+            $total_pages = $page;
+            if (!empty($units_data['meta']['pagination']['total_pages'])) {
+                $total_pages = (int) $units_data['meta']['pagination']['total_pages'];
+            } elseif ($batch_count >= $per_page) {
+                $total_pages = $page + 1; // assume another page may exist
+            }
+
+            $page++;
+        } while ($page <= $total_pages && $batch_count > 0);
+
+        return $all_units;
+    };
 
     // Fetch all valid keychains
     $active_keys = $wpdb->get_results("SELECT name, valid_from, valid_until FROM $keychains_table WHERE valid_until >= '$now'");
@@ -136,19 +177,19 @@ function wp_loft_booking_sync_units_only() {
     $branches = $wpdb->get_results("SELECT id, building_id FROM {$wpdb->prefix}loft_branches WHERE building_id IS NOT NULL");
 
     foreach ($branches as $branch) {
-        $response = wp_remote_get("{$api_base_url}/units?q[building_id_eq]={$branch->building_id}", [
-            'headers' => ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json']
-        ]);
+        $units_data = $fetch_units_for_building( $branch->building_id );
 
-        if (is_wp_error($response)) {
-            error_log("❌ Error fetching units: " . $response->get_error_message());
+        if (is_wp_error($units_data)) {
+            error_log("❌ Error fetching units: " . $units_data->get_error_message());
             continue;
         }
 
-        $units_data = json_decode(wp_remote_retrieve_body($response), true);
-        if (!isset($units_data['data']) || !is_array($units_data['data'])) continue;
+        if (empty($units_data)) {
+            error_log("⚠️ No units returned for building ID {$branch->building_id}.");
+            continue;
+        }
 
-        foreach ($units_data['data'] as $unit) {
+        foreach ($units_data as $unit) {
             // Get and normalize unit name
             $unit_name = sanitize_text_field($unit['label'] ?? 'Unknown');
             $unit_name = preg_replace('/\s*\(/', ' (', $unit_name); // enforce space before "("
@@ -247,24 +288,40 @@ function wp_loft_booking_sync_units_only() {
                 elseif (stripos($unit_name_upper, 'PENTHOUSE') !== false) $summary['PENTHOUSE']++;
             }
 
-            $result = $wpdb->insert(
-                $units_table,
-                [
-                    'branch_id'          => $branch->id,
-                    'unit_name'          => $unit_name,
-                    'status'             => $status,
-                    'availability_until' => $available_until,
-                    'unit_id_api'        => $unit_id_api
-                ],
-                ['%d', '%s', '%s', '%s', '%d']
-            );
+            $prepared_units[] = [
+                'branch_id'          => $branch->id,
+                'unit_name'          => $unit_name,
+                'status'             => $status,
+                'availability_until' => $available_until,
+                'unit_id_api'        => $unit_id_api,
+            ];
+        }
+    }
 
-            if ($result === false) {
-                error_log("❌ INSERT FAILED: $unit_name — " . $wpdb->last_error);
-            } else {
-                error_log("✅ INSERTED: $unit_name | STATUS: $status | UNTIL: " . ($available_until ?? 'N/A'));
-                $new_units_count++;
-            }
+    if (empty($prepared_units)) {
+        error_log('❌ No loft units were fetched from ButterflyMX; existing data preserved.');
+
+        return new WP_Error(
+            'no_units_fetched',
+            __('No loft units were fetched from ButterflyMX. Please retry sync or check the integration.', 'wp-loft-booking')
+        );
+    }
+
+    // Clear and replace loft_units only after successful fetch
+    $wpdb->query("DELETE FROM $units_table");
+
+    foreach ($prepared_units as $unit_row) {
+        $result = $wpdb->insert(
+            $units_table,
+            $unit_row,
+            ['%d', '%s', '%s', '%s', '%d']
+        );
+
+        if ($result === false) {
+            error_log("❌ INSERT FAILED: {$unit_row['unit_name']} — " . $wpdb->last_error);
+        } else {
+            error_log("✅ INSERTED: {$unit_row['unit_name']} | STATUS: {$unit_row['status']} | UNTIL: " . ($unit_row['availability_until'] ?? 'N/A'));
+            $new_units_count++;
         }
     }
 
