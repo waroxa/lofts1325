@@ -5,6 +5,7 @@
  * Author: Loft1325 Automation
  * Version: 1.0.0
  * Text Domain: loft1325-mobile-lofts
+ * Restored: Ensures the mobile-first loft detail layout remains active for designated room pages.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,19 +22,12 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 		 */
 		private static $instance = null;
 
-/**
- * Whether the mobile loft template is active.
- *
- * @var bool
- */
-private $is_mobile_template = false;
-
-/**
- * Tracks whether required booking dependencies are available.
- *
- * @var bool
- */
-private $dependencies_ready = false;
+		/**
+		 * Whether the mobile loft template is active.
+		 *
+		 * @var bool
+		 */
+		private $is_mobile_template = false;
 
 		/**
 		 * Cached language code (fr or en).
@@ -55,31 +49,16 @@ private $dependencies_ready = false;
 			return self::$instance;
 		}
 
-/**
- * Constructor.
- */
-private function __construct() {
-add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-        // Run dependency checks after ND Booking registers its post types.
-        add_action( 'init', array( $this, 'evaluate_dependencies' ), 20 );
-add_action( 'init', array( $this, 'register_image_sizes' ) );
-add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
-add_filter( 'body_class', array( $this, 'filter_body_class' ) );
-add_action( 'admin_notices', array( $this, 'maybe_show_dependency_notice' ) );
-}
-
-/**
-     * Validate plugin dependencies before running any front-end logic.
-     *
-     * @return bool
-     */
-    public function evaluate_dependencies() {
-        $nd_booking_active       = post_type_exists( 'nd_booking_cpt_1' );
-        $this->dependencies_ready = $nd_booking_active;
-
-        return $this->dependencies_ready;
-    }
+		/**
+		 * Constructor.
+		 */
+		private function __construct() {
+			add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+			add_action( 'init', array( $this, 'register_image_sizes' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+			add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
+			add_filter( 'body_class', array( $this, 'filter_body_class' ) );
+		}
 
 		/**
 		 * Load translations.
@@ -100,18 +79,14 @@ add_action( 'admin_notices', array( $this, 'maybe_show_dependency_notice' ) );
 		 *
 		 * @return bool
 		 */
-public function should_use_mobile_layout() {
-if ( is_admin() || is_feed() || is_embed() ) {
-return false;
-}
+		public function should_use_mobile_layout() {
+			if ( is_admin() || is_feed() || is_embed() ) {
+				return false;
+			}
 
-        if ( ! $this->dependencies_ready && ! $this->evaluate_dependencies() ) {
-            return false;
-        }
-
-if ( ! is_singular( 'nd_booking_cpt_1' ) ) {
-return false;
-}
+			if ( ! is_singular( 'nd_booking_cpt_1' ) ) {
+				return false;
+			}
 
 			if ( apply_filters( 'loft1325_mobile_lofts_force_layout', false ) ) {
 				return true;
@@ -208,8 +183,6 @@ return false;
 
 			if ( function_exists( 'trp_get_current_language' ) ) {
 				$language = (string) trp_get_current_language();
-			} elseif ( isset( $_GET['lang'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$language = (string) wp_unslash( $_GET['lang'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			} else {
 				$language = function_exists( 'determine_locale' ) ? (string) determine_locale() : get_locale();
 			}
@@ -233,42 +206,23 @@ return false;
 		}
 
 		/**
-	 * Get the booking URL for the room.
-	 *
-	 * @param int $post_id Room post ID.
-	 *
-	 * @return string
-	 */
-        public function get_booking_url( $post_id ) {
-                $language          = $this->get_current_language();
-                $booking_page_slug = trailingslashit( home_url( '/nd-booking-pages/nd-booking-page/' ) );
+		 * Get the booking URL for the room.
+		 *
+		 * @param int $post_id Room post ID.
+		 *
+		 * @return string
+		 */
+		public function get_booking_url( $post_id ) {
+			$base = 'https://loft1325.com/nd-booking-pages/nd-booking-page/';
 
-                if ( function_exists( 'trp_get_url_for_language' ) && $booking_page_slug ) {
-                        $booking_page_slug = trp_get_url_for_language( $booking_page_slug, $language );
-                }
-
-                        $params         = array(
-                                'room_id' => $post_id,
-                                'room'    => get_post_field( 'post_name', $post_id ),
-                        );
-                        $allowed_params = array(
-                                'nd_booking_archive_form_date_range_from',
-                                'nd_booking_archive_form_date_range_to',
-                                'nd_booking_archive_form_guests',
-                                'nd_booking_archive_form_children',
-                                'nd_booking_booking_form_coupon',
-                                'nd_booking_checkout_form_coupon',
-                        );
-                        $allowed_params = array_merge( $allowed_params, array( 'lang' ) ); // keep language continuity.
-
-                        foreach ( $allowed_params as $param ) {
-                                if ( isset( $_GET[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                                        $params[ $param ] = sanitize_text_field( wp_unslash( (string) $_GET[ $param ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                                }
-                        }
-
-                return add_query_arg( $params, $booking_page_slug );
-        }
+			return add_query_arg(
+				array(
+					'room'    => get_post_field( 'post_name', $post_id ),
+					'room_id' => absint( $post_id ),
+				),
+				$base
+			);
+		}
 
 		/**
 		 * Assemble key room details.
@@ -399,30 +353,15 @@ return false;
 		 *
 		 * @return array<string, string>
 		 */
-private function format_image( $attachment_id ) {
-$src = wp_get_attachment_image_src( $attachment_id, 'loft1325_mobile_loft_slider' );
+		private function format_image( $attachment_id ) {
+			$src = wp_get_attachment_image_src( $attachment_id, 'loft1325_mobile_loft_slider' );
 
-return array(
-'url' => $src ? $src[0] : '',
-'alt' => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-);
-}
-
-/**
- * Display an admin notice when required dependencies are missing.
- */
-public function maybe_show_dependency_notice() {
-if ( $this->dependencies_ready ) {
-return;
-}
-
-if ( ! current_user_can( 'manage_options' ) ) {
-return;
-}
-
-echo '<div class="notice notice-error"><p>' . esc_html__( 'Loft1325 Mobile Lofts requires ND Booking to be active. Please enable ND Booking to load the mobile room layout.', 'loft1325-mobile-lofts' ) . '</p></div>';
-}
-}
+			return array(
+				'url' => $src ? $src[0] : '',
+				'alt' => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+	}
 }
 
 Loft1325_Mobile_Lofts::instance();

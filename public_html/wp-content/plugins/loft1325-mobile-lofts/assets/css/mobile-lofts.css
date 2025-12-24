@@ -3,7 +3,6 @@ body.loft1325-mobile-lofts-active {
 	font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 	background: radial-gradient(circle at 20% 20%, rgba(118, 177, 196, 0.2), transparent 40%), radial-gradient(circle at 80% 10%, rgba(80, 104, 150, 0.18), transparent 35%), #0f1620;
 	color: #0f172a;
-	overflow-x: hidden;
 }
 
 body.loft1325-mobile-lofts-active a {
@@ -14,16 +13,13 @@ body.loft1325-mobile-lofts-active a {
 .loft1325-mobile-loft__backdrop {
 	min-height: 100vh;
 	background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-	overflow-x: hidden;
 }
 
 .loft1325-mobile-loft {
 	max-width: 540px;
 	margin: 0 auto;
-	width: min(540px, 100%);
-	padding: 1.25rem 1.25rem 5.25rem;
+	padding: 1.25rem 1.1rem 5.25rem;
 	position: relative;
-	box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__topbar {
@@ -31,16 +27,8 @@ body.loft1325-mobile-lofts-active a {
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.75rem;
-	flex-wrap: wrap;
 	margin-bottom: 0.85rem;
 	color: #e7eff5;
-}
-
-.loft1325-mobile-loft__topbar-actions {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.45rem;
-	white-space: nowrap;
 }
 
 .loft1325-mobile-loft__crumb {
@@ -68,42 +56,18 @@ body.loft1325-mobile-lofts-active a {
 	letter-spacing: 0.02em;
 }
 
-.loft1325-mobile-loft__lang-switch {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.35rem;
-	padding: 0.45rem 0.75rem;
-	border-radius: 999px;
-	background: rgba(15, 23, 42, 0.5);
-	color: #f8fbff;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	border: 1px solid rgba(118, 177, 196, 0.45);
-	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-}
-
-.loft1325-mobile-loft__lang-switch .dashicons {
-	font-size: 16px;
-	margin-top: -1px;
-}
-
 .loft1325-mobile-loft__hero {
 	display: grid;
 	gap: 0.85rem;
 	margin-bottom: 1.15rem;
-	overflow: hidden;
 }
 
 .loft1325-mobile-loft__slider {
-        position: relative;
-        border-radius: 26px;
-        overflow: hidden;
-        box-shadow: 0 25px 45px rgba(10, 20, 40, 0.35), 0 12px 24px rgba(0, 0, 0, 0.25);
-        background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-        width: 100%;
-        box-sizing: border-box;
-        isolation: isolate;
+	position: relative;
+	border-radius: 24px;
+	overflow: hidden;
+	box-shadow: 0 25px 45px rgba(10, 20, 40, 0.35), 0 12px 24px rgba(0, 0, 0, 0.25);
+	background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
 }
 
 .loft1325-mobile-loft__slider-track {
@@ -112,14 +76,13 @@ body.loft1325-mobile-lofts-active a {
 	grid-auto-columns: 100%;
 	transition: transform 0.5s ease;
 	width: 100%;
-	max-width: 100%;
 }
 
 .loft1325-mobile-loft__slide {
-        margin: 0;
-        height: clamp(260px, 55vw, 360px);
-        position: relative;
-        background: linear-gradient(120deg, #192434, #0d111a);
+	margin: 0;
+	height: 260px;
+	position: relative;
+	background: linear-gradient(120deg, #192434, #0d111a);
 }
 
 .loft1325-mobile-loft__slide img {
@@ -143,11 +106,11 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__slider-nav {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	padding: 0 0.35rem;
 	pointer-events: none;
 }
@@ -177,118 +140,49 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__slider-dots {
-        position: absolute;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: inline-flex;
-        gap: 8px;
-        background: rgba(8, 12, 24, 0.6);
-        padding: 7px 12px;
-        border-radius: 999px;
-        backdrop-filter: blur(16px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+	position: absolute;
+	bottom: 12px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: inline-flex;
+	gap: 6px;
+	background: rgba(8, 12, 24, 0.45);
+	padding: 6px 10px;
+	border-radius: 999px;
+	backdrop-filter: blur(10px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .loft1325-mobile-loft__dot {
-        height: 9px;
-        width: 9px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.42);
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
+	height: 8px;
+	width: 8px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.4);
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .loft1325-mobile-loft__dot.is-active {
-        transform: translateY(-1px) scale(1.1);
-        background: #e7f5ff;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
-}
-
-.loft1325-mobile-loft__slider::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(7, 12, 20, 0) 0%, rgba(7, 12, 20, 0.45) 70%, rgba(7, 12, 20, 0.85) 100%);
-        pointer-events: none;
-        z-index: 1;
-}
-
-.loft1325-mobile-loft__slider-overlay {
-        position: absolute;
-        inset: auto 1rem 1rem 1rem;
-        display: grid;
-        gap: 0.65rem;
-        z-index: 2;
-}
-
-.loft1325-mobile-loft__slider-pill {
-        width: fit-content;
-        padding: 0.35rem 0.85rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
-        color: #f7fbff;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.loft1325-mobile-loft__slider-overlay-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.65rem;
-        padding: 0.85rem 1rem;
-        border-radius: 18px;
-        background: rgba(7, 13, 26, 0.65);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        box-shadow: 0 24px 36px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(14px);
-}
-
-.loft1325-mobile-loft__overlay-price {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        color: #e6edf5;
-}
-
-.loft1325-mobile-loft__overlay-price p {
-        margin: 0;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: rgba(230, 237, 245, 0.9);
-}
-
-.loft1325-mobile-loft__overlay-price strong {
-        display: block;
-        font-size: 1.15rem;
-        color: #fff;
-}
-
-.loft1325-mobile-loft__overlay-price small {
-        display: block;
-        color: rgba(230, 237, 245, 0.8);
+	transform: scale(1.3);
+	background: #76b1c4;
 }
 
 .loft1325-mobile-loft__slider-badge {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        padding: 0.35rem 0.6rem;
-        border-radius: 12px;
-        background: rgba(7, 13, 25, 0.65);
-        color: #e2ecf5;
-        font-weight: 700;
-        font-size: 0.85rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        backdrop-filter: blur(12px);
-        z-index: 2;
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	padding: 0.35rem 0.6rem;
+	border-radius: 12px;
+	background: rgba(7, 13, 25, 0.65);
+	color: #e2ecf5;
+	font-weight: 700;
+	font-size: 0.85rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	backdrop-filter: blur(12px);
 }
 
 .loft1325-mobile-loft__hero-card {
@@ -305,17 +199,10 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__hero-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-}
-
-.loft1325-mobile-loft__pill-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
-        margin: 0.35rem 0 0.1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
 }
 
 .loft1325-mobile-loft__eyebrow {
@@ -379,20 +266,15 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__cta-row {
-        display: grid;
-        gap: 0.6rem;
-        grid-template-columns: 1fr 1fr;
-}
-
-.loft1325-mobile-loft__btn--full {
-        width: 100%;
-        justify-content: center;
+	display: grid;
+	gap: 0.6rem;
+	grid-template-columns: 1fr 1fr;
 }
 
 .loft1325-mobile-loft__btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	padding: 0.95rem 1rem;
 	border-radius: 14px;
 	font-weight: 700;
@@ -402,17 +284,16 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__btn--primary {
-	background: linear-gradient(135deg, #0f1f3a, #1c4a73);
-	color: #f7fbff !important;
-	box-shadow: 0 18px 32px rgba(12, 27, 48, 0.45);
-	border-color: rgba(255, 255, 255, 0.16);
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+	background: linear-gradient(135deg, #0f172a, #193954);
+	color: #fff;
+	box-shadow: 0 16px 30px rgba(25, 57, 84, 0.35);
+	border-color: rgba(255, 255, 255, 0.08);
 }
 
 .loft1325-mobile-loft__btn--primary:hover,
 .loft1325-mobile-loft__btn--primary:focus-visible {
 	transform: translateY(-1px);
-	box-shadow: 0 20px 36px rgba(12, 27, 48, 0.5);
+	box-shadow: 0 18px 34px rgba(25, 57, 84, 0.45);
 }
 
 .loft1325-mobile-loft__btn--ghost {
@@ -508,28 +389,12 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__chip {
-        padding: 0.65rem 0.85rem;
-        border-radius: 14px;
-        background: #f1f5f9;
-        color: #0f172a;
-        font-weight: 600;
-        border: 1px solid rgba(118, 177, 196, 0.2);
-}
-
-.loft1325-mobile-loft__chip--frosted {
-        background: rgba(118, 177, 196, 0.14);
-        border-color: rgba(255, 255, 255, 0.55);
-        box-shadow: 0 12px 20px rgba(12, 27, 48, 0.12);
-        color: #0b1726;
-        backdrop-filter: blur(8px);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-}
-
-.loft1325-mobile-loft__chip--frosted .dashicons {
-        color: #0f2d4a;
-        margin-top: 1px;
+	padding: 0.65rem 0.85rem;
+	border-radius: 14px;
+	background: #f1f5f9;
+	color: #0f172a;
+	font-weight: 600;
+	border: 1px solid rgba(118, 177, 196, 0.2);
 }
 
 .loft1325-mobile-loft__chip-list--accent .loft1325-mobile-loft__chip {

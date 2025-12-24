@@ -7,11 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$post = get_post();
-if ( have_posts() ) {
-	the_post();
-}
-
 $plugin         = Loft1325_Mobile_Lofts::instance();
 $room_id        = get_the_ID();
 $room_data      = $plugin->get_room_data( $room_id );
@@ -20,9 +15,6 @@ $booking_url    = $plugin->get_booking_url( $room_id );
 $language       = $plugin->get_current_language();
 $archive_url    = get_post_type_archive_link( 'nd_booking_cpt_1' );
 $archive_url    = $archive_url ? $archive_url : home_url( '/' );
-$toggle_language = ( 'en' === $language ) ? 'fr' : 'en';
-$toggle_label   = ( 'en' === $language ) ? 'FR' : 'EN';
-$toggle_url     = add_query_arg( 'lang', $toggle_language );
 $per_night      = $plugin->localize_label( 'par nuit', 'per night' );
 $cta_label      = $plugin->localize_label( 'Réserver maintenant', 'Reserve now' );
 $details_label  = $plugin->localize_label( 'Voir les détails', 'View details' );
@@ -48,20 +40,14 @@ get_header();
 				<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
 				<?php echo esc_html( $plugin->localize_label( 'Retour aux lofts', 'Back to lofts' ) ); ?>
 			</a>
-			<div class="loft1325-mobile-loft__topbar-actions">
-				<a class="loft1325-mobile-loft__lang-switch" href="<?php echo esc_url( $toggle_url ); ?>">
-					<span aria-hidden="true" class="dashicons dashicons-translation"></span>
-					<?php echo esc_html( $toggle_label ); ?>
-				</a>
-				<span class="loft1325-mobile-loft__pill"><?php echo esc_html( $pill_label ); ?></span>
-			</div>
+			<span class="loft1325-mobile-loft__pill"><?php echo esc_html( $pill_label ); ?></span>
 		</header>
 
-                <section class="loft1325-mobile-loft__hero" aria-label="<?php the_title_attribute(); ?>">
-                        <div class="loft1325-mobile-loft__slider" data-loft-slider data-autoplay="true">
-                                <div class="loft1325-mobile-loft__slider-track" data-loft-slider-track style="--loft-slider-count: <?php echo esc_attr( max( 1, count( $gallery ) ) ); ?>;">
-                                        <?php if ( ! empty( $gallery ) ) : ?>
-                                                <?php foreach ( $gallery as $image ) : ?>
+		<section class="loft1325-mobile-loft__hero" aria-label="<?php the_title_attribute(); ?>">
+			<div class="loft1325-mobile-loft__slider" data-loft-slider data-autoplay="true">
+				<div class="loft1325-mobile-loft__slider-track" data-loft-slider-track style="--loft-slider-count: <?php echo esc_attr( max( 1, count( $gallery ) ) ); ?>;">
+					<?php if ( ! empty( $gallery ) ) : ?>
+						<?php foreach ( $gallery as $image ) : ?>
 							<figure class="loft1325-mobile-loft__slide" data-loft-slide>
 								<?php if ( ! empty( $image['url'] ) ) : ?>
 									<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ? $image['alt'] : $room_data['title'] ); ?>" loading="lazy" />
@@ -84,36 +70,18 @@ get_header();
 							<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
 						</button>
 					</div>
-                                        <div class="loft1325-mobile-loft__slider-dots" role="tablist" aria-label="<?php echo esc_attr( $plugin->localize_label( 'Sélectionner une image', 'Select an image' ) ); ?>" data-loft-dots></div>
-                                <?php endif; ?>
+					<div class="loft1325-mobile-loft__slider-dots" role="tablist" aria-label="<?php echo esc_attr( $plugin->localize_label( 'Sélectionner une image', 'Select an image' ) ); ?>" data-loft-dots></div>
+				<?php endif; ?>
 
-                                <div class="loft1325-mobile-loft__slider-badge">
-                                        <span class="dashicons dashicons-star-filled" aria-hidden="true"></span>
-                                        <?php echo esc_html( $rating_label ); ?>
-                                </div>
+				<div class="loft1325-mobile-loft__slider-badge">
+					<span class="dashicons dashicons-star-filled" aria-hidden="true"></span>
+					<?php echo esc_html( $rating_label ); ?>
+				</div>
+			</div>
 
-                                <div class="loft1325-mobile-loft__slider-overlay">
-                                        <div class="loft1325-mobile-loft__slider-pill">
-                                                <?php echo esc_html( $plugin->localize_label( 'Sélection artisanale', 'Curated escape' ) ); ?>
-                                        </div>
-                                        <div class="loft1325-mobile-loft__slider-overlay-grid">
-                                                <div class="loft1325-mobile-loft__overlay-price">
-                                                        <p><?php echo esc_html( $plugin->localize_label( 'À partir de', 'Starting at' ) ); ?></p>
-                                                        <div>
-                                                                <strong><?php echo $room_data['price'] ? esc_html( $room_data['price'] ) : esc_html( $empty_price ); ?></strong>
-                                                                <small><?php echo esc_html( $per_night ); ?></small>
-                                                        </div>
-                                                </div>
-                                                <a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary loft1325-mobile-loft__btn--full" href="<?php echo esc_url( $booking_url ); ?>">
-                                                        <?php echo esc_html( $cta_label ); ?>
-                                                </a>
-                                        </div>
-                                </div>
-                        </div>
-
-                        <div class="loft1325-mobile-loft__hero-card">
-                                <div class="loft1325-mobile-loft__hero-meta">
-                                        <?php if ( $room_data['branch_title'] ) : ?>
+			<div class="loft1325-mobile-loft__hero-card">
+				<div class="loft1325-mobile-loft__hero-meta">
+					<?php if ( $room_data['branch_title'] ) : ?>
 						<span class="loft1325-mobile-loft__eyebrow"><?php echo esc_html( $room_data['branch_title'] ); ?></span>
 					<?php endif; ?>
 					<?php if ( $room_data['branch_stars'] ) : ?>
@@ -128,36 +96,23 @@ get_header();
 				<h1 class="loft1325-mobile-loft__title"><?php echo esc_html( $room_data['title'] ); ?></h1>
 				<p class="loft1325-mobile-loft__lede"><?php echo esc_html( $room_data['excerpt'] ); ?></p>
 
-                                <div class="loft1325-mobile-loft__pill-row">
-                                        <?php if ( $room_data['capacity'] ) : ?>
-                                                <span class="loft1325-mobile-loft__chip loft1325-mobile-loft__chip--frosted">
-                                                        <span class="dashicons dashicons-groups" aria-hidden="true"></span>
-                                                        <?php echo esc_html( sprintf( '%s %s', $room_data['capacity'], $sleeps_label ) ); ?>
-                                                </span>
-                                        <?php endif; ?>
-                                        <?php if ( $room_data['room_size'] ) : ?>
-                                                <span class="loft1325-mobile-loft__chip loft1325-mobile-loft__chip--frosted">
-                                                        <span class="dashicons dashicons-grid-view" aria-hidden="true"></span>
-                                                        <?php echo esc_html( $room_data['room_size'] ); ?> ㎡
-                                                </span>
-                                        <?php endif; ?>
-                                        <?php if ( $room_data['min_nights'] ) : ?>
-                                                <span class="loft1325-mobile-loft__chip loft1325-mobile-loft__chip--frosted">
-                                                        <span class="dashicons dashicons-clock" aria-hidden="true"></span>
-                                                        <?php echo esc_html( sprintf( '%s %s', $room_data['min_nights'], $nights_label ) ); ?>
-                                                </span>
-                                        <?php endif; ?>
-                                </div>
+				<div class="loft1325-mobile-loft__price">
+					<div class="loft1325-mobile-loft__price-label"><?php echo esc_html( $plugin->localize_label( 'À partir de', 'From' ) ); ?></div>
+					<div class="loft1325-mobile-loft__price-value">
+						<strong><?php echo $room_data['price'] ? esc_html( $room_data['price'] ) : esc_html( $empty_price ); ?></strong>
+						<small><?php echo esc_html( $per_night ); ?></small>
+					</div>
+				</div>
 
-                                <div class="loft1325-mobile-loft__cta-row">
-                                        <a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--ghost" href="#loft1325-mobile-loft-highlights">
-                                                <?php echo esc_html( $details_label ); ?>
-                                        </a>
-                                        <a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" href="<?php echo esc_url( $booking_url ); ?>">
-                                                <?php echo esc_html( $cta_label ); ?>
-                                        </a>
-                                </div>
-                        </div>
+				<div class="loft1325-mobile-loft__cta-row">
+					<a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" href="<?php echo esc_url( $booking_url ); ?>">
+						<?php echo esc_html( $cta_label ); ?>
+					</a>
+					<a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--ghost" href="#loft1325-mobile-loft-highlights">
+						<?php echo esc_html( $details_label ); ?>
+					</a>
+				</div>
+			</div>
 		</section>
 
 		<section id="loft1325-mobile-loft-highlights" class="loft1325-mobile-loft__section loft1325-mobile-loft__section--cards">
