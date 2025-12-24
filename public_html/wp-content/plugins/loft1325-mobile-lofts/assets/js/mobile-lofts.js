@@ -12,14 +12,16 @@
 	function createSlider(slider) {
 		var track = slider.querySelector("[data-loft-slider-track]");
 		var slides = slider.querySelectorAll("[data-loft-slide]");
-		var dotsContainer = slider.querySelector("[data-loft-dots]");
-		var prevBtn = slider.querySelector("[data-loft-prev]");
-		var nextBtn = slider.querySelector("[data-loft-next]");
-		var autoplay = slider.getAttribute("data-autoplay") === "true";
-		var autoplayInterval = (window.Loft1325MobileLofts && window.Loft1325MobileLofts.autoplayInterval) ? window.Loft1325MobileLofts.autoplayInterval : 5500;
-		var current = 0;
-		var timer = null;
-		var startX = 0;
+                var dotsContainer = slider.querySelector("[data-loft-dots]");
+                var prevBtn = slider.querySelector("[data-loft-prev]");
+                var nextBtn = slider.querySelector("[data-loft-next]");
+                var progressFill = slider.querySelector("[data-loft-progress]");
+                var counter = slider.querySelector("[data-loft-counter]");
+                var autoplay = slider.getAttribute("data-autoplay") === "true";
+                var autoplayInterval = (window.Loft1325MobileLofts && window.Loft1325MobileLofts.autoplayInterval) ? window.Loft1325MobileLofts.autoplayInterval : 5500;
+                var current = 0;
+                var timer = null;
+                var startX = 0;
 		var deltaX = 0;
 
 		if (!track || !slides.length) {
@@ -45,12 +47,21 @@
 			});
 		}
 
-		function update() {
-			track.style.transform = "translateX(-" + current * 100 + "%)";
+                function update() {
+                        track.style.transform = "translateX(-" + current * 100 + "%)";
 
-			if (!dotsContainer) {
-				return;
-			}
+                        if (counter) {
+                                counter.textContent = (current + 1) + " / " + slides.length;
+                        }
+
+                        if (progressFill) {
+                                var percentage = ((current + 1) / slides.length) * 100;
+                                progressFill.style.width = percentage + "%";
+                        }
+
+                        if (!dotsContainer) {
+                                return;
+                        }
 
 			var dots = dotsContainer.querySelectorAll(".loft1325-mobile-loft__dot");
 			dots.forEach(function (dot, index) {
