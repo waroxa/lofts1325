@@ -202,13 +202,18 @@ body.loft1325-mobile-lofts-active a {
 
 .loft1325-mobile-loft__hero-card {
         position: relative;
-        margin-top: -1.2rem;
+        margin: -1.2rem 0 0;
         background: var(--loft1325-surface);
-        padding: 1.5rem 1.25rem;
+        padding: 1.5rem 1.35rem;
         border-radius: 24px;
         box-shadow: var(--loft1325-glow);
         border: 1px solid var(--loft1325-border);
         background-image: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.06), transparent 45%), radial-gradient(circle at 80% 0%, rgba(15, 23, 42, 0.06), transparent 35%);
+}
+
+.loft1325-mobile-loft__hero-card.loft1325-mobile-loft__section {
+        padding: 1.5rem 1.35rem;
+        margin: -1.2rem 0 0;
 }
 
 .loft1325-mobile-loft__hero-meta {
