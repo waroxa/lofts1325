@@ -107,16 +107,16 @@ function loft_booking_handle_payment_settings_save()
 
     // Persist the combined settings array. Use autoload=true so the settings
     // are always available even on hosts with aggressive object caching.
-    update_option('wp_loft_booking_stripe_settings', $settings, true);
+    loft_booking_update_option_with_logging('wp_loft_booking_stripe_settings', $settings, true, 'Stripe settings array');
 
     // Keep legacy option names in sync for any existing integrations.
-    update_option('stripe_publishable_key', $settings['live_publishable']);
-    update_option('stripe_secret_key', $settings['live_secret']);
-    update_option('stripe_test_publishable_key', $settings['test_publishable']);
-    update_option('stripe_test_secret_key', $settings['test_secret']);
-    update_option('stripe_test_mode', (bool) $settings['test_mode']);
-    update_option('stripe_checkout_message', $settings['checkout_message']);
-    update_option('stripe_currency', $settings['currency']);
+    loft_booking_update_option_with_logging('stripe_publishable_key', $settings['live_publishable']);
+    loft_booking_update_option_with_logging('stripe_secret_key', $settings['live_secret']);
+    loft_booking_update_option_with_logging('stripe_test_publishable_key', $settings['test_publishable']);
+    loft_booking_update_option_with_logging('stripe_test_secret_key', $settings['test_secret']);
+    loft_booking_update_option_with_logging('stripe_test_mode', (bool) $settings['test_mode']);
+    loft_booking_update_option_with_logging('stripe_checkout_message', $settings['checkout_message']);
+    loft_booking_update_option_with_logging('stripe_currency', $settings['currency']);
 
     // Re-read the values to verify the database accepted the update and show a
     // helpful message if the save failed for any reason (e.g., DB permissions
@@ -155,6 +155,54 @@ function loft_booking_handle_payment_settings_save()
 
     wp_safe_redirect(admin_url('admin.php?page=loft-payment-settings'));
     exit;
+}
+
+/**
+ * Update an option and log when WordPress reports a failed write.
+ */
+function loft_booking_update_option_with_logging($option, $value, $autoload = null, $label = null)
+{
+    $previous = get_option($option, null);
+    $result   = update_option($option, $value, $autoload);
+
+    // update_option() returns false when the value is identical or when the
+    // write fails. Only log when we expected a change but WordPress indicates
+    // it could not save.
+    $expected_change = $previous !== $value;
+
+    if ($expected_change && $result === false) {
+        error_log(
+            sprintf(
+                'Loft Booking: Failed to update option "%s"%s. Attempted %s but stored %s.',
+                $option,
+                $label ? sprintf(' (%s)', $label) : '',
+                loft_booking_describe_option_value($value),
+                loft_booking_describe_option_value($previous)
+            )
+        );
+    }
+
+    return $result;
+}
+
+/**
+ * Provide a masked/concise description of an option value for logs.
+ */
+function loft_booking_describe_option_value($value)
+{
+    if (is_array($value)) {
+        return '(array)';
+    }
+
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+
+    if ($value === null) {
+        return '(null)';
+    }
+
+    return loft_booking_mask_key_for_logging((string) $value);
 }
 
 /**
