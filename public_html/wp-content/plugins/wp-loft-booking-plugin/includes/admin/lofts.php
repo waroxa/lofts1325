@@ -420,29 +420,58 @@ function wp_loft_booking_display_units() {
 
 function find_first_available_loft_unit($room_type) {
     global $wpdb;
-    $type        = strtoupper($room_type);
-    $units_table = $wpdb->prefix . 'loft_units';
 
-    $unit = $wpdb->get_row(
+    $units_table = $wpdb->prefix . 'loft_units';
+    $requested   = wp_loft_booking_detect_room_type($room_type);
+
+    $candidates = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT * FROM {$units_table} WHERE status = 'Available' AND unit_name LIKE %s ORDER BY id ASC LIMIT 1",
-            '%' . $wpdb->esc_like("($type)") . '%'
+            "SELECT * FROM {$units_table} WHERE LOWER(status) = %s ORDER BY id ASC",
+            'available'
         )
     );
 
-    if ($unit) {
+    $selected = null;
+
+    foreach ($candidates as $candidate) {
+        $unit_type = wp_loft_booking_detect_room_type($candidate->unit_name);
+
+        if ($requested && $unit_type && $unit_type !== $requested) {
+            continue;
+        }
+
+        $selected = $candidate;
+        break;
+    }
+
+    if (!$selected && !empty($candidates)) {
+        // Fall back to the first available unit when the request can't be typed.
+        $selected = $candidates[0];
+    }
+
+    if ($selected) {
+        $selected_type = wp_loft_booking_detect_room_type($selected->unit_name);
         $wpdb->update(
             $units_table,
             ['status' => 'Reserved'],
-            ['id' => $unit->id],
+            ['id' => $selected->id],
             ['%s'],
             ['%d']
         );
 
-        error_log("✅ MATCHED UNIT: {$unit->unit_name} (DB ID: {$unit->id}, API ID: {$unit->unit_id_api})");
+        $type_label = $requested ?: ($selected_type ?? '');
+        error_log(
+            sprintf(
+                '✅ MATCHED UNIT: %s (DB ID: %d, API ID: %s) [requested type: %s]',
+                $selected->unit_name,
+                $selected->id,
+                $selected->unit_id_api ?? 'n/a',
+                $type_label ?: 'any'
+            )
+        );
     }
 
-    return $unit;
+    return $selected;
 }
 
 

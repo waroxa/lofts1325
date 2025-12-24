@@ -8,7 +8,9 @@ add_action('wp_ajax_wp_loft_booking_update_cleaning_status', 'wp_loft_booking_aj
 function wp_loft_booking_calendar_admin_assets($hook) {
     $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
 
-    if ('loft-booking-google-calendar' !== $page) {
+    $pages_with_calendar = ['loft-booking-google-calendar', 'loft-keychain-calendar'];
+
+    if (!in_array($page, $pages_with_calendar, true)) {
         return;
     }
 

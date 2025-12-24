@@ -3,16 +3,20 @@
 
     const settings = window.wpLoftCalendarData || {};
     const initial = settings.payload || {};
+    const today = initial.today || new Date().toISOString().slice(0, 10);
 
     const state = {
         bookings: decorateBookings(initial.bookings || []),
         cleaning: initial.cleaning || [],
-        today: initial.today || new Date().toISOString().slice(0, 10),
+        keys: decorateKeychains(initial.keys || []),
+        today,
         view: {
             bookings: initial.today ? new Date(initial.today) : new Date(),
             cleaning: initial.today ? new Date(initial.today) : new Date(),
+            keys: initial.today ? new Date(initial.today) : new Date(),
         },
         statuses: settings.statuses || {},
+        keyStatuses: settings.keyStatuses || {},
     };
 
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -72,6 +76,17 @@
         });
     }
 
+    function decorateKeychains(keys) {
+        return (keys || []).map((key) => {
+            const loftLabel = key.loft_label || key.loft || '';
+            return {
+                ...key,
+                color: key.color || loftColor(loftLabel),
+                loft_label: loftLabel,
+            };
+        });
+    }
+
     function expandBookingsAcrossStay(bookings) {
         const expanded = [];
 
@@ -94,6 +109,35 @@
                     stay_length: totalNights,
                     night_index: i + 1,
                     day_key: toKey(night),
+                });
+            }
+        });
+
+        return expanded;
+    }
+
+    function expandKeychainsAcrossValidity(keys) {
+        const expanded = [];
+
+        (keys || []).forEach((keychain) => {
+            if (!keychain.start || !keychain.end) return;
+
+            const start = new Date(`${keychain.start}T12:00:00`);
+            const end = new Date(`${keychain.end}T12:00:00`);
+
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+
+            const totalDays = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
+
+            for (let i = 0; i < totalDays; i++) {
+                const day = new Date(start);
+                day.setDate(start.getDate() + i);
+
+                expanded.push({
+                    ...keychain,
+                    day_key: toKey(day),
+                    validity_length: totalDays,
+                    validity_index: i + 1,
                 });
             }
         });
@@ -170,10 +214,21 @@
         const container = $(`#loft-${type}-calendar`);
         const viewDate = state.view[type];
         const days = buildMonth(viewDate);
-        const sourceEvents = type === 'bookings' ? expandBookingsAcrossStay(state.bookings) : state.cleaning;
+        const sourceEvents =
+            type === 'bookings'
+                ? expandBookingsAcrossStay(state.bookings)
+                : type === 'keys'
+                ? expandKeychainsAcrossValidity(state.keys)
+                : state.cleaning;
         const eventsByDay = groupEvents(
             sourceEvents,
-            (event) => (type === 'bookings' ? event.day_key : event.cleaning_date)
+            (event) => {
+                if (type === 'bookings' || type === 'keys') {
+                    return event.day_key;
+                }
+
+                return event.cleaning_date;
+            }
         );
 
         const weekdayRow = dayLabels
@@ -212,6 +267,31 @@
                                     <p class="loft-calendar__meta">${friendlyDate(event.start)} → ${friendlyDate(event.end)} · ${event.nights || event.stay_length || 1} night(s)</p>
                                     <p class="loft-calendar__meta loft-calendar__meta--keys">🔑 ${keyLabel}</p>
                                     <p class="loft-calendar__meta">${event.amount || ''} · ${event.status || ''}</p>
+                                </div>
+                            `;
+                        }
+
+                        if (type === 'keys') {
+                            const color = event.color || loftColor(event.loft_label || event.loft);
+                            const darker = shadeColor(color, -18);
+                            const nameLabel = event.key_label || 'Keychain';
+                            const keyNames = event.key_names && event.key_names.length ? event.key_names.join(', ') : nameLabel;
+                            const validityBadge =
+                                event.validity_length > 1
+                                    ? `<span class="loft-calendar__pill loft-calendar__pill--subtle">Day ${event.validity_index} of ${event.validity_length}</span>`
+                                    : '';
+                            const statusLabel = state.keyStatuses[event.status] || event.status || '';
+
+                            return `
+                                <div class="loft-calendar__event" aria-label="Keychain for ${event.loft}" style="background: linear-gradient(135deg, ${color}, ${darker}); border-left: 5px solid ${darker};">
+                                    <div class="loft-calendar__event-heading">
+                                        <span class="loft-calendar__pill">${event.loft_label || event.loft}</span>
+                                        ${validityBadge}
+                                    </div>
+                                    <p class="loft-calendar__event-title">${nameLabel}</p>
+                                    <p class="loft-calendar__meta">${friendlyDate(event.start)} → ${friendlyDate(event.end)}</p>
+                                    <p class="loft-calendar__meta loft-calendar__meta--keys">🔑 ${keyNames}</p>
+                                    <p class="loft-calendar__meta">${statusLabel}</p>
                                 </div>
                             `;
                         }
@@ -290,9 +370,18 @@
         state.bookings = decorateBookings(snapshot.bookings || []);
         state.cleaning = snapshot.cleaning || [];
         state.today = snapshot.today || state.today;
-        renderCalendar('bookings');
-        renderCalendar('cleaning');
-        renderQueue();
+        if ($('#loft-bookings-calendar').length) {
+            renderCalendar('bookings');
+        }
+
+        if ($('#loft-cleaning-calendar').length) {
+            renderCalendar('cleaning');
+            renderQueue();
+        }
+
+        if ($('#loft-keys-calendar').length) {
+            renderCalendar('keys');
+        }
     }
 
     function updateStatus(bookingId, status) {
@@ -325,7 +414,16 @@
         updateStatus(bookingId, status);
     });
 
-    renderCalendar('bookings');
-    renderCalendar('cleaning');
-    renderQueue();
+    if ($('#loft-bookings-calendar').length) {
+        renderCalendar('bookings');
+    }
+
+    if ($('#loft-cleaning-calendar').length) {
+        renderCalendar('cleaning');
+        renderQueue();
+    }
+
+    if ($('#loft-keys-calendar').length) {
+        renderCalendar('keys');
+    }
 })(jQuery);
