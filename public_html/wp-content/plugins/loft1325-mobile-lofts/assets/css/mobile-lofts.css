@@ -209,6 +209,9 @@ body.loft1325-mobile-lofts-active a {
         box-shadow: var(--loft1325-glow);
         border: 1px solid var(--loft1325-border);
         background-image: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.06), transparent 45%), radial-gradient(circle at 80% 0%, rgba(15, 23, 42, 0.06), transparent 35%);
+        display: grid;
+        grid-template-rows: auto auto auto auto 1fr auto;
+        row-gap: 0.75rem;
 }
 
 .loft1325-mobile-loft__hero-card.loft1325-mobile-loft__section {
@@ -297,6 +300,7 @@ body.loft1325-mobile-lofts-active a {
         display: grid;
         grid-template-columns: 1.1fr 1fr;
         gap: 0.75rem;
+        margin-top: auto;
 }
 
 .loft1325-mobile-loft__btn {

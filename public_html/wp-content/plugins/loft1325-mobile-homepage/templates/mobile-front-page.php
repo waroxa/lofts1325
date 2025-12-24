@@ -107,6 +107,8 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
     display: grid;
     gap: 1rem;
     color: #0b0b0b;
+    min-height: 100%;
+    grid-template-rows: auto auto 1fr auto auto;
 }
 
 body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-badge {
@@ -158,6 +160,10 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
     text-transform: uppercase;
     letter-spacing: 0.12em;
 }
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-actions {
+    margin-top: auto;
+ }
 
 body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__room-footer {
     margin-top: 2.35rem;

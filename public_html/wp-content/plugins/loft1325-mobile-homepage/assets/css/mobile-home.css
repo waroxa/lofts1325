@@ -1073,6 +1073,8 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
     display: grid;
     gap: 1rem;
     color: var(--loft1325-text);
+    min-height: 100%;
+    grid-template-rows: auto auto 1fr auto auto;
 }
 
 .loft1325-mobile-home__room-badge {
@@ -1126,7 +1128,7 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
 }
 
 .loft1325-mobile-home__room-actions {
-    margin-top: 0.35rem;
+    margin-top: auto;
 }
 
 .loft1325-mobile-home__room-footer {
