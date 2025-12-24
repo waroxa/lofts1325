@@ -1,73 +1,11 @@
 (function () {
-        "use strict";
+	"use strict";
 
-        var sliders = document.querySelectorAll("[data-loft-slider]");
+	var sliders = document.querySelectorAll("[data-loft-slider]");
 
-        function moveLanguageSwitcherIntoLayout() {
-                var layout = document.querySelector(".loft1325-mobile-loft");
-                var highlights = document.getElementById("loft1325-mobile-loft-highlights");
-                var switcher = document.querySelector(".trp-language-switcher-container, .trp-language-switcher");
-
-                if (!layout || !highlights || !switcher) {
-                        return null;
-                }
-
-                var wrapper = switcher.closest(".loft1325-mobile-loft__language-switcher");
-
-                if (!wrapper) {
-                        wrapper = document.createElement("div");
-                        wrapper.className = "loft1325-mobile-loft__language-switcher";
-                        wrapper.appendChild(switcher);
-                }
-
-                if (wrapper.parentElement !== layout) {
-                        layout.insertBefore(wrapper, highlights);
-                }
-
-                switcher.style.position = "static";
-                switcher.style.left = "auto";
-                switcher.style.right = "auto";
-                switcher.style.bottom = "auto";
-
-                return switcher;
-        }
-
-        function setLanguageSwitcherOffset() {
-                var body = document.body;
-                var switcher = moveLanguageSwitcherIntoLayout();
-
-                if (!body) {
-                        return;
-                }
-
-                if (!switcher) {
-                        body.classList.remove("loft1325-mobile-lofts--has-switcher");
-                        body.style.removeProperty("--loft1325-language-switcher-height");
-                        return;
-                }
-
-                if (switcher.closest(".loft1325-mobile-loft__language-switcher")) {
-                        body.classList.remove("loft1325-mobile-lofts--has-switcher");
-                        body.style.removeProperty("--loft1325-language-switcher-height");
-                        return;
-                }
-
-                var rect = switcher.getBoundingClientRect ? switcher.getBoundingClientRect() : null;
-                var height = switcher.offsetHeight || (rect ? rect.height : 0) || 0;
-
-                if (height > 0) {
-                        body.style.setProperty("--loft1325-language-switcher-height", height + 12 + "px");
-                        body.classList.add("loft1325-mobile-lofts--has-switcher");
-                }
-        }
-
-        setLanguageSwitcherOffset();
-
-        if (!sliders.length) {
-                return;
-        }
-
-        window.addEventListener("resize", setLanguageSwitcherOffset);
+	if (!sliders.length) {
+		return;
+	}
 
 	var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
