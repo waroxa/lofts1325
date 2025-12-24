@@ -187,16 +187,16 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__hero-card {
-	margin-top: -40px;
-	background: #f8fafc;
-	border-radius: 22px;
-	padding: 1.25rem;
-	box-shadow: 0 20px 44px rgba(9, 18, 36, 0.25), 0 10px 20px rgba(0, 0, 0, 0.1);
-	position: relative;
-	z-index: 1;
-	display: grid;
-	gap: 0.65rem;
-	border: 1px solid rgba(118, 177, 196, 0.22);
+        margin-top: 0;
+        background: #f8fafc;
+        border-radius: 22px;
+        padding: 1.25rem;
+        box-shadow: 0 20px 44px rgba(9, 18, 36, 0.25), 0 10px 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: 0.65rem;
+        border: 1px solid rgba(118, 177, 196, 0.22);
 }
 
 .loft1325-mobile-loft__hero-meta {
