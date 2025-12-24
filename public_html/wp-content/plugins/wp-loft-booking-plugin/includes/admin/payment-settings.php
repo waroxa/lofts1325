@@ -134,6 +134,15 @@ function loft_booking_handle_payment_settings_save()
             60
         );
     } else {
+        $differences = loft_booking_describe_stripe_mismatches($settings, $persisted);
+
+        error_log(
+            sprintf(
+                'Loft Booking: Stripe keys failed to persist. Differences: %s',
+                $differences ? implode('; ', $differences) : 'unknown reason'
+            )
+        );
+
         set_transient(
             'loft_booking_payment_settings_notice',
             [
@@ -146,6 +155,61 @@ function loft_booking_handle_payment_settings_save()
 
     wp_safe_redirect(admin_url('admin.php?page=loft-payment-settings'));
     exit;
+}
+
+/**
+ * Describe masked differences between the submitted and stored Stripe settings for logging.
+ *
+ * @param array $submitted The submitted settings array.
+ * @param array $persisted The settings read back from the database.
+ * @return array List of human-readable differences.
+ */
+function loft_booking_describe_stripe_mismatches(array $submitted, array $persisted)
+{
+    $differences = [];
+
+    $fields = [
+        'live_publishable' => 'Live publishable key',
+        'live_secret'      => 'Live secret key',
+        'test_publishable' => 'Test publishable key',
+        'test_secret'      => 'Test secret key',
+    ];
+
+    foreach ($fields as $field => $label) {
+        if (($submitted[$field] ?? '') !== ($persisted[$field] ?? '')) {
+            $differences[] = sprintf(
+                '%s mismatch (submitted %s, stored %s)',
+                $label,
+                loft_booking_mask_key_for_logging($submitted[$field] ?? ''),
+                loft_booking_mask_key_for_logging($persisted[$field] ?? '')
+            );
+        }
+    }
+
+    return $differences;
+}
+
+/**
+ * Mask Stripe keys to avoid logging full secrets.
+ *
+ * @param string $key The key to mask.
+ * @return string Masked key description.
+ */
+function loft_booking_mask_key_for_logging($key)
+{
+    $key = (string) $key;
+
+    if ($key === '') {
+        return '(empty)';
+    }
+
+    $length = strlen($key);
+
+    if ($length <= 8) {
+        return str_repeat('*', $length);
+    }
+
+    return substr($key, 0, 4) . '...' . substr($key, -4) . sprintf(' (len:%d)', $length);
 }
 
 function loft_booking_payment_settings()
