@@ -11,15 +11,16 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__backdrop {
-	min-height: 100vh;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+        min-height: 100vh;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+        padding-top: env(safe-area-inset-top, 0);
 }
 
 .loft1325-mobile-loft {
-	max-width: 540px;
-	margin: 0 auto;
-	padding: 1.25rem 1.1rem 5.25rem;
-	position: relative;
+        max-width: 540px;
+        margin: 0 auto;
+        padding: calc(env(safe-area-inset-top, 0px) + 1.25rem) 1.1rem 5.25rem;
+        position: relative;
 }
 
 .loft1325-mobile-loft__topbar {
