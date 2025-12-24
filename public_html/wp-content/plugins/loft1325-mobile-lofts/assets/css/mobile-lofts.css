@@ -1,487 +1,417 @@
 body.loft1325-mobile-lofts-active {
         margin: 0;
-        font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at 20% 20%, rgba(118, 177, 196, 0.2), transparent 40%), radial-gradient(circle at 80% 10%, rgba(80, 104, 150, 0.18), transparent 35%), #0f1620;
-        color: #0f172a;
+        font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        background: #f7f7f9;
+        color: #0b0b0b;
+        --loft1325-brand: #0f172a;
+        --loft1325-brand-soft: rgba(15, 23, 42, 0.08);
+        --loft1325-surface: #ffffff;
+        --loft1325-border: #e5e7eb;
+        --loft1325-muted: #6b7280;
+        --loft1325-glow: 0 18px 48px rgba(15, 23, 42, 0.14);
         overflow-x: hidden;
 }
 
 body.loft1325-mobile-lofts-active a {
-	color: inherit;
-	text-decoration: none;
+        color: inherit;
+        text-decoration: none;
 }
 
-.loft1325-mobile-loft__backdrop {
+#loft1325-mobile-loftpage {
         min-height: 100vh;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-        overflow-x: hidden;
+        background: linear-gradient(180deg, #f7f7f9 0%, #eef3f6 100%);
 }
 
 .loft1325-mobile-loft {
-        width: min(540px, 100%);
+        width: min(820px, 100%);
         margin: 0 auto;
-        padding: 1rem 1.1rem 5.25rem;
-        position: relative;
+        padding: 1.25rem 1.25rem 5.5rem;
         box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__topbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.75rem;
-	margin-bottom: 0.85rem;
-	color: #e7eff5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        color: var(--loft1325-brand);
+        margin-bottom: 0.75rem;
 }
 
 .loft1325-mobile-loft__crumb {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.3rem;
-	padding: 0.35rem 0.5rem;
-	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.08);
-	color: #e7eff5;
-	font-weight: 600;
-	font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 600;
+        font-size: 0.98rem;
+        padding: 0.65rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.06);
+}
+
+.loft1325-mobile-loft__crumb .dashicons {
+        font-size: 18px;
 }
 
 .loft1325-mobile-loft__pill {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.4rem 0.8rem;
-	border-radius: 999px;
-	background: rgba(118, 177, 196, 0.18);
-	color: #d6e8f0;
-	font-weight: 700;
-	font-size: 0.85rem;
-	letter-spacing: 0.02em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        background: #111827;
+        color: #fff;
+        font-size: 0.85rem;
 }
 
 .loft1325-mobile-loft__hero {
         display: grid;
-        gap: 0.85rem;
-        margin-bottom: 1.15rem;
-        position: relative;
-        isolation: isolate;
+        gap: 1.25rem;
 }
 
 .loft1325-mobile-loft__slider {
         position: relative;
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 25px 45px rgba(10, 20, 40, 0.35), 0 12px 24px rgba(0, 0, 0, 0.25);
-        background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-        height: clamp(220px, 60vh, 360px);
-        width: 100%;
+        background: #0f172a;
+        isolation: isolate;
+        box-shadow: var(--loft1325-glow);
 }
 
 .loft1325-mobile-loft__slider-track {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: 100%;
-        transition: transform 0.5s ease;
+        display: flex;
         width: 100%;
-        height: 100%;
-        box-sizing: border-box;
+        transition: transform 0.5s ease;
 }
 
 .loft1325-mobile-loft__slide {
-        margin: 0;
-        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
         position: relative;
-        background: linear-gradient(120deg, #192434, #0d111a);
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(180deg, #1f2937 0%, #0f172a 100%);
 }
 
 .loft1325-mobile-loft__slide img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
 }
 
-.loft1325-mobile-loft__slide--placeholder {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #cbd5e1;
-}
-
-.loft1325-mobile-loft__slide-fallback {
-	width: 100%;
-	height: 100%;
-	background: repeating-linear-gradient(135deg, rgba(118, 177, 196, 0.2) 0px, rgba(118, 177, 196, 0.2) 12px, rgba(118, 177, 196, 0.05) 12px, rgba(118, 177, 196, 0.05) 24px);
-}
-
-.loft1325-mobile-loft__slider-nav {
-	position: absolute;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0 0.35rem;
-	pointer-events: none;
-}
-
-.loft1325-mobile-loft__slider-btn {
-	height: 42px;
-	width: 42px;
-	border-radius: 50%;
-	border: 1px solid rgba(255, 255, 255, 0.18);
-	background: rgba(4, 10, 20, 0.55);
-	color: #fff;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	backdrop-filter: blur(10px);
-	cursor: pointer;
-	pointer-events: auto;
-	transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.loft1325-mobile-loft__slider-btn:hover,
-.loft1325-mobile-loft__slider-btn:focus-visible {
-	transform: translateY(-1px);
-	border-color: rgba(118, 177, 196, 0.6);
-	background: rgba(9, 17, 32, 0.75);
-	outline: none;
-}
-
-.loft1325-mobile-loft__slider-dots {
-	position: absolute;
-	bottom: 12px;
-	left: 50%;
-	transform: translateX(-50%);
-	display: inline-flex;
-	gap: 6px;
-	background: rgba(8, 12, 24, 0.45);
-	padding: 6px 10px;
-	border-radius: 999px;
-	backdrop-filter: blur(10px);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.loft1325-mobile-loft__dot {
-	height: 8px;
-	width: 8px;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.4);
-	border: none;
-	padding: 0;
-	cursor: pointer;
-	transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.loft1325-mobile-loft__dot.is-active {
-	transform: scale(1.3);
-	background: #76b1c4;
+.loft1325-mobile-loft__slide--placeholder .loft1325-mobile-loft__slide-fallback {
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08) 12px, rgba(255, 255, 255, 0.02) 12px, rgba(255, 255, 255, 0.02) 24px);
 }
 
 .loft1325-mobile-loft__slider-badge {
-	position: absolute;
-	top: 12px;
-	left: 12px;
-	padding: 0.35rem 0.6rem;
-	border-radius: 12px;
-	background: rgba(7, 13, 25, 0.65);
-	color: #e2ecf5;
-	font-weight: 700;
-	font-size: 0.85rem;
-	display: inline-flex;
-	align-items: center;
-	gap: 0.35rem;
-	backdrop-filter: blur(12px);
+        position: absolute;
+        top: 0.9rem;
+        right: 0.9rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #0f172a;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.loft1325-mobile-loft__slider-nav {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0.65rem;
+        pointer-events: none;
+}
+
+.loft1325-mobile-loft__slider-btn {
+        pointer-events: auto;
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0f172a;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+        cursor: pointer;
+}
+
+.loft1325-mobile-loft__slider-dots {
+        position: absolute;
+        left: 50%;
+        bottom: 0.85rem;
+        transform: translateX(-50%);
+        display: inline-flex;
+        gap: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.5);
+}
+
+.loft1325-mobile-loft__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+}
+
+.loft1325-mobile-loft__dot.is-active {
+        background: #fff;
+        width: 12px;
+        border-radius: 6px;
 }
 
 .loft1325-mobile-loft__hero-card {
-        margin-top: calc(-1 * clamp(88px, 20vh, 150px));
-        background: #f8fafc;
-        border-radius: 22px;
-        padding: 1.25rem;
-	box-shadow: 0 20px 44px rgba(9, 18, 36, 0.25), 0 10px 20px rgba(0, 0, 0, 0.1);
-	position: relative;
-	z-index: 1;
-	display: grid;
-	gap: 0.65rem;
-	border: 1px solid rgba(118, 177, 196, 0.22);
+        position: relative;
+        margin-top: -1.2rem;
+        background: var(--loft1325-surface);
+        padding: 1.5rem 1.25rem;
+        border-radius: 24px;
+        box-shadow: var(--loft1325-glow);
+        border: 1px solid var(--loft1325-border);
 }
 
 .loft1325-mobile-loft__hero-meta {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.5rem;
-}
-
-.loft1325-mobile-loft__eyebrow {
-	font-size: 0.85rem;
-	font-weight: 700;
-	color: #0f172a;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.35rem;
+        color: var(--loft1325-muted);
+        font-size: 0.95rem;
 }
 
 .loft1325-mobile-loft__stars {
-	color: #f59e0b;
-	display: inline-flex;
-	gap: 0.15rem;
+        display: inline-flex;
+        gap: 0.15rem;
+        color: #fbbf24;
 }
 
 .loft1325-mobile-loft__title {
-	margin: 0;
-	font-size: 1.6rem;
-	font-weight: 700;
-	color: #0b1624;
-	line-height: 1.25;
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-size: 1.55rem;
+        margin: 0.35rem 0 0.25rem;
+        color: var(--loft1325-brand);
 }
 
 .loft1325-mobile-loft__lede {
-	margin: 0;
-	color: #475569;
-	font-size: 0.98rem;
-	line-height: 1.6;
+        margin: 0 0 0.9rem;
+        color: var(--loft1325-muted);
+        line-height: 1.5;
+        font-size: 1rem;
 }
 
 .loft1325-mobile-loft__price {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.85rem 1rem;
-	border-radius: 16px;
-	background: linear-gradient(90deg, rgba(118, 177, 196, 0.12), rgba(118, 177, 196, 0.06));
-	color: #0f172a;
-}
-
-.loft1325-mobile-loft__price-label {
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	font-size: 0.85rem;
-}
-
-.loft1325-mobile-loft__price-value {
-	display: grid;
-	align-items: end;
-	text-align: right;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1rem;
+        background: rgba(15, 23, 42, 0.04);
+        border-radius: 14px;
+        border: 1px solid var(--loft1325-border);
+        margin-bottom: 1rem;
 }
 
 .loft1325-mobile-loft__price-value strong {
-	font-size: 1.4rem;
+        display: block;
+        font-size: 1.4rem;
+        color: var(--loft1325-brand);
 }
 
 .loft1325-mobile-loft__price-value small {
-	color: #475569;
+        color: var(--loft1325-muted);
 }
 
 .loft1325-mobile-loft__cta-row {
-	display: grid;
-	gap: 0.6rem;
-	grid-template-columns: 1fr 1fr;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 0.75rem;
 }
 
 .loft1325-mobile-loft__btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.95rem 1rem;
-	border-radius: 14px;
-	font-weight: 700;
-	border: 1px solid transparent;
-	transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
-	text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.95rem 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .loft1325-mobile-loft__btn--primary {
-	background: linear-gradient(135deg, #0f172a, #193954);
-	color: #fff;
-	box-shadow: 0 16px 30px rgba(25, 57, 84, 0.35);
-	border-color: rgba(255, 255, 255, 0.08);
-}
-
-.loft1325-mobile-loft__btn--primary:hover,
-.loft1325-mobile-loft__btn--primary:focus-visible {
-	transform: translateY(-1px);
-	box-shadow: 0 18px 34px rgba(25, 57, 84, 0.45);
+        background: linear-gradient(120deg, #0f172a, #1f2937);
+        color: #fff;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.28);
 }
 
 .loft1325-mobile-loft__btn--ghost {
-	background: #fff;
-	color: #0f172a;
-	border-color: rgba(118, 177, 196, 0.4);
+        background: #fff;
+        border-color: var(--loft1325-border);
+        color: var(--loft1325-brand);
 }
 
-.loft1325-mobile-loft__btn--ghost:hover,
-.loft1325-mobile-loft__btn--ghost:focus-visible {
-	transform: translateY(-1px);
-	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+.loft1325-mobile-loft__btn:active {
+        transform: translateY(1px);
+        box-shadow: none;
 }
 
 .loft1325-mobile-loft__section {
-	margin: 1.75rem 0;
-	background: rgba(255, 255, 255, 0.9);
-	border-radius: 22px;
-	padding: 1.35rem 1.25rem;
-	box-shadow: 0 18px 30px rgba(6, 12, 22, 0.18);
-	border: 1px solid rgba(118, 177, 196, 0.15);
-}
-
-.loft1325-mobile-loft__section--cards {
-	background: linear-gradient(180deg, #f4f8fb 0%, #eef3f6 100%);
+        margin-top: 1.75rem;
+        background: var(--loft1325-surface);
+        border-radius: 20px;
+        border: 1px solid var(--loft1325-border);
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+        padding: 1.4rem 1.35rem 1.55rem;
 }
 
 .loft1325-mobile-loft__section-header {
-	display: grid;
-	gap: 0.35rem;
-	margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
 }
 
 .loft1325-mobile-loft__section-header h2 {
-	margin: 0;
-	font-size: 1.3rem;
-	color: #0b1624;
+        margin: 0;
+        font-size: 1.2rem;
+        color: var(--loft1325-brand);
 }
 
 .loft1325-mobile-loft__section-pill {
-	display: inline-flex;
-	padding: 0.35rem 0.75rem;
-	border-radius: 999px;
-	background: rgba(118, 177, 196, 0.18);
-	color: #0f172a;
-	font-weight: 700;
-	font-size: 0.85rem;
-	letter-spacing: 0.01em;
-	width: fit-content;
+        padding: 0.45rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--loft1325-brand);
+        font-weight: 700;
+        font-size: 0.9rem;
 }
 
 .loft1325-mobile-loft__fact-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.85rem;
+        display: grid;
+        gap: 0.85rem;
 }
 
 .loft1325-mobile-loft__fact {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	gap: 0.65rem;
-	padding: 0.85rem;
-	border-radius: 14px;
-	background: #fff;
-	align-items: center;
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-	border: 1px solid rgba(15, 23, 42, 0.06);
-}
-
-.loft1325-mobile-loft__fact span.dashicons {
-	font-size: 20px;
-	color: #193954;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.04);
+        border: 1px solid var(--loft1325-border);
 }
 
 .loft1325-mobile-loft__fact p {
-	margin: 0;
-	color: #475569;
-	font-size: 0.9rem;
+        margin: 0;
+        color: var(--loft1325-muted);
 }
 
 .loft1325-mobile-loft__fact strong {
-	color: #0b1624;
-	font-size: 1.05rem;
+        display: block;
+        color: var(--loft1325-brand);
+        font-size: 1.1rem;
+}
+
+.loft1325-mobile-loft__section--stacked {
+        padding: 1.4rem 1.25rem;
 }
 
 .loft1325-mobile-loft__chip-list {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.6rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0;
+        margin: 0;
+        list-style: none;
 }
 
 .loft1325-mobile-loft__chip {
-	padding: 0.65rem 0.85rem;
-	border-radius: 14px;
-	background: #f1f5f9;
-	color: #0f172a;
-	font-weight: 600;
-	border: 1px solid rgba(118, 177, 196, 0.2);
+        padding: 0.65rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--loft1325-border);
+        background: #fff;
+        color: var(--loft1325-brand);
+        font-weight: 600;
 }
 
 .loft1325-mobile-loft__chip-list--accent .loft1325-mobile-loft__chip {
-	background: linear-gradient(135deg, rgba(118, 177, 196, 0.22), rgba(118, 177, 196, 0.12));
-}
-
-.loft1325-mobile-loft__chip--glow {
-	box-shadow: 0 10px 20px rgba(118, 177, 196, 0.22);
-}
-
-.loft1325-mobile-loft__section-subheader {
-	margin: 1.1rem 0 0.6rem;
+        background: linear-gradient(120deg, rgba(15, 23, 42, 0.85), #0f172a);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
 }
 
 .loft1325-mobile-loft__section-subheader h3 {
-	margin: 0;
-	color: #0b1624;
+        margin: 0.35rem 0 0.65rem;
+        font-size: 1rem;
+        color: var(--loft1325-brand);
 }
 
-.loft1325-mobile-loft__content {
-	color: #0f172a;
-	line-height: 1.65;
+.loft1325-mobile-loft__section--content .loft1325-mobile-loft__content {
+        color: #111827;
+        line-height: 1.65;
+        font-size: 1.02rem;
 }
 
-.loft1325-mobile-loft__content p {
-	color: #475569;
+.loft1325-mobile-loft__section--content .loft1325-mobile-loft__content p {
+        margin-bottom: 0.85rem;
 }
 
 .loft1325-mobile-loft__floating-bar {
-	position: sticky;
-	bottom: 0.85rem;
-	left: 0;
-	right: 0;
-	margin-top: 1.5rem;
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	align-items: center;
-	gap: 0.85rem;
-	padding: 0.85rem;
-	border-radius: 18px;
-	background: rgba(8, 13, 24, 0.85);
-	backdrop-filter: blur(14px);
-	box-shadow: 0 18px 30px rgba(0, 0, 0, 0.35);
-	z-index: 5;
-}
-
-.loft1325-mobile-loft__floating-price {
-	color: #e2ecf5;
-	display: grid;
-	gap: 0.1rem;
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--loft1325-border);
+        padding: 0.85rem 1.25rem;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 0.75rem;
+        align-items: center;
+        box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__floating-price strong {
-	font-size: 1.2rem;
+        display: block;
+        font-size: 1.2rem;
+        color: var(--loft1325-brand);
 }
 
-.loft1325-mobile-loft__floating-price small {
-	color: rgba(226, 236, 245, 0.8);
-}
-
+.loft1325-mobile-loft__floating-price small,
 .loft1325-mobile-loft__floating-label {
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	font-weight: 700;
-	font-size: 0.78rem;
-	color: rgba(226, 236, 245, 0.85);
+        color: var(--loft1325-muted);
 }
 
-@media (min-width: 480px) {
-        .loft1325-mobile-loft {
-                padding: 1.5rem 1.5rem 5.25rem;
+@media (max-width: 540px) {
+        .loft1325-mobile-loft__cta-row,
+        .loft1325-mobile-loft__floating-bar {
+                grid-template-columns: 1fr;
         }
 
-        .loft1325-mobile-loft__slider {
-                height: clamp(260px, 55vh, 380px);
+        .loft1325-mobile-loft__hero-card {
+                margin-top: -1.8rem;
         }
 
-	.loft1325-mobile-loft__cta-row {
-		gap: 0.9rem;
-	}
+        .loft1325-mobile-loft__slider-dots {
+                bottom: 0.65rem;
+        }
 }

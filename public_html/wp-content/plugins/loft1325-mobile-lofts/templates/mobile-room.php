@@ -33,8 +33,8 @@ $empty_price    = $plugin->localize_label( 'Tarif sur demande', 'Rate on request
 get_header();
 ?>
 
-<main class="loft1325-mobile-loft__backdrop">
-	<div class="loft1325-mobile-loft">
+<main id="loft1325-mobile-loftpage" class="loft1325-mobile-loft__backdrop">
+        <div class="loft1325-mobile-loft">
 		<header class="loft1325-mobile-loft__topbar">
 			<a class="loft1325-mobile-loft__crumb" href="<?php echo esc_url( $archive_url ); ?>">
 				<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
