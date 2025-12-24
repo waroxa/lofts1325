@@ -145,8 +145,13 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 				return;
 			}
 
-			wp_enqueue_style( 'dashicons' );
-			wp_enqueue_style( 'loft1325-mobile-lofts-fonts', 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap', array(), null );
+                        wp_enqueue_style( 'dashicons' );
+                        wp_enqueue_style(
+                                'loft1325-mobile-lofts-fonts',
+                                'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap',
+                                array(),
+                                null
+                        );
 
 			$style_path = plugin_dir_path( __FILE__ ) . 'assets/css/mobile-lofts.css';
 			$style_uri  = plugin_dir_url( __FILE__ ) . 'assets/css/mobile-lofts.css';
