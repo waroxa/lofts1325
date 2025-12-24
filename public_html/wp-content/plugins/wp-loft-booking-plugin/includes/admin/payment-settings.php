@@ -107,16 +107,16 @@ function loft_booking_handle_payment_settings_save()
 
     // Persist the combined settings array. Use autoload=true so the settings
     // are always available even on hosts with aggressive object caching.
-    update_option('wp_loft_booking_stripe_settings', $settings, true);
+    loft_booking_update_option_with_logging('wp_loft_booking_stripe_settings', $settings, true, 'Stripe settings array');
 
     // Keep legacy option names in sync for any existing integrations.
-    update_option('stripe_publishable_key', $settings['live_publishable']);
-    update_option('stripe_secret_key', $settings['live_secret']);
-    update_option('stripe_test_publishable_key', $settings['test_publishable']);
-    update_option('stripe_test_secret_key', $settings['test_secret']);
-    update_option('stripe_test_mode', (bool) $settings['test_mode']);
-    update_option('stripe_checkout_message', $settings['checkout_message']);
-    update_option('stripe_currency', $settings['currency']);
+    loft_booking_update_option_with_logging('stripe_publishable_key', $settings['live_publishable']);
+    loft_booking_update_option_with_logging('stripe_secret_key', $settings['live_secret']);
+    loft_booking_update_option_with_logging('stripe_test_publishable_key', $settings['test_publishable']);
+    loft_booking_update_option_with_logging('stripe_test_secret_key', $settings['test_secret']);
+    loft_booking_update_option_with_logging('stripe_test_mode', (bool) $settings['test_mode']);
+    loft_booking_update_option_with_logging('stripe_checkout_message', $settings['checkout_message']);
+    loft_booking_update_option_with_logging('stripe_currency', $settings['currency']);
 
     // Re-read the values to verify the database accepted the update and show a
     // helpful message if the save failed for any reason (e.g., DB permissions
@@ -134,6 +134,15 @@ function loft_booking_handle_payment_settings_save()
             60
         );
     } else {
+        $differences = loft_booking_describe_stripe_mismatches($settings, $persisted);
+
+        error_log(
+            sprintf(
+                'Loft Booking: Stripe keys failed to persist. Differences: %s',
+                $differences ? implode('; ', $differences) : 'unknown reason'
+            )
+        );
+
         set_transient(
             'loft_booking_payment_settings_notice',
             [
@@ -146,6 +155,130 @@ function loft_booking_handle_payment_settings_save()
 
     wp_safe_redirect(admin_url('admin.php?page=loft-payment-settings'));
     exit;
+}
+
+/**
+ * Update an option and log when WordPress reports a failed write.
+ */
+function loft_booking_update_option_with_logging($option, $value, $autoload = null, $label = null)
+{
+    $previous = get_option($option, null);
+    $result   = update_option($option, $value, $autoload);
+
+    // update_option() returns false when the value is identical or when the
+    // write fails. Only log when we expected a change but WordPress indicates
+    // it could not save.
+    $expected_change = !loft_booking_option_values_equivalent($previous, $value);
+
+    if ($expected_change && $result === false) {
+        error_log(
+            sprintf(
+                'Loft Booking: Failed to update option "%s"%s. Attempted %s but stored %s.',
+                $option,
+                $label ? sprintf(' (%s)', $label) : '',
+                loft_booking_describe_option_value($value),
+                loft_booking_describe_option_value($previous)
+            )
+        );
+    }
+
+    return $result;
+}
+
+/**
+ * Determine whether two option values are effectively equivalent.
+ *
+ * This prevents logging false positives when WordPress stores boolean options
+ * as empty strings. For example, update_option( 'foo', false ) with a current
+ * value of '' will return false (no change), but that should not be treated as
+ * a failed save.
+ *
+ * @param mixed $previous Previously stored value.
+ * @param mixed $value     Requested value to store.
+ * @return bool True when the values are equivalent for our purposes.
+ */
+function loft_booking_option_values_equivalent($previous, $value)
+{
+    if (is_bool($value)) {
+        return wp_validate_boolean($previous) === wp_validate_boolean($value);
+    }
+
+    return $previous === $value;
+}
+
+/**
+ * Provide a masked/concise description of an option value for logs.
+ */
+function loft_booking_describe_option_value($value)
+{
+    if (is_array($value)) {
+        return '(array)';
+    }
+
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+
+    if ($value === null) {
+        return '(null)';
+    }
+
+    return loft_booking_mask_key_for_logging((string) $value);
+}
+
+/**
+ * Describe masked differences between the submitted and stored Stripe settings for logging.
+ *
+ * @param array $submitted The submitted settings array.
+ * @param array $persisted The settings read back from the database.
+ * @return array List of human-readable differences.
+ */
+function loft_booking_describe_stripe_mismatches(array $submitted, array $persisted)
+{
+    $differences = [];
+
+    $fields = [
+        'live_publishable' => 'Live publishable key',
+        'live_secret'      => 'Live secret key',
+        'test_publishable' => 'Test publishable key',
+        'test_secret'      => 'Test secret key',
+    ];
+
+    foreach ($fields as $field => $label) {
+        if (($submitted[$field] ?? '') !== ($persisted[$field] ?? '')) {
+            $differences[] = sprintf(
+                '%s mismatch (submitted %s, stored %s)',
+                $label,
+                loft_booking_mask_key_for_logging($submitted[$field] ?? ''),
+                loft_booking_mask_key_for_logging($persisted[$field] ?? '')
+            );
+        }
+    }
+
+    return $differences;
+}
+
+/**
+ * Mask Stripe keys to avoid logging full secrets.
+ *
+ * @param string $key The key to mask.
+ * @return string Masked key description.
+ */
+function loft_booking_mask_key_for_logging($key)
+{
+    $key = (string) $key;
+
+    if ($key === '') {
+        return '(empty)';
+    }
+
+    $length = strlen($key);
+
+    if ($length <= 8) {
+        return str_repeat('*', $length);
+    }
+
+    return substr($key, 0, 4) . '...' . substr($key, -4) . sprintf(' (len:%d)', $length);
 }
 
 function loft_booking_payment_settings()
