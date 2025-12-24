@@ -42,7 +42,7 @@ function marina_child_enqueue_custom_assets() {
         $header_fixes_version
     );
 
-    if ( is_front_page() ) {
+    if ( is_front_page() && wp_is_mobile() ) {
         $mobile_home_path = get_stylesheet_directory() . '/css/mobile-home.css';
         $home_translation_fix_path = get_stylesheet_directory() . '/js/home-translation-fix.js';
 
