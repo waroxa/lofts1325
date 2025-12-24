@@ -22,6 +22,13 @@ function wp_loft_booking_admin_menu() {
     'loft-booking-google-calendar',
     'loft_booking_google_calendar_page');
     add_submenu_page(
+    'wp_loft_booking',
+    '🔑 Key Schedule',
+    '🔑 Key Calendar',
+    'manage_options',
+    'loft-keychain-calendar',
+    'loft_booking_keychain_calendar_page');
+    add_submenu_page(
     null, // 👈 null para que no aparezca en el menú
     'Google OAuth Callback',
     '', // sin título en menú
