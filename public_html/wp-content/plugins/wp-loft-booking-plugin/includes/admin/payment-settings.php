@@ -101,7 +101,7 @@ function loft_booking_handle_payment_settings_save()
         $settings['test_secret'] = sanitize_text_field(wp_unslash($_POST['stripe_test_secret_key']));
     }
 
-    $settings['test_mode']        = !empty($_POST['stripe_test_mode']);
+    $settings['test_mode']        = wp_validate_boolean($_POST['stripe_test_mode'] ?? false);
     $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
     $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
 
@@ -168,21 +168,49 @@ function loft_booking_update_option_with_logging($option, $value, $autoload = nu
     // update_option() returns false when the value is identical or when the
     // write fails. Only log when we expected a change but WordPress indicates
     // it could not save.
-    $expected_change = $previous !== $value;
+    $expected_change = !loft_booking_option_values_equivalent($previous, $value);
 
     if ($expected_change && $result === false) {
-        error_log(
-            sprintf(
-                'Loft Booking: Failed to update option "%s"%s. Attempted %s but stored %s.',
-                $option,
-                $label ? sprintf(' (%s)', $label) : '',
-                loft_booking_describe_option_value($value),
-                loft_booking_describe_option_value($previous)
-            )
-        );
+        // If WordPress reports no change, verify the persisted value before
+        // declaring a failure. This avoids noisy logs when the stored value is
+        // equivalent (e.g., '' vs false for checkboxes).
+        $persisted = get_option($option, null);
+
+        if (!loft_booking_option_values_equivalent($persisted, $value)) {
+            error_log(
+                sprintf(
+                    'Loft Booking: Failed to update option "%s"%s. Attempted %s but stored %s.',
+                    $option,
+                    $label ? sprintf(' (%s)', $label) : '',
+                    loft_booking_describe_option_value($value),
+                    loft_booking_describe_option_value($persisted)
+                )
+            );
+        }
     }
 
     return $result;
+}
+
+/**
+ * Determine whether two option values are effectively equivalent.
+ *
+ * This prevents logging false positives when WordPress stores boolean options
+ * as empty strings. For example, update_option( 'foo', false ) with a current
+ * value of '' will return false (no change), but that should not be treated as
+ * a failed save.
+ *
+ * @param mixed $previous Previously stored value.
+ * @param mixed $value     Requested value to store.
+ * @return bool True when the values are equivalent for our purposes.
+ */
+function loft_booking_option_values_equivalent($previous, $value)
+{
+    if (is_bool($value)) {
+        return wp_validate_boolean($previous) === wp_validate_boolean($value);
+    }
+
+    return $previous === $value;
 }
 
 /**
@@ -323,6 +351,7 @@ function loft_booking_payment_settings()
                         <th scope="row"><label for="stripe_test_mode">Enable Stripe test mode</label></th>
                         <td>
                             <label>
+                                <input type="hidden" name="stripe_test_mode" value="0">
                                 <input type="checkbox" id="stripe_test_mode" name="stripe_test_mode" value="1" <?php checked($stripe_test_mode); ?>>
                                 Use sandbox/test keys without replacing live keys.
                             </label>
