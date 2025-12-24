@@ -43,7 +43,23 @@ function wp_loft_booking_keychain_calendar_page() {
                     <h2 class="loft-calendar__title">Key calendar</h2>
                     <p class="description">Colours mirror lofts. Each bar shows how long the keychain is valid for and which loft it belongs to.</p>
                 </div>
-                <div class="loft-calendar__nav" data-calendar-target="keys"></div>
+                <div class="loft-calendar__controls">
+                    <div class="loft-calendar__filters" data-calendar-target="keys">
+                        <label class="loft-calendar__filter">
+                            <input type="checkbox" value="active" checked />
+                            <span><?php printf(esc_html__('Active (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['active'])); ?></span>
+                        </label>
+                        <label class="loft-calendar__filter">
+                            <input type="checkbox" value="upcoming" />
+                            <span><?php printf(esc_html__('Upcoming (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['upcoming'])); ?></span>
+                        </label>
+                        <label class="loft-calendar__filter">
+                            <input type="checkbox" value="expired" />
+                            <span><?php printf(esc_html__('Expired (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['expired'])); ?></span>
+                        </label>
+                    </div>
+                    <div class="loft-calendar__nav" data-calendar-target="keys"></div>
+                </div>
             </header>
             <div id="loft-keys-calendar" class="loft-calendar__canvas" data-calendar-type="keys"></div>
             <div class="loft-calendar__legend">
