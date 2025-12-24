@@ -43,6 +43,13 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
         private $current_language = null;
 
         /**
+         * Tracks whether required booking dependencies are available.
+         *
+         * @var bool
+         */
+        private $dependencies_ready = false;
+
+        /**
          * Initialize singleton instance.
          *
          * @return Loft1325_Mobile_Homepage
@@ -60,6 +67,7 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          */
         private function __construct() {
             add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+            add_action( 'init', array( $this, 'evaluate_dependencies' ), 5 );
             add_action( 'init', array( $this, 'register_feature_post_type' ) );
             add_action( 'init', array( $this, 'register_image_sizes' ) );
             add_filter( 'query_vars', array( $this, 'register_preview_query_var' ) );
@@ -68,6 +76,21 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
             add_filter( 'body_class', array( $this, 'filter_body_class' ) );
             add_action( 'customize_register', array( $this, 'register_customizer_settings' ) );
             add_action( 'template_redirect', array( $this, 'redirect_mobile_search_requests' ) );
+            add_action( 'admin_notices', array( $this, 'maybe_show_dependency_notice' ) );
+        }
+
+        /**
+         * Validate plugin dependencies before running any front-end logic.
+         */
+        public function evaluate_dependencies() {
+            $nd_booking_active = post_type_exists( 'nd_booking_cpt_1' );
+
+            if ( ! $nd_booking_active ) {
+                $this->dependencies_ready = false;
+                return;
+            }
+
+            $this->dependencies_ready = true;
         }
 
         /**
@@ -148,19 +171,25 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                 return false;
             }
 
-            if ( ! is_front_page() ) {
+            if ( ! $this->dependencies_ready ) {
                 return false;
             }
 
-            if ( apply_filters( 'loft1325_mobile_home_force_layout', false ) ) {
-                return true;
+            if ( ! is_front_page() ) {
+                return false;
             }
 
             if ( isset( $_GET['loft1325_mobile_preview'] ) && '1' === $_GET['loft1325_mobile_preview'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 return true;
             }
 
-            return wp_is_mobile();
+            $is_mobile_request = wp_is_mobile();
+
+            if ( ! $is_mobile_request ) {
+                return false;
+            }
+
+            return (bool) apply_filters( 'loft1325_mobile_home_force_layout', true );
         }
 
         /**
@@ -265,28 +294,32 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
          *
          * @return string
          */
-        public function get_mobile_search_form_markup() {
-            $this->enqueue_search_dependencies();
+		public function get_mobile_search_form_markup() {
+			$this->enqueue_search_dependencies();
 
-            $action = '';
+			$action = '';
+			$language = $this->get_current_language();
 
-            if ( function_exists( 'nd_booking_search_page' ) ) {
-                $action = nd_booking_search_page();
-            }
+			if ( function_exists( 'nd_booking_search_page' ) ) {
+				$action = nd_booking_search_page();
+			}
 
-            if ( ! $action ) {
-                $archive_link = get_post_type_archive_link( 'nd_booking_cpt_1' );
-                $action       = $archive_link ? $archive_link : home_url( '/' );
-            }
+			if ( ! $action ) {
+				$archive_link = get_post_type_archive_link( 'nd_booking_cpt_1' );
+				$action       = $archive_link ? $archive_link : home_url( '/' );
+			}
 
-            $check_in_ts     = current_time( 'timestamp' );
-            $check_out_ts    = $check_in_ts + DAY_IN_SECONDS;
-            $check_in_value  = '';
-            $check_out_value = '';
+			if ( function_exists( 'trp_get_url_for_language' ) ) {
+				$action = trp_get_url_for_language( $action, $language );
+			}
 
-            $default_adults   = 2;
-            $default_children = 0;
-            $language         = $this->get_current_language();
+			$check_in_ts     = current_time( 'timestamp' );
+			$check_out_ts    = $check_in_ts + DAY_IN_SECONDS;
+			$check_in_value  = '';
+			$check_out_value = '';
+
+			$default_adults   = 2;
+			$default_children = 0;
 
             $dates_label      = $this->localize_label( 'Dates', 'Dates' );
             $date_placeholder = $this->localize_label( 'Sélectionner les dates', 'Select dates' );
@@ -391,17 +424,23 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
 
             $target = '';
 
-            if ( function_exists( 'nd_booking_search_page' ) ) {
-                $target = nd_booking_search_page();
-            }
+			if ( function_exists( 'nd_booking_search_page' ) ) {
+				$target = nd_booking_search_page();
+			}
 
-            if ( ! $target ) {
-                $target = get_post_type_archive_link( 'nd_booking_cpt_1' );
-            }
+			if ( ! $target ) {
+				$target = get_post_type_archive_link( 'nd_booking_cpt_1' );
+			}
 
-            if ( ! $target ) {
-                return;
-            }
+			if ( ! $target ) {
+				return;
+			}
+
+			$language = $this->get_current_language();
+
+			if ( function_exists( 'trp_get_url_for_language' ) ) {
+				$target = trp_get_url_for_language( $target, $language );
+			}
 
             $query_args = isset( $_GET ) ? (array) wp_unslash( $_GET ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             unset( $query_args['post_type'] );
@@ -891,6 +930,17 @@ if ( ! class_exists( 'Loft1325_Mobile_Homepage' ) ) {
                     )
                 )
             );
+        }
+
+        /**
+         * Surface a helpful admin notice when dependencies are missing.
+         */
+        public function maybe_show_dependency_notice() {
+            if ( $this->dependencies_ready || ! current_user_can( 'activate_plugins' ) ) {
+                return;
+            }
+
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'Loft1325 Mobile Homepage needs the ND Booking plugin active to render properly. Please activate ND Booking before enabling the mobile experience.', 'loft1325-mobile-home' ) . '</p></div>';
         }
     }
 }
