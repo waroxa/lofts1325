@@ -152,6 +152,37 @@
     margin-bottom: 10px;
 }
 
+.loft-calendar__controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.loft-calendar__filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.loft-calendar__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    background: #f8fafc;
+    border: 1px solid var(--loft-stroke);
+    border-radius: 12px;
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.loft-calendar__filter input {
+    margin: 0;
+}
+
 .loft-calendar__title {
     margin: 2px 0;
 }

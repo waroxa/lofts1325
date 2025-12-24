@@ -17,6 +17,9 @@
         },
         statuses: settings.statuses || {},
         keyStatuses: settings.keyStatuses || {},
+        filters: {
+            keys: [],
+        },
     };
 
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -145,6 +148,25 @@
         return expanded;
     }
 
+    function captureFilters(type) {
+        const group = $(`.loft-calendar__filters[data-calendar-target="${type}"]`);
+        if (!group.length) return [];
+
+        const selected = group
+            .find('input[type="checkbox"]:checked')
+            .map((_, input) => $(input).val())
+            .get()
+            .filter(Boolean);
+
+        return selected;
+    }
+
+    function syncFilters(type) {
+        state.filters = state.filters || {};
+        const selections = captureFilters(type);
+        state.filters[type] = selections.length ? selections : [];
+    }
+
     function pad(num) {
         return num.toString().padStart(2, '0');
     }
@@ -214,11 +236,19 @@
         const container = $(`#loft-${type}-calendar`);
         const viewDate = state.view[type];
         const days = buildMonth(viewDate);
+        const keysSource =
+            type === 'keys'
+                ? state.keys.filter((key) => {
+                      const filters = state.filters?.keys || [];
+                      if (!filters.length) return true;
+                      return filters.includes(key.status);
+                  })
+                : state.keys;
         const sourceEvents =
             type === 'bookings'
                 ? expandBookingsAcrossStay(state.bookings)
                 : type === 'keys'
-                ? expandKeychainsAcrossValidity(state.keys)
+                ? expandKeychainsAcrossValidity(keysSource)
                 : state.cleaning;
         const eventsByDay = groupEvents(
             sourceEvents,
@@ -414,6 +444,14 @@
         updateStatus(bookingId, status);
     });
 
+    $(document).on('change', '.loft-calendar__filters input[type="checkbox"]', function () {
+        const type = $(this).closest('.loft-calendar__filters').data('calendar-target');
+        if (!type) return;
+
+        syncFilters(type);
+        renderCalendar(type);
+    });
+
     if ($('#loft-bookings-calendar').length) {
         renderCalendar('bookings');
     }
@@ -424,6 +462,7 @@
     }
 
     if ($('#loft-keys-calendar').length) {
+        syncFilters('keys');
         renderCalendar('keys');
     }
 })(jQuery);
