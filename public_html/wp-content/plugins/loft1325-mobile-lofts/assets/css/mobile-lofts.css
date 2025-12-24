@@ -1,8 +1,9 @@
 body.loft1325-mobile-lofts-active {
-	margin: 0;
-	font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-	background: radial-gradient(circle at 20% 20%, rgba(118, 177, 196, 0.2), transparent 40%), radial-gradient(circle at 80% 10%, rgba(80, 104, 150, 0.18), transparent 35%), #0f1620;
-	color: #0f172a;
+        margin: 0;
+        font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(118, 177, 196, 0.2), transparent 40%), radial-gradient(circle at 80% 10%, rgba(80, 104, 150, 0.18), transparent 35%), #0f1620;
+        color: #0f172a;
+        overflow-x: hidden;
 }
 
 body.loft1325-mobile-lofts-active a {
@@ -11,15 +12,17 @@ body.loft1325-mobile-lofts-active a {
 }
 
 .loft1325-mobile-loft__backdrop {
-	min-height: 100vh;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+        min-height: 100vh;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+        overflow-x: hidden;
 }
 
 .loft1325-mobile-loft {
-        max-width: 540px;
+        width: min(540px, 100%);
         margin: 0 auto;
         padding: 1rem 1.1rem 5.25rem;
         position: relative;
+        box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__topbar {
@@ -61,6 +64,7 @@ body.loft1325-mobile-lofts-active a {
         gap: 0.85rem;
         margin-bottom: 1.15rem;
         position: relative;
+        isolation: isolate;
 }
 
 .loft1325-mobile-loft__slider {
@@ -70,6 +74,7 @@ body.loft1325-mobile-lofts-active a {
         box-shadow: 0 25px 45px rgba(10, 20, 40, 0.35), 0 12px 24px rgba(0, 0, 0, 0.25);
         background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
         height: clamp(220px, 60vh, 360px);
+        width: 100%;
 }
 
 .loft1325-mobile-loft__slider-track {
@@ -79,6 +84,7 @@ body.loft1325-mobile-lofts-active a {
         transition: transform 0.5s ease;
         width: 100%;
         height: 100%;
+        box-sizing: border-box;
 }
 
 .loft1325-mobile-loft__slide {
