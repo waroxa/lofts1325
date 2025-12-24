@@ -53,13 +53,12 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 		 * Constructor.
 		 */
 		private function __construct() {
-                        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-                        add_action( 'init', array( $this, 'register_image_sizes' ) );
-                        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-                        add_action( 'wp_head', array( $this, 'maybe_render_viewport_meta' ), 0 );
-                        add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
-                        add_filter( 'body_class', array( $this, 'filter_body_class' ) );
-                }
+			add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+			add_action( 'init', array( $this, 'register_image_sizes' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+			add_filter( 'template_include', array( $this, 'maybe_use_mobile_template' ), 99 );
+			add_filter( 'body_class', array( $this, 'filter_body_class' ) );
+		}
 
 		/**
 		 * Load translations.
@@ -141,13 +140,18 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 		/**
 		 * Enqueue assets when the mobile loft template is in play.
 		 */
-                public function enqueue_assets() {
-                        if ( ! $this->should_use_mobile_layout() ) {
-                                return;
-                        }
+		public function enqueue_assets() {
+			if ( ! $this->should_use_mobile_layout() ) {
+				return;
+			}
 
-			wp_enqueue_style( 'dashicons' );
-			wp_enqueue_style( 'loft1325-mobile-lofts-fonts', 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap', array(), null );
+                        wp_enqueue_style( 'dashicons' );
+                        wp_enqueue_style(
+                                'loft1325-mobile-lofts-fonts',
+                                'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap',
+                                array(),
+                                null
+                        );
 
 			$style_path = plugin_dir_path( __FILE__ ) . 'assets/css/mobile-lofts.css';
 			$style_uri  = plugin_dir_url( __FILE__ ) . 'assets/css/mobile-lofts.css';
@@ -161,25 +165,14 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 
 			wp_enqueue_script( 'loft1325-mobile-lofts', $script_uri, array(), $script_ver, true );
 
-                        wp_localize_script(
-                                'loft1325-mobile-lofts',
-                                'Loft1325MobileLofts',
-                                array(
-                                        'autoplayInterval' => 5500,
-                                )
-                        );
-                }
-
-                /**
-                 * Ensure the viewport accommodates device safe areas on mobile layouts.
-                 */
-                public function maybe_render_viewport_meta() {
-                        if ( ! $this->should_use_mobile_layout() ) {
-                                return;
-                        }
-
-                        echo '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />';
-                }
+			wp_localize_script(
+				'loft1325-mobile-lofts',
+				'Loft1325MobileLofts',
+				array(
+					'autoplayInterval' => 5500,
+				)
+			);
+		}
 
 		/**
 		 * Get the active language (fr or en).
