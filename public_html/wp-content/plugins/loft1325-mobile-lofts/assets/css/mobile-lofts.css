@@ -8,6 +8,7 @@ body.loft1325-mobile-lofts-active {
         --loft1325-surface: #ffffff;
         --loft1325-border: #e5e7eb;
         --loft1325-muted: #6b7280;
+        --loft1325-accent: #8b5cf6;
         --loft1325-glow: 0 18px 48px rgba(15, 23, 42, 0.14);
         overflow-x: hidden;
 }
@@ -74,7 +75,7 @@ body.loft1325-mobile-lofts-active a {
         position: relative;
         border-radius: 24px;
         overflow: hidden;
-        background: #0f172a;
+        background: radial-gradient(circle at 25% 20%, rgba(139, 92, 246, 0.25), rgba(15, 23, 42, 0.95));
         isolation: isolate;
         box-shadow: var(--loft1325-glow);
 }
@@ -119,6 +120,12 @@ body.loft1325-mobile-lofts-active a {
         align-items: center;
         gap: 0.4rem;
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
+}
+
+.loft1325-mobile-loft__slider-count {
+        font-size: 0.9rem;
+        color: #4b5563;
 }
 
 .loft1325-mobile-loft__slider-nav {
@@ -158,6 +165,25 @@ body.loft1325-mobile-lofts-active a {
         background: rgba(0, 0, 0, 0.5);
 }
 
+.loft1325-mobile-loft__slider-progress {
+        position: absolute;
+        left: 1.25rem;
+        right: 1.25rem;
+        bottom: 0.45rem;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        overflow: hidden;
+}
+
+.loft1325-mobile-loft__slider-progress-fill {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #fff, #d1d5db);
+        transition: width 0.35s ease;
+}
+
 .loft1325-mobile-loft__dot {
         width: 8px;
         height: 8px;
@@ -182,6 +208,7 @@ body.loft1325-mobile-lofts-active a {
         border-radius: 24px;
         box-shadow: var(--loft1325-glow);
         border: 1px solid var(--loft1325-border);
+        background-image: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.06), transparent 45%), radial-gradient(circle at 80% 0%, rgba(15, 23, 42, 0.06), transparent 35%);
 }
 
 .loft1325-mobile-loft__hero-meta {
@@ -214,6 +241,26 @@ body.loft1325-mobile-lofts-active a {
         font-size: 1rem;
 }
 
+.loft1325-mobile-loft__microgrid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0 0 1rem;
+}
+
+.loft1325-mobile-loft__microchip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.65rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.05);
+        color: var(--loft1325-brand);
+        font-weight: 600;
+        border: 1px solid var(--loft1325-border);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
 .loft1325-mobile-loft__price {
         display: flex;
         align-items: center;
@@ -233,6 +280,12 @@ body.loft1325-mobile-lofts-active a {
 
 .loft1325-mobile-loft__price-value small {
         color: var(--loft1325-muted);
+}
+
+.loft1325-mobile-loft__price-hint {
+        font-size: 0.9rem;
+        color: var(--loft1325-accent);
+        font-weight: 700;
 }
 
 .loft1325-mobile-loft__cta-row {
@@ -329,6 +382,44 @@ body.loft1325-mobile-lofts-active a {
         font-size: 1.1rem;
 }
 
+.loft1325-mobile-loft__section--perks {
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.9), #0b1222 70%);
+        color: #f8fafc;
+        border-color: transparent;
+        box-shadow: 0 28px 48px rgba(15, 23, 42, 0.28);
+}
+
+.loft1325-mobile-loft__section--perks .loft1325-mobile-loft__section-pill,
+.loft1325-mobile-loft__section--perks h2 {
+        color: #f8fafc;
+}
+
+.loft1325-mobile-loft__perk-grid {
+        display: grid;
+        gap: 0.85rem;
+}
+
+.loft1325-mobile-loft__perk {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.loft1325-mobile-loft__perk p {
+        margin: 0;
+        font-weight: 700;
+        color: #fff;
+}
+
+.loft1325-mobile-loft__perk small {
+        color: #e5e7eb;
+}
+
 .loft1325-mobile-loft__section--stacked {
         padding: 1.4rem 1.25rem;
 }
@@ -374,6 +465,11 @@ body.loft1325-mobile-lofts-active a {
         margin-bottom: 0.85rem;
 }
 
+.loft1325-mobile-loft__section--content .loft1325-mobile-loft__content h2,
+.loft1325-mobile-loft__section--content .loft1325-mobile-loft__content h3 {
+        color: var(--loft1325-brand);
+}
+
 .loft1325-mobile-loft__floating-bar {
         position: sticky;
         bottom: 0;
@@ -413,5 +509,10 @@ body.loft1325-mobile-lofts-active a {
 
         .loft1325-mobile-loft__slider-dots {
                 bottom: 0.65rem;
+        }
+
+        .loft1325-mobile-loft__slider-progress {
+                left: 0.9rem;
+                right: 0.9rem;
         }
 }
