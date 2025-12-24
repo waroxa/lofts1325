@@ -22,7 +22,13 @@ function loft_booking_payment_settings_page()
  */
 function wp_loft_booking_get_stripe_settings()
 {
-    $settings = (array) get_option('wp_loft_booking_stripe_settings', []);
+    $settings = get_option('wp_loft_booking_stripe_settings', []);
+
+    // Make sure we are working with a predictable array shape even if the
+    // stored option was corrupted or contains unexpected data types.
+    if (!is_array($settings)) {
+        $settings = [];
+    }
 
     // Backward compatibility: fall back to legacy option names if the new array is empty.
     $legacy_defaults = [
@@ -34,6 +40,10 @@ function wp_loft_booking_get_stripe_settings()
         'checkout_message' => get_option('stripe_checkout_message', 'Simple and safe. Make payments with any type of credit card.'),
         'currency'         => get_option('stripe_currency', 'CAD'),
     ];
+
+    // Only keep keys we understand, then merge with defaults so all expected
+    // keys are always present.
+    $settings = array_intersect_key($settings, $legacy_defaults);
 
     return wp_parse_args($settings, $legacy_defaults);
 }
@@ -95,7 +105,9 @@ function loft_booking_handle_payment_settings_save()
     $settings['checkout_message'] = sanitize_textarea_field(wp_unslash($_POST['stripe_checkout_message'] ?? ''));
     $settings['currency']         = sanitize_text_field(wp_unslash($_POST['stripe_currency'] ?? 'CAD'));
 
-    update_option('wp_loft_booking_stripe_settings', $settings, false);
+    // Persist the combined settings array. Use autoload=true so the settings
+    // are always available even on hosts with aggressive object caching.
+    update_option('wp_loft_booking_stripe_settings', $settings, true);
 
     // Keep legacy option names in sync for any existing integrations.
     update_option('stripe_publishable_key', $settings['live_publishable']);
@@ -106,7 +118,33 @@ function loft_booking_handle_payment_settings_save()
     update_option('stripe_checkout_message', $settings['checkout_message']);
     update_option('stripe_currency', $settings['currency']);
 
-    wp_safe_redirect(add_query_arg('settings-updated', 'true', admin_url('admin.php?page=loft-payment-settings')));
+    // Re-read the values to verify the database accepted the update and show a
+    // helpful message if the save failed for any reason (e.g., DB permissions
+    // or a security layer stripping fields).
+    $persisted = wp_loft_booking_get_stripe_settings();
+    $save_ok   = $persisted['test_publishable'] === ($settings['test_publishable'] ?? '')
+        && $persisted['test_secret'] === ($settings['test_secret'] ?? '')
+        && $persisted['live_publishable'] === ($settings['live_publishable'] ?? '')
+        && $persisted['live_secret'] === ($settings['live_secret'] ?? '');
+
+    if ($save_ok) {
+        set_transient(
+            'loft_booking_payment_settings_notice',
+            ['type' => 'success', 'message' => __('Payment settings saved successfully.', 'wp-loft-booking')],
+            60
+        );
+    } else {
+        set_transient(
+            'loft_booking_payment_settings_notice',
+            [
+                'type'    => 'error',
+                'message' => __('We could not confirm the keys were saved. Please check database permissions or security filters that might strip form fields.', 'wp-loft-booking'),
+            ],
+            60
+        );
+    }
+
+    wp_safe_redirect(admin_url('admin.php?page=loft-payment-settings'));
     exit;
 }
 
@@ -135,9 +173,19 @@ function loft_booking_payment_settings()
         </div>
 
         <div class="card" style="padding:16px;max-width:820px;">
-            <?php if (!empty($_GET['settings-updated'])) : ?>
-                <div class="notice notice-success is-dismissible"><p>Payment settings saved successfully.</p></div>
-            <?php endif; ?>
+            <?php
+            $notice = get_transient('loft_booking_payment_settings_notice');
+            if ($notice) {
+                delete_transient('loft_booking_payment_settings_notice');
+
+                $class = $notice['type'] === 'success' ? 'notice-success' : 'notice-error';
+                printf(
+                    '<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',
+                    esc_attr('notice ' . $class),
+                    esc_html($notice['message'])
+                );
+            }
+            ?>
 
             <h2 style="margin-top:0;">Stripe environment</h2>
             <table class="form-table" role="presentation">

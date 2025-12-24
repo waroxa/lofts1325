@@ -42,12 +42,21 @@ function wp_loft_booking_check_token_refresh() {
 }
 
 function wp_loft_booking_schedule_unit_sync() {
-    if (!wp_next_scheduled('wp_loft_booking_sync_units')) {
+    $next_run = wp_next_scheduled('wp_loft_booking_sync_units');
+    $current_schedule = $next_run ? wp_get_schedule('wp_loft_booking_sync_units') : false;
+
+    if ($next_run && 'every_5_minutes' !== $current_schedule) {
+        wp_unschedule_event($next_run, 'wp_loft_booking_sync_units');
+        $next_run = false;
+    }
+
+    if (!$next_run) {
         wp_schedule_event(time(), 'every_5_minutes', 'wp_loft_booking_sync_units');
     }
 }
 add_action('wp_loft_booking_sync_units', 'wp_loft_booking_sync_units');
 register_activation_hook(dirname(__FILE__, 3) . '/wp-loft-booking-plugin.php', 'wp_loft_booking_schedule_unit_sync');
+add_action('init', 'wp_loft_booking_schedule_unit_sync');
 
 // 1️⃣ Add custom cron schedule (e.g., every 5 minutes)
 add_filter('cron_schedules', function ($schedules) {
