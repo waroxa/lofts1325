@@ -90,8 +90,9 @@ function wp_loft_booking_prepare_keychain_calendar_payload() {
             "SELECT kc.*, u.unit_name
              FROM {$kc_table} kc
              LEFT JOIN {$units_table} u ON kc.unit_id = u.id
-             WHERE kc.valid_until >= %s AND kc.valid_from <= %s
-             ORDER BY kc.valid_from ASC
+             WHERE (kc.valid_until IS NULL OR kc.valid_until >= %s)
+               AND (kc.valid_from IS NULL OR kc.valid_from <= %s)
+             ORDER BY COALESCE(kc.valid_from, kc.created_at) ASC
              LIMIT 600",
             $window_start,
             $window_end
@@ -110,8 +111,8 @@ function wp_loft_booking_prepare_keychain_calendar_payload() {
     $today_ts = current_time('timestamp');
 
     foreach ($rows as $row) {
-        $start = wp_loft_booking_normalize_date($row['valid_from'] ?? '');
-        $end   = wp_loft_booking_normalize_date($row['valid_until'] ?? '');
+        $start = wp_loft_booking_normalize_date($row['valid_from'] ?? '') ?: wp_loft_booking_normalize_date($row['created_at'] ?? '');
+        $end   = wp_loft_booking_normalize_date($row['valid_until'] ?? '') ?: $start;
 
         $key_rows = $wpdb->get_results(
             $wpdb->prepare(
