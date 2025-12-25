@@ -302,6 +302,23 @@ function wp_loft_booking_bookings_page() {
 
         <hr>
 
+        <h2>Post-stay email preview</h2>
+        <p>Preview the bilingual follow-up email with high-contrast styling before sending it to guests.</p>
+        <div style="max-width:720px;margin:16px 0;">
+            <?php if (function_exists('wp_loft_booking_render_post_stay_email_html')) : ?>
+                <?php echo wp_kses_post(wp_loft_booking_render_post_stay_email_html([
+                    'guest_name' => 'Maria Garcia Carrasco',
+                    'room_name'  => 'Loft 1325 – Val-d’Or',
+                    'checkin'    => 'December 24, 2025',
+                    'checkout'   => 'December 25, 2025',
+                ])); ?>
+            <?php else : ?>
+                <p class="description">Post-stay preview unavailable.</p>
+            <?php endif; ?>
+        </div>
+
+        <hr>
+
         <h2>Recent bookings (ND Booking)</h2>
         <p>Browse the latest ND Booking records and resend the same checkout-triggered emails.</p>
         <?php if (!empty($recent_bookings)) : ?>

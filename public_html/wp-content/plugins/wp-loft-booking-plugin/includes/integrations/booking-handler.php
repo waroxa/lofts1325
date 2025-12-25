@@ -3614,6 +3614,66 @@ function wp_loft_booking_send_cleaning_email($booking, $is_manual = false, array
 }
 
 
+function wp_loft_booking_render_post_stay_email_html(array $args = []) {
+    $defaults = [
+        'guest_name' => __('Invité', 'wp-loft-booking'),
+        'room_name'  => __('Votre loft', 'wp-loft-booking'),
+        'checkin'    => __('N/A', 'wp-loft-booking'),
+        'checkout'   => __('N/A', 'wp-loft-booking'),
+        'is_manual'  => false,
+        'review_url' => 'https://share.google/NhVsg7IdeyfwUZ3xc',
+    ];
+
+    $data = array_merge($defaults, $args);
+
+    ob_start();
+    ?>
+    <div style="margin:0;padding:0;background-color:#e5e7eb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0f172a;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#e5e7eb;padding:28px 0;">
+            <tr>
+                <td align="center" style="padding:0 16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="640" style="width:100%;max-width:640px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 32px rgba(15,23,42,0.12);">
+                        <tr>
+                            <td style="padding:0;">
+                                <img src="https://loft1325.com/wp-content/uploads/2024/06/3W8A2811.png" alt="Loft 1325 exterior" width="640" style="display:block;width:100%;height:auto;border:0;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:24px 32px;background-color:#0b1628;color:#f8fafc;">
+                                <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#cbd5e1;">Loft 1325</p>
+                                <h1 style="margin:10px 0 6px;font-size:22px;line-height:1.3;">Merci pour votre visite | Thank you for staying</h1>
+                                <p style="margin:0;font-size:14px;line-height:1.7;color:#e2e8f0;">Nous espérons que vous avez apprécié votre séjour dans <?php echo esc_html($data['room_name']); ?>. | We hope you enjoyed your time in <?php echo esc_html($data['room_name']); ?>.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:28px 32px 30px;">
+                                <p style="margin:0 0 14px;font-size:16px;color:#0f172a;font-weight:700;">Bonjour <?php echo esc_html($data['guest_name']); ?>,</p>
+                                <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#111827;">Merci d’avoir choisi Loft 1325 pour votre visite à Val-d’Or. / Thank you for choosing Loft 1325 for your stay in Val-d’Or.</p>
+                                <div style="margin:0 0 18px;padding:14px 16px;background-color:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0;">
+                                    <p style="margin:0;font-size:14px;color:#0f172a;font-weight:700;">Vos dates · Your dates</p>
+                                    <p style="margin:6px 0 0;font-size:14px;color:#0f172a;"><?php echo esc_html($data['checkin']); ?> → <?php echo esc_html($data['checkout']); ?></p>
+                                </div>
+                                <p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#111827;">Nous aimerions connaître votre avis. / We would love your feedback.</p>
+                                <p style="margin:0 0 6px;">
+                                    <a href="<?php echo esc_url($data['review_url']); ?>" style="background-color:#0f766e;color:#f8fafc;text-decoration:none;padding:13px 20px;border-radius:12px;font-weight:800;display:inline-block;">Laisser un avis · Leave a review</a>
+                                </p>
+                                <p style="margin:0;font-size:12px;line-height:1.6;color:#4b5563;">Le lien ouvre notre page Google pour vos commentaires. / The link opens our Google page for feedback.</p>
+                                <?php if (!empty($data['is_manual'])) : ?>
+                                    <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#6b7280;">Cette relance a été envoyée manuellement depuis le portail Loft 1325. / This follow-up was issued manually from the Loft 1325 portal.</p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <?php
+
+    return trim(ob_get_clean());
+}
+
+
 function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, array $options = []) {
     $recipient = isset($booking['email']) ? sanitize_email($booking['email']) : '';
 
@@ -3650,41 +3710,13 @@ function wp_loft_booking_send_post_stay_email($booking, $is_manual = false, arra
 
     $subject = 'Lofts 1325 – Merci pour votre séjour | Thank you for your stay';
 
-    ob_start();
-    ?>
-    <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f3f4f6;padding:28px 0;">
-            <tr>
-                <td align="center" style="padding:0 16px;">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 32px rgba(15,23,42,0.12);">
-                        <tr>
-                            <td style="padding:32px 32px 20px;background:linear-gradient(135deg,#0f172a,#1f2937);color:#f9fafb;">
-                                <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#9ca3af;">Loft 1325</p>
-                                <h1 style="margin:8px 0 0;font-size:20px;">Merci pour votre visite | Thank you for staying</h1>
-                                <p style="margin:12px 0 0;font-size:14px;line-height:1.6;">Nous espérons que vous avez apprécié votre séjour dans <?php echo esc_html($room_name); ?>. | We hope you enjoyed your time in <?php echo esc_html($room_name); ?>.</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding:28px 32px;">
-                                <p style="margin:0 0 12px;font-size:15px;color:#111827;font-weight:600;">Bonjour <?php echo esc_html($guest_name); ?>,</p>
-                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Merci d’avoir choisi Loft 1325 pour votre visite à Val-d’Or. / Thank you for choosing Loft 1325 for your stay in Val-d’Or.</p>
-                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Vos dates · Your dates:<br><strong><?php echo esc_html($checkin); ?> → <?php echo esc_html($checkout); ?></strong></p>
-                                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">Nous aimerions connaître votre avis. / We would love your feedback.</p>
-                                <p style="margin:0;">
-                                    <a href="https://g.page/r/CfeXFP4gAiijEAg/review" style="background-color:#0ea5e9;color:#f8fafc;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:700;display:inline-block;">Laisser un avis · Leave a review</a>
-                                </p>
-                                <?php if ($is_manual) : ?>
-                                    <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#9ca3af;">Cette relance a été envoyée manuellement depuis le portail Loft 1325. / This follow-up was issued manually from the Loft 1325 portal.</p>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <?php
-    $body = ob_get_clean();
+    $body = wp_loft_booking_render_post_stay_email_html([
+        'guest_name' => $guest_name,
+        'room_name'  => $room_name,
+        'checkin'    => $checkin,
+        'checkout'   => $checkout,
+        'is_manual'  => $is_manual,
+    ]);
 
     $message = [
         'to'      => [$recipient],
