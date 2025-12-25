@@ -196,7 +196,11 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
     }
 
     if ( $args['unit'] ) {
-        $where[]  = 'u.unit_name = %s';
+        if ( __( 'Unassigned / Unknown', 'wp-loft-booking' ) === $args['unit'] ) {
+            $where[] = '(u.unit_name IS NULL OR u.unit_name = %s)';
+        } else {
+            $where[] = 'u.unit_name = %s';
+        }
         $params[] = $args['unit'];
     }
 
@@ -210,7 +214,7 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
 
     $where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-    $sql = "SELECT kc.*, u.unit_name, t.first_name, t.last_name,
+    $sql = "SELECT kc.*, u.unit_name, u.id as unit_id, t.first_name, t.last_name,
                 COUNT(kvk.key_id) as vk_total,
                 SUM(CASE WHEN vk.key_type = 'admin' THEN 1 ELSE 0 END) as admin_keys
             FROM {$kc_table} kc
@@ -228,9 +232,11 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
     $prepared = $wpdb->prepare( $sql, $params );
     $rows     = $wpdb->get_results( $prepared, ARRAY_A );
 
-    $resources = array();
-    $events    = array();
-    $today_ts  = current_time( 'timestamp' );
+    $resources      = array();
+    $events         = array();
+    $today_ts       = current_time( 'timestamp' );
+    $range_start_ts = $args['start'] ? strtotime( $args['start'] ) : false;
+    $range_end_ts   = $args['end'] ? strtotime( $args['end'] ) : false;
 
     foreach ( $rows as $row ) {
         $tenant_first = isset( $row['first_name'] ) ? sanitize_text_field( $row['first_name'] ) : '';
@@ -238,6 +244,8 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
         $tenant_name  = trim( $tenant_first . ' ' . $tenant_last );
 
         $unit_label = isset( $row['unit_name'] ) ? sanitize_text_field( $row['unit_name'] ) : '';
+        $unit_id    = isset( $row['unit_id'] ) ? 'unit-' . absint( $row['unit_id'] ) : 'unit-unassigned';
+        $unit_title = $unit_label ? $unit_label : __( 'Unassigned / Unknown', 'wp-loft-booking' );
 
         $start_mysql = isset( $row['valid_from'] ) ? sanitize_text_field( $row['valid_from'] ) : '';
         $end_mysql   = isset( $row['valid_until'] ) ? sanitize_text_field( $row['valid_until'] ) : '';
@@ -253,40 +261,51 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
             $status = 'active';
         }
 
-        $resources[] = array(
-            'id'                => (string) ( $row['id'] ?? '' ),
-            'title'             => $row['name'] ? sanitize_text_field( $row['name'] ) : __( 'Keychain', 'wp-loft-booking' ),
-            'unit'              => $unit_label,
-            'tenant'            => $tenant_name,
-            'virtual_keys_count'=> (int) $row['vk_total'],
-            'people_count'      => isset( $row['people_count'] ) ? (int) $row['people_count'] : 0,
-            'admin_keys'        => isset( $row['admin_keys'] ) ? (int) $row['admin_keys'] : 0,
-            'status'            => $status,
-        );
+        if ( ! isset( $resources[ $unit_id ] ) ) {
+            $resources[ $unit_id ] = array(
+                'id'          => $unit_id,
+                'title'       => $unit_title,
+                'keys_total'  => 0,
+                'active_keys' => 0,
+            );
+        }
+
+        $resources[ $unit_id ]['keys_total']++;
+
+        if ( $range_start_ts && $range_end_ts && $start_ts && $end_ts ) {
+            if ( $start_ts <= $range_end_ts && $end_ts >= $range_start_ts ) {
+                $resources[ $unit_id ]['active_keys']++;
+            }
+        } elseif ( 'active' === $status ) {
+            $resources[ $unit_id ]['active_keys']++;
+        }
 
         if ( ! $start_mysql || ! $end_mysql ) {
             continue;
         }
 
         $events[] = array(
-            'resourceId' => (string) ( $row['id'] ?? '' ),
-            'start'      => mysql_to_rfc3339( $start_mysql ),
-            'end'        => mysql_to_rfc3339( $end_mysql ),
-            'title'      => sprintf( _n( '%d virtual key', '%d virtual keys', (int) $row['vk_total'], 'wp-loft-booking' ), (int) $row['vk_total'] ),
-            'tenant'     => $tenant_name,
-            'unit'       => $unit_label,
-            'status'     => $status,
-            'admin'      => isset( $row['admin_keys'] ) && (int) $row['admin_keys'] > 0,
-            'keychain'   => $row['name'] ? sanitize_text_field( $row['name'] ) : '',
-            'virtual'    => (int) $row['vk_total'],
+            'resourceId'   => $unit_id,
+            'start'        => mysql_to_rfc3339( $start_mysql ),
+            'end'          => mysql_to_rfc3339( $end_mysql ),
+            'title'        => sprintf( _n( '%d virtual key', '%d virtual keys', (int) $row['vk_total'], 'wp-loft-booking' ), (int) $row['vk_total'] ),
+            'tenant'       => $tenant_name,
+            'unit'         => $unit_title,
+            'status'       => $status,
+            'admin'        => isset( $row['admin_keys'] ) && (int) $row['admin_keys'] > 0,
+            'keychain'     => $row['name'] ? sanitize_text_field( $row['name'] ) : '',
+            'virtual'      => (int) $row['vk_total'],
+            'keychain_id'  => isset( $row['id'] ) ? (int) $row['id'] : 0,
+            'valid_from'   => $start_mysql,
+            'valid_until'  => $end_mysql,
         );
     }
 
     return array(
-        'resources' => $resources,
+        'resources' => array_values( $resources ),
         'events'    => $events,
         'meta'      => array(
-            'count' => count( $resources ),
+            'count' => count( $events ),
         ),
     );
 }
