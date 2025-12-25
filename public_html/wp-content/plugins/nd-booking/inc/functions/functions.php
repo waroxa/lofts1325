@@ -835,22 +835,37 @@ function nd_booking_qnt_room_bookable($nd_booking_strings_dates_orders,$nd_booki
 		    }
 
 
-		    $nd_booking_room_left = $nd_booking_meta_box_qnt - $nd_booking_qnt_room;
+                    $nd_booking_room_left = $nd_booking_meta_box_qnt - $nd_booking_qnt_room;
 
 
-		    if ( $nd_booking_room_left == 1 ){
+                    $nd_booking_locale      = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+                    $nd_booking_lang_prefix = substr( $nd_booking_locale, 0, 2 );
 
-		    	return '<span class="nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_color_3">'.__('THIS IS THE LAST ROOM AT THIS PRICE','nd-booking').'</span>';
+                    $nd_booking_last_room_text = ( 'fr' === $nd_booking_lang_prefix )
+                        ? __( 'DERNIÈRE CHAMBRE À CE PRIX', 'nd-booking' )
+                        : __( 'LAST ROOM AT THIS PRICE', 'nd-booking' );
 
-		    }elseif ( $nd_booking_room_left <= 3 ){
+                    $nd_booking_only_label = ( 'fr' === $nd_booking_lang_prefix )
+                        ? __( 'PLUS QUE', 'nd-booking' )
+                        : __( 'ONLY', 'nd-booking' );
 
-		    	return '<span class="nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_top_10 nd_booking_padding_top_5 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_color_3">'.__('ONLY','nd-booking').' '.$nd_booking_room_left.' '.__('ROOM LEFT AT THIS PRICE','nd-booking').'</span>';
+                    $nd_booking_rooms_left_label = ( 'fr' === $nd_booking_lang_prefix )
+                        ? __( 'CHAMBRES RESTANTES À CE PRIX', 'nd-booking' )
+                        : __( 'ROOMS LEFT AT THIS PRICE', 'nd-booking' );
 
-		    }
+                    if ( $nd_booking_room_left == 1 ){
 
-		}
+                        return '<span class="nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_padding_top_5 nd_booking_top_10 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_color_3">'.$nd_booking_last_room_text.'</span>';
 
-	}
+                    }elseif ( $nd_booking_room_left <= 3 ){
+
+                        return '<span class="nd_options_color_white nd_booking_font_size_10 nd_booking_line_height_10 nd_booking_letter_spacing_2 nd_booking_padding_3_5 nd_booking_top_10 nd_booking_padding_top_5 nd_booking_position_absolute nd_booking_right_10 nd_booking_bg_color_3">'.$nd_booking_only_label.' '.$nd_booking_room_left.' '.$nd_booking_rooms_left_label.'</span>';
+
+                    }
+
+                }
+
+        }
 
 }
 
