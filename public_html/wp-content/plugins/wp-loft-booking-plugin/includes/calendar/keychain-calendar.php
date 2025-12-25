@@ -2,6 +2,8 @@
 defined('ABSPATH') || exit;
 
 function wp_loft_booking_keychain_calendar_page() {
+    error_log('✅ Rendering Loft Booking keychain calendar page.');
+
     $payload = wp_loft_booking_prepare_keychain_calendar_payload();
 
     wp_localize_script(
