@@ -102,6 +102,91 @@ function nd_booking_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'nd_booking_scripts' );
 
+/**
+ * Determine whether the current request should load the enhanced search assets.
+ *
+ * @return bool
+ */
+function nd_booking_should_enqueue_search_assets() {
+    $should_enqueue = is_search();
+
+    if ( ! $should_enqueue && is_page() ) {
+        $page = get_post();
+
+        if ( $page instanceof WP_Post ) {
+            if ( has_shortcode( $page->post_content, 'nd_booking_search_results' ) ) {
+                $should_enqueue = true;
+            }
+
+            if ( ! $should_enqueue && nd_booking_post_contains_shortcode( $page, 'nd_booking_search_results' ) ) {
+                $should_enqueue = true;
+            }
+        }
+    }
+
+    if ( $should_enqueue ) {
+        return true;
+    }
+
+    $nd_booking_query_params = array(
+        'nd_booking_archive_form_date_range_from',
+        'nd_booking_archive_form_date_range_to',
+        'nd_booking_archive_form_guests',
+        'nd_booking_archive_form_services',
+        'nd_booking_archive_form_additional_services',
+        'nd_booking_archive_form_branch_stars',
+        'nd_booking_archive_form_branches',
+        'nd_booking_archive_form_max_price_for_day',
+    );
+
+    foreach ( $nd_booking_query_params as $query_param ) {
+        if ( isset( $_GET[ $query_param ] ) && '' !== $_GET[ $query_param ] ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Enqueue front-end enhancements for ND Booking search and results pages.
+ */
+function nd_booking_enqueue_search_enhancements() {
+    if ( ! nd_booking_should_enqueue_search_assets() ) {
+        return;
+    }
+
+    $styles_relative_path = 'assets/css/search-enhancements.css';
+    $styles_path          = plugin_dir_path( __FILE__ ) . $styles_relative_path;
+
+    if ( file_exists( $styles_path ) && is_readable( $styles_path ) ) {
+        $styles_version = (string) filemtime( $styles_path );
+
+        wp_enqueue_style(
+            'nd-booking-search-enhancements',
+            plugins_url( $styles_relative_path, __FILE__ ),
+            array( 'nd_booking_style' ),
+            $styles_version
+        );
+    }
+
+    $translation_fix_relative_path = 'assets/js/search-translation-fix.js';
+    $translation_fix_path          = plugin_dir_path( __FILE__ ) . $translation_fix_relative_path;
+
+    if ( file_exists( $translation_fix_path ) && is_readable( $translation_fix_path ) ) {
+        $translation_fix_version = (string) filemtime( $translation_fix_path );
+
+        wp_enqueue_script(
+            'nd-booking-search-translation-fix',
+            plugins_url( $translation_fix_relative_path, __FILE__ ),
+            array(),
+            $translation_fix_version,
+            true
+        );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'nd_booking_enqueue_search_enhancements', 35 );
+
 
 if ( ! function_exists( 'nd_booking_elementor_data_contains_shortcode' ) ) {
     /**
