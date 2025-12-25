@@ -847,6 +847,30 @@ function wp_loft_booking_build_booking_payload($booking_id, array $overrides = [
 }
 
 /**
+ * Normalize a transaction reference to avoid leaking fatal error output into emails.
+ *
+ * @param mixed $raw_value Raw transaction value from ND Booking.
+ */
+function wp_loft_booking_sanitize_transaction_reference($raw_value)
+{
+    $value = wp_strip_all_tags((string) $raw_value);
+    $value = trim(preg_replace('/\s+/', ' ', $value));
+
+    $fatal_markers = [
+        'there has been a critical error on this website',
+        'il y a eu une erreur critique sur ce site',
+    ];
+
+    foreach ($fatal_markers as $marker) {
+        if (false !== stripos($value, $marker)) {
+            return '';
+        }
+    }
+
+    return $value;
+}
+
+/**
  * Retrieve an ND Booking entry and normalize it for email notifications.
  *
  * @param int $booking_id Booking ID from the nd_booking_booking table.
@@ -872,6 +896,8 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
 
     $matched_unit = wp_loft_booking_find_unit_by_label($room_name);
 
+    $transaction_id = wp_loft_booking_sanitize_transaction_reference($row['paypal_tx'] ?? '');
+
     return [
         'booking_id'     => (int) $booking_id,
         'room_id'        => $room_id,
@@ -891,7 +917,7 @@ function wp_loft_booking_fetch_nd_booking($booking_id) {
         'total'          => isset($row['final_trip_price']) ? (float) $row['final_trip_price'] : 0.0,
         'currency'       => $row['paypal_currency'] ?? 'CAD',
         'payment_status' => $row['paypal_payment_status'] ?? '',
-        'transaction_id' => $row['paypal_tx'] ?? '',
+        'transaction_id' => $transaction_id,
         'extra_services' => $row['extra_services'] ?? '',
         'coupon'         => $row['user_coupon'] ?? '',
         'arrival_time'   => $row['user_arrival'] ?? '',
