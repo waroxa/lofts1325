@@ -52,11 +52,11 @@ function wp_loft_booking_keychain_calendar_page() {
                             <span><?php printf(esc_html__('Active (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['active'])); ?></span>
                         </label>
                         <label class="loft-calendar__filter">
-                            <input type="checkbox" value="upcoming" />
+                            <input type="checkbox" value="upcoming" checked />
                             <span><?php printf(esc_html__('Upcoming (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['upcoming'])); ?></span>
                         </label>
                         <label class="loft-calendar__filter">
-                            <input type="checkbox" value="expired" />
+                            <input type="checkbox" value="expired" checked />
                             <span><?php printf(esc_html__('Expired (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['expired'])); ?></span>
                         </label>
                     </div>
