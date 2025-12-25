@@ -316,6 +316,14 @@ function wp_loft_booking_bookings_page() {
                 <p class="description">Post-stay preview unavailable.</p>
             <?php endif; ?>
         </div>
+        <form method="post" style="margin:12px 0 20px;max-width:520px;">
+            <?php wp_nonce_field('wp_loft_booking_send_post_stay_test'); ?>
+            <input type="hidden" name="wp_loft_booking_send_post_stay_test" value="1">
+            <label for="post_stay_test_email"><strong>Send a test copy</strong></label>
+            <input type="email" id="post_stay_test_email" name="post_stay_test_email" class="regular-text" placeholder="you@example.com" required>
+            <p class="description">Queues the same message above to your inbox using sample stay details. Copies are tagged as manual sends.</p>
+            <p style="margin-top:8px;"><button class="button button-primary" type="submit">Send test post-stay email</button></p>
+        </form>
 
         <hr>
 
@@ -658,6 +666,57 @@ function wp_loft_booking_handle_booking_actions() {
             __('Recipient lists saved.', 'wp-loft-booking'),
             'updated'
         );
+    }
+
+    if (!empty($_POST['wp_loft_booking_send_post_stay_test'])) {
+        check_admin_referer('wp_loft_booking_send_post_stay_test');
+
+        $recipient = isset($_POST['post_stay_test_email']) ? sanitize_email(wp_unslash($_POST['post_stay_test_email'])) : '';
+
+        if (!$recipient || !is_email($recipient)) {
+            add_settings_error(
+                'wp_loft_booking_bookings',
+                'post_stay_test_invalid_recipient',
+                __('Enter a valid email to receive the post-stay test.', 'wp-loft-booking'),
+                'error'
+            );
+        } else {
+            $now      = current_time('timestamp');
+            $checkin  = wp_date('Y-m-d', $now);
+            $checkout = wp_date('Y-m-d', $now + DAY_IN_SECONDS);
+
+            $booking = [
+                'email'     => $recipient,
+                'name'      => 'Maria',
+                'surname'   => 'Garcia Carrasco',
+                'room_name' => 'Loft 1325 – Val-d’Or',
+                'date_from' => $checkin,
+                'date_to'   => $checkout,
+            ];
+
+            $result = wp_loft_booking_send_post_stay_email($booking, true, [
+                'dry_run'      => false,
+                'send_at'      => null,
+                'force_new_job' => true,
+            ]);
+
+            if (is_wp_error($result) || empty($result)) {
+                $message = is_wp_error($result) ? $result->get_error_message() : __('Unable to queue the test email.', 'wp-loft-booking');
+                add_settings_error(
+                    'wp_loft_booking_bookings',
+                    'post_stay_test_failed',
+                    esc_html($message),
+                    'error'
+                );
+            } else {
+                add_settings_error(
+                    'wp_loft_booking_bookings',
+                    'post_stay_test_sent',
+                    __('Post-stay test email queued. Check your inbox shortly.', 'wp-loft-booking'),
+                    'updated'
+                );
+            }
+        }
     }
 
     if (!empty($_POST['wp_loft_booking_manual_send'])) {
