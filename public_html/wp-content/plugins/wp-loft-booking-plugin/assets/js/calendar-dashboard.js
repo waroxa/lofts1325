@@ -23,6 +23,7 @@
     };
 
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
     const colorPalette = [
         '#2563eb',
@@ -209,6 +210,23 @@
         return days;
     }
 
+    function buildTimelineWindow(baseDate, length = 35) {
+        const start = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+        const days = [];
+
+        for (let i = 0; i < length; i++) {
+            const current = new Date(start);
+            current.setDate(start.getDate() + i);
+            days.push({
+                date: current,
+                key: toKey(current),
+                isToday: toKey(current) === state.today,
+            });
+        }
+
+        return days;
+    }
+
     function groupEvents(events, accessor) {
         return events.reduce((acc, event) => {
             const key = accessor(event);
@@ -218,6 +236,70 @@
             acc[key].push(event);
             return acc;
         }, {});
+    }
+
+    function renderKeyTimeline(container, days, keys) {
+        if (!container.length) return;
+
+        const timelineStart = days[0]?.date;
+
+        const dayHeader = days
+            .map((day) => {
+                const label = day.date.toLocaleDateString(undefined, { weekday: 'short' });
+                const classes = ['loft-calendar__timeline-day'];
+                if (day.isToday) classes.push('loft-calendar__timeline-day--today');
+
+                return `<div class="${classes.join(' ')}">${label}<span>${day.date.getDate()}</span></div>`;
+            })
+            .join('');
+
+        const rows = keys
+            .map((key) => {
+                const start = new Date(`${key.start}T12:00:00`);
+                const end = new Date(`${key.end}T12:00:00`);
+
+                if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
+
+                const duration = Math.max(1, Math.round((end - start) / MS_IN_DAY) + 1);
+                const offset = Math.max(0, Math.round((start - timelineStart) / MS_IN_DAY));
+                const clampedEnd = Math.min(days.length - 1, offset + duration - 1);
+                const span = Math.max(1, clampedEnd - offset + 1);
+
+                const color = key.color || loftColor(key.loft_label || key.loft);
+                const darker = shadeColor(color, -18);
+                const keyNames = key.key_names && key.key_names.length ? key.key_names.join(', ') : key.key_label;
+                const statusLabel = state.keyStatuses[key.status] || key.status || '';
+
+                return `
+                    <div class="loft-calendar__timeline-row">
+                        <div class="loft-calendar__timeline-meta">
+                            <span class="loft-calendar__pill">${key.loft_label || key.loft}</span>
+                            <div>
+                                <p class="loft-calendar__timeline-title">${key.key_label || 'Keychain'}</p>
+                                <p class="loft-calendar__meta loft-calendar__meta--keys">🔑 ${keyNames}</p>
+                                <p class="loft-calendar__meta">${friendlyDate(key.start)} → ${friendlyDate(key.end)}</p>
+                                <p class="loft-calendar__meta">${statusLabel}</p>
+                            </div>
+                        </div>
+                        <div class="loft-calendar__timeline-grid" style="grid-template-columns: repeat(${days.length}, 1fr);">
+                            <div class="loft-calendar__timeline-bar" style="grid-column: ${offset + 1} / span ${span}; background: linear-gradient(135deg, ${color}, ${darker}); border-left: 4px solid ${darker};">
+                                <span class="loft-calendar__pill loft-calendar__pill--subtle">${span} day${span > 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            })
+            .join('');
+
+        container.html(`
+            <div class="loft-calendar__timeline">
+                <div class="loft-calendar__timeline-header" style="grid-template-columns: 180px repeat(${days.length}, 1fr);">
+                    <div class="loft-calendar__timeline-label">Dates</div>
+                    ${dayHeader}
+                </div>
+                <div class="loft-calendar__timeline-body">${rows}</div>
+            </div>
+        `);
     }
 
     function renderNav(type) {
@@ -232,10 +314,95 @@
         `);
     }
 
+
+    function renderKeyTimeline(container, days, keys) {
+        if (!container.length) return;
+
+        const dayColumns = days.length || 1;
+        const firstDay = days[0]?.date ? new Date(days[0].date) : new Date();
+        const lastDay = days[days.length - 1]?.date ? new Date(days[days.length - 1].date) : new Date();
+        const dayCells = days
+            .map((day) => {
+                const classes = ['loft-calendar__timeline-day'];
+                if (!day.isCurrentMonth) classes.push('loft-calendar__timeline-day--muted');
+                if (day.isToday) classes.push('loft-calendar__timeline-day--today');
+
+                return `
+                    <div class="${classes.join(' ')}">
+                        <span class="loft-calendar__timeline-day-weekday">${day.date.toLocaleDateString(undefined, {
+                            weekday: 'short',
+                        })}</span>
+                        <span class="loft-calendar__timeline-day-date">${day.date.getDate()}</span>
+                    </div>
+                `;
+            })
+            .join('');
+
+        const rows = (keys || [])
+            .map((keychain) => {
+                if (!keychain.start || !keychain.end) return '';
+
+                const startDate = new Date(`${keychain.start}T12:00:00`);
+                const endDate = new Date(`${keychain.end}T12:00:00`);
+
+                if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return '';
+
+                if (endDate < firstDay || startDate > lastDay) return '';
+
+                const color = keychain.color || loftColor(keychain.loft_label || keychain.loft);
+                const darker = shadeColor(color, -18);
+                const nameLabel = keychain.key_label || 'Keychain';
+                const keyNames = keychain.key_names && keychain.key_names.length ? keychain.key_names.join(', ') : nameLabel;
+                const statusLabel = state.keyStatuses[keychain.status] || keychain.status || '';
+
+                const msPerDay = 1000 * 60 * 60 * 24;
+                const startOffset = Math.max(0, Math.floor((startDate - firstDay) / msPerDay));
+                const endOffset = Math.min(
+                    days.length - 1,
+                    Math.max(startOffset, Math.floor((endDate - firstDay) / msPerDay))
+                );
+                const span = Math.max(1, Math.min(days.length, endOffset - startOffset + 1));
+
+                return `
+                    <div class="loft-calendar__timeline-row">
+                        <div class="loft-calendar__timeline-label">
+                            <span class="loft-calendar__pill">${keychain.loft_label || keychain.loft || 'Loft'}</span>
+                            <div class="loft-calendar__timeline-label-text">
+                                <p class="loft-calendar__timeline-title">${nameLabel}</p>
+                                <p class="loft-calendar__timeline-meta">${friendlyDate(keychain.start)} → ${friendlyDate(keychain.end)}</p>
+                                <p class="loft-calendar__timeline-meta loft-calendar__timeline-meta--keys">🔑 ${keyNames}</p>
+                                <p class="loft-calendar__timeline-meta loft-calendar__timeline-meta--status">${statusLabel}</p>
+                            </div>
+                        </div>
+                        <div class="loft-calendar__timeline-track" style="grid-template-columns: repeat(${dayColumns}, minmax(32px, 1fr));">
+                            <div class="loft-calendar__timeline-bar" style="grid-column: ${startOffset + 1} / span ${span}; background: linear-gradient(135deg, ${color}, ${darker}); border-left: 5px solid ${darker};">
+                                <span class="loft-calendar__timeline-bar-title">${nameLabel}</span>
+                                <span class="loft-calendar__timeline-bar-meta">${statusLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            })
+            .filter(Boolean)
+            .join('');
+
+        container.html(`
+            <div class="loft-calendar__timeline">
+                <div class="loft-calendar__timeline-header">
+                    <div class="loft-calendar__timeline-label loft-calendar__timeline-label--header">Keychain</div>
+                    <div class="loft-calendar__timeline-days" style="grid-template-columns: repeat(${dayColumns}, minmax(32px, 1fr));">${dayCells}</div>
+                </div>
+                <div class="loft-calendar__timeline-body">
+                    ${rows || '<p class="loft-calendar__empty">No keychains match your filters for this month.</p>'}
+                </div>
+            </div>
+        `);
+    }
+
     function renderCalendar(type) {
         const container = $(`#loft-${type}-calendar`);
         const viewDate = state.view[type];
-        const days = buildMonth(viewDate);
+
         const keysSource =
             type === 'keys'
                 ? state.keys.filter((key) => {
@@ -244,16 +411,22 @@
                       return filters.includes(key.status);
                   })
                 : state.keys;
+
+        if (type === 'keys') {
+            renderKeyTimeline(container, days, keysSource);
+            renderNav(type);
+            return;
+        }
+
         const sourceEvents =
             type === 'bookings'
                 ? expandBookingsAcrossStay(state.bookings)
-                : type === 'keys'
-                ? expandKeychainsAcrossValidity(keysSource)
                 : state.cleaning;
+
         const eventsByDay = groupEvents(
             sourceEvents,
             (event) => {
-                if (type === 'bookings' || type === 'keys') {
+                if (type === 'bookings') {
                     return event.day_key;
                 }
 
