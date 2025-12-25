@@ -12,6 +12,7 @@
             admin: false,
             virtualKeys: false,
         },
+        expanded: new Set(),
         loading: false,
     };
 
@@ -125,6 +126,8 @@
         const start = startOfRange(state.focusDate, state.view);
         const end = endOfRange(state.focusDate, state.view);
         const slots = slotsForRange(start, end, state.view);
+        const today = new Date();
+        const todayInRange = today >= start && today <= end;
 
         const grid = document.createElement('div');
         grid.className = 'loft-keychain-calendar__grid';
@@ -134,7 +137,10 @@
 
         const resourceHead = document.createElement('div');
         resourceHead.className = 'loft-keychain-calendar__resource-row';
-        resourceHead.innerHTML = `<strong>${state.resources.length} keychains</strong><span class="loft-keychain-calendar__resource-meta">${settings.todayLabel || ''}</span>`;
+        resourceHead.innerHTML = `
+            <div class="loft-keychain-calendar__resource-label">${escapeHtml('Unit')}</div>
+            <span class="loft-keychain-calendar__resource-meta">${settings.todayLabel || ''}</span>
+        `;
 
         const timelineHead = document.createElement('div');
         timelineHead.className = 'loft-keychain-calendar__timeline-header';
@@ -149,6 +155,19 @@
             timelineHead.appendChild(label);
         });
 
+        if (todayInRange) {
+            const line = document.createElement('div');
+            line.className = 'loft-keychain-calendar__today-line';
+            const position = positionEvent(
+                { start: today.toISOString(), end: today.toISOString() },
+                start,
+                end,
+                state.view
+            );
+            line.style.left = `${position.left}%`;
+            timelineHead.appendChild(line);
+        }
+
         header.appendChild(resourceHead);
         header.appendChild(timelineHead);
 
@@ -161,6 +180,19 @@
         const timelineCol = document.createElement('div');
         timelineCol.className = 'loft-keychain-calendar__timelines';
 
+        if (todayInRange) {
+            const line = document.createElement('div');
+            line.className = 'loft-keychain-calendar__today-line';
+            const position = positionEvent(
+                { start: today.toISOString(), end: today.toISOString() },
+                start,
+                end,
+                state.view
+            );
+            line.style.left = `${position.left}%`;
+            timelineCol.appendChild(line);
+        }
+
         if (!state.resources.length) {
             const empty = document.createElement('div');
             empty.className = 'loft-keychain-calendar__empty';
@@ -171,18 +203,23 @@
         const fragmentRes = document.createDocumentFragment();
         const fragmentTime = document.createDocumentFragment();
 
-        state.resources.forEach((resource) => {
+        state.resources.forEach((resource, index) => {
             const resRow = document.createElement('div');
             resRow.className = 'loft-keychain-calendar__resource-row';
+            if (index % 2 === 1) {
+                resRow.classList.add('is-striped');
+            }
             resRow.innerHTML = `
                 <strong>${escapeHtml(resource.title)}</strong>
-                <span class="loft-keychain-calendar__resource-meta">${escapeHtml(resource.unit || 'Unassigned')}</span>
-                <span class="loft-keychain-calendar__resource-meta">${escapeHtml(resource.tenant || '')}</span>
+                <span class="loft-keychain-calendar__resource-meta">${resource.keys_total || 0} keys • ${resource.active_keys || 0} active in range</span>
             `;
             fragmentRes.appendChild(resRow);
 
             const row = document.createElement('div');
             row.className = 'loft-keychain-calendar__timeline-row';
+            if (index % 2 === 1) {
+                row.classList.add('is-striped');
+            }
 
             const gridLine = document.createElement('div');
             gridLine.className = 'loft-keychain-calendar__timeline-grid';
@@ -198,29 +235,58 @@
             row.appendChild(gridLine);
 
             const events = state.events.filter((evt) => evt.resourceId === resource.id);
-            events.forEach((evt) => {
-                const bar = document.createElement('div');
-                bar.className = `loft-keychain-calendar__event loft-keychain-calendar__event--${evt.status}`;
-                if (evt.admin) {
-                    bar.classList.add('loft-keychain-calendar__event--admin');
-                }
-                bar.textContent = `${evt.keychain || ''}`.trim() || resource.title;
+            const lanes = layoutLanes(events);
+            const visibleLaneCount = state.expanded.has(resource.id) ? lanes.length : Math.min(4, lanes.length);
+            const rowHeight = Math.max(64, visibleLaneCount * 40);
+            resRow.style.minHeight = `${rowHeight}px`;
+            row.style.minHeight = `${rowHeight}px`;
 
-                const positions = positionEvent(evt, start, end, state.view);
-                bar.style.left = `${positions.left}%`;
-                bar.style.width = `${positions.width}%`;
+            for (let l = 0; l < visibleLaneCount; l++) {
+                const laneEl = document.createElement('div');
+                laneEl.className = 'loft-keychain-calendar__lane';
 
-                bar.dataset.details = JSON.stringify({
-                    ...evt,
-                    resource,
+                lanes[l].forEach((evt) => {
+                    const bar = document.createElement('div');
+                    bar.className = `loft-keychain-calendar__event loft-keychain-calendar__event--${evt.status}`;
+                    if (evt.admin) {
+                        bar.classList.add('loft-keychain-calendar__event--admin');
+                    }
+
+                    const label = eventLabel(evt);
+                    bar.textContent = label.truncated;
+                    bar.title = label.full;
+
+                    const positions = positionEvent(evt, start, end, state.view);
+                    bar.style.left = `${positions.left}%`;
+                    bar.style.width = `${positions.width}%`;
+
+                    bar.addEventListener('mouseenter', (e) => showTooltip(e, evt, resource));
+                    bar.addEventListener('mouseleave', hideTooltip);
+                    bar.addEventListener('click', () => openModal(evt, resource));
+
+                    laneEl.appendChild(bar);
                 });
 
-                bar.addEventListener('mouseenter', (e) => showTooltip(e, evt, resource));
-                bar.addEventListener('mouseleave', hideTooltip);
-                bar.addEventListener('click', () => openModal(evt, resource));
+                row.appendChild(laneEl);
+            }
 
-                row.appendChild(bar);
-            });
+            if (lanes.length > visibleLaneCount) {
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'loft-keychain-calendar__more';
+                toggle.textContent = state.expanded.has(resource.id)
+                    ? 'Show less'
+                    : `+${lanes.length - visibleLaneCount} more`;
+                toggle.addEventListener('click', () => {
+                    if (state.expanded.has(resource.id)) {
+                        state.expanded.delete(resource.id);
+                    } else {
+                        state.expanded.add(resource.id);
+                    }
+                    buildTimeline();
+                });
+                row.appendChild(toggle);
+            }
 
             fragmentTime.appendChild(row);
         });
@@ -238,7 +304,9 @@
         const total = state.resources.length;
         if (summary) {
             summary.textContent = total
-                ? `${total} keychains shown from ${formatDate(start)} to ${formatDate(new Date(end.getTime() - 1))}`
+                ? `${state.events.length} keychains across ${total} units from ${formatDate(start)} to ${formatDate(
+                      new Date(end.getTime() - 1)
+                  )}`
                 : settings.labels?.noResults || '';
         }
     }
@@ -263,10 +331,56 @@
         const rangeMs = end.getTime() - start.getTime();
         const effectiveStart = Math.max(eventStart.getTime(), start.getTime());
         const effectiveEnd = Math.min(eventEnd.getTime(), end.getTime());
+        if (effectiveEnd < effectiveStart) {
+            return { left: 0, width: 0 };
+        }
         const left = ((effectiveStart - start.getTime()) / rangeMs) * 100;
         const width = Math.max(2, ((effectiveEnd - effectiveStart) / rangeMs) * 100);
 
         return { left, width };
+    }
+
+    function layoutLanes(events) {
+        const sorted = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
+        const lanes = [];
+
+        sorted.forEach((event) => {
+            const startTime = new Date(event.start).getTime();
+            let placed = false;
+
+            for (let i = 0; i < lanes.length; i++) {
+                const lane = lanes[i];
+                const last = lane[lane.length - 1];
+                if (new Date(last.end).getTime() <= startTime) {
+                    lane.push(event);
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed) {
+                lanes.push([event]);
+            }
+        });
+
+        return lanes;
+    }
+
+    function eventLabel(evt) {
+        let label = '';
+
+        if (evt.keychain) {
+            label = `Key: ${evt.keychain}`;
+        } else if (evt.tenant) {
+            label = `Tenant: ${evt.tenant}`;
+        } else if (typeof evt.virtual === 'number') {
+            label = `VK: ${evt.virtual}`;
+        } else {
+            label = 'Key';
+        }
+
+        const truncated = label.length > 28 ? `${label.slice(0, 27)}…` : label;
+        return { full: label, truncated };
     }
 
     function escapeHtml(value) {
@@ -275,15 +389,23 @@
         return span.innerHTML;
     }
 
+    function capitalize(value) {
+        if (!value) return '';
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
     function showTooltip(event, data, resource) {
         hideTooltip();
         const tooltip = document.createElement('div');
         tooltip.className = 'loft-keychain-calendar__tooltip';
         tooltip.innerHTML = `
-            <strong>${escapeHtml(resource.title)}</strong><br />
-            ${escapeHtml(resource.unit || '')}<br />
-            ${escapeHtml(data.tenant || '')}<br />
-            ${settings.labels?.virtualKeys || 'Virtual keys'}: ${data.virtual}
+            <strong>${escapeHtml(data.keychain || 'Keychain')}</strong><br />
+            <div>${escapeHtml(data.unit || resource.title)}</div>
+            <div>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(data.tenant || '—')}</div>
+            <div>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${data.virtual}</div>
+            <div>${escapeHtml('Valid from')}: ${formatDate(new Date(data.start))}</div>
+            <div>${escapeHtml('Valid until')}: ${formatDate(new Date(data.end))}</div>
+            <div>Status: ${escapeHtml(capitalize(data.status || ''))}</div>
         `;
 
         document.body.appendChild(tooltip);
@@ -306,15 +428,15 @@
         const modal = document.createElement('div');
         modal.className = 'loft-keychain-calendar__modal';
         modal.innerHTML = `
-            <h2>${escapeHtml(resource.title)}</h2>
-            <p class="loft-keychain-calendar__resource-meta">${escapeHtml(resource.unit || '')}</p>
-            <p>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(evt.tenant || resource.tenant || '—')}</p>
+            <h2>${escapeHtml(evt.keychain || 'Keychain')}</h2>
+            <p class="loft-keychain-calendar__resource-meta">${escapeHtml(evt.unit || resource.title)}</p>
+            <p>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(evt.tenant || '—')}</p>
             <p>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${evt.virtual}</p>
-            <p>${escapeHtml(settings.labels?.people || 'People')}: ${resource.people_count || 0}</p>
+            <p>Status: ${escapeHtml(capitalize(evt.status))}</p>
             <p>${formatDate(new Date(evt.start))} → ${formatDate(new Date(evt.end))}</p>
             <footer>
                 <button class="button button-secondary" data-close>Close</button>
-                <a class="button button-primary" href="${settings.editBase}${resource.id}">Open keychain</a>
+                <a class="button button-primary" href="${settings.editBase}${evt.keychain_id}">Open keychain</a>
             </footer>
         `;
 
@@ -336,6 +458,14 @@
             option.textContent = unit;
             unitSelect?.appendChild(option);
         });
+
+        const unknownLabel = 'Unassigned / Unknown';
+        if (!settings.units.includes(unknownLabel)) {
+            const option = document.createElement('option');
+            option.value = unknownLabel;
+            option.textContent = unknownLabel;
+            unitSelect?.appendChild(option);
+        }
     }
 
     function bindControls() {
@@ -413,6 +543,7 @@
 
             state.resources = json.data.resources || [];
             state.events = json.data.events || [];
+            state.expanded = new Set();
             buildTimeline();
         } catch (error) {
             container && (container.innerHTML = `<div class="loft-keychain-calendar__empty">${error.message}</div>`);
