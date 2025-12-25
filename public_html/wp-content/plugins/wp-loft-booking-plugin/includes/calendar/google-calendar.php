@@ -91,6 +91,9 @@ function wp_loft_booking_prepare_calendar_payload() {
         ARRAY_A
     );
 
+    $plugin_bookings_table = $wpdb->prefix . 'loft_bookings';
+    $units_table           = $wpdb->prefix . 'loft_units';
+
     $status_store = wp_loft_booking_get_cleaning_status_store();
     $bookings     = [];
     $cleaning     = [];
@@ -155,6 +158,80 @@ function wp_loft_booking_prepare_calendar_payload() {
             'note'            => $status_data['note'] ?? '',
             'email_sent'      => !empty($status_data['email_sent']) || !empty($status_data['notified_at']),
             'notified_at'     => $status_data['notified_at'] ?? '',
+            'needs_attention' => $attention,
+        ];
+
+        $summary['upcoming_bookings']++;
+
+        if ($checkin === $today) {
+            $summary['arrivals_today']++;
+        }
+
+        if ($checkout === $today) {
+            $summary['departures_today']++;
+        }
+
+        if ($attention) {
+            $summary['pending_cleaning']++;
+        }
+    }
+
+    // Fallback to bookings saved through the custom Loft Booking table so the calendar never renders empty.
+    $plugin_rows = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT b.*, u.unit_name
+             FROM {$plugin_bookings_table} b
+             LEFT JOIN {$units_table} u ON b.unit_id = u.id
+             WHERE b.checkout_date >= %s AND b.checkin_date <= %s
+             ORDER BY b.checkin_date ASC
+             LIMIT 600",
+            $window_start,
+            $window_end
+        ),
+        ARRAY_A
+    );
+
+    foreach ($plugin_rows as $row) {
+        $checkin  = wp_loft_booking_normalize_date($row['checkin_date'] ?? '');
+        $checkout = wp_loft_booking_normalize_date($row['checkout_date'] ?? '');
+
+        if (!$checkin || !$checkout) {
+            continue;
+        }
+
+        $booking_id  = (int) ($row['id'] ?? 0);
+        $room_name   = wp_loft_booking_format_unit_label($row['unit_name'] ?? '');
+        $guest_name  = trim((string) ($row['customer_name'] ?? '')) ?: __('Guest', 'wp-loft-booking');
+        $nights      = max(1, (int) round((strtotime($checkout) - strtotime($checkin)) / DAY_IN_SECONDS));
+        $payment     = strtolower((string) ($row['payment_status'] ?? 'confirmed')) ?: 'confirmed';
+        $clean_state = $status_store[$booking_id]['status'] ?? 'pending';
+        $attention   = wp_loft_booking_cleaning_needs_attention($checkout, $clean_state);
+
+        $bookings[] = [
+            'id'         => $booking_id,
+            'loft'       => $room_name ?: __('Loft', 'wp-loft-booking'),
+            'loft_label' => $room_name ?: __('Loft', 'wp-loft-booking'),
+            'guest'      => $guest_name,
+            'start'      => $checkin,
+            'end'        => $checkout,
+            'nights'     => $nights,
+            'status'     => $payment,
+            'amount'     => wp_loft_booking_format_currency((float) ($row['total_amount'] ?? 0), 'CAD'),
+            'currency'   => 'CAD',
+        ];
+
+        $cleaning[] = [
+            'booking_id'      => $booking_id,
+            'loft'            => $room_name ?: __('Loft', 'wp-loft-booking'),
+            'guest'           => $guest_name,
+            'arrival'         => $checkin,
+            'departure'       => $checkout,
+            'cleaning_date'   => $checkout,
+            'status'          => wp_loft_booking_normalize_cleaning_status($clean_state),
+            'status_label'    => wp_loft_booking_cleaning_status_labels()[$clean_state] ?? ucfirst($clean_state),
+            'note'            => $status_store[$booking_id]['note'] ?? '',
+            'email_sent'      => !empty($status_store[$booking_id]['email_sent']) || !empty($status_store[$booking_id]['notified_at']),
+            'notified_at'     => $status_store[$booking_id]['notified_at'] ?? '',
             'needs_attention' => $attention,
         ];
 
