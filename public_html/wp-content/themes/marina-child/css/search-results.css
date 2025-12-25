@@ -3,9 +3,9 @@
     --loft-slate: #4c5a67;
     --loft-sand: #f7f4ef;
     --loft-ice: #f1f5f9;
-    --loft-cerulean: #1f6fbf;
-    --loft-success: #3db7a5;
-    --loft-warning: #f5a623;
+    --loft-cerulean: #76b1c4;
+    --loft-success: #76b1c4;
+    --loft-warning: #76b1c4;
 }
 
 .loft-search-page {
@@ -129,14 +129,14 @@
 .loft-search-sidebar__form input[type="search"]:focus {
     outline: none;
     border-color: var(--loft-cerulean);
-    box-shadow: 0 0 0 4px rgba(31, 111, 191, 0.18);
+    box-shadow: 0 0 0 4px rgba(118, 177, 196, 0.2);
 }
 
 .loft-search-sidebar__form input[type="submit"] {
     padding: 0.9rem 1.2rem;
     border-radius: 14px;
     border: none;
-    background: linear-gradient(120deg, #f6b343, #ef7e14);
+    background: linear-gradient(120deg, #76b1c4, #5a93a7);
     color: #fff;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -148,7 +148,7 @@
 .loft-search-sidebar__form input[type="submit"]:hover,
 .loft-search-sidebar__form input[type="submit"]:focus {
     transform: translateY(-1px);
-    box-shadow: 0 14px 28px rgba(239, 126, 20, 0.28);
+    box-shadow: 0 14px 28px rgba(118, 177, 196, 0.28);
 }
 
 .loft-search-sidebar__fine-print {
