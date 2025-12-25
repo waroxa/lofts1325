@@ -3621,7 +3621,7 @@ function wp_loft_booking_render_post_stay_email_html(array $args = []) {
         'checkin'    => __('N/A', 'wp-loft-booking'),
         'checkout'   => __('N/A', 'wp-loft-booking'),
         'is_manual'  => false,
-        'review_url' => 'https://share.google/NhVsg7IdeyfwUZ3xc',
+        'review_url' => 'https://g.page/r/CaEGioGvieX7EBM/review',
     ];
 
     $data = array_merge($defaults, $args);
@@ -3655,9 +3655,16 @@ function wp_loft_booking_render_post_stay_email_html(array $args = []) {
                                 </div>
                                 <p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#111827;">Nous aimerions connaître votre avis. / We would love your feedback.</p>
                                 <p style="margin:0 0 6px;">
-                                    <a href="<?php echo esc_url($data['review_url']); ?>" style="background-color:#0f766e;color:#f8fafc;text-decoration:none;padding:13px 20px;border-radius:12px;font-weight:800;display:inline-block;">Laisser un avis · Leave a review</a>
+                                    <a href="<?php echo esc_url($data['review_url']); ?>" style="background-color:#76b1c4;color:#0b1628;text-decoration:none;padding:13px 20px;border-radius:12px;font-weight:800;display:inline-block;">Laisser un avis · Leave a review</a>
                                 </p>
                                 <p style="margin:0;font-size:12px;line-height:1.6;color:#4b5563;">Le lien ouvre notre page Google pour vos commentaires. / The link opens our Google page for feedback.</p>
+                                <div style="margin:20px 0 0;padding:16px 0 0;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:12px;">
+                                    <img src="https://loft1325.com/wp-content/uploads/2024/06/Asset-1.png" alt="Logo Loft 1325" width="72" style="display:block;height:auto;border:0;">
+                                    <div>
+                                        <p style="margin:0;font-size:13px;color:#0f172a;font-weight:700;">Loft 1325</p>
+                                        <p style="margin:4px 0 0;font-size:12px;color:#475569;">1325 3e Avenue, Val-d’Or, QC</p>
+                                    </div>
+                                </div>
                                 <?php if (!empty($data['is_manual'])) : ?>
                                     <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#6b7280;">Cette relance a été envoyée manuellement depuis le portail Loft 1325. / This follow-up was issued manually from the Loft 1325 portal.</p>
                                 <?php endif; ?>
