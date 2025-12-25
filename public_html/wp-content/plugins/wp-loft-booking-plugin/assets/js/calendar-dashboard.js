@@ -232,6 +232,91 @@
         `);
     }
 
+
+    function renderKeyTimeline(container, days, keys) {
+        if (!container.length) return;
+
+        const dayColumns = days.length || 1;
+        const firstDay = days[0]?.date ? new Date(days[0].date) : new Date();
+        const lastDay = days[days.length - 1]?.date ? new Date(days[days.length - 1].date) : new Date();
+        const dayCells = days
+            .map((day) => {
+                const classes = ['loft-calendar__timeline-day'];
+                if (!day.isCurrentMonth) classes.push('loft-calendar__timeline-day--muted');
+                if (day.isToday) classes.push('loft-calendar__timeline-day--today');
+
+                return `
+                    <div class="${classes.join(' ')}">
+                        <span class="loft-calendar__timeline-day-weekday">${day.date.toLocaleDateString(undefined, {
+                            weekday: 'short',
+                        })}</span>
+                        <span class="loft-calendar__timeline-day-date">${day.date.getDate()}</span>
+                    </div>
+                `;
+            })
+            .join('');
+
+        const rows = (keys || [])
+            .map((keychain) => {
+                if (!keychain.start || !keychain.end) return '';
+
+                const startDate = new Date(`${keychain.start}T12:00:00`);
+                const endDate = new Date(`${keychain.end}T12:00:00`);
+
+                if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return '';
+
+                if (endDate < firstDay || startDate > lastDay) return '';
+
+                const color = keychain.color || loftColor(keychain.loft_label || keychain.loft);
+                const darker = shadeColor(color, -18);
+                const nameLabel = keychain.key_label || 'Keychain';
+                const keyNames = keychain.key_names && keychain.key_names.length ? keychain.key_names.join(', ') : nameLabel;
+                const statusLabel = state.keyStatuses[keychain.status] || keychain.status || '';
+
+                const msPerDay = 1000 * 60 * 60 * 24;
+                const startOffset = Math.max(0, Math.floor((startDate - firstDay) / msPerDay));
+                const endOffset = Math.min(
+                    days.length - 1,
+                    Math.max(startOffset, Math.floor((endDate - firstDay) / msPerDay))
+                );
+                const span = Math.max(1, Math.min(days.length, endOffset - startOffset + 1));
+
+                return `
+                    <div class="loft-calendar__timeline-row">
+                        <div class="loft-calendar__timeline-label">
+                            <span class="loft-calendar__pill">${keychain.loft_label || keychain.loft || 'Loft'}</span>
+                            <div class="loft-calendar__timeline-label-text">
+                                <p class="loft-calendar__timeline-title">${nameLabel}</p>
+                                <p class="loft-calendar__timeline-meta">${friendlyDate(keychain.start)} → ${friendlyDate(keychain.end)}</p>
+                                <p class="loft-calendar__timeline-meta loft-calendar__timeline-meta--keys">🔑 ${keyNames}</p>
+                                <p class="loft-calendar__timeline-meta loft-calendar__timeline-meta--status">${statusLabel}</p>
+                            </div>
+                        </div>
+                        <div class="loft-calendar__timeline-track" style="grid-template-columns: repeat(${dayColumns}, minmax(32px, 1fr));">
+                            <div class="loft-calendar__timeline-bar" style="grid-column: ${startOffset + 1} / span ${span}; background: linear-gradient(135deg, ${color}, ${darker}); border-left: 5px solid ${darker};">
+                                <span class="loft-calendar__timeline-bar-title">${nameLabel}</span>
+                                <span class="loft-calendar__timeline-bar-meta">${statusLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            })
+            .filter(Boolean)
+            .join('');
+
+        container.html(`
+            <div class="loft-calendar__timeline">
+                <div class="loft-calendar__timeline-header">
+                    <div class="loft-calendar__timeline-label loft-calendar__timeline-label--header">Keychain</div>
+                    <div class="loft-calendar__timeline-days" style="grid-template-columns: repeat(${dayColumns}, minmax(32px, 1fr));">${dayCells}</div>
+                </div>
+                <div class="loft-calendar__timeline-body">
+                    ${rows || '<p class="loft-calendar__empty">No keychains match your filters for this month.</p>'}
+                </div>
+            </div>
+        `);
+    }
+
     function renderCalendar(type) {
         const container = $(`#loft-${type}-calendar`);
         const viewDate = state.view[type];
@@ -244,16 +329,22 @@
                       return filters.includes(key.status);
                   })
                 : state.keys;
+
+        if (type === 'keys') {
+            renderKeyTimeline(container, days, keysSource);
+            renderNav(type);
+            return;
+        }
+
         const sourceEvents =
             type === 'bookings'
                 ? expandBookingsAcrossStay(state.bookings)
-                : type === 'keys'
-                ? expandKeychainsAcrossValidity(keysSource)
                 : state.cleaning;
+
         const eventsByDay = groupEvents(
             sourceEvents,
             (event) => {
-                if (type === 'bookings' || type === 'keys') {
+                if (type === 'bookings') {
                     return event.day_key;
                 }
 
