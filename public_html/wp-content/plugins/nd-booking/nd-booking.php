@@ -118,7 +118,7 @@ if ( ! function_exists( 'nd_booking_should_enqueue_search_assets' ) ) {
         if ( ! $should_enqueue && function_exists( 'is_page' ) && is_page() ) {
             $page = function_exists( 'get_post' ) ? get_post() : null;
 
-            if ( $page instanceof WP_Post ) {
+            if ( is_object( $page ) && ( ! class_exists( 'WP_Post' ) || $page instanceof WP_Post ) ) {
                 if ( function_exists( 'has_shortcode' ) && has_shortcode( $page->post_content, 'nd_booking_search_results' ) ) {
                     $should_enqueue = true;
                 }
@@ -235,7 +235,7 @@ if ( ! function_exists( 'nd_booking_post_contains_shortcode' ) ) {
      * @return bool
      */
     function nd_booking_post_contains_shortcode( $post, $shortcode, array &$visited = array() ) {
-        if ( ! ( $post instanceof WP_Post ) ) {
+        if ( ! is_object( $post ) || ( class_exists( 'WP_Post' ) && ! ( $post instanceof WP_Post ) ) ) {
             return false;
         }
 
@@ -280,7 +280,7 @@ if ( ! function_exists( 'nd_booking_post_contains_shortcode' ) ) {
 
             $template_post = function_exists( 'get_post' ) ? get_post( $template_id ) : null;
 
-            if ( ! $template_post instanceof WP_Post ) {
+            if ( ! is_object( $template_post ) || ( class_exists( 'WP_Post' ) && ! ( $template_post instanceof WP_Post ) ) ) {
                 continue;
             }
 
@@ -306,6 +306,12 @@ if ( ! function_exists( 'nd_booking_is_checkout_screen' ) ) {
             return $is_checkout;
         }
 
+        if ( ! function_exists( 'is_admin' ) || ! function_exists( 'is_page' ) || ! function_exists( 'get_post' ) || ! function_exists( 'get_option' ) ) {
+            $is_checkout = false;
+
+            return $is_checkout;
+        }
+
         if ( is_admin() || ! is_page() ) {
             $is_checkout = false;
 
@@ -314,7 +320,7 @@ if ( ! function_exists( 'nd_booking_is_checkout_screen' ) ) {
 
         $page = get_post();
 
-        if ( ! $page instanceof WP_Post ) {
+        if ( ! is_object( $page ) || ( class_exists( 'WP_Post' ) && ! ( $page instanceof WP_Post ) ) ) {
             $is_checkout = false;
 
             return $is_checkout;
