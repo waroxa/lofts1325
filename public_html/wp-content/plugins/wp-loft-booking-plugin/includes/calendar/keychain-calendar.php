@@ -1,166 +1,311 @@
 <?php
 defined('ABSPATH') || exit;
 
-function wp_loft_booking_keychain_calendar_page() {
-    error_log('✅ Rendering Loft Booking keychain calendar page.');
+/**
+ * Enqueue styles and scripts for the keychain calendar admin page.
+ *
+ * @param string $hook Current admin page hook suffix.
+ */
+function wp_loft_booking_keychain_calendar_enqueue( $hook ) {
+    $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
-    $payload = wp_loft_booking_prepare_keychain_calendar_payload();
+    if ( 'loft-keychain-calendar' !== $page ) {
+        return;
+    }
+
+    $plugin_path = trailingslashit( dirname( dirname( __FILE__ ) ) );
+    $plugin_url  = trailingslashit( dirname( dirname( plugin_dir_url( __FILE__ ) ) ) );
+
+    $css_file = $plugin_path . 'assets/css/keychain-calendar.css';
+    $js_file  = $plugin_path . 'assets/js/keychain-calendar.js';
+
+    $css_url = $plugin_url . 'assets/css/keychain-calendar.css';
+    $js_url  = $plugin_url . 'assets/js/keychain-calendar.js';
+
+    wp_enqueue_style( 'wp-loft-keychain-calendar', $css_url, array(), file_exists( $css_file ) ? filemtime( $css_file ) : '1.0.0' );
+    wp_enqueue_script( 'wp-loft-keychain-calendar', $js_url, array( 'jquery' ), file_exists( $js_file ) ? filemtime( $js_file ) : '1.0.0', true );
+
+    $units = wp_loft_booking_keychain_calendar_units();
 
     wp_localize_script(
-        'wp-loft-booking-calendar',
-        'wpLoftCalendarData',
-        [
-            'ajaxUrl'     => admin_url('admin-ajax.php'),
-            'nonce'       => wp_create_nonce('wp_loft_calendar'),
-            'payload'     => $payload,
-            'statuses'    => [],
-            'keyStatuses' => [
-                'active'   => __('Active now', 'wp-loft-booking'),
-                'upcoming' => __('Upcoming', 'wp-loft-booking'),
-                'expired'  => __('Expired', 'wp-loft-booking'),
-            ],
-        ]
+        'wp-loft-keychain-calendar',
+        'loftKeychainCalendar',
+        array(
+            'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+            'nonce'        => wp_create_nonce( 'loft_keychain_calendar' ),
+            'initialDate'  => wp_date( 'Y-m-d', current_time( 'timestamp' ) ),
+            'initialView'  => 'week',
+            'units'        => $units,
+            'labels'       => array(
+                'searchPlaceholder' => __( 'Search keychains, units, tenants…', 'wp-loft-booking' ),
+                'noResults'         => __( 'No keychains match this view.', 'wp-loft-booking' ),
+                'virtualKeys'       => __( 'Virtual keys', 'wp-loft-booking' ),
+                'people'            => __( 'People', 'wp-loft-booking' ),
+                'tenant'            => __( 'Tenant', 'wp-loft-booking' ),
+            ),
+            'editBase'     => admin_url( 'admin.php?page=wp_loft_booking_keychains&keychain_id=' ),
+            'todayLabel'   => wp_date( get_option( 'date_format' ), current_time( 'timestamp' ) ),
+        )
     );
+}
+add_action( 'admin_enqueue_scripts', 'wp_loft_booking_keychain_calendar_enqueue' );
 
+/**
+ * Render the Keychain Calendar admin page.
+ */
+function wp_loft_booking_keychain_calendar_page() {
     ?>
-    <div class="wrap loft-calendar">
-        <div class="loft-calendar__hero">
-            <div class="loft-calendar__hero-text">
-                <p class="loft-calendar__eyebrow">Loft 1325 operations</p>
-                <h1>Virtual key coverage at a glance</h1>
-                <p class="loft-calendar__lede">See every configured keychain by loft, coloured by unit so you can spot gaps instantly.</p>
-                <div class="loft-calendar__chips">
-                    <span class="loft-chip loft-chip--primary">🔑 Total keys <strong><?php echo esc_html($payload['summary']['total']); ?></strong></span>
-                    <span class="loft-chip loft-chip--info">🟢 Active today <strong><?php echo esc_html($payload['summary']['active']); ?></strong></span>
-                    <span class="loft-chip loft-chip--muted">⏳ Upcoming <strong><?php echo esc_html($payload['summary']['upcoming']); ?></strong></span>
-                    <span class="loft-chip loft-chip--warning">⌛ Expired <strong><?php echo esc_html($payload['summary']['expired']); ?></strong></span>
+    <div class="wrap loft-keychain-calendar">
+        <div class="loft-keychain-calendar__hero">
+            <div>
+                <p class="loft-keychain-calendar__eyebrow"><?php esc_html_e( 'Access orchestration', 'wp-loft-booking' ); ?></p>
+                <h1><?php esc_html_e( 'Keychain Calendar', 'wp-loft-booking' ); ?></h1>
+                <p class="loft-keychain-calendar__lede"><?php esc_html_e( 'Visualize when each keychain is active. Switch views to scan days, weeks, months, or the full year.', 'wp-loft-booking' ); ?></p>
+            </div>
+            <div class="loft-keychain-calendar__legend">
+                <span class="loft-keychain-calendar__chip loft-keychain-calendar__chip--active"><?php esc_html_e( 'Active now', 'wp-loft-booking' ); ?></span>
+                <span class="loft-keychain-calendar__chip loft-keychain-calendar__chip--future"><?php esc_html_e( 'Upcoming', 'wp-loft-booking' ); ?></span>
+                <span class="loft-keychain-calendar__chip loft-keychain-calendar__chip--expired"><?php esc_html_e( 'Expired', 'wp-loft-booking' ); ?></span>
+                <span class="loft-keychain-calendar__chip loft-keychain-calendar__chip--admin"><?php esc_html_e( 'Admin key', 'wp-loft-booking' ); ?></span>
+            </div>
+        </div>
+
+        <div class="loft-keychain-calendar__controls" aria-label="<?php esc_attr_e( 'Calendar controls', 'wp-loft-booking' ); ?>">
+            <div class="loft-keychain-calendar__search">
+                <label for="loft-keychain-search" class="screen-reader-text"><?php esc_html_e( 'Search keychains', 'wp-loft-booking' ); ?></label>
+                <span class="dashicons dashicons-search" aria-hidden="true"></span>
+                <input id="loft-keychain-search" type="search" placeholder="<?php esc_attr_e( 'Search keychains, units, tenants…', 'wp-loft-booking' ); ?>" />
+            </div>
+            <div class="loft-keychain-calendar__filters">
+                <label>
+                    <span class="screen-reader-text"><?php esc_html_e( 'Filter by unit', 'wp-loft-booking' ); ?></span>
+                    <select id="loft-keychain-unit-filter">
+                        <option value=""><?php esc_html_e( 'All units', 'wp-loft-booking' ); ?></option>
+                    </select>
+                </label>
+                <label class="loft-keychain-calendar__toggle">
+                    <input type="checkbox" id="loft-keychain-admin-filter" />
+                    <span><?php esc_html_e( 'Only admin keys', 'wp-loft-booking' ); ?></span>
+                </label>
+                <label class="loft-keychain-calendar__toggle">
+                    <input type="checkbox" id="loft-keychain-vk-filter" />
+                    <span><?php esc_html_e( 'Virtual keys > 0', 'wp-loft-booking' ); ?></span>
+                </label>
+            </div>
+            <div class="loft-keychain-calendar__view-switcher" role="group" aria-label="<?php esc_attr_e( 'Switch calendar view', 'wp-loft-booking' ); ?>">
+                <button class="button loft-keychain-calendar__nav" data-nav="prev" aria-label="<?php esc_attr_e( 'Previous range', 'wp-loft-booking' ); ?>">&larr;</button>
+                <button class="button loft-keychain-calendar__nav" data-nav="today"><?php esc_html_e( 'Today', 'wp-loft-booking' ); ?></button>
+                <button class="button loft-keychain-calendar__nav" data-nav="next" aria-label="<?php esc_attr_e( 'Next range', 'wp-loft-booking' ); ?>">&rarr;</button>
+                <div class="loft-keychain-calendar__views">
+                    <button class="button button-secondary" data-view="day"><?php esc_html_e( 'Day', 'wp-loft-booking' ); ?></button>
+                    <button class="button button-secondary" data-view="week"><?php esc_html_e( 'Week', 'wp-loft-booking' ); ?></button>
+                    <button class="button button-secondary" data-view="month"><?php esc_html_e( 'Month', 'wp-loft-booking' ); ?></button>
+                    <button class="button button-secondary" data-view="year"><?php esc_html_e( 'Year', 'wp-loft-booking' ); ?></button>
                 </div>
             </div>
         </div>
 
-        <section class="loft-calendar__panel loft-calendar__panel--full">
-            <header class="loft-calendar__panel-heading">
-                <div>
-                    <p class="loft-calendar__eyebrow">Access</p>
-                    <h2 class="loft-calendar__title">Key calendar</h2>
-                    <p class="description">Colours mirror lofts. Each bar shows how long the keychain is valid for and which loft it belongs to.</p>
-                </div>
-                <div class="loft-calendar__controls">
-                    <div class="loft-calendar__filters" data-calendar-target="keys">
-                        <label class="loft-calendar__filter">
-                            <input type="checkbox" value="active" checked />
-                            <span><?php printf(esc_html__('Active (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['active'])); ?></span>
-                        </label>
-                        <label class="loft-calendar__filter">
-                            <input type="checkbox" value="upcoming" checked />
-                            <span><?php printf(esc_html__('Upcoming (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['upcoming'])); ?></span>
-                        </label>
-                        <label class="loft-calendar__filter">
-                            <input type="checkbox" value="expired" checked />
-                            <span><?php printf(esc_html__('Expired (%s)', 'wp-loft-booking'), number_format_i18n($payload['summary']['expired'])); ?></span>
-                        </label>
-                    </div>
-                    <div class="loft-calendar__nav" data-calendar-target="keys"></div>
-                </div>
-            </header>
-            <div id="loft-keys-calendar" class="loft-calendar__canvas" data-calendar-type="keys"></div>
-            <div class="loft-calendar__legend">
-                <span class="loft-chip loft-chip--primary">Active</span>
-                <span class="loft-chip loft-chip--info">Upcoming</span>
-                <span class="loft-chip loft-chip--muted">Expired</span>
-            </div>
-        </section>
+        <div class="loft-keychain-calendar__summary" role="status" aria-live="polite"></div>
+
+        <div class="loft-keychain-calendar__canvas" id="loft-keychain-calendar" aria-live="polite"></div>
     </div>
     <?php
 }
 
-function wp_loft_booking_prepare_keychain_calendar_payload() {
+/**
+ * AJAX handler to return keychain events for the requested range.
+ */
+function wp_loft_booking_keychain_calendar_data() {
+    check_ajax_referer( 'loft_keychain_calendar', 'nonce' );
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( array( 'message' => __( 'You do not have permission to view this calendar.', 'wp-loft-booking' ) ), 403 );
+    }
+
+    $start   = isset( $_GET['start'] ) ? sanitize_text_field( wp_unslash( $_GET['start'] ) ) : '';
+    $end     = isset( $_GET['end'] ) ? sanitize_text_field( wp_unslash( $_GET['end'] ) ) : '';
+    $search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+    $unit    = isset( $_GET['unit'] ) ? sanitize_text_field( wp_unslash( $_GET['unit'] ) ) : '';
+    $admin   = isset( $_GET['admin'] ) ? (bool) intval( $_GET['admin'] ) : false;
+    $has_vk  = isset( $_GET['virtual_keys'] ) ? (bool) intval( $_GET['virtual_keys'] ) : false;
+    $per_row = isset( $_GET['limit'] ) ? max( 50, intval( $_GET['limit'] ) ) : 400;
+
+    $args = array(
+        'start'          => $start,
+        'end'            => $end,
+        'search'         => $search,
+        'unit'           => $unit,
+        'only_admin'     => $admin,
+        'only_virtual'   => $has_vk,
+        'limit'          => $per_row,
+    );
+
+    $results = wp_loft_booking_query_keychain_calendar( $args );
+
+    wp_send_json_success( $results );
+}
+add_action( 'wp_ajax_loft_keychain_calendar_data', 'wp_loft_booking_keychain_calendar_data' );
+
+/**
+ * Query keychains and prepare resource + event payloads.
+ *
+ * @param array $args Query arguments.
+ *
+ * @return array
+ */
+function wp_loft_booking_query_keychain_calendar( $args ) {
     global $wpdb;
+
+    $defaults = array(
+        'start'        => '',
+        'end'          => '',
+        'search'       => '',
+        'unit'         => '',
+        'only_admin'   => false,
+        'only_virtual' => false,
+        'limit'        => 400,
+    );
+
+    $args = wp_parse_args( $args, $defaults );
 
     $kc_table    = $wpdb->prefix . 'loft_keychains';
     $kc_vk_table = $wpdb->prefix . 'loft_keychain_virtual_keys';
     $vk_table    = $wpdb->prefix . 'loft_virtual_keys';
     $units_table = $wpdb->prefix . 'loft_units';
+    $ten_table   = $wpdb->prefix . 'loft_tenants';
 
-    $window_start = wp_date('Y-m-d', strtotime('-1 year', current_time('timestamp')));
-    $window_end   = wp_date('Y-m-d', strtotime('+1 year', current_time('timestamp')));
+    $where  = array();
+    $params = array();
 
-    $rows = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT kc.*, u.unit_name
-             FROM {$kc_table} kc
-             LEFT JOIN {$units_table} u ON kc.unit_id = u.id
-             WHERE (kc.valid_until IS NULL OR kc.valid_until >= %s)
-               AND (kc.valid_from IS NULL OR kc.valid_from <= %s)
-             ORDER BY COALESCE(kc.valid_from, kc.created_at) ASC
-             LIMIT 600",
-            $window_start,
-            $window_end
-        ),
-        ARRAY_A
-    );
+    if ( $args['start'] ) {
+        $where[]  = '(kc.valid_until >= %s)';
+        $params[] = $args['start'];
+    }
 
-    $summary = [
-        'total'    => 0,
-        'active'   => 0,
-        'upcoming' => 0,
-        'expired'  => 0,
-    ];
+    if ( $args['end'] ) {
+        $where[]  = '(kc.valid_from <= %s)';
+        $params[] = $args['end'];
+    }
 
-    $keys = [];
-    $today_ts = current_time('timestamp');
+    if ( $args['search'] ) {
+        $like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+        $where[]  = '(kc.name LIKE %s OR u.unit_name LIKE %s OR CONCAT_WS(" ", t.first_name, t.last_name) LIKE %s)';
+        $params[] = $like;
+        $params[] = $like;
+        $params[] = $like;
+    }
 
-    foreach ($rows as $row) {
-        $start = wp_loft_booking_normalize_date($row['valid_from'] ?? '') ?: wp_loft_booking_normalize_date($row['created_at'] ?? '');
-        $end   = wp_loft_booking_normalize_date($row['valid_until'] ?? '') ?: $start;
+    if ( $args['unit'] ) {
+        $where[]  = 'u.unit_name = %s';
+        $params[] = $args['unit'];
+    }
 
-        $key_rows = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT vk.name, vk.key_type, vk.key_status
-                 FROM {$kc_vk_table} kc_vk
-                 LEFT JOIN {$vk_table} vk ON kc_vk.key_id = vk.id
-                 WHERE kc_vk.keychain_id = %d",
-                (int) $row['id']
-            ),
-            ARRAY_A
-        );
+    if ( $args['only_admin'] ) {
+        $where[] = "EXISTS (SELECT 1 FROM {$kc_vk_table} kvk INNER JOIN {$vk_table} vk ON kvk.key_id = vk.id WHERE kvk.keychain_id = kc.id AND vk.key_type = 'admin')";
+    }
 
-        $names = array_values(array_filter(array_map(
-            static function ($key) {
-                return isset($key['name']) ? sanitize_text_field($key['name']) : '';
-            },
-            $key_rows
-        )));
+    if ( $args['only_virtual'] ) {
+        $where[] = "EXISTS (SELECT 1 FROM {$kc_vk_table} kvk WHERE kvk.keychain_id = kc.id)";
+    }
 
-        $start_ts = $start ? strtotime($start . ' 00:00:00') : false;
-        $end_ts   = $end ? strtotime($end . ' 23:59:59') : false;
+    $where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-        if ($end_ts && $end_ts < $today_ts) {
+    $sql = "SELECT kc.*, u.unit_name, t.first_name, t.last_name,
+                COUNT(kvk.key_id) as vk_total,
+                SUM(CASE WHEN vk.key_type = 'admin' THEN 1 ELSE 0 END) as admin_keys
+            FROM {$kc_table} kc
+            LEFT JOIN {$units_table} u ON kc.unit_id = u.id
+            LEFT JOIN {$ten_table} t ON kc.tenant_id = t.id
+            LEFT JOIN {$kc_vk_table} kvk ON kvk.keychain_id = kc.id
+            LEFT JOIN {$vk_table} vk ON kvk.key_id = vk.id
+            {$where_sql}
+            GROUP BY kc.id
+            ORDER BY kc.valid_from ASC
+            LIMIT %d";
+
+    $params[] = max( 1, (int) $args['limit'] );
+
+    $prepared = $wpdb->prepare( $sql, $params );
+    $rows     = $wpdb->get_results( $prepared, ARRAY_A );
+
+    $resources = array();
+    $events    = array();
+    $today_ts  = current_time( 'timestamp' );
+
+    foreach ( $rows as $row ) {
+        $tenant_first = isset( $row['first_name'] ) ? sanitize_text_field( $row['first_name'] ) : '';
+        $tenant_last  = isset( $row['last_name'] ) ? sanitize_text_field( $row['last_name'] ) : '';
+        $tenant_name  = trim( $tenant_first . ' ' . $tenant_last );
+
+        $unit_label = isset( $row['unit_name'] ) ? sanitize_text_field( $row['unit_name'] ) : '';
+
+        $start_mysql = isset( $row['valid_from'] ) ? sanitize_text_field( $row['valid_from'] ) : '';
+        $end_mysql   = isset( $row['valid_until'] ) ? sanitize_text_field( $row['valid_until'] ) : '';
+
+        $start_ts = $start_mysql ? strtotime( $start_mysql ) : false;
+        $end_ts   = $end_mysql ? strtotime( $end_mysql ) : false;
+
+        $status = 'future';
+
+        if ( $end_ts && $end_ts < $today_ts ) {
             $status = 'expired';
-        } elseif ($start_ts && $start_ts > $today_ts) {
-            $status = 'upcoming';
-        } else {
+        } elseif ( $start_ts && $start_ts <= $today_ts && ( ! $end_ts || $end_ts >= $today_ts ) ) {
             $status = 'active';
         }
 
-        $summary['total']++;
-        $summary[$status]++;
+        $resources[] = array(
+            'id'                => (string) ( $row['id'] ?? '' ),
+            'title'             => $row['name'] ? sanitize_text_field( $row['name'] ) : __( 'Keychain', 'wp-loft-booking' ),
+            'unit'              => $unit_label,
+            'tenant'            => $tenant_name,
+            'virtual_keys_count'=> (int) $row['vk_total'],
+            'people_count'      => isset( $row['people_count'] ) ? (int) $row['people_count'] : 0,
+            'admin_keys'        => isset( $row['admin_keys'] ) ? (int) $row['admin_keys'] : 0,
+            'status'            => $status,
+        );
 
-        $keys[] = [
-            'id'          => (int) $row['id'],
-            'loft'        => wp_loft_booking_format_unit_label($row['unit_name'] ?? ''),
-            'loft_label'  => wp_loft_booking_format_unit_label($row['unit_name'] ?? ''),
-            'key_label'   => $row['name'] ? sanitize_text_field($row['name']) : __('Keychain', 'wp-loft-booking'),
-            'key_names'   => $names,
-            'start'       => $start,
-            'end'         => $end,
-            'status'      => $status,
-        ];
+        if ( ! $start_mysql || ! $end_mysql ) {
+            continue;
+        }
+
+        $events[] = array(
+            'resourceId' => (string) ( $row['id'] ?? '' ),
+            'start'      => mysql_to_rfc3339( $start_mysql ),
+            'end'        => mysql_to_rfc3339( $end_mysql ),
+            'title'      => sprintf( _n( '%d virtual key', '%d virtual keys', (int) $row['vk_total'], 'wp-loft-booking' ), (int) $row['vk_total'] ),
+            'tenant'     => $tenant_name,
+            'unit'       => $unit_label,
+            'status'     => $status,
+            'admin'      => isset( $row['admin_keys'] ) && (int) $row['admin_keys'] > 0,
+            'keychain'   => $row['name'] ? sanitize_text_field( $row['name'] ) : '',
+            'virtual'    => (int) $row['vk_total'],
+        );
     }
 
-    return [
-        'keys'    => $keys,
-        'summary' => $summary,
-        'today'   => wp_date('Y-m-d', $today_ts),
-    ];
+    return array(
+        'resources' => $resources,
+        'events'    => $events,
+        'meta'      => array(
+            'count' => count( $resources ),
+        ),
+    );
+}
+
+/**
+ * Retrieve units for the dropdown filter.
+ *
+ * @return array
+ */
+function wp_loft_booking_keychain_calendar_units() {
+    global $wpdb;
+
+    $units_table = $wpdb->prefix . 'loft_units';
+
+    $rows = $wpdb->get_col( "SELECT unit_name FROM {$units_table} ORDER BY unit_name ASC" );
+
+    if ( ! $rows ) {
+        return array();
+    }
+
+    return array_map( 'sanitize_text_field', array_filter( $rows ) );
 }
