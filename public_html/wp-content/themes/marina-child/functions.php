@@ -655,20 +655,52 @@ function marina_child_start_trp_cleanup_buffer() {
 add_action( 'template_redirect', 'marina_child_start_trp_cleanup_buffer', 0 );
 
 /**
- * Force specific ND Booking availability alerts to display in fr-CA by default.
+ * Localize ND Booking availability alerts based on the active language.
  */
 function marina_child_translate_booking_alerts( $translation, $text, $domain ) {
     if ( 'nd-booking' !== $domain ) {
         return $translation;
     }
 
-    switch ( $text ) {
-        case 'THIS IS THE LAST ROOM AT THIS PRICE':
-            return 'DERNIÈRE CHAMBRE DISPONIBLE À CE PRIX';
-        case 'ONLY':
-            return 'PLUS QUE';
-        case 'ROOM LEFT AT THIS PRICE':
-            return 'CHAMBRES À CE PRIX';
+    $language = '';
+
+    if ( function_exists( 'trp_get_current_language' ) ) {
+        $language = trp_get_current_language();
+    } elseif ( function_exists( 'determine_locale' ) ) {
+        $language = determine_locale();
+    } else {
+        $language = get_locale();
+    }
+
+    $language = strtolower( substr( (string) $language, 0, 2 ) );
+
+    $strings = array(
+        'THIS IS THE LAST ROOM AT THIS PRICE' => array(
+            'fr' => 'DERNIÈRE CHAMBRE DISPONIBLE À CE PRIX',
+            'en' => 'THIS IS THE LAST ROOM AT THIS PRICE',
+        ),
+        'ONLY' => array(
+            'fr' => 'PLUS QUE',
+            'en' => 'ONLY',
+        ),
+        'ROOM LEFT AT THIS PRICE' => array(
+            'fr' => 'CHAMBRES À CE PRIX',
+            'en' => 'ROOM LEFT AT THIS PRICE',
+        ),
+        'LAST ROOMS AVAILABLE !' => array(
+            'fr' => 'DERNIÈRES CHAMBRES DISPONIBLES !',
+            'en' => 'LAST ROOMS AVAILABLE !',
+        ),
+    );
+
+    if ( isset( $strings[ $text ] ) ) {
+        if ( isset( $strings[ $text ][ $language ] ) ) {
+            return $strings[ $text ][ $language ];
+        }
+
+        if ( isset( $strings[ $text ]['en'] ) ) {
+            return $strings[ $text ]['en'];
+        }
     }
 
     return $translation;
