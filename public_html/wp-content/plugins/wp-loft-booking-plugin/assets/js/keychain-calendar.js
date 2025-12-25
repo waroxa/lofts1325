@@ -138,7 +138,7 @@
         const resourceHead = document.createElement('div');
         resourceHead.className = 'loft-keychain-calendar__resource-row';
         resourceHead.innerHTML = `
-            <div class="loft-keychain-calendar__resource-label">${escapeHtml('Unit')}</div>
+            <div class="loft-keychain-calendar__resource-label">${escapeHtml('Tenant')}</div>
             <span class="loft-keychain-calendar__resource-meta">${settings.todayLabel || ''}</span>
         `;
 
@@ -211,7 +211,7 @@
             }
             resRow.innerHTML = `
                 <strong>${escapeHtml(resource.title)}</strong>
-                <span class="loft-keychain-calendar__resource-meta">${resource.keys_total || 0} keys • ${resource.active_keys || 0} active in range</span>
+                <span class="loft-keychain-calendar__resource-meta">${escapeHtml(resource.subtitle || '')}${resource.email ? ' • ' + escapeHtml(resource.email) : ''}</span>
             `;
             fragmentRes.appendChild(resRow);
 
@@ -236,8 +236,8 @@
 
             const events = state.events.filter((evt) => evt.resourceId === resource.id);
             const lanes = layoutLanes(events);
-            const visibleLaneCount = state.expanded.has(resource.id) ? lanes.length : Math.min(4, lanes.length);
-            const rowHeight = Math.max(64, visibleLaneCount * 40);
+            const visibleLaneCount = state.expanded.has(resource.id) ? lanes.length : Math.min(3, lanes.length);
+            const rowHeight = Math.max(60, visibleLaneCount * 36 + 12);
             resRow.style.minHeight = `${rowHeight}px`;
             row.style.minHeight = `${rowHeight}px`;
 
@@ -248,11 +248,11 @@
                 lanes[l].forEach((evt) => {
                     const bar = document.createElement('div');
                     bar.className = `loft-keychain-calendar__event loft-keychain-calendar__event--${evt.status}`;
-                    if (evt.admin) {
+                    if (evt.isAdminKey) {
                         bar.classList.add('loft-keychain-calendar__event--admin');
                     }
 
-                    const label = eventLabel(evt);
+                    const label = eventLabel(evt, resource);
                     bar.textContent = label.truncated;
                     bar.title = label.full;
 
@@ -304,7 +304,7 @@
         const total = state.resources.length;
         if (summary) {
             summary.textContent = total
-                ? `${state.events.length} keychains across ${total} units from ${formatDate(start)} to ${formatDate(
+                ? `${state.events.length} access keys across ${total} tenants from ${formatDate(start)} to ${formatDate(
                       new Date(end.getTime() - 1)
                   )}`
                 : settings.labels?.noResults || '';
@@ -366,20 +366,24 @@
         return lanes;
     }
 
-    function eventLabel(evt) {
-        let label = '';
+    function eventLabel(evt, resource) {
+        const parts = [];
 
-        if (evt.keychain) {
-            label = `Key: ${evt.keychain}`;
-        } else if (evt.tenant) {
-            label = `Tenant: ${evt.tenant}`;
-        } else if (typeof evt.virtual === 'number') {
-            label = `VK: ${evt.virtual}`;
-        } else {
-            label = 'Key';
+        const unit = evt.unitLabel || resource.unitLabel || resource.subtitle || '';
+        if (unit) {
+            parts.push(unit);
         }
 
-        const truncated = label.length > 28 ? `${label.slice(0, 27)}…` : label;
+        if (evt.keychainName) {
+            parts.push(`Key: ${evt.keychainName}`);
+        }
+
+        if (typeof evt.virtualKeysCount === 'number') {
+            parts.push(`VK: ${evt.virtualKeysCount}`);
+        }
+
+        const label = parts.length ? parts.join(' • ') : 'Key';
+        const truncated = label.length > 42 ? `${label.slice(0, 41)}…` : label;
         return { full: label, truncated };
     }
 
@@ -399,13 +403,14 @@
         const tooltip = document.createElement('div');
         tooltip.className = 'loft-keychain-calendar__tooltip';
         tooltip.innerHTML = `
-            <strong>${escapeHtml(data.keychain || 'Keychain')}</strong><br />
-            <div>${escapeHtml(data.unit || resource.title)}</div>
-            <div>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(data.tenant || '—')}</div>
-            <div>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${data.virtual}</div>
+            <strong>${escapeHtml(data.keychainName || 'Keychain')}</strong><br />
+            <div>${escapeHtml(data.unitLabel || resource.subtitle || resource.unitLabel || '')}</div>
+            <div>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(resource.title)}</div>
+            ${data.tenantEmail ? `<div>${escapeHtml(data.tenantEmail)}</div>` : ''}
+            <div>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${data.virtualKeysCount ?? 0}</div>
             <div>${escapeHtml('Valid from')}: ${formatDate(new Date(data.start))}</div>
             <div>${escapeHtml('Valid until')}: ${formatDate(new Date(data.end))}</div>
-            <div>Status: ${escapeHtml(capitalize(data.status || ''))}</div>
+            <div>Status: ${escapeHtml(capitalize(data.status || ''))}${data.isAdminKey ? ' • Admin' : ''}</div>
         `;
 
         document.body.appendChild(tooltip);
@@ -427,16 +432,22 @@
 
         const modal = document.createElement('div');
         modal.className = 'loft-keychain-calendar__modal';
+        const tenantLink = settings.tenantBase && evt.meta?.tenantId
+            ? `<a class="button" href="${settings.tenantBase}${evt.meta.tenantId}">Open tenant</a>`
+            : '';
+
         modal.innerHTML = `
-            <h2>${escapeHtml(evt.keychain || 'Keychain')}</h2>
-            <p class="loft-keychain-calendar__resource-meta">${escapeHtml(evt.unit || resource.title)}</p>
-            <p>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(evt.tenant || '—')}</p>
-            <p>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${evt.virtual}</p>
-            <p>Status: ${escapeHtml(capitalize(evt.status))}</p>
+            <h2>${escapeHtml(evt.keychainName || 'Keychain')}</h2>
+            <p class="loft-keychain-calendar__resource-meta">${escapeHtml(evt.unitLabel || resource.subtitle || resource.unitLabel || '')}</p>
+            <p>${escapeHtml(settings.labels?.tenant || 'Tenant')}: ${escapeHtml(resource.title)}</p>
+            ${evt.tenantEmail ? `<p>${escapeHtml(evt.tenantEmail)}</p>` : ''}
+            <p>${escapeHtml(settings.labels?.virtualKeys || 'Virtual keys')}: ${evt.virtualKeysCount ?? 0}</p>
+            <p>Status: ${escapeHtml(capitalize(evt.status))}${evt.isAdminKey ? ' • Admin' : ''}</p>
             <p>${formatDate(new Date(evt.start))} → ${formatDate(new Date(evt.end))}</p>
             <footer>
                 <button class="button button-secondary" data-close>Close</button>
-                <a class="button button-primary" href="${settings.editBase}${evt.keychain_id}">Open keychain</a>
+                <a class="button button-primary" href="${settings.editBase}${evt.meta?.keychainId}">Open keychain</a>
+                ${tenantLink}
             </footer>
         `;
 

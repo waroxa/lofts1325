@@ -37,13 +37,14 @@ function wp_loft_booking_keychain_calendar_enqueue( $hook ) {
             'initialView'  => 'week',
             'units'        => $units,
             'labels'       => array(
-                'searchPlaceholder' => __( 'Search keychains, units, tenants…', 'wp-loft-booking' ),
-                'noResults'         => __( 'No keychains match this view.', 'wp-loft-booking' ),
+                'searchPlaceholder' => __( 'Search tenants, units, or keychains…', 'wp-loft-booking' ),
+                'noResults'         => __( 'No tenants match this view.', 'wp-loft-booking' ),
                 'virtualKeys'       => __( 'Virtual keys', 'wp-loft-booking' ),
                 'people'            => __( 'People', 'wp-loft-booking' ),
                 'tenant'            => __( 'Tenant', 'wp-loft-booking' ),
             ),
             'editBase'     => admin_url( 'admin.php?page=wp_loft_booking_keychains&keychain_id=' ),
+            'tenantBase'   => admin_url( 'admin.php?page=tenants&tenant_id=' ),
             'todayLabel'   => wp_date( get_option( 'date_format' ), current_time( 'timestamp' ) ),
         )
     );
@@ -174,6 +175,28 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
     $units_table = $wpdb->prefix . 'loft_units';
     $ten_table   = $wpdb->prefix . 'loft_tenants';
 
+    $tenants = $wpdb->get_results(
+        "SELECT id, tenant_id, first_name, last_name, email, building_name, unit_label, floor FROM {$ten_table}",
+        ARRAY_A
+    );
+
+    $tenants_by_id    = array();
+    $tenants_by_email = array();
+    $tenants_by_name  = array();
+
+    foreach ( $tenants as $tenant ) {
+        $tenants_by_id[ (int) $tenant['id'] ] = $tenant;
+
+        if ( ! empty( $tenant['email'] ) ) {
+            $tenants_by_email[ strtolower( trim( $tenant['email'] ) ) ] = $tenant;
+        }
+
+        $name_key = strtolower( trim( $tenant['first_name'] . ' ' . $tenant['last_name'] ) );
+        if ( $name_key ) {
+            $tenants_by_name[ $name_key ] = $tenant;
+        }
+    }
+
     $where  = array();
     $params = array();
 
@@ -187,23 +210,6 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
         $params[] = $args['end'];
     }
 
-    if ( $args['search'] ) {
-        $like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
-        $where[]  = '(kc.name LIKE %s OR u.unit_name LIKE %s OR CONCAT_WS(" ", t.first_name, t.last_name) LIKE %s)';
-        $params[] = $like;
-        $params[] = $like;
-        $params[] = $like;
-    }
-
-    if ( $args['unit'] ) {
-        if ( __( 'Unassigned / Unknown', 'wp-loft-booking' ) === $args['unit'] ) {
-            $where[] = '(u.unit_name IS NULL OR u.unit_name = %s)';
-        } else {
-            $where[] = 'u.unit_name = %s';
-        }
-        $params[] = $args['unit'];
-    }
-
     if ( $args['only_admin'] ) {
         $where[] = "EXISTS (SELECT 1 FROM {$kc_vk_table} kvk INNER JOIN {$vk_table} vk ON kvk.key_id = vk.id WHERE kvk.keychain_id = kc.id AND vk.key_type = 'admin')";
     }
@@ -214,7 +220,9 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
 
     $where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-    $sql = "SELECT kc.*, u.unit_name, u.id as unit_id, t.first_name, t.last_name,
+    $sql = "SELECT kc.*, u.unit_name AS keychain_unit, u.id as unit_id, t.id as tenant_db_id,
+                t.tenant_id as tenant_public_id, t.first_name as tenant_first, t.last_name as tenant_last, t.email as tenant_email,
+                t.building_name as tenant_building, t.unit_label as tenant_unit, t.floor as tenant_floor,
                 COUNT(kvk.key_id) as vk_total,
                 SUM(CASE WHEN vk.key_type = 'admin' THEN 1 ELSE 0 END) as admin_keys
             FROM {$kc_table} kc
@@ -235,20 +243,16 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
     $resources      = array();
     $events         = array();
     $today_ts       = current_time( 'timestamp' );
-    $range_start_ts = $args['start'] ? strtotime( $args['start'] ) : false;
-    $range_end_ts   = $args['end'] ? strtotime( $args['end'] ) : false;
+    $search_term    = strtolower( $args['search'] );
+    $filter_unit    = $args['unit'];
 
     foreach ( $rows as $row ) {
-        $tenant_first = isset( $row['first_name'] ) ? sanitize_text_field( $row['first_name'] ) : '';
-        $tenant_last  = isset( $row['last_name'] ) ? sanitize_text_field( $row['last_name'] ) : '';
-        $tenant_name  = trim( $tenant_first . ' ' . $tenant_last );
-
-        $unit_label = isset( $row['unit_name'] ) ? sanitize_text_field( $row['unit_name'] ) : '';
-        $unit_id    = isset( $row['unit_id'] ) ? 'unit-' . absint( $row['unit_id'] ) : 'unit-unassigned';
-        $unit_title = $unit_label ? $unit_label : __( 'Unassigned / Unknown', 'wp-loft-booking' );
-
         $start_mysql = isset( $row['valid_from'] ) ? sanitize_text_field( $row['valid_from'] ) : '';
         $end_mysql   = isset( $row['valid_until'] ) ? sanitize_text_field( $row['valid_until'] ) : '';
+
+        if ( ! $start_mysql || ! $end_mysql ) {
+            continue;
+        }
 
         $start_ts = $start_mysql ? strtotime( $start_mysql ) : false;
         $end_ts   = $end_mysql ? strtotime( $end_mysql ) : false;
@@ -261,52 +265,160 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
             $status = 'active';
         }
 
-        if ( ! isset( $resources[ $unit_id ] ) ) {
-            $resources[ $unit_id ] = array(
-                'id'          => $unit_id,
-                'title'       => $unit_title,
-                'keys_total'  => 0,
-                'active_keys' => 0,
+        $contact           = wp_loft_booking_primary_contact_from_people_json( $row['people_json'] ?? '' );
+        $contact_name      = $contact['name'] ? sanitize_text_field( $contact['name'] ) : '';
+        $contact_email     = $contact['email'] ? sanitize_email( $contact['email'] ) : '';
+        $contact_email_key = $contact_email ? strtolower( $contact_email ) : '';
+        $contact_lookup    = $contact['normalized_name'];
+
+        $tenant = null;
+
+        if ( ! empty( $row['tenant_db_id'] ) && isset( $tenants_by_id[ (int) $row['tenant_db_id'] ] ) ) {
+            $tenant = $tenants_by_id[ (int) $row['tenant_db_id'] ];
+        } elseif ( $contact_email_key && isset( $tenants_by_email[ $contact_email_key ] ) ) {
+            $tenant = $tenants_by_email[ $contact_email_key ];
+        } elseif ( $contact_lookup && isset( $tenants_by_name[ $contact_lookup ] ) ) {
+            $tenant = $tenants_by_name[ $contact['normalized_name'] ];
+        }
+
+        $resource_id    = 'tenant_unknown';
+        $resource_title = __( 'Unmatched / Unknown tenant', 'wp-loft-booking' );
+        $resource_email = '';
+        $resource_unit  = '';
+        $resource_sub   = '';
+        $resource_floor = '';
+
+        if ( $tenant ) {
+            $resource_id    = 'tenant_' . ( isset( $tenant['tenant_id'] ) ? absint( $tenant['tenant_id'] ) : absint( $tenant['id'] ) );
+            $resource_title = trim( sanitize_text_field( $tenant['first_name'] . ' ' . $tenant['last_name'] ) );
+            $resource_email = ! empty( $tenant['email'] ) ? sanitize_email( $tenant['email'] ) : '';
+            $resource_unit  = ! empty( $tenant['unit_label'] ) ? sanitize_text_field( $tenant['unit_label'] ) : '';
+            $resource_floor = ! empty( $tenant['floor'] ) ? sanitize_text_field( $tenant['floor'] ) : '';
+            $building       = ! empty( $tenant['building_name'] ) ? sanitize_text_field( $tenant['building_name'] ) : '';
+
+            $resource_sub = $resource_unit;
+
+            if ( $resource_floor ) {
+                $resource_sub = $resource_sub ? $resource_sub . ' • ' . $resource_floor : $resource_floor;
+            }
+
+            if ( $building ) {
+                $resource_sub = $resource_sub ? $resource_sub . ' • ' . $building : $building;
+            }
+        } else {
+            $resource_sub   = $contact_name ? sprintf( __( 'Key owner: %s', 'wp-loft-booking' ), $contact_name ) : __( 'No tenant record', 'wp-loft-booking' );
+            $resource_email = $contact_email;
+            $resource_unit  = ! empty( $row['keychain_unit'] ) ? sanitize_text_field( $row['keychain_unit'] ) : '';
+        }
+
+        $unit_label = $resource_unit ? $resource_unit : ( ! empty( $row['keychain_unit'] ) ? sanitize_text_field( $row['keychain_unit'] ) : '' );
+
+        if ( $filter_unit ) {
+            if ( __( 'Unassigned / Unknown', 'wp-loft-booking' ) === $filter_unit ) {
+                if ( $unit_label ) {
+                    continue;
+                }
+            } elseif ( $unit_label !== $filter_unit ) {
+                continue;
+            }
+        }
+
+        if ( $search_term ) {
+            $haystack = strtolower(
+                $resource_title . ' ' . $resource_email . ' ' . $unit_label . ' ' . $resource_sub . ' ' . ( $row['name'] ?? '' ) . ' ' . $contact_name
+            );
+
+            if ( false === strpos( $haystack, $search_term ) ) {
+                continue;
+            }
+        }
+
+        if ( ! isset( $resources[ $resource_id ] ) ) {
+            $resources[ $resource_id ] = array(
+                'id'        => $resource_id,
+                'title'     => $resource_title ?: __( 'Unknown tenant', 'wp-loft-booking' ),
+                'subtitle'  => $resource_sub,
+                'email'     => $resource_email,
+                'unitLabel' => $unit_label,
             );
         }
 
-        $resources[ $unit_id ]['keys_total']++;
-
-        if ( $range_start_ts && $range_end_ts && $start_ts && $end_ts ) {
-            if ( $start_ts <= $range_end_ts && $end_ts >= $range_start_ts ) {
-                $resources[ $unit_id ]['active_keys']++;
-            }
-        } elseif ( 'active' === $status ) {
-            $resources[ $unit_id ]['active_keys']++;
-        }
-
-        if ( ! $start_mysql || ! $end_mysql ) {
-            continue;
-        }
-
         $events[] = array(
-            'resourceId'   => $unit_id,
-            'start'        => mysql_to_rfc3339( $start_mysql ),
-            'end'          => mysql_to_rfc3339( $end_mysql ),
-            'title'        => sprintf( _n( '%d virtual key', '%d virtual keys', (int) $row['vk_total'], 'wp-loft-booking' ), (int) $row['vk_total'] ),
-            'tenant'       => $tenant_name,
-            'unit'         => $unit_title,
-            'status'       => $status,
-            'admin'        => isset( $row['admin_keys'] ) && (int) $row['admin_keys'] > 0,
-            'keychain'     => $row['name'] ? sanitize_text_field( $row['name'] ) : '',
-            'virtual'      => (int) $row['vk_total'],
-            'keychain_id'  => isset( $row['id'] ) ? (int) $row['id'] : 0,
-            'valid_from'   => $start_mysql,
-            'valid_until'  => $end_mysql,
+            'id'               => isset( $row['id'] ) ? 'keychain_' . (int) $row['id'] : uniqid( 'keychain_', true ),
+            'resourceId'       => $resource_id,
+            'start'            => mysql_to_rfc3339( $start_mysql ),
+            'end'              => mysql_to_rfc3339( $end_mysql ),
+            'unitLabel'        => $unit_label,
+            'keychainName'     => $row['name'] ? sanitize_text_field( $row['name'] ) : '',
+            'virtualKeysCount' => (int) $row['vk_total'],
+            'isAdminKey'       => isset( $row['admin_keys'] ) && (int) $row['admin_keys'] > 0,
+            'status'           => $status,
+            'meta'             => array(
+                'tenantId'   => $tenant ? (int) $tenant['tenant_id'] : null,
+                'keychainId' => isset( $row['id'] ) ? (int) $row['id'] : null,
+            ),
+            'tenantEmail'      => $resource_email,
+            'tenantName'       => $resource_title,
         );
     }
 
+    $resource_list = array_values( $resources );
+
+    usort(
+        $resource_list,
+        static function ( $a, $b ) {
+            return strcasecmp( $a['title'], $b['title'] );
+        }
+    );
+
     return array(
-        'resources' => array_values( $resources ),
+        'resources' => $resource_list,
         'events'    => $events,
         'meta'      => array(
             'count' => count( $events ),
         ),
+    );
+}
+
+/**
+ * Extract the primary contact from a keychain people_json payload.
+ *
+ * @param string $people_json Raw JSON string.
+ * @return array
+ */
+function wp_loft_booking_primary_contact_from_people_json( $people_json ) {
+    if ( empty( $people_json ) ) {
+        return array(
+            'name'  => '',
+            'email' => '',
+        );
+    }
+
+    $decoded = json_decode( $people_json, true );
+
+    if ( ! is_array( $decoded ) || empty( $decoded ) ) {
+        return array(
+            'name'  => '',
+            'email' => '',
+        );
+    }
+
+    $first = array_filter( $decoded, static function ( $person ) {
+        return ! empty( $person['email'] ) || ! empty( $person['first_name'] ) || ! empty( $person['last_name'] );
+    } );
+
+    $person = reset( $first );
+
+    $full_name = '';
+
+    if ( $person ) {
+        $full_name = trim( ( $person['first_name'] ?? '' ) . ' ' . ( $person['last_name'] ?? '' ) );
+    }
+
+    return array(
+        'name'            => $full_name,
+        'normalized_name' => strtolower( $full_name ),
+        'email'           => isset( $person['email'] ) ? strtolower( trim( $person['email'] ) ) : '',
     );
 }
 
@@ -318,9 +430,9 @@ function wp_loft_booking_query_keychain_calendar( $args ) {
 function wp_loft_booking_keychain_calendar_units() {
     global $wpdb;
 
-    $units_table = $wpdb->prefix . 'loft_units';
+    $tenants_table = $wpdb->prefix . 'loft_tenants';
 
-    $rows = $wpdb->get_col( "SELECT unit_name FROM {$units_table} ORDER BY unit_name ASC" );
+    $rows = $wpdb->get_col( "SELECT DISTINCT unit_label FROM {$tenants_table} WHERE unit_label IS NOT NULL AND unit_label != '' ORDER BY unit_label ASC" );
 
     if ( ! $rows ) {
         return array();
