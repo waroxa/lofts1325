@@ -23,6 +23,19 @@
         year: { step: 12, formatter: (d) => d.toLocaleDateString(undefined, { month: 'short' }) },
     };
 
+    function slotWidthForView(view) {
+        switch (view) {
+            case 'day':
+                return 120;
+            case 'week':
+                return 140;
+            case 'month':
+                return 72;
+            default:
+                return 120;
+        }
+    }
+
     const container = document.getElementById('loft-keychain-calendar');
     const summary = document.querySelector('.loft-keychain-calendar__summary');
     const unitSelect = document.getElementById('loft-keychain-unit-filter');
@@ -128,22 +141,31 @@
         const slots = slotsForRange(start, end, state.view);
         const today = new Date();
         const todayInRange = today >= start && today <= end;
+        const slotWidth = slotWidthForView(state.view);
+        const todayPosition = todayInRange
+            ? positionEvent({ start: today.toISOString(), end: today.toISOString() }, start, end, state.view)
+            : null;
 
-        const grid = document.createElement('div');
-        grid.className = 'loft-keychain-calendar__grid';
+        const setTimelineColumns = (el) => {
+            el.style.gridTemplateColumns = `repeat(${slots.length}, ${slotWidth}px)`;
+        };
 
-        const header = document.createElement('div');
-        header.className = 'loft-keychain-calendar__grid-header';
+        const board = document.createElement('div');
+        board.className = 'loft-keychain-calendar__board';
 
-        const resourceHead = document.createElement('div');
-        resourceHead.className = 'loft-keychain-calendar__resource-row';
-        resourceHead.innerHTML = `
-            <div class="loft-keychain-calendar__resource-label">${escapeHtml('Tenant')}</div>
-            <span class="loft-keychain-calendar__resource-meta">${settings.todayLabel || ''}</span>
+        const corner = document.createElement('div');
+        corner.className = 'loft-keychain-calendar__corner';
+        corner.innerHTML = `
+            <div class="loft-keychain-calendar__corner-title">${escapeHtml(settings.labels?.tenant || 'Tenant')}</div>
+            <div class="loft-keychain-calendar__corner-sub">${escapeHtml('Unit / Building')}</div>
         `;
+        board.appendChild(corner);
 
+        const headerWrap = document.createElement('div');
+        headerWrap.className = 'loft-keychain-calendar__header-wrap';
         const timelineHead = document.createElement('div');
         timelineHead.className = 'loft-keychain-calendar__timeline-header';
+        setTimelineColumns(timelineHead);
 
         const formatter = views[state.view].formatter;
         slots.forEach((slot) => {
@@ -155,43 +177,18 @@
             timelineHead.appendChild(label);
         });
 
-        if (todayInRange) {
+        if (todayInRange && todayPosition) {
             const line = document.createElement('div');
             line.className = 'loft-keychain-calendar__today-line';
-            const position = positionEvent(
-                { start: today.toISOString(), end: today.toISOString() },
-                start,
-                end,
-                state.view
-            );
-            line.style.left = `${position.left}%`;
+            line.style.left = `${todayPosition.left}%`;
             timelineHead.appendChild(line);
         }
 
-        header.appendChild(resourceHead);
-        header.appendChild(timelineHead);
-
-        const body = document.createElement('div');
-        body.className = 'loft-keychain-calendar__grid-body';
+        headerWrap.appendChild(timelineHead);
+        board.appendChild(headerWrap);
 
         const resourcesCol = document.createElement('div');
-        resourcesCol.className = 'loft-keychain-calendar__resources';
-
-        const timelineCol = document.createElement('div');
-        timelineCol.className = 'loft-keychain-calendar__timelines';
-
-        if (todayInRange) {
-            const line = document.createElement('div');
-            line.className = 'loft-keychain-calendar__today-line';
-            const position = positionEvent(
-                { start: today.toISOString(), end: today.toISOString() },
-                start,
-                end,
-                state.view
-            );
-            line.style.left = `${position.left}%`;
-            timelineCol.appendChild(line);
-        }
+        resourcesCol.className = 'loft-keychain-calendar__left';
 
         if (!state.resources.length) {
             const empty = document.createElement('div');
@@ -199,6 +196,9 @@
             empty.textContent = settings.labels?.noResults || 'No keychains found.';
             resourcesCol.appendChild(empty);
         }
+
+        const body = document.createElement('div');
+        body.className = 'loft-keychain-calendar__body';
 
         const fragmentRes = document.createDocumentFragment();
         const fragmentTime = document.createDocumentFragment();
@@ -213,7 +213,6 @@
                 <strong>${escapeHtml(resource.title)}</strong>
                 <span class="loft-keychain-calendar__resource-meta">${escapeHtml(resource.subtitle || '')}${resource.email ? ' • ' + escapeHtml(resource.email) : ''}</span>
             `;
-            fragmentRes.appendChild(resRow);
 
             const row = document.createElement('div');
             row.className = 'loft-keychain-calendar__timeline-row';
@@ -223,6 +222,7 @@
 
             const gridLine = document.createElement('div');
             gridLine.className = 'loft-keychain-calendar__timeline-grid';
+            setTimelineColumns(gridLine);
 
             slots.forEach((slot) => {
                 const cell = document.createElement('div');
@@ -237,7 +237,8 @@
             const events = state.events.filter((evt) => evt.resourceId === resource.id);
             const lanes = layoutLanes(events);
             const visibleLaneCount = state.expanded.has(resource.id) ? lanes.length : Math.min(3, lanes.length);
-            const rowHeight = Math.max(60, visibleLaneCount * 36 + 12);
+            const laneHeight = 32;
+            const rowHeight = Math.max(44, visibleLaneCount * laneHeight + 12);
             resRow.style.minHeight = `${rowHeight}px`;
             row.style.minHeight = `${rowHeight}px`;
 
@@ -288,18 +289,31 @@
                 row.appendChild(toggle);
             }
 
+            fragmentRes.appendChild(resRow);
             fragmentTime.appendChild(row);
         });
 
-        resourcesCol.appendChild(fragmentRes);
-        timelineCol.appendChild(fragmentTime);
+        const resScroller = document.createElement('div');
+        resScroller.className = 'loft-keychain-calendar__left-scroller';
+        resScroller.appendChild(fragmentRes);
+        resourcesCol.appendChild(resScroller);
 
-        body.appendChild(resourcesCol);
-        body.appendChild(timelineCol);
+        const timeScroller = document.createElement('div');
+        timeScroller.className = 'loft-keychain-calendar__body-scroller';
+        if (todayInRange && todayPosition) {
+            const line = document.createElement('div');
+            line.className = 'loft-keychain-calendar__today-line';
+            line.style.left = `${todayPosition.left}%`;
+            timeScroller.appendChild(line);
+        }
+        timeScroller.appendChild(fragmentTime);
+        body.appendChild(timeScroller);
 
-        grid.appendChild(header);
-        grid.appendChild(body);
-        container.appendChild(grid);
+        board.appendChild(resourcesCol);
+        board.appendChild(body);
+        container.appendChild(board);
+
+        syncScroll(resScroller, timeScroller, headerWrap);
 
         const total = state.resources.length;
         if (summary) {
@@ -309,6 +323,36 @@
                   )}`
                 : settings.labels?.noResults || '';
         }
+    }
+
+    function syncScroll(resScroller, timeScroller, headerWrap) {
+        let syncing = false;
+
+        const lock = () => {
+            syncing = true;
+            requestAnimationFrame(() => {
+                syncing = false;
+            });
+        };
+
+        timeScroller.addEventListener('scroll', () => {
+            if (syncing) return;
+            resScroller.scrollTop = timeScroller.scrollTop;
+            headerWrap.scrollLeft = timeScroller.scrollLeft;
+            lock();
+        });
+
+        resScroller.addEventListener('scroll', () => {
+            if (syncing) return;
+            timeScroller.scrollTop = resScroller.scrollTop;
+            lock();
+        });
+
+        headerWrap.addEventListener('scroll', () => {
+            if (syncing) return;
+            timeScroller.scrollLeft = headerWrap.scrollLeft;
+            lock();
+        });
     }
 
     function isToday(date) {
@@ -375,11 +419,11 @@
         }
 
         if (evt.keychainName) {
-            parts.push(`Key: ${evt.keychainName}`);
+            parts.push(evt.keychainName);
         }
 
         if (typeof evt.virtualKeysCount === 'number') {
-            parts.push(`VK: ${evt.virtualKeysCount}`);
+            parts.push(`VK:${evt.virtualKeysCount}`);
         }
 
         const label = parts.length ? parts.join(' • ') : 'Key';
