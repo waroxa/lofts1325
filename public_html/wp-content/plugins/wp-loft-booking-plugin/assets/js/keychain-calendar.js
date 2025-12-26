@@ -84,7 +84,7 @@
         } else if (view === 'month') {
             d.setDate(1);
         } else if (view === 'year') {
-            d.setMonth(0, 1);
+            d.setDate(1);
         }
 
         d.setHours(0, 0, 0, 0);
@@ -101,7 +101,7 @@
         } else if (view === 'month') {
             d.setMonth(d.getMonth() + 1);
         } else {
-            d.setFullYear(d.getFullYear() + 1);
+            d.setMonth(d.getMonth() + 12);
         }
 
         return d;
@@ -123,7 +123,7 @@
             }
         } else {
             for (let i = 0; i < 12; i++) {
-                cursor.setMonth(i, 1);
+                cursor.setMonth(start.getMonth() + i, 1);
                 slots.push(new Date(cursor));
             }
         }
@@ -254,8 +254,25 @@
                     }
 
                     const label = eventLabel(evt, resource);
-                    bar.textContent = label.truncated;
-                    bar.title = label.full;
+                    const isYearView = state.view === 'year';
+
+                    if (isYearView) {
+                        bar.classList.add('loft-keychain-calendar__event--stacked');
+                        const title = document.createElement('span');
+                        title.className = 'loft-keychain-calendar__event-title';
+                        title.textContent = label.truncated;
+
+                        const dates = document.createElement('span');
+                        dates.className = 'loft-keychain-calendar__event-dates';
+                        dates.textContent = formatRange(evt.start, evt.end);
+
+                        bar.appendChild(title);
+                        bar.appendChild(dates);
+                    } else {
+                        bar.textContent = label.truncated;
+                    }
+
+                    bar.title = isYearView ? `${label.full} • ${formatRange(evt.start, evt.end)}` : label.full;
 
                     const positions = positionEvent(evt, start, end, state.view);
                     bar.style.left = `${positions.left}%`;
@@ -366,6 +383,17 @@
 
     function formatDate(date) {
         return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatRange(start, end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const sameYear = startDate.getFullYear() === endDate.getFullYear();
+        const baseOptions = { month: 'short', day: 'numeric' };
+        const startOptions = sameYear ? baseOptions : { ...baseOptions, year: 'numeric' };
+        const endOptions = { ...baseOptions, year: 'numeric' };
+
+        return `${startDate.toLocaleDateString(undefined, startOptions)} → ${endDate.toLocaleDateString(undefined, endOptions)}`;
     }
 
     function positionEvent(evt, start, end, view) {
