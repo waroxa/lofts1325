@@ -84,7 +84,7 @@
         } else if (view === 'month') {
             d.setDate(1);
         } else if (view === 'year') {
-            d.setMonth(0, 1);
+            d.setDate(1);
         }
 
         d.setHours(0, 0, 0, 0);
@@ -101,7 +101,7 @@
         } else if (view === 'month') {
             d.setMonth(d.getMonth() + 1);
         } else {
-            d.setFullYear(d.getFullYear() + 1);
+            d.setMonth(d.getMonth() + 12);
         }
 
         return d;
@@ -123,7 +123,7 @@
             }
         } else {
             for (let i = 0; i < 12; i++) {
-                cursor.setMonth(i, 1);
+                cursor.setMonth(start.getMonth() + i, 1);
                 slots.push(new Date(cursor));
             }
         }
