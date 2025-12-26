@@ -3641,7 +3641,7 @@ function wp_loft_booking_render_post_stay_email_html(array $args = []) {
                         <tr>
                             <td style="padding:24px 32px;background-color:#0b1628;color:#f8fafc;">
                                 <p style="margin:0;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#cbd5e1;">Loft 1325</p>
-                                <h1 style="margin:10px 0 6px;font-size:22px;line-height:1.3;">Merci pour votre visite | Thank you for staying</h1>
+                                <h1 style="margin:10px 0 6px;font-size:22px;line-height:1.3;color:#ffffff !important;">Merci pour votre visite | Thank you for staying</h1>
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#e2e8f0;">Nous espérons que vous avez apprécié votre séjour dans <?php echo esc_html($data['room_name']); ?>. | We hope you enjoyed your time in <?php echo esc_html($data['room_name']); ?>.</p>
                             </td>
                         </tr>
