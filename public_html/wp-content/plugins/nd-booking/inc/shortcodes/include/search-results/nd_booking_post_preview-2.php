@@ -24,6 +24,31 @@ $nd_booking_rooms_left_b = "";
 $nd_booking_meta_box_room_woo_product = get_post_meta( $nd_booking_id, 'nd_booking_meta_box_room_woo_product', true );
 if ( $nd_booking_meta_box_room_woo_product == '' ){ $nd_booking_meta_box_room_woo_product = 0; }
 
+$nd_booking_r_permalink = $nd_booking_permalink;
+if ( $nd_booking_meta_box_room_woo_product == 0 ) {
+    $nd_booking_r_permalink = nd_booking_get_room_link( $nd_booking_id, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
+}
+
+if ( wp_is_mobile() ) {
+    $nd_booking_mobile_query = array();
+
+    if ( ! empty( $nd_booking_date_from ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_date_range_from'] = $nd_booking_date_from;
+    }
+
+    if ( ! empty( $nd_booking_date_to ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_date_range_to'] = $nd_booking_date_to;
+    }
+
+    if ( ! empty( $nd_booking_archive_form_guests ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_guests'] = $nd_booking_archive_form_guests;
+    }
+
+    $nd_booking_r_permalink = ! empty( $nd_booking_mobile_query )
+        ? add_query_arg( $nd_booking_mobile_query, $nd_booking_permalink )
+        : $nd_booking_permalink;
+}
+
 
 if ( nd_booking_is_available_block($nd_booking_id_room,$nd_booking_date_from,$nd_booking_date_to) == 0 ) {
     
@@ -69,7 +94,9 @@ if ( has_post_thumbnail() ) {
 
             '.$nd_booking_rooms_left_b.'
 
-            <img alt="" class="nd_booking_section" src="'.nd_booking_get_post_img_src(get_the_ID()).'">
+            <a class="nd_booking_section loft-search-card__media-link" href="'.esc_url( $nd_booking_r_permalink ).'">
+                <img alt="" class="nd_booking_section" src="'.nd_booking_get_post_img_src(get_the_ID()).'">
+            </a>
 
             <div class="nd_booking_bg_greydark_alpha_gradient_3 nd_booking_position_absolute nd_booking_left_0 nd_booking_height_100_percentage nd_booking_width_100_percentage nd_booking_padding_30 nd_booking_box_sizing_border_box">
                 <div class="nd_booking_position_absolute nd_booking_bottom_20">
@@ -108,12 +135,6 @@ $nd_booking_shortcode_right_content .= '
             '.$nd_booking_image.'
 
             <div class="nd_booking_section nd_booking_padding_30 nd_booking_box_sizing_border_box">';
-
-                if ( $nd_booking_meta_box_room_woo_product != 0 ){
-                    $nd_booking_r_permalink = $nd_booking_permalink;
-                }else{
-                    $nd_booking_r_permalink = nd_booking_get_room_link($nd_booking_id,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_archive_form_guests);
-                }
 
                 $nd_booking_shortcode_right_content .= '
                 <a href="'.$nd_booking_r_permalink.'"><h1>'.$nd_booking_title.'</h1></a>
