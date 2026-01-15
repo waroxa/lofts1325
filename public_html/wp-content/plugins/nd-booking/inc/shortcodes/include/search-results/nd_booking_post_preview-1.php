@@ -42,6 +42,31 @@ $loft_room_excerpt = wp_kses_post( $nd_booking_meta_box_text_preview );
 $nd_booking_meta_box_room_woo_product = get_post_meta( $nd_booking_id, 'nd_booking_meta_box_room_woo_product', true );
 if ( $nd_booking_meta_box_room_woo_product == '' ){ $nd_booking_meta_box_room_woo_product = 0; }
 
+$nd_booking_r_permalink = $nd_booking_permalink;
+if ( $nd_booking_meta_box_room_woo_product == 0 ) {
+    $nd_booking_r_permalink = nd_booking_get_room_link( $nd_booking_id, $nd_booking_date_from, $nd_booking_date_to, $nd_booking_archive_form_guests );
+}
+
+if ( wp_is_mobile() ) {
+    $nd_booking_mobile_query = array();
+
+    if ( ! empty( $nd_booking_date_from ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_date_range_from'] = $nd_booking_date_from;
+    }
+
+    if ( ! empty( $nd_booking_date_to ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_date_range_to'] = $nd_booking_date_to;
+    }
+
+    if ( ! empty( $nd_booking_archive_form_guests ) ) {
+        $nd_booking_mobile_query['nd_booking_archive_form_guests'] = $nd_booking_archive_form_guests;
+    }
+
+    $nd_booking_r_permalink = ! empty( $nd_booking_mobile_query )
+        ? add_query_arg( $nd_booking_mobile_query, $nd_booking_permalink )
+        : $nd_booking_permalink;
+}
+
 
 $loft_pricing_details = array();
 if ( isset( $nd_booking_pricing_cache ) && isset( $nd_booking_pricing_cache[ $nd_booking_id ] ) ) {
@@ -142,7 +167,9 @@ if ( has_post_thumbnail() ) {
 
             '.$loft_best_value_ribbon_markup.'
 
-            <img alt="" class="nd_booking_section loft-search-card__media-img" src="'.$loft_room_image_src.'">
+            <a class="loft-search-card__media-link" href="'.esc_url( $nd_booking_r_permalink ).'">
+                <img alt="" class="nd_booking_section loft-search-card__media-img" src="'.$loft_room_image_src.'">
+            </a>
 
             '.$loft_media_overlay.'
 
@@ -170,12 +197,6 @@ $nd_booking_shortcode_right_content .= '
             <div class="nd_booking_section nd_booking_box_sizing_border_box loft-search-card__content">
                 <div class="loft-search-card__body">
                     <div class="loft-search-card__details">';
-
-                if ( $nd_booking_meta_box_room_woo_product != 0 ){
-                    $nd_booking_r_permalink = $nd_booking_permalink;
-                }else{
-                    $nd_booking_r_permalink = nd_booking_get_room_link($nd_booking_id,$nd_booking_date_from,$nd_booking_date_to,$nd_booking_archive_form_guests);
-                }
 
                 $nd_booking_shortcode_right_content .= '
                         <a class="loft-search-card__title-link" href="'.$nd_booking_r_permalink.'"><h2 class="loft-search-card__title">'.$loft_room_title.'</h2></a>
