@@ -218,15 +218,17 @@ if ( ! class_exists( 'Loft1325_Mobile_Lofts' ) ) {
 		 * @return string
 		 */
 		public function get_booking_url( $post_id ) {
-			$base = 'https://loft1325.com/nd-booking-pages/nd-booking-page/';
+			$base = '';
 
-			return add_query_arg(
-				array(
-					'room'    => get_post_field( 'post_name', $post_id ),
-					'room_id' => absint( $post_id ),
-				),
-				$base
-			);
+			if ( function_exists( 'nd_booking_booking_page' ) ) {
+				$base = nd_booking_booking_page();
+			}
+
+			if ( ! $base ) {
+				$base = home_url( '/nd-booking-pages/nd-booking-page/' );
+			}
+
+			return $base;
 		}
 
 		/**
