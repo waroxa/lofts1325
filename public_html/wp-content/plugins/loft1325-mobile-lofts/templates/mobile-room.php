@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 $plugin         = Loft1325_Mobile_Lofts::instance();
 $room_id        = get_the_ID();
+$room_id_room   = get_post_meta( $room_id, 'nd_booking_id_room', true );
+$room_id_room   = $room_id_room ? $room_id_room : $room_id;
 $room_data      = $plugin->get_room_data( $room_id );
 $gallery        = $plugin->get_room_gallery( $room_id );
 $booking_url    = $plugin->get_booking_url( $room_id );
@@ -32,6 +34,29 @@ $empty_price    = $plugin->localize_label( 'Tarif sur demande', 'Rate on request
 $vibe_label     = $plugin->localize_label( 'Ambiance signature', 'Signature vibe' );
 $perks_label    = $plugin->localize_label( 'Avantages directs', 'Direct perks' );
 $cta_hint       = $plugin->localize_label( 'Confirmation immédiate', 'Instant confirmation' );
+$booking_date_from = isset( $_GET['nd_booking_archive_form_date_range_from'] )
+	? sanitize_text_field( wp_unslash( $_GET['nd_booking_archive_form_date_range_from'] ) )
+	: '';
+$booking_date_to = isset( $_GET['nd_booking_archive_form_date_range_to'] )
+	? sanitize_text_field( wp_unslash( $_GET['nd_booking_archive_form_date_range_to'] ) )
+	: '';
+$booking_guests = isset( $_GET['nd_booking_archive_form_guests'] )
+	? absint( wp_unslash( $_GET['nd_booking_archive_form_guests'] ) )
+	: 1;
+
+if ( '' === $booking_date_from ) {
+	$booking_date_from = date( 'm/d/Y' );
+}
+
+if ( '' === $booking_date_to ) {
+	$booking_date_to = date( 'm/d/Y', strtotime( '+1 day' ) );
+}
+
+if ( $booking_guests <= 0 ) {
+	$booking_guests = 1;
+}
+
+$booking_form_id = $room_id . '-' . $room_id_room;
 
 get_header();
 ?>
@@ -132,9 +157,17 @@ get_header();
 			</div>
 
 			<div class="loft1325-mobile-loft__cta-row">
-				<a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" href="<?php echo esc_url( $booking_url ); ?>">
-					<?php echo esc_html( $cta_label ); ?>
-				</a>
+				<form class="loft1325-mobile-loft__cta-form" action="<?php echo esc_url( $booking_url ); ?>" method="post">
+					<input type="hidden" name="nd_booking_archive_form_id" value="<?php echo esc_attr( $booking_form_id ); ?>">
+					<input type="hidden" name="nd_booking_archive_form_date_range_from" value="<?php echo esc_attr( $booking_date_from ); ?>">
+					<input type="hidden" name="nd_booking_archive_form_date_range_to" value="<?php echo esc_attr( $booking_date_to ); ?>">
+					<input type="hidden" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $booking_guests ); ?>">
+					<input type="hidden" name="nd_booking_form_booking_arrive_advs" value="1">
+					<input type="hidden" name="nd_booking_form_booking_arrive_sr" value="1">
+					<button class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" type="submit">
+						<?php echo esc_html( $cta_label ); ?>
+					</button>
+				</form>
 				<a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--ghost" href="#loft1325-mobile-loft-highlights">
 					<?php echo esc_html( $details_label ); ?>
 				</a>
@@ -261,9 +294,17 @@ get_header();
 				<strong><?php echo $room_data['price'] ? esc_html( $room_data['price'] ) : esc_html( $empty_price ); ?></strong>
 				<small><?php echo esc_html( $per_night ); ?></small>
 			</div>
-			<a class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" href="<?php echo esc_url( $booking_url ); ?>">
-				<?php echo esc_html( $cta_label ); ?>
-			</a>
+			<form class="loft1325-mobile-loft__cta-form" action="<?php echo esc_url( $booking_url ); ?>" method="post">
+				<input type="hidden" name="nd_booking_archive_form_id" value="<?php echo esc_attr( $booking_form_id ); ?>">
+				<input type="hidden" name="nd_booking_archive_form_date_range_from" value="<?php echo esc_attr( $booking_date_from ); ?>">
+				<input type="hidden" name="nd_booking_archive_form_date_range_to" value="<?php echo esc_attr( $booking_date_to ); ?>">
+				<input type="hidden" name="nd_booking_archive_form_guests" value="<?php echo esc_attr( $booking_guests ); ?>">
+				<input type="hidden" name="nd_booking_form_booking_arrive_advs" value="1">
+				<input type="hidden" name="nd_booking_form_booking_arrive_sr" value="1">
+				<button class="loft1325-mobile-loft__btn loft1325-mobile-loft__btn--primary" type="submit">
+					<?php echo esc_html( $cta_label ); ?>
+				</button>
+			</form>
 		</div>
 	</div>
 </main>
