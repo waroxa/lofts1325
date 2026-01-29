@@ -257,13 +257,13 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 }
 
 .loft1325-mobile-home__hero-title {
-    font-size: clamp(1.85rem, 6vw, 2.25rem);
-    line-height: 1.22;
+    font-size: clamp(1.55rem, 7vw, 2rem);
+    line-height: 1.2;
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.02em;
     text-wrap: balance;
-    color: #0f172a !important;
+    color: #ffffff !important;
     font-family: 'Playfair Display', serif;
 }
 
