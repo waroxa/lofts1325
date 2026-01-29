@@ -27,6 +27,14 @@ $empty_rooms_text   = $plugin->localize_label( 'Aucun loft n’est actuellement 
 $price_label        = ( 'en' === $language ) ? 'From %1$s%2$s' : 'À partir de %1$s%2$s';
 $rating_label       = $plugin->localize_label( 'Note %s sur 5', 'Rating %s out of 5' );
 $per_night_label    = $plugin->localize_label( 'par nuit', 'per night' );
+$hero_title         = $plugin->get_string( 'hero_title' );
+$hero_title_html    = esc_html( $hero_title );
+
+if ( 'fr' === $language ) {
+    $hero_title_html = 'Experience Hoteliere<br>100% Virtuelle';
+} elseif ( false !== strpos( $hero_title, '100%' ) && false === strpos( $hero_title, "\n" ) ) {
+    $hero_title_html = preg_replace( '/\s*100%/u', '<br>100%', $hero_title_html, 1 );
+}
 
 if ( ! $rooms_archive ) {
     $rooms_archive = home_url( '/' );
@@ -63,6 +71,12 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
     gap: 0.75rem;
     margin-bottom: 1.75rem;
     text-align: left;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__hero-title {
+    color: #ffffff !important;
+    font-size: clamp(1.4rem, 6.5vw, 1.9rem) !important;
+    line-height: 1.15 !important;
 }
 
 body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-title {
@@ -286,7 +300,7 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
 
                 <div class="loft1325-mobile-home__hero-content loft1325-mobile-home__hero-content--after-search">
                     <span class="loft1325-mobile-home__hero-pill"><?php echo esc_html( $plugin->get_string( 'hero_tagline' ) ); ?></span>
-                    <h1 class="loft1325-mobile-home__hero-title"><?php echo esc_html( $plugin->get_string( 'hero_title' ) ); ?></h1>
+                    <h1 class="loft1325-mobile-home__hero-title"><?php echo wp_kses( $hero_title_html, array( 'br' => array() ) ); ?></h1>
                     <p class="loft1325-mobile-home__hero-text"><?php echo esc_html( $plugin->get_string( 'hero_description' ) ); ?></p>
                 </div>
 
