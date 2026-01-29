@@ -30,7 +30,9 @@ $per_night_label    = $plugin->localize_label( 'par nuit', 'per night' );
 $hero_title         = $plugin->get_string( 'hero_title' );
 $hero_title_html    = esc_html( $hero_title );
 
-if ( false !== strpos( $hero_title, '100%' ) && false === strpos( $hero_title, "\n" ) ) {
+if ( 'fr' === $language ) {
+    $hero_title_html = 'Experience Hoteliere<br>100% Virtuelle';
+} elseif ( false !== strpos( $hero_title, '100%' ) && false === strpos( $hero_title, "\n" ) ) {
     $hero_title_html = preg_replace( '/\s*100%/u', '<br>100%', $hero_title_html, 1 );
 }
 
@@ -69,6 +71,12 @@ body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home
     gap: 0.75rem;
     margin-bottom: 1.75rem;
     text-align: left;
+}
+
+body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__hero-title {
+    color: #ffffff !important;
+    font-size: clamp(1.4rem, 6.5vw, 1.9rem) !important;
+    line-height: 1.15 !important;
 }
 
 body.loft1325-mobile-home-active #loft1325-mobile-homepage .loft1325-mobile-home__section-title {

@@ -257,8 +257,8 @@ body.loft1325-mobile-home-active .loft1325-mobile-home a {
 }
 
 .loft1325-mobile-home__hero-title {
-    font-size: clamp(1.55rem, 7vw, 2rem);
-    line-height: 1.2;
+    font-size: clamp(1.4rem, 6.5vw, 1.9rem);
+    line-height: 1.15;
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.02em;
